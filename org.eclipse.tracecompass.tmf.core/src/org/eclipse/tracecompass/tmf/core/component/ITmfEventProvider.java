@@ -12,6 +12,10 @@
 
 package org.eclipse.tracecompass.tmf.core.component;
 
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
@@ -53,4 +57,72 @@ public interface ITmfEventProvider extends ITmfComponent {
      * @return the event referred to by context
      */
     ITmfEvent getNext(ITmfContext context);
+
+    /**
+     * Gets the parent event provider.
+     *
+     * @return the parent event provider.
+     */
+    @Nullable
+    ITmfEventProvider getParent();
+
+    /**
+     * Sets the parent event provider.
+     *
+     * @param parent
+     *            the parent to set.
+     */
+    void setParent(@Nullable ITmfEventProvider parent);
+
+    /**
+     * Adds a child event provider.
+     *
+     * @param child
+     *            child to add.
+     */
+    void addChild(@NonNull ITmfEventProvider child);
+
+    /**
+     * Gets the children event providers.
+     *
+     * @return the children event providers
+     */
+    @NonNull
+    List<ITmfEventProvider> getChildren();
+
+    /**
+     * Returns the child event provider with given name.
+     *
+     * @param name
+     *            name of child to find.
+     * @return child event provider or null.
+     */
+    @Nullable
+    ITmfEventProvider getChild(String name);
+
+    /**
+     * Returns the child event provider for a given index
+     *
+     * @param index index of child to get
+     * @return child event provider
+     */
+    @NonNull
+    ITmfEventProvider getChild(int index);
+
+    /**
+     * Gets children for given class type.
+     *
+     * @param clazz
+     *            a class type to get
+     * @return list of trace control event providers matching given class type.
+     */
+    @NonNull
+    <T extends ITmfEventProvider> List<T> getChildren(Class<T> clazz);
+
+    /**
+     * Gets the number of children
+     *
+     * @return number of children
+     */
+    int getNbChildren();
 }

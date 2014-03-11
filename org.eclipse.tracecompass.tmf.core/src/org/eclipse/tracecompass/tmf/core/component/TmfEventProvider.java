@@ -15,6 +15,8 @@
 
 package org.eclipse.tracecompass.tmf.core.component;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,6 +82,11 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
 
     private boolean fIsTimeout = false;
 
+    /** The parent event provider */
+    private TmfEventProvider fParent = null;
+    /** The list of children event providers */
+    private final List<TmfEventProvider> fChildren = Collections.synchronizedList(new ArrayList<TmfEventProvider>());
+
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
@@ -136,6 +143,13 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
                 fTimer.cancel();
             }
             fTimer = null;
+        }
+
+        synchronized (fChildren) {
+            for (TmfEventProvider child : fChildren) {
+                child.dispose();
+            }
+            fChildren.clear();
         }
         super.dispose();
     }
@@ -436,4 +450,78 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
         }
     }
 
+    // ------------------------------------------------------------------------
+    // Parent/child API
+    // ------------------------------------------------------------------------
+
+    @Override
+    public ITmfEventProvider getParent() {
+        synchronized (fLock) {
+            return fParent;
+        }
+    }
+
+    @Override
+    public void setParent(ITmfEventProvider parent) {
+        if (!(parent instanceof TmfEventProvider)) {
+            throw new IllegalArgumentException();
+        }
+
+        synchronized (fLock) {
+            fParent = (TmfEventProvider) parent;
+        }
+    }
+
+    @Override
+    public List<ITmfEventProvider> getChildren() {
+        synchronized (fChildren) {
+            List<ITmfEventProvider> list = new ArrayList<>();
+            list.addAll(fChildren);
+            return list;
+        }
+    }
+
+    @Override
+    public <T extends ITmfEventProvider> List<T> getChildren(Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+        synchronized (fChildren) {
+            for (TmfEventProvider child : fChildren) {
+                if (clazz.isAssignableFrom(child.getClass())) {
+                    list.add(clazz.cast(child));
+                }
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public ITmfEventProvider getChild(String name) {
+        synchronized (fChildren) {
+            for (TmfEventProvider child : fChildren) {
+                if (child.getName().equals(name)) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("null")
+    @Override
+    public ITmfEventProvider getChild(int index) {
+        return fChildren.get(index);
+    }
+
+    @Override
+    public void addChild(ITmfEventProvider child) {
+        if (!(child instanceof TmfEventProvider)) {
+            throw new IllegalArgumentException();
+        }
+        fChildren.add((TmfEventProvider) child);
+    }
+
+    @Override
+    public int getNbChildren() {
+        return fChildren.size();
+    }
 }
