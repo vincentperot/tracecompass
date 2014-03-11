@@ -25,7 +25,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
  * @see TmfEventProvider
  * @since 3.0
  */
-public interface ITmfEventProvider extends ITmfComponent {
+public interface ITmfEventProvider extends ITmfCompositeComponent {
 
     /**
      * Queue the request for processing.
