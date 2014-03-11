@@ -58,7 +58,10 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
     public static final int DEFAULT_BLOCK_SIZE = 50000;
 
     /** Delay for coalescing background requests (in milli-seconds) */
-    private static final long DELAY = 1000;
+    private static final long DELAY = 500;
+
+    /** Current timer task */
+    private TimerTask fCurrentTask;
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -133,6 +136,8 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
 
         synchronized (fLock) {
              fTimer = new Timer();
+             // initialize to avoidNullPointer Exception
+             fCurrentTask = new TimerTask() { @Override public void run() {} };
         }
 
         TmfProviderManager.register(fType, this);
@@ -181,6 +186,11 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
     @Override
     public void sendRequest(final ITmfEventRequest request) {
         synchronized (fLock) {
+
+            if (sendWithParent(request)) {
+                return;
+            }
+
             if (request.getExecType() == ExecutionType.FOREGROUND) {
                 if ((fSignalDepth > 0) || (fRequestPendingCounter > 0)) {
                     coalesceEventRequest(request);
@@ -198,25 +208,19 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
                 return;
             }
 
-            /*
-             *  For the first background request in the request pending queue
-             *  a timer will be started to allow other background requests to
-             *  coalesce.
-             */
-            boolean startTimer = (getNbPendingBackgroundRequests() == 0);
+            fCurrentTask.cancel();
             coalesceEventRequest(request);
-            if (startTimer) {
-                TimerTask task = new TimerTask() {
-                    @Override
-                    public void run() {
-                        synchronized (fLock) {
-                            fIsTimeout = true;
-                            fireRequest();
-                        }
+
+            fCurrentTask = new TimerTask() {
+                @Override
+                public void run() {
+                    synchronized (fLock) {
+                        fIsTimeout = true;
+                        fireRequest();
                     }
-                };
-                fTimer.schedule(task, DELAY);
-            }
+                }
+            };
+            fTimer.schedule(fCurrentTask, DELAY);
         }
     }
 
@@ -292,6 +296,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
                 TmfCoreTracer.traceRequest(request.getRequestId(), "COALESCED with " + coalescedRequest.getRequestId()); //$NON-NLS-1$
                 TmfCoreTracer.traceRequest(coalescedRequest.getRequestId(), "now contains " + coalescedRequest.getSubRequestIds()); //$NON-NLS-1$
             }
+            coalesceChildrenRequests(coalescedRequest);
             fPendingCoalescedRequests.add(coalescedRequest);
         }
     }
@@ -312,6 +317,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
                         TmfCoreTracer.traceRequest(request.getRequestId(), "COALESCED with " + coalescedRequest.getRequestId()); //$NON-NLS-1$
                         TmfCoreTracer.traceRequest(coalescedRequest.getRequestId(), "now contains " + coalescedRequest.getSubRequestIds()); //$NON-NLS-1$
                     }
+                    coalesceChildrenRequests(coalescedRequest);
                     return;
                 }
             }
@@ -319,21 +325,60 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
         }
     }
 
-    /**
-     * Gets the number of background requests in pending queue.
-     *
-     * @return the number of background requests in pending queue
+    /*
+     * Sends a request with the parent if compatible.
      */
-    private int getNbPendingBackgroundRequests() {
-        int nbBackgroundRequests = 0;
+    private boolean sendWithParent(final ITmfEventRequest request) {
+        ITmfCompositeComponent parent = getParent();
+        if (parent instanceof TmfEventProvider) {
+            return ((TmfEventProvider) parent).sendIfCompatible(request);
+        }
+        return false;
+    }
+
+    /*
+     * Sends a request if compatible with a pending coalesced request.
+     */
+    private boolean sendIfCompatible(ITmfEventRequest request) {
         synchronized (fLock) {
-            for (ITmfEventRequest request : fPendingCoalescedRequests) {
-                if (request.getExecType() == ExecutionType.BACKGROUND) {
-                    nbBackgroundRequests++;
+            for (TmfCoalescedEventRequest coalescedRequest : fPendingCoalescedRequests) {
+                if (coalescedRequest.isCompatible(request)) {
+                    sendRequest(request);
+                    return true;
                 }
             }
         }
-        return nbBackgroundRequests;
+        return false;
+    }
+
+    /*
+     * Coalesces children requests with given request if compatible.
+     */
+    private void coalesceChildrenRequests(final TmfCoalescedEventRequest request) {
+        synchronized (fChildren) {
+            for (TmfEventProvider child : fChildren) {
+                child.coalesceCompatibleRequests(request);
+            }
+        }
+    }
+
+
+    /*
+     * Coalesces all pending requests that are compatible with coalesced request.
+     */
+    private void coalesceCompatibleRequests(TmfCoalescedEventRequest request) {
+        Iterator<TmfCoalescedEventRequest> iter = fPendingCoalescedRequests.iterator();
+        while (iter.hasNext()) {
+            TmfCoalescedEventRequest pendingRequest = iter.next();
+            if (request.isCompatible(pendingRequest)) {
+                request.addRequest(pendingRequest);
+                if (TmfCoreTracer.isRequestTraced()) {
+                    TmfCoreTracer.traceRequest(pendingRequest, "COALESCED with " + request.getRequestId()); //$NON-NLS-1$
+                    TmfCoreTracer.traceRequest(request, "now contains " + request.getSubRequestIds()); //$NON-NLS-1$
+                }
+                iter.remove();
+            }
+        }
     }
 
     // ------------------------------------------------------------------------
