@@ -15,6 +15,8 @@
 
 package org.eclipse.tracecompass.tmf.core.component;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,6 +82,15 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
 
     private boolean fIsTimeout = false;
 
+    /**
+     * The parent component.
+     */
+    private TmfEventProvider fParent = null;
+    /**
+     * The list if children components.
+     */
+    private final List<TmfEventProvider> fChildren = Collections.synchronizedList(new ArrayList<TmfEventProvider>());
+
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
@@ -136,6 +147,13 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
                 fTimer.cancel();
             }
             fTimer = null;
+        }
+
+        synchronized (fChildren) {
+            for (TmfEventProvider child : fChildren) {
+                child.dispose();
+            }
+            fChildren.clear();
         }
         super.dispose();
     }
@@ -436,4 +454,102 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
         }
     }
 
+    // ------------------------------------------------------------------------
+    // ITmfCompositeComponent
+    // ------------------------------------------------------------------------
+
+    /**
+     * @since 3.0
+     */
+    @Override
+    public ITmfCompositeComponent getParent() {
+        synchronized (fLock) {
+            return fParent;
+        }
+    }
+
+    /**
+     * @since 3.0
+     */
+    @Override
+    public void setParent(ITmfCompositeComponent parent) {
+        if (!(parent instanceof TmfEventProvider)) {
+            throw new IllegalArgumentException();
+        }
+
+        synchronized (fLock) {
+            fParent = (TmfEventProvider)parent;
+        }
+    }
+
+    /**
+     * @since 3.0
+     */
+    @Override
+    public List<ITmfCompositeComponent> getChildren() {
+        synchronized (fChildren) {
+            List<ITmfCompositeComponent> list = new ArrayList<>();
+            list.addAll(fChildren);
+            return list;
+        }
+    }
+
+    /**
+     * @since 3.0
+     */
+    @Override
+    public ITmfCompositeComponent getChild(String name) {
+        synchronized (fChildren) {
+            for (TmfEventProvider child : fChildren) {
+                if (child.getName().equals(name)) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @since 3.0
+     */
+    @Override
+    public <T extends ITmfCompositeComponent> List<T> getChildren(Class<T> clazz) {
+       List<T> list = new ArrayList<>();
+       synchronized (fChildren) {
+           for (TmfEventProvider child : fChildren) {
+               if (clazz.isAssignableFrom(child.getClass())) {
+                   list.add(clazz.cast(child));
+               }
+           }
+       }
+       return list;
+    }
+
+    /**
+     * @since 3.0
+     */
+    @SuppressWarnings("null")
+    @Override
+    public ITmfCompositeComponent getChild(int index) {
+        return fChildren.get(index);
+    }
+
+    /**
+     * @since 3.0
+     */
+    @Override
+    public void addChild(ITmfCompositeComponent child) {
+        if (!(child instanceof TmfEventProvider)) {
+            throw new IllegalArgumentException();
+        }
+        fChildren.add((TmfEventProvider)child);
+    }
+
+    /**
+     * @since 3.0
+     */
+    @Override
+    public int getNbChildren() {
+        return fChildren.size();
+    }
 }
