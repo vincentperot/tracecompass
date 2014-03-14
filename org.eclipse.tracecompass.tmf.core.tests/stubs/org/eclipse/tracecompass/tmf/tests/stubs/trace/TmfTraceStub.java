@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.core.resources.IProject;
@@ -24,6 +25,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
+import org.eclipse.tracecompass.internal.tmf.core.request.TmfCoalescedEventRequest;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
@@ -422,4 +424,20 @@ public class TmfTraceStub extends TmfTrace implements ITmfEventParser, ITmfPersi
     public void selectTrace() {
         TmfSignalManager.dispatchSignal(new TmfTraceSelectedSignal(this, this));
     }
+
+    @Override
+    public List<TmfCoalescedEventRequest> getPendingRequests() {
+        return super.getPendingRequests();
+    }
+
+    @Override
+    public void clearPendingRequests() {
+        super.clearPendingRequests();
+    }
+
+    @Override
+    public void setTimerEnabled(boolean enabled) {
+        super.setTimerEnabled(enabled);
+    }
+
 }

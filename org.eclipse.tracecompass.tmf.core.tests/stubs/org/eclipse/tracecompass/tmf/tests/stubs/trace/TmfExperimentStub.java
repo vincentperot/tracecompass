@@ -12,7 +12,10 @@
 
 package org.eclipse.tracecompass.tmf.tests.stubs.trace;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IResource;
+import org.eclipse.tracecompass.internal.tmf.core.request.TmfCoalescedEventRequest;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfExperiment;
@@ -49,4 +52,21 @@ public class TmfExperimentStub extends TmfExperiment {
     public void initExperiment(final Class<? extends ITmfEvent> type, final String path, final ITmfTrace[] traces, final int indexPageSize, IResource resource) {
         super.initExperiment(type, path, traces, indexPageSize, resource);
     }
+
+    @Override
+    public List<TmfCoalescedEventRequest> getPendingRequests() {
+        return super.getPendingRequests();
+    }
+
+    @Override
+    public void clearPendingRequests() {
+        super.clearPendingRequests();
+    }
+
+    @Override
+    public void setTimerEnabled(boolean enabled) {
+        super.setTimerEnabled(enabled);
+    }
+
+
 }
