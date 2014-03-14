@@ -83,7 +83,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
 
     private Timer fTimer;
 
-    private boolean fIsTimeout = false;
+    private boolean fIsTimerEnabled;
 
     /**
      * The parent component.
@@ -103,6 +103,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
      */
     public TmfEventProvider() {
         super();
+        setTimerEnabled(true);
         fExecutor = new TmfRequestExecutor();
     }
 
@@ -160,6 +161,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
             }
             fChildren.clear();
         }
+        clearPendingRequests();
         super.dispose();
     }
 
@@ -208,23 +210,24 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
                 return;
             }
 
-            fCurrentTask.cancel();
             coalesceEventRequest(request);
 
-            fCurrentTask = new TimerTask() {
-                @Override
-                public void run() {
-                    synchronized (fLock) {
-                        fIsTimeout = true;
-                        fireRequest();
+            if (fIsTimerEnabled) {
+                fCurrentTask.cancel();
+                fCurrentTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        synchronized (fLock) {
+                            fireRequest(true);
+                        }
                     }
-                }
-            };
-            fTimer.schedule(fCurrentTask, DELAY);
+                };
+                fTimer.schedule(fCurrentTask, DELAY);
+            }
         }
     }
 
-    private void fireRequest() {
+    private void fireRequest(boolean isTimeout) {
         synchronized (fLock) {
             if (fRequestPendingCounter > 0) {
                 return;
@@ -233,7 +236,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
             if (fPendingCoalescedRequests.size() > 0) {
                 Iterator<TmfCoalescedEventRequest> iter = fPendingCoalescedRequests.iterator();
                 while (iter.hasNext()) {
-                    ExecutionType type = (fIsTimeout ? ExecutionType.BACKGROUND : ExecutionType.FOREGROUND);
+                    ExecutionType type = (isTimeout ? ExecutionType.BACKGROUND : ExecutionType.FOREGROUND);
                     ITmfEventRequest request = iter.next();
                     if (type == request.getExecType()) {
                         queueRequest(request);
@@ -265,7 +268,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
 
                 // fire request if all pending requests are received
                 if (fRequestPendingCounter == 0) {
-                    fireRequest();
+                    fireRequest(false);
                 }
             }
         }
@@ -310,7 +313,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
      */
     protected void coalesceEventRequest(ITmfEventRequest request) {
         synchronized (fLock) {
-            for (TmfCoalescedEventRequest coalescedRequest : fPendingCoalescedRequests) {
+            for (TmfCoalescedEventRequest coalescedRequest : getPendingRequests()) {
                 if (coalescedRequest.isCompatible(request)) {
                     coalescedRequest.addRequest(request);
                     if (TmfCoreTracer.isRequestTraced()) {
@@ -341,7 +344,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
      */
     private boolean sendIfCompatible(ITmfEventRequest request) {
         synchronized (fLock) {
-            for (TmfCoalescedEventRequest coalescedRequest : fPendingCoalescedRequests) {
+            for (TmfCoalescedEventRequest coalescedRequest : getPendingRequests()) {
                 if (coalescedRequest.isCompatible(request)) {
                     // Send so it can be coalesced with the parent(s)
                     sendRequest(request);
@@ -368,7 +371,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
      * Coalesces all pending requests that are compatible with coalesced request.
      */
     private void coalesceCompatibleRequests(TmfCoalescedEventRequest request) {
-        Iterator<TmfCoalescedEventRequest> iter = fPendingCoalescedRequests.iterator();
+        Iterator<TmfCoalescedEventRequest> iter = getPendingRequests().iterator();
         while (iter.hasNext()) {
             TmfCoalescedEventRequest pendingRequest = iter.next();
             if (request.isCompatible(pendingRequest)) {
@@ -494,8 +497,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
         synchronized (fLock) {
             fSignalDepth--;
             if (fSignalDepth == 0) {
-                fIsTimeout = false;
-                fireRequest();
+                fireRequest(false);
             }
         }
     }
@@ -569,5 +571,35 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
     @Override
     public int getNbChildren() {
         return fChildren.size();
+    }
+
+    // ------------------------------------------------------------------------
+    // Debug code (will also used in tests using reflection)
+    // ------------------------------------------------------------------------
+
+    /**
+     * Gets a list of all pending requests. Debug code.
+     *
+     * @return a list of all pending requests
+     */
+    private List<TmfCoalescedEventRequest> getPendingRequests() {
+        return fPendingCoalescedRequests;
+    }
+
+    /**
+     * Clears all pending requests. Debug code.
+     */
+    private void  clearPendingRequests() {
+        fPendingCoalescedRequests.clear();
+    }
+
+    /**
+     * Enables/disables the timer. Debug code.
+     *
+     * @param enabled
+     *            the enable flag to set
+     */
+    private void setTimerEnabled(Boolean enabled) {
+        fIsTimerEnabled = enabled;
     }
 }
