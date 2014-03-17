@@ -13,8 +13,12 @@
 package org.eclipse.tracecompass.tmf.core.tests.component;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.tracecompass.internal.tmf.core.request.TmfCoalescedEventRequest;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -67,11 +71,6 @@ public class TmfEventProviderCoalescingTest {
 
         // Disable the timer
         fExperiment.indexTrace(true);
-        fExperiment.setTimerEnabled(false);
-        fExperiment2.setTimerEnabled(false);
-        fTmfTrace1.setTimerEnabled(false);
-        fTmfTrace2.setTimerEnabled(false);
-        fTmfTrace3.setTimerEnabled(false);
     }
 
     /**
@@ -80,7 +79,7 @@ public class TmfEventProviderCoalescingTest {
     @AfterClass
     public static void tearDown() {
         fExperiment.dispose();
-    }
+            }
 
     /**
      * Test setup-up
@@ -91,7 +90,6 @@ public class TmfEventProviderCoalescingTest {
         TmfEventRequest.reset();
     }
 
-
     /**
      * Test clean-up
      */
@@ -100,11 +98,8 @@ public class TmfEventProviderCoalescingTest {
         // Reset the request IDs
         TmfEventRequest.reset();
         // clear pending request
-        fExperiment.clearPendingRequests();
-        fExperiment2.clearPendingRequests();
-        fTmfTrace1.clearPendingRequests();
-        fTmfTrace2.clearPendingRequests();
-        fTmfTrace3.clearPendingRequests();
+        clearPendingRequests();
+        setTimerFlags(false);
     }
 
     // ------------------------------------------------------------------------
@@ -121,6 +116,7 @@ public class TmfEventProviderCoalescingTest {
         fTmfTrace1.sendRequest(trace1Req);
         fTmfTrace2.sendRequest(trace2Req);
 
+        // Verify that requests are coalesced properly with the experiment request
         List<TmfCoalescedEventRequest> pending = fExperiment.getPendingRequests();
         assertEquals(1, pending.size());
 
@@ -129,7 +125,25 @@ public class TmfEventProviderCoalescingTest {
 
         TmfCoalescedEventRequest coalescedRequest = pending.get(0);
         assertEquals("[0, 1, 2]", coalescedRequest.getSubRequestIds());
-        fExperiment.clearPendingRequests();
+
+        // Now trigger manually the sending of the request
+        fExperiment.notifyPendingRequest(false);
+
+        try {
+            expReq.waitForCompletion();
+        } catch (InterruptedException e) {
+        }
+
+        // Verify that requests only received events from the relevant traces
+        assertTrue(expReq.isTraceHandled(fTmfTrace1));
+        assertTrue(expReq.isTraceHandled(fTmfTrace2));
+
+        assertTrue(trace1Req.isTraceHandled(fTmfTrace1));
+        assertFalse(trace1Req.isTraceHandled(fTmfTrace2));
+
+        assertFalse(trace2Req.isTraceHandled(fTmfTrace1));
+        assertTrue(trace2Req.isTraceHandled(fTmfTrace2));
+
     }
 
     // ------------------------------------------------------------------------
@@ -145,6 +159,7 @@ public class TmfEventProviderCoalescingTest {
         fTmfTrace2.sendRequest(trace2Req);
         fExperiment.sendRequest(expReq);
 
+        // Verify that requests are coalesced properly with the experiment request
         List<TmfCoalescedEventRequest> pending = fExperiment.getPendingRequests();
         assertEquals(1, pending.size());
 
@@ -152,12 +167,31 @@ public class TmfEventProviderCoalescingTest {
         assertEquals(0, fTmfTrace2.getPendingRequests().size());
 
         TmfCoalescedEventRequest coalescedRequest = pending.get(0);
-        assertEquals("[0, 3, 4]", coalescedRequest.getSubRequestIds());
+        assertEquals("[0, 1, 2]", coalescedRequest.getSubRequestIds());
+
+        // Now trigger manually the sending of the request
+        fExperiment.notifyPendingRequest(false);
+
+        try {
+            expReq.waitForCompletion();
+        } catch (InterruptedException e) {
+        }
+
+        // Verify that requests only received events from the relevant traces
+        assertTrue(expReq.isTraceHandled(fTmfTrace1));
+        assertTrue(expReq.isTraceHandled(fTmfTrace2));
+
+        assertTrue(trace1Req.isTraceHandled(fTmfTrace1));
+        assertFalse(trace1Req.isTraceHandled(fTmfTrace2));
+
+        assertFalse(trace2Req.isTraceHandled(fTmfTrace1));
+        assertTrue(trace2Req.isTraceHandled(fTmfTrace2));
     }
 
     /***/
     @Test
     public void testChildrenFirstCoalescing2() {
+
         InnerEventRequest expReq = new InnerEventRequest(ITmfEvent.class, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
         InnerEventRequest exp2Req = new InnerEventRequest(ITmfEvent.class, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
         InnerEventRequest trace1Req = new InnerEventRequest(ITmfEvent.class, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
@@ -169,6 +203,7 @@ public class TmfEventProviderCoalescingTest {
         fExperiment2.sendRequest(exp2Req);
         fExperiment.sendRequest(expReq);
 
+        // Verify that requests are coalesced properly with the experiment request
         List<TmfCoalescedEventRequest> pending = fExperiment.getPendingRequests();
         assertEquals(1, pending.size());
 
@@ -176,7 +211,36 @@ public class TmfEventProviderCoalescingTest {
         assertEquals(0, fTmfTrace2.getPendingRequests().size());
 
         TmfCoalescedEventRequest coalescedRequest = pending.get(0);
-        assertEquals("[0, 5, 6, 8]", coalescedRequest.getSubRequestIds());
+        assertEquals("[0, 2, 3, 1, 4]", coalescedRequest.getSubRequestIds());
+
+        // Now trigger manually the sending of the request
+        fExperiment.notifyPendingRequest(false);
+
+        try {
+            expReq.waitForCompletion();
+        } catch (InterruptedException e) {
+        }
+
+        // Verify that requests only received events from the relevant traces
+        assertTrue(expReq.isTraceHandled(fTmfTrace1));
+        assertTrue(expReq.isTraceHandled(fTmfTrace2));
+        assertTrue(expReq.isTraceHandled(fTmfTrace3));
+
+        assertFalse(exp2Req.isTraceHandled(fTmfTrace1));
+        assertFalse(exp2Req.isTraceHandled(fTmfTrace2));
+        assertTrue(exp2Req.isTraceHandled(fTmfTrace3));
+
+        assertTrue(trace1Req.isTraceHandled(fTmfTrace1));
+        assertFalse(trace1Req.isTraceHandled(fTmfTrace2));
+        assertFalse(trace1Req.isTraceHandled(fTmfTrace3));
+
+        assertFalse(trace2Req.isTraceHandled(fTmfTrace1));
+        assertTrue(trace2Req.isTraceHandled(fTmfTrace2));
+        assertFalse(trace2Req.isTraceHandled(fTmfTrace3));
+
+        assertFalse(trace3Req.isTraceHandled(fTmfTrace1));
+        assertFalse(trace3Req.isTraceHandled(fTmfTrace2));
+        assertTrue(trace3Req.isTraceHandled(fTmfTrace3));
     }
 
     /***/
@@ -189,6 +253,7 @@ public class TmfEventProviderCoalescingTest {
         fExperiment.sendRequest(expReq);
         fTmfTrace2.sendRequest(trace2Req);
 
+        // Verify that requests are coalesced properly with the experiment request
         List<TmfCoalescedEventRequest> pending = fExperiment.getPendingRequests();
         assertEquals(1, pending.size());
 
@@ -196,7 +261,25 @@ public class TmfEventProviderCoalescingTest {
         assertEquals(0, fTmfTrace2.getPendingRequests().size());
 
         TmfCoalescedEventRequest coalescedRequest = pending.get(0);
-        assertEquals("[0, 3, 2]", coalescedRequest.getSubRequestIds());
+        assertEquals("[0, 1, 2]", coalescedRequest.getSubRequestIds());
+
+        // Now trigger manually the sending of the request
+        fExperiment.notifyPendingRequest(false);
+
+        try {
+            expReq.waitForCompletion();
+        } catch (InterruptedException e) {
+        }
+
+        // Verify that requests only received events from the relevant traces
+        assertTrue(expReq.isTraceHandled(fTmfTrace1));
+        assertTrue(expReq.isTraceHandled(fTmfTrace2));
+
+        assertTrue(trace1Req.isTraceHandled(fTmfTrace1));
+        assertFalse(trace1Req.isTraceHandled(fTmfTrace2));
+
+        assertFalse(trace2Req.isTraceHandled(fTmfTrace1));
+        assertTrue(trace2Req.isTraceHandled(fTmfTrace2));
     }
 
     /***/
@@ -214,6 +297,7 @@ public class TmfEventProviderCoalescingTest {
         fTmfTrace2.sendRequest(trace2Req);
         fExperiment.sendRequest(expReq2);
 
+        // Verify that requests are coalesced properly with the experiment request
         List<TmfCoalescedEventRequest> pending = fExperiment.getPendingRequests();
         assertEquals(1, pending.size());
 
@@ -223,9 +307,30 @@ public class TmfEventProviderCoalescingTest {
         assertEquals(0, fExperiment2.getPendingRequests().size());
 
         TmfCoalescedEventRequest coalescedRequest = pending.get(0);
-        assertEquals("[0, 5, 4, 1]", coalescedRequest.getSubRequestIds());
-        fExperiment.clearPendingRequests();
+        assertEquals("[0, 2, 3, 4, 1]", coalescedRequest.getSubRequestIds());
         sendSync(false);
+
+        try {
+            expReq.waitForCompletion();
+        } catch (InterruptedException e) {
+        }
+
+        assertTrue(expReq.isTraceHandled(fTmfTrace1));
+        assertTrue(expReq.isTraceHandled(fTmfTrace2));
+        assertTrue(expReq.isTraceHandled(fTmfTrace3));
+
+        assertTrue(expReq2.isTraceHandled(fTmfTrace1));
+        assertTrue(expReq2.isTraceHandled(fTmfTrace2));
+        assertTrue(expReq2.isTraceHandled(fTmfTrace3));
+
+        assertTrue(trace1Req.isTraceHandled(fTmfTrace1));
+        assertFalse(trace1Req.isTraceHandled(fTmfTrace2));
+        assertFalse(trace1Req.isTraceHandled(fTmfTrace3));
+
+        assertFalse(trace2Req.isTraceHandled(fTmfTrace1));
+        assertTrue(trace2Req.isTraceHandled(fTmfTrace2));
+        assertFalse(trace2Req.isTraceHandled(fTmfTrace3));
+
     }
 
     private static void sendSync(boolean isStart) {
@@ -247,10 +352,39 @@ public class TmfEventProviderCoalescingTest {
         }
     }
 
+    private static void setTimerFlags(boolean flag) {
+        fExperiment.setTimerEnabled(flag);
+        fExperiment2.setTimerEnabled(flag);
+        fTmfTrace1.setTimerEnabled(flag);
+        fTmfTrace2.setTimerEnabled(flag);
+        fTmfTrace3.setTimerEnabled(flag);
+    }
+
+    private static void clearPendingRequests() {
+        fExperiment.clearPendingRequests();
+        fExperiment2.clearPendingRequests();
+        fTmfTrace1.clearPendingRequests();
+        fTmfTrace2.clearPendingRequests();
+        fTmfTrace3.clearPendingRequests();
+    }
+
     private static class InnerEventRequest extends TmfEventRequest {
+        private Set<String> traces = new HashSet<>();
+
         public InnerEventRequest(Class<? extends ITmfEvent> dataType, long index, int nbRequested, ExecutionType priority) {
             super(dataType, index, nbRequested, priority);
         }
-    }
 
+        @Override
+        public void handleData(ITmfEvent event) {
+            super.handleData(event);
+            if (!traces.contains(event.getTrace().getName())) {
+                traces.add(event.getTrace().getName());
+            }
+        }
+
+        public boolean isTraceHandled(ITmfTrace trace) {
+            return traces.contains(trace.getName());
+        }
+    }
 }

@@ -53,4 +53,15 @@ public interface ITmfEventProvider extends ITmfCompositeComponent {
      * @return the event referred to by context
      */
     ITmfEvent getNext(ITmfContext context);
+
+    /**
+     * Returns true if an event was provided by this event provider or one of
+     * its children event providers else false.
+     *
+     * @param event
+     *            the event to check
+     * @return <code>true</code> if event was provided by this provider or one
+     *         of its children else <code>false</code>
+     */
+    boolean isEventProvidedBy(ITmfEvent event);
 }
