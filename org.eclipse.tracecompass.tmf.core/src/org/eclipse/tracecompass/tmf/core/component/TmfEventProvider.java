@@ -189,6 +189,10 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
     public void sendRequest(final ITmfEventRequest request) {
         synchronized (fLock) {
 
+            if (request.getEventProvider() == null) {
+                request.setEventProvider(this);
+            }
+
             if (sendWithParent(request)) {
                 return;
             }
@@ -269,6 +273,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
                 // fire request if all pending requests are received
                 if (fRequestPendingCounter == 0) {
                     fireRequest(false);
+                    fireRequest(true);
                 }
             }
         }
@@ -295,6 +300,7 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
                     request.getNbRequested(),
                     request.getExecType());
             coalescedRequest.addRequest(request);
+            coalescedRequest.setEventProvider(this);
             if (TmfCoreTracer.isRequestTraced()) {
                 TmfCoreTracer.traceRequest(request.getRequestId(), "COALESCED with " + coalescedRequest.getRequestId()); //$NON-NLS-1$
                 TmfCoreTracer.traceRequest(coalescedRequest.getRequestId(), "now contains " + coalescedRequest.getSubRequestIds()); //$NON-NLS-1$
@@ -571,6 +577,24 @@ public abstract class TmfEventProvider extends TmfComponent implements ITmfEvent
     @Override
     public int getNbChildren() {
         return fChildren.size();
+    }
+
+    @Override
+    public boolean isEventProvidedBy(ITmfEvent event) {
+        if ((event.getTrace() == this)) {
+            return true;
+        }
+        if (fChildren.size() > 0) {
+            synchronized (fLock) {
+                List <TmfEventProvider> children = getChildren(TmfEventProvider.class);
+                for (TmfEventProvider child : children) {
+                    if (child.isEventProvidedBy(event)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     // ------------------------------------------------------------------------
