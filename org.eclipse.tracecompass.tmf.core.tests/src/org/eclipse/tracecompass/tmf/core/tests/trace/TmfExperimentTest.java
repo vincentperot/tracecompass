@@ -219,7 +219,7 @@ public class TmfExperimentTest {
     public void testSeekNoTrace() {
         TmfExperiment experiment = new TmfExperiment(ITmfEvent.class, EXPERIMENT, null);
         ITmfContext context = experiment.seekEvent((TmfExperimentLocation) null);
-        assertNull("seekEvent", context);
+        validateContextRanks(context);
         experiment.dispose();
     }
 
