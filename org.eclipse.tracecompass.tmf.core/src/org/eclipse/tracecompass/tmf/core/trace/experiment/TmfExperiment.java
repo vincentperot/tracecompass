@@ -20,7 +20,7 @@ package org.eclipse.tracecompass.tmf.core.trace.experiment;
 
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -100,11 +100,6 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
     // ------------------------------------------------------------------------
     // Attributes
     // ------------------------------------------------------------------------
-
-    /**
-     * The set of traces that constitute the experiment
-     */
-    protected ITmfTrace[] fTraces;
 
     /**
      * The set of traces that constitute the experiment
@@ -219,9 +214,9 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
         // traces have to be set before super.initialize()
         if (traces != null) {
             // initialize
-            fTraces = new ITmfTrace[0];
             for (ITmfTrace trace : traces) {
                 if (trace != null) {
+                    trace.setParent(this);
                     addChild(trace);
                 }
             }
@@ -255,8 +250,8 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
      *
      * @return The array of contained traces
      */
-    public ITmfTrace[] getTraces() {
-        return fTraces;
+    public List<ITmfTrace> getTraces() {
+        return getChildren(ITmfTrace.class);
     }
 
     /**
@@ -286,7 +281,7 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
     public synchronized ITmfContext armRequest(final ITmfEventRequest request) {
 
         // Make sure we have something to read from
-        if (fTraces.length == 0) {
+        if (getChildren().size() == 0) {
             return null;
         }
 
@@ -315,32 +310,29 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
             return null; // Throw an exception?
         }
 
-        // Make sure we have something to read from
-        if (fTraces == null) {
-            return null;
-        }
+        int length = getNbChildren();
 
         // Initialize the location array if necessary
         TmfLocationArray locationArray = ((location == null) ?
-                new TmfLocationArray(fTraces.length) :
+                new TmfLocationArray(length) :
                 ((TmfExperimentLocation) location).getLocationInfo());
 
         ITmfLocation[] locations = locationArray.getLocations();
         long[] ranks = locationArray.getRanks();
 
         // Create and populate the context's traces contexts
-        final TmfExperimentContext context = new TmfExperimentContext(fTraces.length);
+        final TmfExperimentContext context = new TmfExperimentContext(length);
 
         // Position the traces
         long rank = 0;
-        for (int i = 0; i < fTraces.length; i++) {
+        for (int i = 0; i < length; i++) {
             // Get the relevant trace attributes
-            final ITmfContext traceContext = fTraces[i].seekEvent(locations[i]);
+            final ITmfContext traceContext = ((ITmfTrace) getChild(i)).seekEvent(locations[i]);
             context.setContext(i, traceContext);
             traceContext.setRank(ranks[i]);
             // update location after seek
             locations[i] = traceContext.getLocation();
-            context.setEvent(i, fTraces[i].getNext(traceContext));
+            context.setEvent(i, ((ITmfTrace) getChild(i)).getNext(traceContext));
             rank += ranks[i];
         }
 
@@ -406,8 +398,10 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
             return null; // Throw an exception?
         }
 
+        int length = getNbChildren();
+
         // Make sure that we have something to read from
-        if (fTraces == null) {
+        if (length == 0) {
             return null;
         }
 
@@ -418,15 +412,16 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
         final int lastTrace = expContext.getLastTrace();
         if (lastTrace != TmfExperimentContext.NO_TRACE) {
             final ITmfContext traceContext = expContext.getContext(lastTrace);
-            expContext.setEvent(lastTrace, fTraces[lastTrace].getNext(traceContext));
+            expContext.setEvent(lastTrace, ((ITmfTrace) getChild(lastTrace)).getNext(traceContext));
             expContext.setLastTrace(TmfExperimentContext.NO_TRACE);
         }
 
         // Scan the candidate events and identify the "next" trace to read from
         int trace = TmfExperimentContext.NO_TRACE;
         ITmfTimestamp timestamp = TmfTimestamp.BIG_CRUNCH;
-        for (int i = 0; i < fTraces.length; i++) {
+        for (int i = 0; i < length; i++) {
             final ITmfEvent event = expContext.getEvent(i);
+
             if (event != null && event.getTimestamp() != null) {
                 final ITmfTimestamp otherTS = event.getTimestamp();
                 if (otherTS.compareTo(timestamp) < 0) {
@@ -467,13 +462,16 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
     @Override
     public ITmfTimestamp getInitialRangeOffset() {
 
-        if ((fTraces == null) || (fTraces.length == 0)) {
+        List<ITmfEventProvider> children = getChildren();
+
+        if (children.size() == 0) {
             return super.getInitialRangeOffset();
         }
 
         ITmfTimestamp initTs = TmfTimestamp.BIG_CRUNCH;
-        for (int i = 0; i < fTraces.length; i++) {
-            ITmfTimestamp ts = fTraces[i].getInitialRangeOffset();
+        for (ITmfEventProvider child : children) {
+            final ITmfTrace trace = (ITmfTrace) child;
+            ITmfTimestamp ts = (trace).getInitialRangeOffset();
             if (ts.compareTo(initTs) < 0) {
                 initTs = ts;
             }
@@ -557,7 +555,7 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
 
             final File syncFile = (syncDirectory != null) ? new File(syncDirectory + File.separator + SYNCHRONIZATION_FILE_NAME) : null;
 
-            final SynchronizationAlgorithm syncAlgo = SynchronizationManager.synchronizeTraces(syncFile, Arrays.asList(fTraces), doSync);
+            final SynchronizationAlgorithm syncAlgo = SynchronizationManager.synchronizeTraces(syncFile, getChildren(ITmfTrace.class), doSync);
 
             final TmfTraceSynchronizedSignal signal = new TmfTraceSynchronizedSignal(this, syncAlgo);
 
@@ -579,32 +577,6 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
     @SuppressWarnings("nls")
     public synchronized String toString() {
         return "[TmfExperiment (" + getName() + ")]";
-    }
-
-    // ------------------------------------------------------------------------
-    // ITmfCompositeComponent
-    // ------------------------------------------------------------------------
-
-    /**
-     * @since 3.0
-     */
-    @Override
-    public void addChild(ITmfEventProvider child) {
-        if (child instanceof ITmfTrace) {
-            super.addChild(child);
-            child.setParent(this);
-
-            // Cache the children in an array for performance reasons
-            if ((fTraces == null) || (fTraces.length == 0)) {
-                fTraces = new ITmfTrace[] { (ITmfTrace) child };
-            } else {
-                ITmfTrace[] tmpArray = Arrays.copyOf(fTraces, fTraces.length + 1);
-                tmpArray[fTraces.length] = (ITmfTrace) child;
-                fTraces = tmpArray;
-            }
-            return;
-        }
-        throw new IllegalArgumentException();
     }
 
     // ------------------------------------------------------------------------
@@ -649,7 +621,9 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
                     if (!getIndexer().isIndexing()) {
                         ITmfTimestamp startTimestamp = TmfTimestamp.BIG_CRUNCH;
                         ITmfTimestamp endTimestamp = TmfTimestamp.BIG_BANG;
-                        for (final ITmfTrace trace : fTraces) {
+
+                        for (final ITmfEventProvider child : getChildren()) {
+                            final ITmfTrace trace = (ITmfTrace) child;
                             if (trace.getStartTime().compareTo(startTimestamp) < 0) {
                                 startTimestamp = trace.getStartTime();
                             }
@@ -684,7 +658,8 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
     @Override
     public long getStreamingInterval() {
         long interval = 0;
-        for (final ITmfTrace trace : fTraces) {
+        for (final ITmfEventProvider child : getChildren()) {
+            final ITmfTrace trace = (ITmfTrace) child;
             interval = Math.max(interval, trace.getStreamingInterval());
         }
         return interval;
@@ -717,22 +692,22 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
     public synchronized int getCheckpointSize() {
         int totalCheckpointSize = 0;
         try {
-            if (fTraces != null) {
-                for (final ITmfTrace trace : fTraces) {
-                    if (!(trace instanceof ITmfPersistentlyIndexable)) {
-                        return 0;
-                    }
-
-                    ITmfPersistentlyIndexable persistableIndexTrace = (ITmfPersistentlyIndexable) trace;
-                    int currentTraceCheckpointSize = persistableIndexTrace.getCheckpointSize();
-                    if (currentTraceCheckpointSize <= 0) {
-                        return 0;
-                    }
-                    totalCheckpointSize += currentTraceCheckpointSize;
-                    // each entry in the TmfLocationArray has a rank in addition
-                    // of the location
-                    totalCheckpointSize += 8;
+            List<ITmfEventProvider> children = getChildren();
+            for (ITmfEventProvider child : children) {
+                final ITmfTrace trace = (ITmfTrace) child;
+                if (!(trace instanceof ITmfPersistentlyIndexable)) {
+                    return 0;
                 }
+
+                ITmfPersistentlyIndexable persistableIndexTrace = (ITmfPersistentlyIndexable) trace;
+                int currentTraceCheckpointSize = persistableIndexTrace.getCheckpointSize();
+                if (currentTraceCheckpointSize <= 0) {
+                    return 0;
+                }
+                totalCheckpointSize += currentTraceCheckpointSize;
+                // each entry in the TmfLocationArray has a rank in addition
+                // of the location
+                totalCheckpointSize += 8;
             }
         } catch (UnsupportedOperationException e) {
             return 0;
@@ -746,10 +721,12 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
      */
     @Override
     public ITmfLocation restoreLocation(ByteBuffer bufferIn) {
-        ITmfLocation[] locations = new ITmfLocation[fTraces.length];
-        long[] ranks = new long[fTraces.length];
-        for (int i = 0; i < fTraces.length; ++i) {
-            final ITmfTrace trace = fTraces[i];
+        List<ITmfEventProvider> children = getChildren();
+        int length = children.size();
+        ITmfLocation[] locations = new ITmfLocation[length];
+        long[] ranks = new long[length];
+        for (int i = 0; i < length; ++i) {
+            final ITmfTrace trace = (ITmfTrace) getChild(i);
             locations[i] = ((ITmfPersistentlyIndexable) trace).restoreLocation(bufferIn);
             ranks[i] = bufferIn.getLong();
         }
@@ -757,5 +734,4 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
         TmfExperimentLocation l = new TmfExperimentLocation(arr);
         return l;
     }
-
 }

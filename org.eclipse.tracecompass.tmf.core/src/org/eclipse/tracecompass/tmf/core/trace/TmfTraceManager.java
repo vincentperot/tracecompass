@@ -16,7 +16,6 @@ package org.eclipse.tracecompass.tmf.core.trace;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -233,8 +232,8 @@ public final class TmfTraceManager {
         }
         if (trace instanceof TmfExperiment) {
             TmfExperiment exp = (TmfExperiment) trace;
-            ITmfTrace[] traces = exp.getTraces();
-            Set<ITmfTrace> alltraces = new LinkedHashSet<>(Arrays.asList(traces));
+            List<ITmfTrace> traces = exp.getTraces();
+            Set<ITmfTrace> alltraces = new LinkedHashSet<>(traces);
             alltraces.add(exp);
             return alltraces;
         }
