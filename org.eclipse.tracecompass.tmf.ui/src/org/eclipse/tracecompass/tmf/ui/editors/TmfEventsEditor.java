@@ -14,6 +14,7 @@
 package org.eclipse.tracecompass.tmf.ui.editors;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -347,7 +348,7 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
              * All the traces in this experiment are of the same type, let's
              * just use the normal table for that type.
              */
-            return getEventTable(experiment.getTraces()[0], parent, cacheSize);
+            return getEventTable(experiment.getTraces().get(0), parent, cacheSize);
         }
 
         /*
@@ -355,7 +356,7 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
          * definitely using a TmfEventsTable. Aggregate the columns from all
          * trace types.
          */
-        ITmfTrace[] traces = experiment.getTraces();
+        List<ITmfTrace> traces = experiment.getTraces();
         Set<ITmfEventAspect> aspects = new LinkedHashSet<>();
 
         for (ITmfTrace trace : traces) {
