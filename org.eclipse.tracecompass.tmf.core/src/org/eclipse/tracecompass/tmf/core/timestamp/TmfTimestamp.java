@@ -34,30 +34,62 @@ public class TmfTimestamp implements ITmfTimestamp {
     /**
      * The beginning of time
      */
-    public static final ITmfTimestamp BIG_BANG =
-            new TmfTimestamp(Long.MIN_VALUE, Integer.MAX_VALUE);
+    public static final ITmfTimestamp BIG_BANG = new TmfTimestamp(Long.MIN_VALUE, Integer.MAX_VALUE) {
+        @Override
+        public int compareTo(ITmfTimestamp ts) {
+            return (ts == this) ? 0 : -1;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return other == this;
+        }
+
+        @Override
+        public ITmfTimestamp normalize(long offset, int scale) {
+            return this;
+        }
+    };
 
     /**
      * The end of time
      */
-    public static final ITmfTimestamp BIG_CRUNCH =
-            new TmfTimestamp(Long.MAX_VALUE, Integer.MAX_VALUE);
+    public static final ITmfTimestamp BIG_CRUNCH = new TmfTimestamp(Long.MAX_VALUE, Integer.MAX_VALUE) {
+        @Override
+        public int compareTo(ITmfTimestamp ts) {
+            return (ts == this) ? 0 : 1;
+        }
 
-    /**
-     * A more practical definition of "beginning of time"
-     */
-    public static final ITmfTimestamp PROJECT_IS_FUNDED = BIG_BANG;
+        @Override
+        public boolean equals(Object other) {
+            return other == this;
+        }
 
-    /**
-     * A more practical definition of "end of time"
-     */
-    public static final ITmfTimestamp PROJECT_IS_CANNED = BIG_CRUNCH;
+        @Override
+        public ITmfTimestamp normalize(long offset, int scale) {
+            return this;
+        }
+    };
 
     /**
      * Zero
      */
-    public static final ITmfTimestamp ZERO =
-            new TmfTimestamp(0, 0);
+    public static final ITmfTimestamp ZERO = new TmfTimestamp(0, 0) {
+        @Override
+        public int compareTo(ITmfTimestamp ts) {
+            return (ts == this) ? 0 : super.compareTo(ts);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return other == this;
+        }
+
+        @Override
+        public ITmfTimestamp normalize(long offset, int scale) {
+            return this;
+        }
+    };
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -164,26 +196,70 @@ public class TmfTimestamp implements ITmfTimestamp {
         return fScale;
     }
 
-    private static final long scalingFactors[] = new long[] {
-        1L,
-        10L,
-        100L,
-        1000L,
-        10000L,
-        100000L,
-        1000000L,
-        10000000L,
-        100000000L,
-        1000000000L,
-        10000000000L,
-        100000000000L,
-        1000000000000L,
-        10000000000000L,
-        100000000000000L,
-        1000000000000000L,
-        10000000000000000L,
-        100000000000000000L,
-        1000000000000000000L,
+    private static final long SCALING_FACTORS[] = new long[] {
+            1L,
+            10L,
+            100L,
+            1000L,
+            10000L,
+            100000L,
+            1000000L,
+            10000000L,
+            100000000L,
+            1000000000L,
+            10000000000L,
+            100000000000L,
+            1000000000000L,
+            10000000000000L,
+            100000000000000L,
+            1000000000000000L,
+            10000000000000000L,
+            100000000000000000L,
+            1000000000000000000L,
+    };
+
+    private static final long OVERFLOW_CHECK[] = new long[] {
+            Long.MAX_VALUE / SCALING_FACTORS[0],
+            Long.MAX_VALUE / SCALING_FACTORS[1],
+            Long.MAX_VALUE / SCALING_FACTORS[2],
+            Long.MAX_VALUE / SCALING_FACTORS[3],
+            Long.MAX_VALUE / SCALING_FACTORS[4],
+            Long.MAX_VALUE / SCALING_FACTORS[5],
+            Long.MAX_VALUE / SCALING_FACTORS[6],
+            Long.MAX_VALUE / SCALING_FACTORS[7],
+            Long.MAX_VALUE / SCALING_FACTORS[8],
+            Long.MAX_VALUE / SCALING_FACTORS[9],
+            Long.MAX_VALUE / SCALING_FACTORS[10],
+            Long.MAX_VALUE / SCALING_FACTORS[11],
+            Long.MAX_VALUE / SCALING_FACTORS[12],
+            Long.MAX_VALUE / SCALING_FACTORS[13],
+            Long.MAX_VALUE / SCALING_FACTORS[14],
+            Long.MAX_VALUE / SCALING_FACTORS[15],
+            Long.MAX_VALUE / SCALING_FACTORS[16],
+            Long.MAX_VALUE / SCALING_FACTORS[17],
+            Long.MAX_VALUE / SCALING_FACTORS[18]
+    };
+
+    private static final long underflowCheck[] = new long[] {
+            Long.MIN_VALUE / SCALING_FACTORS[0],
+            Long.MIN_VALUE / SCALING_FACTORS[1],
+            Long.MIN_VALUE / SCALING_FACTORS[2],
+            Long.MIN_VALUE / SCALING_FACTORS[3],
+            Long.MIN_VALUE / SCALING_FACTORS[4],
+            Long.MIN_VALUE / SCALING_FACTORS[5],
+            Long.MIN_VALUE / SCALING_FACTORS[6],
+            Long.MIN_VALUE / SCALING_FACTORS[7],
+            Long.MIN_VALUE / SCALING_FACTORS[8],
+            Long.MIN_VALUE / SCALING_FACTORS[9],
+            Long.MIN_VALUE / SCALING_FACTORS[10],
+            Long.MIN_VALUE / SCALING_FACTORS[11],
+            Long.MIN_VALUE / SCALING_FACTORS[12],
+            Long.MIN_VALUE / SCALING_FACTORS[13],
+            Long.MIN_VALUE / SCALING_FACTORS[14],
+            Long.MIN_VALUE / SCALING_FACTORS[15],
+            Long.MIN_VALUE / SCALING_FACTORS[16],
+            Long.MIN_VALUE / SCALING_FACTORS[17],
+            Long.MIN_VALUE / SCALING_FACTORS[18]
     };
 
     @Override
@@ -196,20 +272,18 @@ public class TmfTimestamp implements ITmfTimestamp {
             return this;
         }
 
-        // In case of big bang and big crunch just return this (no need to normalize)
-        if (this.equals(BIG_BANG) || this.equals(BIG_CRUNCH)) {
-            return this;
-        }
-
         // First, scale the timestamp
         if (fScale != scale) {
             final int scaleDiff = Math.abs(fScale - scale);
-            if (scaleDiff >= scalingFactors.length) {
+            if (scaleDiff >= SCALING_FACTORS.length) {
                 throw new ArithmeticException("Scaling exception"); //$NON-NLS-1$
             }
 
-            final long scalingFactor = scalingFactors[scaleDiff];
+            final long scalingFactor = SCALING_FACTORS[scaleDiff];
             if (scale < fScale) {
+                if (value > OVERFLOW_CHECK[scaleDiff] || value < underflowCheck[scaleDiff]) {
+                    throw new ArithmeticException("overflow exception"); //$NON-NLS-1$
+                }
                 value *= scalingFactor;
             } else {
                 value /= scalingFactor;
@@ -255,19 +329,27 @@ public class TmfTimestamp implements ITmfTimestamp {
         if (this == ts || (fValue == ts.getValue() && fScale == ts.getScale())) {
             return 0;
         }
-        if ((fValue == BIG_BANG.getValue() && fScale == BIG_BANG.getScale()) || (ts.getValue() == BIG_CRUNCH.getValue() && ts.getScale() == BIG_CRUNCH.getScale())) {
+        if (ts == BIG_CRUNCH) {
             return -1;
         }
-        if ((fValue == BIG_CRUNCH.getValue() && fScale == BIG_CRUNCH.getScale()) || (ts.getValue() == BIG_BANG.getValue() && ts.getScale() == BIG_BANG.getScale())) {
+        if (ts == BIG_BANG) {
             return 1;
         }
 
         try {
             final ITmfTimestamp nts = ts.normalize(0, fScale);
-            final long delta = fValue - nts.getValue();
-            return Long.compare(delta, 0);
-        }
-        catch (final ArithmeticException e) {
+            long delta = fValue - nts.getValue();
+            if (delta == Long.MIN_VALUE) {
+                delta = (fValue >> 1) - (nts.getValue() >> 1);
+            }
+            if (delta > 0) {
+                return 1;
+            } else if (delta < 0) {
+                return -1;
+            } else {
+                return 0;
+            }
+        } catch (final ArithmeticException e) {
             // Scaling error. We can figure it out nonetheless.
 
             // First, look at the sign of the mantissa
@@ -330,8 +412,7 @@ public class TmfTimestamp implements ITmfTimestamp {
         try {
             ITmfTimestamp ts = normalize(0, ITmfTimestamp.NANOSECOND_SCALE);
             return format.format(ts.getValue());
-        }
-        catch (ArithmeticException e) {
+        } catch (ArithmeticException e) {
             return format.format(0);
         }
     }
