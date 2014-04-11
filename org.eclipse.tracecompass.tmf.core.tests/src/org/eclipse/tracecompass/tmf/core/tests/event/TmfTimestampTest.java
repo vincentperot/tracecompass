@@ -40,9 +40,9 @@ public class TmfTimestampTest {
     // ------------------------------------------------------------------------
 
     private final ITmfTimestamp ts0 = new TmfTimestamp();
-    private final ITmfTimestamp ts1 = new TmfTimestamp(12345,  0);
+    private final ITmfTimestamp ts1 = new TmfTimestamp(12345, 0);
     private final ITmfTimestamp ts2 = new TmfTimestamp(12345, -1);
-    private final ITmfTimestamp ts3 = new TmfTimestamp(12345,  2);
+    private final ITmfTimestamp ts3 = new TmfTimestamp(12345, 2);
     private final ITmfTimestamp ts4 = new TmfTimestamp(12345, -3);
     private final ITmfTimestamp ts5 = new TmfTimestamp(12345, -6);
     private final ITmfTimestamp ts6 = new TmfTimestamp(12345, -9);
@@ -90,7 +90,7 @@ public class TmfTimestampTest {
         assertEquals("getscale", 2, copy.getScale());
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testCopyNullConstructor() {
         new TmfTimestamp((TmfTimestamp) null);
     }
@@ -311,9 +311,13 @@ public class TmfTimestampTest {
         // Test below limit
         try {
             ts1.normalize(0, +MAX_SCALE_DIFF - 1);
-            ts1.normalize(0, -MAX_SCALE_DIFF + 1);
         } catch (final ArithmeticException e) {
             fail("normalize: scale error");
+        }
+        try{
+            ts1.normalize(0, -MAX_SCALE_DIFF + 1);
+            fail("Should have overflown");
+        } catch (final ArithmeticException e) {
         }
 
         // Test at limit
@@ -446,14 +450,14 @@ public class TmfTimestampTest {
         final ITmfTimestamp ts0b = new TmfTimestamp(0, Integer.MAX_VALUE);
         final ITmfTimestamp ts0c = new TmfTimestamp(Long.MIN_VALUE, Integer.MAX_VALUE);
 
-        assertTrue("compareTo", ts0a.compareTo(ts0b) == -1);
-        assertTrue("compareTo", ts0a.compareTo(ts0c) == 1);
+        assertEquals("compareTo", -1, ts0a.compareTo(ts0b));
+        assertEquals("compareTo", 1, ts0a.compareTo(ts0c));
 
-        assertTrue("compareTo", ts0b.compareTo(ts0a) == 1);
-        assertTrue("compareTo", ts0b.compareTo(ts0c) == 1);
+        assertEquals("compareTo", 1, ts0b.compareTo(ts0a));
+        assertEquals("compareTo", 1, ts0b.compareTo(ts0c));
 
-        assertTrue("compareTo", ts0c.compareTo(ts0a) == -1);
-        assertTrue("compareTo", ts0c.compareTo(ts0b) == -1);
+        assertEquals("compareTo", -1, ts0c.compareTo(ts0a));
+        assertEquals("compareTo", -1, ts0c.compareTo(ts0b));
     }
 
     @Test
