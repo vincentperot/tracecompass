@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -9,7 +9,7 @@
  * Contributors:
  *   Bernd Hufmann - Initial API and implementation
  **********************************************************************/
-package org.eclipse.tracecompass.internal.lttng2.control.ui.views.remote;
+package org.eclipse.tracecompass.tmf.remote.core.shell;
 
 import java.util.Arrays;
 
@@ -69,7 +69,12 @@ public class CommandResult implements ICommandResult {
         return fResult;
     }
 
-    @Override
+    /**
+     * Sets the command result value.
+     *
+     * @param result
+     *            The integer result to set
+     */
     public void setResult(int result) {
         fResult = result;
     }
@@ -79,7 +84,12 @@ public class CommandResult implements ICommandResult {
         return Arrays.copyOf(fOutput, fOutput.length);
     }
 
-    @Override
+    /**
+     * Sets the command output.
+     *
+     * @param output
+     *            The output (as an array of Strings) to assign
+     */
     public void setOutput(String[] output) {
         fOutput = new String[0];
         if (output != null) {
@@ -92,7 +102,13 @@ public class CommandResult implements ICommandResult {
         return Arrays.copyOf(fErrorOutput, fErrorOutput.length);
     }
 
-    @Override
+    /**
+     * Sets the command output.
+     *
+     * @param output
+     *            The output (as an array of Strings) to assign
+     */
+
     public void setErrorOutput(String[] output) {
         fErrorOutput = new String[0];
         if (output != null) {
