@@ -27,9 +27,9 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.tracecompass.internal.lttng2.control.ui.views.remote.CommandResult;
-import org.eclipse.tracecompass.internal.lttng2.control.ui.views.remote.ICommandResult;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.LTTngControlService;
+import org.eclipse.tracecompass.tmf.remote.core.shell.CommandResult;
+import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandResult;
 
 @SuppressWarnings("javadoc")
 public class LTTngToolsFileShell extends TestCommandShell {
