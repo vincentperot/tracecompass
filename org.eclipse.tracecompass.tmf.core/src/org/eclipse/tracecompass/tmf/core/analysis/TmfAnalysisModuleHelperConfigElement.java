@@ -29,6 +29,8 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.osgi.framework.Bundle;
 
 /**
@@ -98,8 +100,7 @@ public class TmfAnalysisModuleHelperConfigElement implements IAnalysisModuleHelp
         return ContributorFactoryOSGi.resolve(fCe.getContributor());
     }
 
-    @Override
-    public boolean appliesToTraceType(Class<? extends ITmfTrace> traceclass) {
+    private boolean appliesToTraceType(Class<? extends ITmfTrace> traceclass, boolean checkExperiment) {
         boolean applies = false;
 
         /* Get the module's applying tracetypes */
@@ -116,18 +117,35 @@ public class TmfAnalysisModuleHelperConfigElement implements IAnalysisModuleHelp
                 if (classApplies) {
                     applies |= applyclass.isAssignableFrom(traceclass);
                 } else {
-                    /* If the trace type does not apply, reset the applies variable to false */
+                    /*
+                     * If the trace type does not apply, reset the applies
+                     * variable to false
+                     */
                     if (applyclass.isAssignableFrom(traceclass)) {
                         applies = false;
                     }
                 }
-            } catch (ClassNotFoundException e) {
-                Activator.logError("Error in applies to trace", e); //$NON-NLS-1$
-            } catch (InvalidRegistryObjectException e) {
+
+                /*
+                 * If the trace is an experiment and the analysis applies to experiment,
+                 * check that it applies to some of its subtraces
+                 */
+                if (!applies && checkExperiment && (TmfExperiment.class.isAssignableFrom(traceclass))) {
+                    classAppliesVal = element.getAttribute(TmfAnalysisModuleSourceConfigElement.APPLIES_EXP_ATTR);
+                    if (classAppliesVal != null) {
+                        applies = Boolean.parseBoolean(classAppliesVal);
+                    }
+                }
+            } catch (ClassNotFoundException | InvalidRegistryObjectException e) {
                 Activator.logError("Error in applies to trace", e); //$NON-NLS-1$
             }
         }
         return applies;
+    }
+
+    @Override
+    public boolean appliesToTraceType(Class<? extends ITmfTrace> traceclass) {
+        return appliesToTraceType(traceclass, true);
     }
 
     @Override
@@ -172,8 +190,27 @@ public class TmfAnalysisModuleHelperConfigElement implements IAnalysisModuleHelp
     @Override
     public IAnalysisModule newModule(ITmfTrace trace) throws TmfAnalysisException {
 
+        /* Check if it applies to trace itself */
+        boolean applies = appliesToTraceType(trace.getClass(), false);
+        /*
+         * If the trace is an experiment, check if it applies to an experiment
+         * and if it contains traces it applies to
+         */
+        if (!applies && (trace instanceof TmfExperiment)) {
+            if (appliesToTraceType(trace.getClass(), true)) {
+                boolean expApplies = false;
+                for (ITmfTrace expTrace : TmfTraceManager.getTraceSet(trace)) {
+                    if (appliesToTraceType(expTrace.getClass())) {
+                        expApplies = true;
+                        break;
+                    }
+                }
+                applies = expApplies;
+            }
+        }
+
         /* Check that analysis can be executed */
-        if (!appliesToTraceType(trace.getClass())) {
+        if (!applies) {
             throw new TmfAnalysisException(NLS.bind(Messages.TmfAnalysisModuleHelper_AnalysisDoesNotApply, getName()));
         }
 
