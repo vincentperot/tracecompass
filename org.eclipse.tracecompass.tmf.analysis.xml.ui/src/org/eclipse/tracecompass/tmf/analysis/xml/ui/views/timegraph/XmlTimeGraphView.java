@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -242,59 +243,58 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
 
         List<Element> entries = XmlUtils.getChildElements(viewElement, TmfXmlUiStrings.ENTRY_ELEMENT);
         Set<XmlEntry> entryList = new TreeSet<>(getEntryComparator());
-        for (ITmfTrace aTrace : TmfTraceManager.getTraceSet(trace)) {
-            if (monitor.isCanceled()) {
-                return;
-            }
 
-            List<ITmfAnalysisModuleWithStateSystems> stateSystemModules = new LinkedList<>();
-            if (analysisIds.isEmpty()) {
-                /*
-                 * No analysis specified, take all state system analysis modules
-                 */
-                for (ITmfAnalysisModuleWithStateSystems module : aTrace.getAnalysisModulesOfClass(ITmfAnalysisModuleWithStateSystems.class)) {
+        if (monitor.isCanceled()) {
+            return;
+        }
+
+        Set<ITmfAnalysisModuleWithStateSystems> stateSystemModules = new HashSet<>();
+        if (analysisIds.isEmpty()) {
+            /*
+             * No analysis specified, take all state system analysis modules
+             */
+            for (ITmfAnalysisModuleWithStateSystems module : trace.getAnalysisModulesOfClass(ITmfAnalysisModuleWithStateSystems.class)) {
+                stateSystemModules.add(module);
+            }
+        } else {
+            for (String moduleId : analysisIds) {
+                ITmfAnalysisModuleWithStateSystems module = trace.getAnalysisModuleOfClass(ITmfAnalysisModuleWithStateSystems.class, moduleId);
+                if (module != null) {
                     stateSystemModules.add(module);
-                }
-            } else {
-                for (String moduleId : analysisIds) {
-                    ITmfAnalysisModuleWithStateSystems module = aTrace.getAnalysisModuleOfClass(ITmfAnalysisModuleWithStateSystems.class, moduleId);
-                    if (module != null) {
-                        stateSystemModules.add(module);
-                    }
-                }
-            }
-
-            for (ITmfAnalysisModuleWithStateSystems module : stateSystemModules) {
-                IStatus status = module.schedule();
-                if (!status.isOK()) {
-                    return;
-                }
-                if (module instanceof TmfStateSystemAnalysisModule) {
-                    ((TmfStateSystemAnalysisModule) module).waitForInitialization();
-                }
-                for (ITmfStateSystem ssq : module.getStateSystems()) {
-                    if (ssq == null) {
-                        return;
-                    }
-                    ssq.waitUntilBuilt();
-
-                    long startTime = ssq.getStartTime();
-                    long endTime = ssq.getCurrentEndTime();
-                    XmlEntry groupEntry = new XmlEntry(-1, aTrace, aTrace.getName(), ssq);
-                    entryList.add(groupEntry);
-                    setStartTime(Math.min(getStartTime(), startTime));
-                    setEndTime(Math.max(getEndTime(), endTime));
-
-                    /* Add children entry of this entry for each line */
-                    for (Element entry : entries) {
-                        buildEntry(entry, groupEntry, -1);
-                    }
                 }
             }
         }
-        putEntryList(trace, new ArrayList<TimeGraphEntry>(entryList));
 
-        if (trace.equals(getTrace())) {
+        for (ITmfAnalysisModuleWithStateSystems module : stateSystemModules) {
+            IStatus status = module.schedule();
+            if (!status.isOK()) {
+                return;
+            }
+            if (module instanceof TmfStateSystemAnalysisModule) {
+                ((TmfStateSystemAnalysisModule) module).waitForInitialization();
+            }
+            for (ITmfStateSystem ssq : module.getStateSystems()) {
+                if (ssq == null) {
+                    return;
+                }
+                ssq.waitUntilBuilt();
+
+                long startTime = ssq.getStartTime();
+                long endTime = ssq.getCurrentEndTime();
+                XmlEntry groupEntry = new XmlEntry(-1, trace, trace.getName(), ssq);
+                entryList.add(groupEntry);
+                setStartTime(Math.min(getStartTime(), startTime));
+                setEndTime(Math.max(getEndTime(), endTime));
+
+                /* Add children entry of this entry for each line */
+                for (Element entry : entries) {
+                    buildEntry(entry, groupEntry, -1);
+                }
+            }
+        }
+        addToEntryList(parentTrace, new ArrayList<TimeGraphEntry>(entryList));
+
+        if (parentTrace.equals(getTrace())) {
             refresh();
         }
         for (XmlEntry traceEntry : entryList) {
@@ -513,4 +513,43 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
         return Collections.EMPTY_LIST;
     }
 
+    /**
+     * This method will pre-filter the traces that contain analysis modules
+     * supported by this view, whether they are from a trace or an experiment.
+     */
+    @Override
+    protected Iterable<ITmfTrace> getTracesToBuild(ITmfTrace trace) {
+        /*
+         * Get the view element from the XML file. If the element can't be
+         * found, return.
+         */
+        Element viewElement = fViewInfo.getViewElement(TmfXmlUiStrings.TIME_GRAPH_VIEW);
+        if (viewElement == null) {
+            return super.getTracesToBuild(trace);
+        }
+
+        Set<String> analysisIds = fViewInfo.getViewAnalysisIds(viewElement);
+        Set<ITmfTrace> traces = new HashSet<>();
+
+        for (ITmfTrace aTrace : TmfTraceManager.getTraceSetWithExperiment(trace)) {
+            if ((analysisIds.isEmpty() && aTrace.getAnalysisModulesOfClass(ITmfAnalysisModuleWithStateSystems.class).iterator().hasNext())) {
+                /*
+                 * No analysis ID specified, so this trace will be built only if
+                 * it has state system modules
+                 */
+                traces.add(aTrace);
+            } else {
+                /* Build this trace only if it has one the requested modules */
+                for (String moduleId : analysisIds) {
+                    if (aTrace.getAnalysisModuleOfClass(ITmfAnalysisModuleWithStateSystems.class, moduleId) != null) {
+                        traces.add(aTrace);
+                    }
+                }
+            }
+        }
+        if (traces.isEmpty()) {
+            return super.getTracesToBuild(trace);
+        }
+        return traces;
+    }
 }
