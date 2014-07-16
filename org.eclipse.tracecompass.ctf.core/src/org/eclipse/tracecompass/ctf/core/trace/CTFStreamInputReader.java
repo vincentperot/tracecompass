@@ -21,6 +21,7 @@ import java.nio.file.StandardOpenOption;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.internal.ctf.core.Activator;
 import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
@@ -220,9 +221,21 @@ public class CTFStreamInputReader implements AutoCloseable {
      * Get the event context of the stream
      *
      * @return the event context declaration of the stream
+     * @deprecated use {@link CTFStreamInputReader#getStreamEventContextDeclaration()}
      */
+    @Deprecated
     public StructDeclaration getStreamEventContextDecl() {
         return getStreamInput().getStream().getEventContextDecl();
+    }
+
+    /**
+     * Get the event context
+     *
+     * @return the event context
+     * @since 3.1
+     */
+    public ICompositeDeclaration getStreamEventContextDeclaration() {
+        return getStreamInput().getStream().getEventContextDeclaration();
     }
 
     // ------------------------------------------------------------------------

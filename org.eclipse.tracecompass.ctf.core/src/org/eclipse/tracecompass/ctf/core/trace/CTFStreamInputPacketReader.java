@@ -71,7 +71,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
     private final IDeclaration fStreamEventHeaderDecl;
 
     /** Stream event context definition. */
-    private final StructDeclaration fStreamEventContextDecl;
+    private final IDeclaration fStreamEventContextDecl;
 
     private ICompositeDefinition fCurrentTracePacketHeaderDef;
     private ICompositeDefinition fCurrentStreamEventHeaderDef;
@@ -121,23 +121,46 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         fStreamPacketContextDecl = currentStream.getPacketContextDecl();
         fStreamEventHeaderDecl = currentStream.getEventHeaderDeclaration();
         fStreamEventContextDecl = currentStream.getEventContextDecl();
+        fStreamEventContextDecl = currentStream.getEventContextDeclaration();
     }
 
     /**
-     * Get the event context defintiion
+     * Get the event context definition
      *
      * @param input
      *            the bitbuffer to read from
      * @return an context definition, can be null
      * @throws CTFReaderException
      *             out of bounds exception or such
+     * @deprecated use {@link #getEventContextDef}
      */
+    @Deprecated
     public StructDefinition getEventContextDefinition(@NonNull BitBuffer input) throws CTFReaderException {
-        return fStreamEventContextDecl.createDefinition(fStreamInputReader.getStreamInput(), LexicalScope.STREAM_EVENT_CONTEXT, input);
+        if (fStreamEventContextDecl instanceof StructDeclaration) {
+            return ((StructDeclaration) fStreamEventContextDecl).createDefinition(fStreamInputReader.getStreamInput(), LexicalScope.STREAM_EVENT_CONTEXT, input);
+        }
+        return null;
     }
 
     /**
-     * Get the stream context defintiion
+     * Get the event context definition
+     *
+     * @param input
+     *            the bitbuffer to read from
+     * @return an context definition, can be null
+     * @throws CTFReaderException
+     *             out of bounds exception or such
+     * @since 3.1
+     */
+    public ICompositeDefinition getEventContextDef(@NonNull BitBuffer input) throws CTFReaderException {
+        if (fStreamEventContextDecl instanceof StructDeclaration) {
+            return ((StructDeclaration) fStreamEventContextDecl).createDefinition(fStreamInputReader.getStreamInput(), LexicalScope.STREAM_EVENT_CONTEXT, input);
+        }
+        return null;
+    }
+
+    /**
+     * Get the stream context definition
      *
      * @param input
      *            the bitbuffer to read from
@@ -155,7 +178,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
     }
 
     /**
-     * Get the packet context defintiion
+     * Get the packet context definition
      *
      * @param input
      *            the bitbuffer to read from
@@ -168,7 +191,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
     }
 
     /**
-     * Get the event header defintiion
+     * Get the event header definition
      *
      * @param input
      *            the bitbuffer to read from
