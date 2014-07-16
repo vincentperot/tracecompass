@@ -26,6 +26,7 @@ import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Definition;
 import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
+import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
@@ -116,7 +117,7 @@ public class CTFEventDefinitionTest {
     private static void test(int rank, EventDefinition ed) {
         String title = "event #" + rank;
         assertEquals(title, 100L, ed.getTimestamp());
-        StructDefinition context = ed.getContext();
+        ICompositeDefinition context = ed.getMergedContext();
         if (rank >= 4) {
             assertNotNull(title, context);
             if (rank >= 12) {
@@ -129,15 +130,15 @@ public class CTFEventDefinitionTest {
             assertNull(title, context);
         }
         if (((rank / 4) % 2) == 1) {
-            assertNotNull(title, ed.getEventContext());
-        }else{
-            assertNull(title, ed.getEventContext());
+            assertNotNull(title, ed.getEventContextDefinition());
+        } else {
+            assertNull(title, ed.getEventContextDefinition());
         }
         if (rank % 2 == 1) {
-            assertNotNull(title, ed.getFields());
-            assertEquals(title, 3, ed.getFields().getFieldNames().size());
+            assertNotNull(title, ed.getFieldDefinitions());
+            assertEquals(title, 3, ed.getFieldDefinitions().getFieldNames().size());
         } else {
-            assertNull(title, ed.getFields());
+            assertNull(title, ed.getFieldDefinitions());
         }
         assertTrue(title, ed.toString().startsWith("Event type: null" + System.getProperty("line.separator") + "Timestamp: 100"));
     }

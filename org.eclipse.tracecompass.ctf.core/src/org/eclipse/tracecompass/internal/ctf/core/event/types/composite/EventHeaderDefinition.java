@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Declaration;
 import org.eclipse.tracecompass.ctf.core.event.types.Definition;
+import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IEventHeaderDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
@@ -87,6 +88,12 @@ public final class EventHeaderDefinition extends Definition implements IComposit
     public long getTimestamp() {
         return fTimestamp;
     }
+
+    @Override
+    public ICompositeDeclaration getDeclaration() {
+        return (ICompositeDeclaration) super.getDeclaration();
+    }
+
 
     @Override
     public Definition getDefinition(String fieldName) {
