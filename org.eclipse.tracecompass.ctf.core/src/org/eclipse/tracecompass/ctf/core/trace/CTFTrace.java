@@ -579,7 +579,7 @@ public class CTFTrace implements IDefinitionScope {
          */
         if (index != null) {
             for (CTFStreamInput si : stream.getStreamInputs()) {
-                si.getIndex().addAllEntries(index);
+                si.getIndex().appendAll(index);
             }
         }
         return stream;
@@ -791,7 +791,7 @@ public class CTFTrace implements IDefinitionScope {
         long currentStart = Long.MAX_VALUE;
         for (CTFStream stream : fStreams.values()) {
             for (CTFStreamInput si : stream.getStreamInputs()) {
-                currentStart = Math.min(currentStart, si.getIndex().getEntries().get(0).getTimestampBegin());
+                currentStart = Math.min(currentStart, si.getIndex().getElement(0).getTimestampBegin());
             }
         }
         return timestampCyclesToNanos(currentStart);
