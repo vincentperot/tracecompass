@@ -287,7 +287,7 @@ public class CTFStreamInputReader implements AutoCloseable {
      * @return
      */
     private int getPacketSize() {
-        return fStreamInput.getIndex().getEntries().size();
+        return fStreamInput.getIndex().size();
     }
 
     /**
@@ -366,7 +366,7 @@ public class CTFStreamInputReader implements AutoCloseable {
         /*
          * Search in the index for the packet to search in.
          */
-        final int len = fStreamInput.getIndex().getEntries().size();
+        final int len = fStreamInput.getIndex().size();
 
         /*
          * Go to beginning of trace.
@@ -439,7 +439,7 @@ public class CTFStreamInputReader implements AutoCloseable {
     }
 
     private StreamInputPacketIndexEntry getPacket() {
-        return fStreamInput.getIndex().getEntries().get(getPacketIndex());
+        return fStreamInput.getIndex().get(getPacketIndex());
     }
 
     /**
