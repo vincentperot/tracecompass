@@ -19,8 +19,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Declaration;
+import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
 import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IEventHeaderDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
@@ -60,10 +60,6 @@ public class EventHeaderLargeDeclaration extends Declaration implements IEventHe
     private static final int COMPACT_ID = 16;
     private static final int EXTENDED_VALUE = 65535;
     /**
-     * Full sized id is 32 bits
-     */
-    private static final int ID_SIZE = 32;
-    /**
      * Full sized timestamp is 64 bits
      */
     private static final int FULL_TS = 64;
@@ -79,13 +75,6 @@ public class EventHeaderLargeDeclaration extends Declaration implements IEventHe
      * Byte aligned
      */
     private static final int ALIGN = 8;
-    /**
-     * Name of the variant according to the spec
-     */
-    private static final String V = "v"; //$NON-NLS-1$
-    private static final int VARIANT_SIZE = 2;
-    private static final int COMPACT_SIZE = 1;
-    private static final int EXTENDED_FIELD_SIZE = 2;
 
     private final ByteOrder fByteOrder;
 
@@ -100,6 +89,24 @@ public class EventHeaderLargeDeclaration extends Declaration implements IEventHe
             throw new IllegalArgumentException("byteOrder cannot be null"); //$NON-NLS-1$
         }
         fByteOrder = byteOrder;
+    }
+
+    private StructDeclaration getReference() {
+        StructDeclaration ref = new StructDeclaration(ALIGN);
+        EnumDeclaration id = new EnumDeclaration(IntegerDeclaration.createDeclaration(16, false, 10, fByteOrder, Encoding.NONE, "", 8)); //$NON-NLS-1$
+        id.add(0, 65534, "compact"); //$NON-NLS-1$
+        id.add(65535, 65535, "extended"); //$NON-NLS-1$
+        ref.addField("id", id); //$NON-NLS-1$
+        VariantDeclaration v = new VariantDeclaration();
+        StructDeclaration compact = new StructDeclaration(1);
+        compact.addField("timestamp", IntegerDeclaration.createDeclaration(32, false, 10, fByteOrder, Encoding.NONE, "", 8)); //$NON-NLS-1$ //$NON-NLS-2$
+        StructDeclaration extended = new StructDeclaration(1);
+        extended.addField("id", IntegerDeclaration.createDeclaration(32, false, 10, fByteOrder, Encoding.NONE, "", 8)); //$NON-NLS-1$ //$NON-NLS-2$
+        extended.addField("timestamp", IntegerDeclaration.createDeclaration(64, false, 10, fByteOrder, Encoding.NONE, "clock_monotonic", 8)); //$NON-NLS-1$ //$NON-NLS-2$
+        v.addField("compact", compact); //$NON-NLS-1$
+        v.addField("extended", extended); //$NON-NLS-1$
+        ref.addField("v", v); //$NON-NLS-1$
+        return ref;
     }
 
     @Override
@@ -138,78 +145,11 @@ public class EventHeaderLargeDeclaration extends Declaration implements IEventHe
      *            the declaration
      * @return true if the event is a large event header
      */
-    public static boolean isLargeEventHeader(@Nullable StructDeclaration declaration) {
+    public boolean isLargeEventHeader(@Nullable StructDeclaration declaration) {
         if (declaration == null) {
             return false;
         }
-
-        IDeclaration iDeclaration = declaration.getFields().get(ID);
-        if (!(iDeclaration instanceof EnumDeclaration)) {
-            return false;
-        }
-        EnumDeclaration eId = (EnumDeclaration) iDeclaration;
-        if (eId.getContainerType().getLength() != COMPACT_ID) {
-            return false;
-        }
-        iDeclaration = declaration.getFields().get(V);
-
-        if (!(iDeclaration instanceof VariantDeclaration)) {
-            return false;
-        }
-        VariantDeclaration vDec = (VariantDeclaration) iDeclaration;
-        if (!vDec.hasField(COMPACT) || !vDec.hasField(EXTENDED)) {
-            return false;
-        }
-        if (vDec.getFields().size() != VARIANT_SIZE) {
-            return false;
-        }
-        iDeclaration = vDec.getFields().get(COMPACT);
-        if (!(iDeclaration instanceof StructDeclaration)) {
-            return false;
-        }
-        StructDeclaration compactDec = (StructDeclaration) iDeclaration;
-        if (compactDec.getFields().size() != COMPACT_SIZE) {
-            return false;
-        }
-        if (!compactDec.hasField(TIMESTAMP)) {
-            return false;
-        }
-        iDeclaration = compactDec.getFields().get(TIMESTAMP);
-        if (!(iDeclaration instanceof IntegerDeclaration)) {
-            return false;
-        }
-        IntegerDeclaration tsDec = (IntegerDeclaration) iDeclaration;
-        if (tsDec.getLength() != COMPACT_TS || tsDec.isSigned()) {
-            return false;
-        }
-        iDeclaration = vDec.getFields().get(EXTENDED);
-        if (!(iDeclaration instanceof StructDeclaration)) {
-            return false;
-        }
-        StructDeclaration extendedDec = (StructDeclaration) iDeclaration;
-        if (!extendedDec.hasField(TIMESTAMP)) {
-            return false;
-        }
-        if (extendedDec.getFields().size() != EXTENDED_FIELD_SIZE) {
-            return false;
-        }
-        iDeclaration = extendedDec.getFields().get(TIMESTAMP);
-        if (!(iDeclaration instanceof IntegerDeclaration)) {
-            return false;
-        }
-        tsDec = (IntegerDeclaration) iDeclaration;
-        if (tsDec.getLength() != FULL_TS || tsDec.isSigned()) {
-            return false;
-        }
-        iDeclaration = extendedDec.getFields().get(ID);
-        if (!(iDeclaration instanceof IntegerDeclaration)) {
-            return false;
-        }
-        IntegerDeclaration iId = (IntegerDeclaration) iDeclaration;
-        if (iId.getLength() != ID_SIZE || iId.isSigned()) {
-            return false;
-        }
-        return true;
+        return declaration.equals(getReference());
     }
 
     @Override

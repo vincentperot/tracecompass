@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
+import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
 import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.FloatDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
@@ -46,14 +47,14 @@ public class EventHeaderDeclarationTest {
     private static final int VALID_LARGE = 1;
     private static final int VALID_COMPACT = 0;
 
-    private final List<StructDeclaration> declarations = new ArrayList<>();
+    private final List<StructDeclaration> fDeclarations = new ArrayList<>();
 
     /**
      * Setup
      */
     @Before
     public void init() {
-        declarations.clear();
+        fDeclarations.clear();
 
         /**
          * do not reflow
@@ -75,17 +76,20 @@ public class EventHeaderDeclarationTest {
          */
 
         StructDeclaration base = new StructDeclaration(8);
-        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
+        EnumDeclaration idEnumDeclaration = new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL);
+        idEnumDeclaration.add(0, 30, "compact");
+        idEnumDeclaration.add(31, 31, "extended");
+        base.addField("id", idEnumDeclaration);
         VariantDeclaration variantV = new VariantDeclaration();
-        StructDeclaration compact = new StructDeclaration(8);
-        compact.addField("timestamp", IntegerDeclaration.UINT_27B_DECL);
+        StructDeclaration compact = new StructDeclaration(1);
+        compact.addField("timestamp", IntegerDeclaration.createDeclaration(27, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "", 1)); //$NON-NLS-1$ //$NON-NLS-2$
         variantV.addField("compact", compact);
         StructDeclaration large = new StructDeclaration(8);
         large.addField("id", IntegerDeclaration.UINT_32B_DECL);
-        large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
+        large.addField("timestamp", IntegerDeclaration.createDeclaration(64, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "clock_monotonic", 8));
         variantV.addField("extended", large);
         base.addField("v", variantV);
-        declarations.add(base);
+        fDeclarations.add(base);
 
         /**
          * Do not reflow
@@ -107,34 +111,54 @@ public class EventHeaderDeclarationTest {
          */
 
         base = new StructDeclaration(8);
-        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_16B_DECL));
+        idEnumDeclaration = new EnumDeclaration(IntegerDeclaration.UINT_16B_DECL);
+        idEnumDeclaration.add(0, 65534, "compact");
+        idEnumDeclaration.add(65535, 65535, "extended");
+        base.addField("id", idEnumDeclaration);
         variantV = new VariantDeclaration();
         compact = new StructDeclaration(8);
         compact.addField("timestamp", IntegerDeclaration.UINT_32B_DECL);
         variantV.addField("compact", compact);
         large = new StructDeclaration(8);
         large.addField("id", IntegerDeclaration.UINT_32B_DECL);
+        large.addField("timestamp", IntegerDeclaration.createDeclaration(64, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "clock_monotonic", 8));
+        variantV.addField("extended", large);
+        base.addField("v", variantV);
+        fDeclarations.add(base);
+
+        // bad - Alignment is off
+        base = new StructDeclaration(8);
+        base.addField("id", idEnumDeclaration);
+        variantV = new VariantDeclaration();
+        compact = new StructDeclaration(8);
+        compact.addField("timestamp", IntegerDeclaration.UINT_32B_DECL);
+        variantV.addField("compact", compact);
+        large = new StructDeclaration(64);
+        large.addField("id", IntegerDeclaration.UINT_32B_DECL);
         large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
         variantV.addField("extended", large);
         base.addField("v", variantV);
-        declarations.add(base);
+        fDeclarations.add(base);
 
-        // bad - well, sounds nice though
+        // bad - well, sounds delicious though
         base = new StructDeclaration(8);
         base.addField("potato salad", new FloatDeclaration(8, 8, ByteOrder.BIG_ENDIAN, 8));
         base.addField("bbq ribs", new FloatDeclaration(8, 8, ByteOrder.BIG_ENDIAN, 8));
-        declarations.add(base);
-        // bad
+        fDeclarations.add(base);
+
+        // bad - empty variant large
         base = new StructDeclaration(8);
-        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_16B_DECL));
+        base.addField("id", idEnumDeclaration);
         base.addField("v", new FloatDeclaration(8, 8, ByteOrder.BIG_ENDIAN, 8));
-        declarations.add(base);
-        // bad
+        fDeclarations.add(base);
+
+        // bad - empty variant compact
         base = new StructDeclaration(8);
         base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
         base.addField("v", new FloatDeclaration(8, 8, ByteOrder.BIG_ENDIAN, 8));
-        declarations.add(base);
-        // bad
+        fDeclarations.add(base);
+
+        // bad - badly named compact1
         base = new StructDeclaration(8);
         base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
         variantV = new VariantDeclaration();
@@ -146,9 +170,33 @@ public class EventHeaderDeclarationTest {
         large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
         variantV.addField("extended", large);
         base.addField("v", variantV);
-        declarations.add(base);
+        fDeclarations.add(base);
 
-        // bad
+        // bad - compact is not an int, it is a string
+        base = new StructDeclaration(8);
+        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
+        variantV = new VariantDeclaration();
+        StringDeclaration compact1 = new StringDeclaration();
+        variantV.addField("compact", compact1);
+        large = new StructDeclaration(8);
+        large.addField("id", IntegerDeclaration.UINT_32B_DECL);
+        large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
+        variantV.addField("extended", large);
+        base.addField("v", variantV);
+        fDeclarations.add(base);
+
+        // bad - extended is now a string
+        base = new StructDeclaration(8);
+        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
+        variantV = new VariantDeclaration();
+        compact = new StructDeclaration(8);
+        compact.addField("timestamp", IntegerDeclaration.UINT_27B_DECL);
+        variantV.addField("compact", compact);
+        variantV.addField("extended", new StringDeclaration());
+        base.addField("v", variantV);
+        fDeclarations.add(base);
+
+        // bad - 3 elements in the variant
         base = new StructDeclaration(8);
         base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
         variantV = new VariantDeclaration();
@@ -157,12 +205,13 @@ public class EventHeaderDeclarationTest {
         variantV.addField("compact", compact);
         large = new StructDeclaration(8);
         large.addField("id", IntegerDeclaration.UINT_32B_DECL);
-        large.addField("timestamp1", IntegerDeclaration.UINT_64B_DECL);
+        large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
         variantV.addField("extended", large);
+        variantV.addField("other", new StringDeclaration());
         base.addField("v", variantV);
-        declarations.add(base);
+        fDeclarations.add(base);
 
-        // bad
+        // bad - extended timestamp is a string
         base = new StructDeclaration(8);
         base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
         variantV = new VariantDeclaration();
@@ -174,9 +223,9 @@ public class EventHeaderDeclarationTest {
         large.addField("timestamp", new StringDeclaration());
         variantV.addField("extended", large);
         base.addField("v", variantV);
-        declarations.add(base);
+        fDeclarations.add(base);
 
-        // bad
+        // bad - a third variant element which is a compact field (compact)
         base = new StructDeclaration(8);
         base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
         variantV = new VariantDeclaration();
@@ -189,11 +238,11 @@ public class EventHeaderDeclarationTest {
         large.addField("timestamp", new StringDeclaration());
         variantV.addField("extended", large);
         base.addField("v", variantV);
-        declarations.add(base);
+        fDeclarations.add(base);
 
-        // bad
+        // bad - a third variant element which is a compact field (large)
         base = new StructDeclaration(8);
-        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_16B_DECL));
+        base.addField("id", idEnumDeclaration);
         variantV = new VariantDeclaration();
         compact = new StructDeclaration(8);
         compact.addField("timestamp", IntegerDeclaration.UINT_27B_DECL);
@@ -204,22 +253,93 @@ public class EventHeaderDeclarationTest {
         large.addField("timestamp", new StringDeclaration());
         variantV.addField("extended", large);
         base.addField("v", variantV);
-        declarations.add(base);
-        // bad
+        fDeclarations.add(base);
+
+        // bad - id and v are floats!
         base = new StructDeclaration(8);
         base.addField("id", new FloatDeclaration(8, 8, ByteOrder.BIG_ENDIAN, 8));
         base.addField("v", new FloatDeclaration(8, 8, ByteOrder.BIG_ENDIAN, 8));
-        declarations.add(base);
-        // bad
+        fDeclarations.add(base);
+
+        // bad - id and timestamp are int32s, this works but should not be
+        // accelerated
         base = new StructDeclaration(8);
         base.addField("id", IntegerDeclaration.INT_32B_DECL);
         base.addField("timestamp", IntegerDeclaration.INT_32B_DECL);
-        declarations.add(base);
-        // bad
+        fDeclarations.add(base);
+
+        // bad - id is a byte and timestamp is an int32, this works but should
+        // not be accelerated
         base = new StructDeclaration(8);
         base.addField("id", new EnumDeclaration(IntegerDeclaration.INT_8_DECL));
         base.addField("timestamp", IntegerDeclaration.INT_32B_DECL);
-        declarations.add(base);
+        fDeclarations.add(base);
+
+        // bad - Compact is a String
+        base = new StructDeclaration(8);
+        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
+        variantV = new VariantDeclaration();
+        compact = new StructDeclaration(8);
+        variantV.addField("compact", new StringDeclaration());
+        large = new StructDeclaration(8);
+        large.addField("id", IntegerDeclaration.UINT_32B_DECL);
+        large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
+        variantV.addField("extended", large);
+        base.addField("v", variantV);
+        fDeclarations.add(base);
+
+        // bad - extended is a String
+        base = new StructDeclaration(8);
+        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
+        variantV = new VariantDeclaration();
+        compact = new StructDeclaration(8);
+        variantV.addField("compact", compact);
+        large = new StructDeclaration(8);
+        large.addField("id", IntegerDeclaration.UINT_32B_DECL);
+        large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
+        variantV.addField("extended", new StringDeclaration());
+        base.addField("v", variantV);
+        fDeclarations.add(base);
+
+        // bad - empty compact field
+        base = new StructDeclaration(8);
+        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
+        variantV = new VariantDeclaration();
+        compact = new StructDeclaration(8);
+        variantV.addField("compact", compact);
+        large = new StructDeclaration(8);
+        large.addField("id", IntegerDeclaration.UINT_32B_DECL);
+        large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
+        variantV.addField("extended", large);
+        base.addField("v", variantV);
+        fDeclarations.add(base);
+
+        // bad - 3 fields and compact is empty
+        base = new StructDeclaration(8);
+        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
+        variantV = new VariantDeclaration();
+        compact = new StructDeclaration(8);
+        variantV.addField("compact", compact);
+        large = new StructDeclaration(8);
+        large.addField("id", IntegerDeclaration.UINT_32B_DECL);
+        large.addField("timestamp", IntegerDeclaration.UINT_64B_DECL);
+        large.addField("other", IntegerDeclaration.UINT_64B_DECL);
+        variantV.addField("extended", large);
+        base.addField("v", variantV);
+        fDeclarations.add(base);
+
+        // bad - empty compact and large timestamp is an int32
+        base = new StructDeclaration(8);
+        base.addField("id", new EnumDeclaration(IntegerDeclaration.UINT_5B_DECL));
+        variantV = new VariantDeclaration();
+        compact = new StructDeclaration(8);
+        variantV.addField("compact", compact);
+        large = new StructDeclaration(8);
+        large.addField("id", IntegerDeclaration.UINT_32B_DECL);
+        large.addField("timestamp", IntegerDeclaration.UINT_32B_DECL);
+        variantV.addField("extended", large);
+        base.addField("v", variantV);
+        fDeclarations.add(base);
     }
 
     /**
@@ -227,7 +347,7 @@ public class EventHeaderDeclarationTest {
      */
     @Test
     public void validateCompact() {
-        assertEquals(true, EventHeaderCompactDeclaration.isCompactEventHeader(declarations.get(VALID_COMPACT)));
+        assertEquals(true, new EventHeaderCompactDeclaration(ByteOrder.BIG_ENDIAN).isCompactEventHeader(fDeclarations.get(VALID_COMPACT)));
     }
 
     /**
@@ -235,11 +355,11 @@ public class EventHeaderDeclarationTest {
      */
     @Test
     public void validateCompactFail() {
-        for (int i = 0; i < declarations.size(); i++) {
+        for (int i = 0; i < fDeclarations.size(); i++) {
             if (i == VALID_COMPACT) {
                 continue;
             }
-            assertEquals(false, EventHeaderCompactDeclaration.isCompactEventHeader(declarations.get(i)));
+            assertEquals(false, new EventHeaderCompactDeclaration(ByteOrder.BIG_ENDIAN).isCompactEventHeader(fDeclarations.get(i)));
         }
     }
 
@@ -248,7 +368,7 @@ public class EventHeaderDeclarationTest {
      */
     @Test
     public void validateLarge() {
-        assertEquals(true, EventHeaderLargeDeclaration.isLargeEventHeader(declarations.get(VALID_LARGE)));
+        assertEquals(true, new EventHeaderLargeDeclaration(ByteOrder.BIG_ENDIAN).isLargeEventHeader(fDeclarations.get(VALID_LARGE)));
     }
 
     /**
@@ -256,11 +376,11 @@ public class EventHeaderDeclarationTest {
      */
     @Test
     public void validateLargeFail() {
-        for (int i = 0; i < declarations.size(); i++) {
+        for (int i = 0; i < fDeclarations.size(); i++) {
             if (i == VALID_LARGE) {
                 continue;
             }
-            assertEquals(false, EventHeaderLargeDeclaration.isLargeEventHeader(declarations.get(i)));
+            assertEquals(false, new EventHeaderLargeDeclaration(ByteOrder.BIG_ENDIAN).isLargeEventHeader(fDeclarations.get(i)));
         }
     }
 
