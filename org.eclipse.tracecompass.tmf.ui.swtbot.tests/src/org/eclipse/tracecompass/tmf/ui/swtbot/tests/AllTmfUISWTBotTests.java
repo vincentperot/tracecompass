@@ -25,6 +25,7 @@ import org.junit.runners.Suite;
         TestCustomTxtWizard.class,
         TestCustomXmlWizard.class,
         TracingPerspectiveChecker.class,
+        TracingPerspectiveChecker.class,
         org.eclipse.tracecompass.tmf.ui.swtbot.tests.table.AllTests.class
 })
 public class AllTmfUISWTBotTests {
