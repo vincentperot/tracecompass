@@ -4,7 +4,7 @@
 <product name="Trace Compass" uid="org.eclipse.tracecompass.rcp" id="org.eclipse.tracecompass.rcp.branding.product" application="org.eclipse.tracecompass.rcp.ui.application" version="0.1.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
-      <image path="/org.eclipse.tracecompass.tracing.rcp.branding/icons/alt_about.gif"/>
+      <image path="/org.eclipse.tracecompass.rcp.branding/icons/alt_about.gif"/>
       <text>
          Trace Compass
 
@@ -39,7 +39,11 @@ http://www.eclipse.org/legal/epl-v10.html
 
    <windowImages i16="/org.eclipse.tracecompass.rcp.branding/icons/alt_window_16.gif" i32="/org.eclipse.tracecompass.rcp.branding/icons/alt_window_32.gif"/>
 
-
+   <splash
+      location="org.eclipse.tracecompass.rcp.branding"
+      startupProgressRect="10,300,480,15"
+      startupMessageRect="7,285,490,0"
+      startupForegroundColor="FFFFFF" />
    <launcher name="tracecompass">
       <solaris/>
       <win useIco="false">
