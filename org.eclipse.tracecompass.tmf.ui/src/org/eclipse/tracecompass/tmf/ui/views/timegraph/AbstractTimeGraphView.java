@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,6 +34,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -40,11 +42,13 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTimeSynchSignal;
@@ -73,8 +77,12 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.ITimeGraphFilterListener;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeFormat;
 import org.eclipse.ui.IActionBars;
+
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
 /**
  * An abstract view all time graph views can inherit
@@ -159,6 +167,8 @@ public abstract class AbstractTimeGraphView extends TmfView {
 
     /** The filter label provider, or null if filter is not used */
     private TreeLabelProvider fFilterLabelProvider;
+
+    private TimeGraphFilterProvider fItemFilterProvider = new TimeGraphFilterProvider();
 
     // ------------------------------------------------------------------------
     // Classes
@@ -258,6 +268,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
 
         private TimeGraphComboWrapper(Composite parent, int style) {
             combo = new TimeGraphCombo(parent, style, fWeight);
+            combo.addFilterListener(new TimeGraphViewFilterListener());
         }
 
         @Override
@@ -385,6 +396,66 @@ public abstract class AbstractTimeGraphView extends TmfView {
 
     }
 
+    private class TimeGraphViewFilterListener implements ITimeGraphFilterListener {
+
+        @Override
+        public void filterChanged(List<Object> fFilteredObjects) {
+            fItemFilterProvider.saveTraceFilterItems(fFilteredObjects);
+        }
+    }
+
+    private class TimeGraphFilterProvider extends ViewerFilter {
+
+        Map<Long, String> fFilterOutList = null;
+
+        @Override
+        public boolean select(Viewer viewer, Object parentElement, Object element) {
+            if ((fFilterOutList != null) && (element instanceof ITimeGraphEntry)) {
+                ITimeGraphEntry entry = (ITimeGraphEntry) element;
+                if (fFilterOutList.containsKey(entry.getStartTime())) {
+                    return !entry.getName().equals(fFilterOutList.get(entry.getStartTime()));
+                }
+            }
+            return true;
+        }
+
+        private void saveTraceFilterItems(List<Object> filters) {
+            IDialogSettings settings = getPerObjectDialogSetting();
+            Map<Long, String> filterOutList = new HashMap<>();
+            if (filters == null) {
+                settings.put("Filter", "");
+                return;
+            }
+            for (Object o: filters) {
+                if (o instanceof ITimeGraphEntry) {
+                    ITimeGraphEntry entry = (ITimeGraphEntry) o;
+                    filterOutList.put(entry.getStartTime(), entry.getName());
+                }
+            }
+            String filterOut = Joiner.on(" ; ").withKeyValueSeparator(",").join(filterOutList);
+            settings.put("Filter", filterOut);
+        }
+
+        private void loadTraceFilterItems() {
+            fFilterOutList = null;
+            IDialogSettings settings = getPerObjectDialogSetting();
+            String filterOut = settings.get("Filter");
+            if (filterOut == null) {
+                return;
+            }
+            if (filterOut.isEmpty()) {
+                return;
+            }
+            Map<String, String> filterOutList = Splitter.on(" ; ").withKeyValueSeparator(",").split(filterOut);
+            fFilterOutList = new HashMap<>();
+            for (Entry<String, String> entry : filterOutList.entrySet()) {
+                fFilterOutList.put(Long.parseLong(entry.getKey()), entry.getValue());
+            }
+        }
+
+
+    }
+
     /**
      * Base class to provide the labels for the tree viewer. Views extending
      * this class typically need to override the getColumnText method if they
@@ -457,6 +528,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
         @Override
         public void run() {
             buildEventList(fBuildTrace, fParentTrace, fMonitor);
+            fItemFilterProvider.loadTraceFilterItems();
             synchronized (fBuildThreadMap) {
                 fBuildThreadMap.remove(fBuildTrace);
             }
@@ -820,6 +892,22 @@ public abstract class AbstractTimeGraphView extends TmfView {
         return Messages.AbstractTimeGraphView_PreviousTooltip;
     }
 
+    private IDialogSettings getPerObjectDialogSetting() {
+        ITmfTrace trace = this.getTrace();
+        if (trace == null) {
+            return null;
+        }
+        if (trace.getResource() == null) {
+            return null;
+        }
+        IDialogSettings settings = Activator.getDefault().getDialogSettings();
+        IDialogSettings section = settings.getSection(getClass().getName() + '_' + trace.getResource().getName());
+        if (section == null) {
+            section = settings.addNewSection(getClass().getName() + '_' + trace.getResource().getName());
+        }
+        return section;
+    }
+
     // ------------------------------------------------------------------------
     // ViewPart
     // ------------------------------------------------------------------------
@@ -841,6 +929,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
             combo.setFilterLabelProvider(fFilterLabelProvider);
             combo.setFilterColumns(fFilterColumns);
             combo.setTimeGraphContentProvider(new TimeGraphContentProvider());
+            combo.addFilter(fItemFilterProvider);
         }
 
         fTimeGraphWrapper.setTimeGraphProvider(fPresentation);
@@ -1035,6 +1124,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
             } else {
                 fStartTime = fTrace.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
                 fEndTime = fTrace.getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+                fItemFilterProvider.loadTraceFilterItems();
                 refresh();
             }
         }

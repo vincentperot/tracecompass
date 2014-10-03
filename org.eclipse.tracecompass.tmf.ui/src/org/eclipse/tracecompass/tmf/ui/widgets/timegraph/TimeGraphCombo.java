@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -65,6 +66,7 @@ import org.eclipse.tracecompass.internal.tmf.ui.Messages;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.dialogs.TimeGraphFilterDialog;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.ITimeGraphFilterListener;
 
 /**
  * Time graph "combo" view (with the list/tree on the left and the gantt chart
@@ -122,7 +124,7 @@ public class TimeGraphCombo extends Composite {
     private TimeGraphFilterDialog fFilterDialog;
 
     /** The filter generated from the filter dialog */
-    private RawViewerFilter fFilter;
+    private @NonNull RawViewerFilter fFilter;
 
     /** Default weight of each part of the sash */
     private static final int[] DEFAULT_WEIGHTS = { 1, 1 };
@@ -314,9 +316,16 @@ public class TimeGraphCombo extends Composite {
     private class RawViewerFilter extends ViewerFilter {
 
         private List<Object> fFiltered = null;
+        private Set<ITimeGraphFilterListener> fListeners = new HashSet<>();
 
-        public void setFiltered(List<Object> objects) {
+        public void setFiltered(List<Object> objects, boolean notify) {
             fFiltered = objects;
+            /* Save the filter for this trace */
+            if (notify) {
+                for (ITimeGraphFilterListener listener : fListeners) {
+                    listener.filterChanged(objects);
+                }
+            }
         }
 
         public List<Object> getFiltered() {
@@ -329,6 +338,14 @@ public class TimeGraphCombo extends Composite {
                 return true;
             }
             return !fFiltered.contains(element);
+        }
+
+        public void addListener(ITimeGraphFilterListener listener) {
+            fListeners.add(listener);
+        }
+
+        public void removeListener(ITimeGraphFilterListener listener) {
+            fListeners.remove(listener);
         }
     }
 
@@ -672,9 +689,9 @@ public class TimeGraphCombo extends Composite {
                 if (fFilterDialog.getResult().length != allElements.size()) {
                     ArrayList<Object> filteredElements = new ArrayList<Object>(allElements);
                     filteredElements.removeAll(Arrays.asList(fFilterDialog.getResult()));
-                    fFilter.setFiltered(filteredElements);
+                    fFilter.setFiltered(filteredElements, true);
                 } else {
-                    fFilter.setFiltered(null);
+                    fFilter.setFiltered(null, true);
                 }
                 fTreeViewer.refresh();
                 fTreeViewer.expandAll();
@@ -818,7 +835,7 @@ public class TimeGraphCombo extends Composite {
      * @since 3.0
      */
     public void setInput(Object input) {
-        fFilter.setFiltered(null);
+        fFilter.setFiltered(null, false);
         fInhibitTreeSelection = true;
         fTreeViewer.setInput(input);
         for (SelectionListenerWrapper listenerWrapper : fSelectionListenerMap.values()) {
@@ -882,6 +899,26 @@ public class TimeGraphCombo extends Composite {
         fTimeGraphViewer.removeFilter(wrapper);
         fViewerFilterMap.remove(filter);
         alignTreeItems(true);
+    }
+
+    /**
+     * Adds a listener for the filter changes in this time graph combo
+     *
+     * @param listener a filter listener
+     * @since 3.2
+     */
+    public void addFilterListener(ITimeGraphFilterListener listener) {
+        fFilter.addListener(listener);
+    }
+
+    /**
+     * Removes the given filter listener from this time graph combo
+     *
+     * @param listener a filter listener
+     * @since 3.2
+     */
+    public void removeFilterListener(ITimeGraphFilterListener listener) {
+        fFilter.removeListener(listener);
     }
 
     /**
