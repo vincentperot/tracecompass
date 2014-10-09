@@ -55,7 +55,7 @@ public class KernelStateProvider extends AbstractTmfStateProvider {
      * Version number of this state provider. Please bump this if you modify the
      * contents of the generated state history in some way.
      */
-    private static final int VERSION = 7;
+    private static final int VERSION = 8;
 
     private static final int IRQ_HANDLER_ENTRY_INDEX = 1;
     private static final int IRQ_HANDLER_EXIT_INDEX = 2;
@@ -289,9 +289,15 @@ public class KernelStateProvider extends AbstractTmfStateProvider {
                 Integer formerThreadNode = ss.getQuarkRelativeAndAdd(getNodeThreads(ss), prevTid.toString());
                 Integer newCurrentThreadNode = ss.getQuarkRelativeAndAdd(getNodeThreads(ss), nextTid.toString());
 
+                /*
+                 * Empirical observations have shown that if the TASK_STATE_MAX
+                 * flag is active, the process is not really "blocked".
+                 */
+                prevState = prevState & ~(LinuxValues.TASK_STATE_MAX);
+
                 /* Set the status of the process that got scheduled out. */
                 quark = ss.getQuarkRelativeAndAdd(formerThreadNode, Attributes.STATUS);
-                if (prevState != 0) {
+                if (prevState != LinuxValues.TASK_STATE_RUNNING) {
                     value = StateValues.PROCESS_STATUS_WAIT_BLOCKED_VALUE;
                 } else {
                     value = StateValues.PROCESS_STATUS_WAIT_FOR_CPU_VALUE;
