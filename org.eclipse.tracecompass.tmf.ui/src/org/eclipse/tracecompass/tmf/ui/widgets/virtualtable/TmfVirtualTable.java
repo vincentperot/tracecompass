@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 Ericsson
+ * Copyright (c) 2010, 2014 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -91,7 +91,7 @@ public class TmfVirtualTable extends Composite {
     private IDoubleClickListener doubleClickListener = null;
 
     private boolean fResetTopIndex = false;      // Flag to trigger reset of top index
-    private ControlAdapter fResizeListener;      // Resize listener to update visible rows
+    private ControlAdapter fControlListener;     // Control listener to update visible rows
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -159,17 +159,35 @@ public class TmfVirtualTable extends Composite {
             }
         });
 
-        fResizeListener = new ControlAdapter() {
+        fControlListener = new ControlAdapter() {
             @Override
             public void controlResized(ControlEvent event) {
+                /*
+                 * In Linux the table does not receive a control resized event
+                 * when a table column resize causes the horizontal scroll bar
+                 * to become visible or invisible, so a resize listener must be
+                 * added to every table column to properly update the number of
+                 * fully visible rows.
+                 */
                 int tableHeight = Math.max(0, fTable.getClientArea().height - fTable.getHeaderHeight());
                 fFullyVisibleRows = tableHeight / getItemHeight();
                 if (fTableItemCount > 0) {
                     fSlider.setThumb(Math.max(1, Math.min(fTableRows, fFullyVisibleRows)));
                 }
             }
+
+            @Override
+            public void controlMoved(ControlEvent e) {
+                /*
+                 * Work around a display glitch (probably a GTK glitch) where
+                 * the moved column's header becomes invisible and unselectable
+                 * until you focus on another one.
+                 */
+                fTable.setHeaderVisible(false);
+                fTable.setHeaderVisible(true);
+            }
         };
-        fTable.addControlListener(fResizeListener);
+        fTable.addControlListener(fControlListener);
 
         // Implement a "fake" tooltip
         final String TOOLTIP_DATA_KEY = "_TABLEITEM"; //$NON-NLS-1$
@@ -631,14 +649,7 @@ public class TmfVirtualTable extends Composite {
      */
     public TableColumn newTableColumn(int style) {
         TableColumn column = new TableColumn(fTable, style);
-
-        /*
-         * In Linux the table does not receive a control resized event when
-         * a table column resize causes the horizontal scroll bar to become
-         * visible or invisible, so a resize listener must be added to every
-         * table column to properly update the number of fully visible rows.
-         */
-        column.addControlListener(fResizeListener);
+        column.addControlListener(fControlListener);
 
         return column;
     }
@@ -848,6 +859,33 @@ public class TmfVirtualTable extends Composite {
      */
     public TableColumn[] getColumns() {
         return fTable.getColumns();
+    }
+
+    /**
+     * Returns an array of zero-relative integers that map
+     * the creation order of the receiver's items to the
+     * order in which they are currently being displayed.
+     * <p>
+     * Specifically, the indices of the returned array represent
+     * the current visual order of the items, and the contents
+     * of the array represent the creation order of the items.
+     *
+     * @return the current visual order of the receiver's items
+     */
+    public int[] getColumnOrder() {
+        return fTable.getColumnOrder();
+    }
+
+    /**
+     * Sets the order that the items in the receiver should
+     * be displayed in to the given argument which is described
+     * in terms of the zero-relative ordering of when the items
+     * were added.
+     *
+     * @param order the new order to display the items
+     */
+    public void setColumnOrder(int[] order) {
+        fTable.setColumnOrder(order);
     }
 
     /**
