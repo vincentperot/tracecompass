@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.tmf.core.component;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.tmf.core.TmfCoreTracer;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
@@ -31,7 +32,7 @@ public abstract class TmfComponent implements ITmfComponent {
     // Attributes
     // ------------------------------------------------------------------------
 
-    private String fName;
+    private @NonNull String fName = ""; //$NON-NLS-1$
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -52,8 +53,12 @@ public abstract class TmfComponent implements ITmfComponent {
      *            the component name
      */
     public void init(String name) {
+        String cmpName = name;
+        if (cmpName == null) {
+            cmpName = ""; //$NON-NLS-1$
+        }
         TmfCoreTracer.traceComponent(this, "created"); //$NON-NLS-1$
-        fName = name;
+        fName = cmpName;
         TmfSignalManager.register(this);
     }
 
@@ -82,7 +87,7 @@ public abstract class TmfComponent implements ITmfComponent {
     // ------------------------------------------------------------------------
 
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return fName;
     }
 
@@ -91,7 +96,11 @@ public abstract class TmfComponent implements ITmfComponent {
      *            the new component name
      */
     protected void setName(String name) {
-        fName = name;
+        String cmpName = name;
+        if (cmpName == null) {
+            cmpName = ""; //$NON-NLS-1$
+        }
+        fName = cmpName;
     }
 
     // ------------------------------------------------------------------------
