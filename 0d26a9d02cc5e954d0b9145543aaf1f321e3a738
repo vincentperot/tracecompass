@@ -1,0 +1,8 @@
+Verified+1: Hudson CI
+Code-Review+2: Alexandre Montplaisir <alexmonthy@voxpopuli.im>
+Code-Review+1: Genevieve Bastien <gbastien+lttng@versatic.net>
+Submitted-by: Alexandre Montplaisir <alexmonthy@voxpopuli.im>
+Submitted-at: Mon, 27 Oct 2014 22:32:11 -0400
+Reviewed-on: https://git.eclipse.org/r/35503
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
