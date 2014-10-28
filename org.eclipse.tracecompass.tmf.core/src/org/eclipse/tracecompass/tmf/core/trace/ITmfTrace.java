@@ -16,6 +16,8 @@
 
 package org.eclipse.tracecompass.tmf.core.trace;
 
+import java.util.Collection;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
@@ -254,7 +256,7 @@ public interface ITmfTrace extends ITmfEventProvider {
      * @since 3.0
      */
     @NonNull
-    Iterable<IAnalysisModule> getAnalysisModules();
+    Collection<IAnalysisModule> getAnalysisModules();
 
     /**
      * Get an analysis module belonging to this trace, with the specified ID and
@@ -281,7 +283,7 @@ public interface ITmfTrace extends ITmfEventProvider {
      * @since 3.0
      */
     @NonNull
-    <T> Iterable<T> getAnalysisModulesOfClass(Class<T> moduleClass);
+    <T> Collection<T> getAnalysisModulesOfClass(Class<T> moduleClass);
 
     // ------------------------------------------------------------------------
     // Trace characteristics getters

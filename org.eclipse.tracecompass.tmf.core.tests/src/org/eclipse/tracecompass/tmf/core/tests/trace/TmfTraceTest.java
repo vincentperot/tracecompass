@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -441,16 +442,16 @@ public class TmfTraceTest {
     @Test
     public void testGetModulesByClass() {
         /* There should not be any modules at this point */
-        Iterable<IAnalysisModule> modules = fTrace.getAnalysisModules();
-        assertFalse(modules.iterator().hasNext());
+        Collection<IAnalysisModule> modules = fTrace.getAnalysisModules();
+        assertFalse(modules.size() == 0);
 
         /* Open the trace, the modules should be populated */
         fTrace.traceOpened(new TmfTraceOpenedSignal(this, fTrace, null));
 
         modules = fTrace.getAnalysisModules();
-        Iterable<TestAnalysis> testModules = fTrace.getAnalysisModulesOfClass(TestAnalysis.class);
-        assertTrue(modules.iterator().hasNext());
-        assertTrue(testModules.iterator().hasNext());
+        Collection<TestAnalysis> testModules = fTrace.getAnalysisModulesOfClass(TestAnalysis.class);
+        assertTrue(modules.size() > 0);
+        assertTrue(testModules.size() > 0);
 
         /*
          * Make sure all modules of type TestAnalysis are returned in the second

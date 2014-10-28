@@ -17,6 +17,7 @@
 package org.eclipse.tracecompass.tmf.core.trace;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -307,7 +308,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @since 3.0
      */
     @Override
-    public Iterable<IAnalysisModule> getAnalysisModules() {
+    public Collection<IAnalysisModule> getAnalysisModules() {
         synchronized (fAnalysisModules) {
             Set<IAnalysisModule> modules = new HashSet<>(fAnalysisModules.values());
             return modules;
@@ -319,8 +320,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      */
     @Override
     public <T extends IAnalysisModule> T getAnalysisModuleOfClass(Class<T> moduleClass, String id) {
-        Iterable<T> modules = getAnalysisModulesOfClass(moduleClass);
-        for (T module : modules) {
+        for (T module : getAnalysisModulesOfClass(moduleClass)) {
             if (id.equals(module.getId())) {
                 return module;
             }
@@ -332,7 +332,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @since 3.0
      */
     @Override
-    public <T> Iterable<T> getAnalysisModulesOfClass(Class<T> moduleClass) {
+    public <T> Collection<T> getAnalysisModulesOfClass(Class<T> moduleClass) {
         Set<T> modules = new HashSet<>();
         synchronized (fAnalysisModules) {
             for (Entry<String, IAnalysisModule> entry : fAnalysisModules.entrySet()) {

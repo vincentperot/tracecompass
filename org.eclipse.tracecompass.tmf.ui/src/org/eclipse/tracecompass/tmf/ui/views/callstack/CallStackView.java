@@ -16,10 +16,10 @@ package org.eclipse.tracecompass.tmf.ui.views.callstack;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -1318,10 +1318,9 @@ public class CallStackView extends TmfView {
          * Since we cannot know the exact analysis ID (in separate plugins), we
          * will search using the analysis type.
          */
-        Iterable<AbstractCallStackAnalysis> modules =
+        Collection<AbstractCallStackAnalysis> modules =
                 trace.getAnalysisModulesOfClass(AbstractCallStackAnalysis.class);
-        Iterator<AbstractCallStackAnalysis> it = modules.iterator();
-        if (!it.hasNext()) {
+        if (modules.size() == 0) {
             /* This trace does not provide a call-stack analysis */
             return null;
         }
@@ -1332,7 +1331,7 @@ public class CallStackView extends TmfView {
          * TODO Handle the advanced case where one trace provides more than one
          * call-stack analysis.
          */
-        AbstractCallStackAnalysis module = it.next();
+        AbstractCallStackAnalysis module = modules.iterator().next();
         /* This analysis is not automatic, we need to schedule it on-demand */
         module.schedule();
         module.waitForInitialization();

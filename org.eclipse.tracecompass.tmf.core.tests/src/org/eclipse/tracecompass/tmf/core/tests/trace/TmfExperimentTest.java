@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.FileLocator;
@@ -194,15 +195,15 @@ public class TmfExperimentTest {
     @Test
     public void testGetAnalysisModules() {
         /* There should not be any modules at this point */
-        Iterable<IAnalysisModule> modules = fExperiment.getAnalysisModules();
-        assertFalse(modules.iterator().hasNext());
+        Collection<IAnalysisModule> modules = fExperiment.getAnalysisModules();
+        assertTrue(modules.size() == 0);
 
         /* Open the experiment, the modules should be populated */
         fExperiment.traceOpened(new TmfTraceOpenedSignal(this, fExperiment, null));
         modules = fExperiment.getAnalysisModules();
-        Iterable<TestExperimentAnalysis> testModules = fExperiment.getAnalysisModulesOfClass(TestExperimentAnalysis.class);
-        assertTrue(modules.iterator().hasNext());
-        assertTrue(testModules.iterator().hasNext());
+        Collection<TestExperimentAnalysis> testModules = fExperiment.getAnalysisModulesOfClass(TestExperimentAnalysis.class);
+        assertTrue(modules.size() > 0);
+        assertTrue(testModules.size() > 0);
     }
 
     // ------------------------------------------------------------------------

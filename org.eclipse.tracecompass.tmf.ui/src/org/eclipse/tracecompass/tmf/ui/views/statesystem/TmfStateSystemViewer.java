@@ -206,8 +206,7 @@ public class TmfStateSystemViewer extends AbstractTmfTreeViewer {
 
     private static TmfTreeViewerEntry createTraceEntry(ITmfTrace trace) {
         TmfTreeViewerEntry traceEntry = new TmfTreeViewerEntry(trace.getName());
-        Iterable<ITmfAnalysisModuleWithStateSystems> modules = trace.getAnalysisModulesOfClass(ITmfAnalysisModuleWithStateSystems.class);
-        for (ITmfAnalysisModuleWithStateSystems module : modules) {
+        for (ITmfAnalysisModuleWithStateSystems module : trace.getAnalysisModulesOfClass(ITmfAnalysisModuleWithStateSystems.class)) {
             /* Just schedule the module, the data will be filled when available */
             module.schedule();
             if (module instanceof TmfStateSystemAnalysisModule) {
