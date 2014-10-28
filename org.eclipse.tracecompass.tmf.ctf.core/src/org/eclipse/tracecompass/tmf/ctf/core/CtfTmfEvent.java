@@ -154,9 +154,7 @@ public class CtfTmfEvent extends TmfEvent
 
         /* Register the event type in the owning trace, but only if there is one */
         CtfTmfTrace trace = getTrace();
-        if (trace != null) {
-            trace.registerEventType(ctfTmfEventType);
-        }
+        trace.registerEventType(ctfTmfEventType);
 
         return ctfTmfEventType;
     }
@@ -193,9 +191,6 @@ public class CtfTmfEvent extends TmfEvent
     public CtfTmfCallsite getCallsite() {
         CTFCallsite callsite = null;
         CtfTmfTrace trace = getTrace();
-        if (trace == null) {
-            return null;
-        }
         CTFTrace ctfTrace = trace.getCTFTrace();
         /* Should not happen, but it is a good check */
         if (ctfTrace == null) {
