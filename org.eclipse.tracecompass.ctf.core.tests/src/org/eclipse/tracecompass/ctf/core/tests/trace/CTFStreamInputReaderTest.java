@@ -79,21 +79,23 @@ public class CTFStreamInputReaderTest {
 
     private static CTFStreamInputReader getStreamInputReader() throws CTFReaderException {
         assumeTrue(testTrace.exists());
-        CTFTrace trace = testTrace.getTrace();
-        CTFStream s = trace.getStream((long) 0);
-        Set<CTFStreamInput> streamInput = s.getStreamInputs();
-        CTFStreamInputReader retVal = null;
-        for (CTFStreamInput si : streamInput) {
-            /*
-             * For the tests, we'll use the stream input corresponding to the
-             * CPU 0
-             */
-            if (si.getFilename().endsWith("0_0")) {
-                retVal = new CTFStreamInputReader(si);
-                break;
+
+        try (CTFTrace trace = testTrace.getTrace();) {
+            CTFStream s = trace.getStream((long) 0);
+            Set<CTFStreamInput> streamInput = s.getStreamInputs();
+            CTFStreamInputReader retVal = null;
+            for (CTFStreamInput si : streamInput) {
+                /*
+                 * For the tests, we'll use the stream input corresponding to
+                 * the CPU 0
+                 */
+                if (si.getFilename().endsWith("0_0")) {
+                    retVal = new CTFStreamInputReader(si);
+                    break;
+                }
             }
+            return retVal;
         }
-        return retVal;
     }
 
     /**
