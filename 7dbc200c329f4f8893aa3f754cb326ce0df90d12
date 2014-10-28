@@ -1,0 +1,8 @@
+Verified+1: Hudson CI
+Code-Review+2: Patrick Tasse <patrick.tasse@gmail.com>
+Code-Review+1: Genevieve Bastien <gbastien+lttng@versatic.net>
+Submitted-by: Patrick Tasse <patrick.tasse@gmail.com>
+Submitted-at: Tue, 28 Oct 2014 10:54:28 -0400
+Reviewed-on: https://git.eclipse.org/r/35556
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
