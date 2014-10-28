@@ -27,12 +27,8 @@ import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfTraceIndexer;
 @SuppressWarnings("javadoc")
 public class TmfExperimentStub extends TmfExperiment {
 
-    public TmfExperimentStub() {
-        super();
-    }
-
     public TmfExperimentStub(String name, ITmfTrace[] traces, int blockSize) {
-        super(ITmfEvent.class, name, traces, blockSize);
+        super(ITmfEvent.class, name, traces, blockSize, null);
     }
 
     @Override
