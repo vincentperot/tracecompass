@@ -38,6 +38,7 @@ public class TmfEventParserStub implements ITmfEventParser {
     // Attributes
     // ------------------------------------------------------------------------
 
+    private static final String TYPE_PREFIX = "Type-";
     private static final int NB_TYPES = 10;
     private final TmfEventType[] fTypes;
     private final ITmfTrace fEventStream;
@@ -65,7 +66,6 @@ public class TmfEventParserStub implements ITmfEventParser {
     // Operators
     // ------------------------------------------------------------------------
 
-    static final String typePrefix = "Type-";
     @Override
     public ITmfEvent parseEvent(final ITmfContext context) {
 
@@ -73,28 +73,23 @@ public class TmfEventParserStub implements ITmfEventParser {
             return null;
         }
 
-        // Highly inefficient...
-        final RandomAccessFile stream = ((TmfTraceStub) fEventStream).getStream();
-        if (stream == null) {
-            return null;
-        }
-
-        //           String name = eventStream.getName();
-        //           name = name.substring(name.lastIndexOf('/') + 1);
-
         // no need to use synchronized since it's already cover by the calling method
 
         long location = 0;
         if (context != null && context.getLocation() != null) {
             location = (Long) context.getLocation().getLocationInfo();
-            try {
+            try (final RandomAccessFile stream = ((TmfTraceStub) fEventStream).getStream();) {
+                if (stream == null) {
+                    return null;
+                }
+
                 stream.seek(location);
 
                 final long ts        = stream.readLong();
                 final String source  = stream.readUTF();
                 final String type    = stream.readUTF();
                 final int reference  = stream.readInt();
-                final int typeIndex  = Integer.parseInt(type.substring(typePrefix.length()));
+                final int typeIndex  = Integer.parseInt(type.substring(TYPE_PREFIX.length()));
                 final String[] fields = new String[typeIndex];
                 for (int i = 0; i < typeIndex; i++) {
                     fields[i] = stream.readUTF();

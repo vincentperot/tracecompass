@@ -61,18 +61,12 @@ public class TmfUml2SDTestTrace implements ITmfEventParser {
             return null;
         }
 
-        // Highly inefficient...
-        RandomAccessFile stream = ((TmfTraceStub) fEventStream).getStream();
-
-//        String name = eventStream.getName();
-//        name = name.substring(name.lastIndexOf('/') + 1);
-
         long location = 0;
         if (context != null) {
             location = (Long) context.getLocation().getLocationInfo();
         }
 
-        try {
+        try (RandomAccessFile stream = ((TmfTraceStub) fEventStream).getStream();) {
             stream.seek(location);
 
             long ts        = stream.readLong();
