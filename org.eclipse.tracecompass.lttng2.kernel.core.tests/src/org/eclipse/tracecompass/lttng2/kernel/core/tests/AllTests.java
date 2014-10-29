@@ -22,8 +22,9 @@ import org.junit.runner.RunWith;
 @DebugSuite.SuiteClasses({
     ActivatorTest.class,
     org.eclipse.tracecompass.lttng2.kernel.core.tests.analysis.AllTests.class,
-    org.eclipse.tracecompass.lttng2.kernel.core.tests.stateprovider.TestAll.class,
-    org.eclipse.tracecompass.lttng2.kernel.core.tests.event.matchandsync.AllTests.class
+    org.eclipse.tracecompass.lttng2.kernel.core.tests.cpuusage.AllTests.class,
+    org.eclipse.tracecompass.lttng2.kernel.core.tests.event.matchandsync.AllTests.class,
+    org.eclipse.tracecompass.lttng2.kernel.core.tests.stateprovider.TestAll.class
 })
 public class AllTests {
 
