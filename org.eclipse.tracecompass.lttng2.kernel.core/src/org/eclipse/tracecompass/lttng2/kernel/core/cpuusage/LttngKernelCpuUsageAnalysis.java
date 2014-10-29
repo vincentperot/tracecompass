@@ -66,8 +66,9 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
          * This analysis depends on the LTTng kernel analysis, so we'll start
          * that build at the same time
          */
-        LttngKernelAnalysisModule module = getTrace().getAnalysisModuleOfClass(LttngKernelAnalysisModule.class, LttngKernelAnalysisModule.ID);
-        if (module != null) {
+        Iterable<LttngKernelAnalysisModule> kernelModules = getTrace().getAnalysisModulesOfClass(LttngKernelAnalysisModule.class);
+        if (kernelModules.iterator().hasNext()) {
+            LttngKernelAnalysisModule module = kernelModules.iterator().next();
             module.schedule();
         }
         return super.executeAnalysis(monitor);
@@ -91,7 +92,7 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
         if (trace == null || cpuSs == null) {
             return map;
         }
-        ITmfStateSystem kernelSs = TmfStateSystemAnalysisModule.getStateSystem(trace, LttngKernelAnalysisModule.ID);
+        ITmfStateSystem kernelSs = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(trace, LttngKernelAnalysisModule.class);
         if (kernelSs == null) {
             return map;
         }
@@ -108,6 +109,7 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
         if (endTime < startTime) {
             return map;
         }
+        System.out.println("Getting cpu usage in range from " + start + " to " + end + " Actual start: " + startTime + " end:" + endTime);
 
         try {
             /* Get the list of quarks for each CPU and CPU's TIDs */
@@ -122,6 +124,9 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
             List<ITmfStateInterval> endState = cpuSs.queryFullState(endTime);
             List<ITmfStateInterval> kernelStartState = kernelSs.queryFullState(startTime);
             List<ITmfStateInterval> startState = cpuSs.queryFullState(startTime);
+
+//            System.out.println("End kernel state: " + kernelEndState);
+//            System.out.println("End CPU state: " + endState);
 
             long countAtStart, countAtEnd;
 
@@ -144,12 +149,14 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
 
                     countAtEnd = endState.get(tidNode).getStateValue().unboxLong();
                     countAtStart = startState.get(tidNode).getStateValue().unboxLong();
+                    System.out.println("At beginning: start:" + countAtStart + " end: " + countAtEnd);
                     if (countAtStart == -1) {
                         countAtStart = 0;
                     }
                     if (countAtEnd == -1) {
                         countAtEnd = 0;
                     }
+//                    System.out.println("After first check: start:" + countAtStart + " end: " + countAtEnd);
 
                     /*
                      * Interpolate start and end time of threads running at
@@ -167,6 +174,7 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
 
                         countAtEnd = interpolateCount(countAtEnd, endTime, runningEnd, runningTime);
                     }
+//                    System.out.println("After interpolation: start:" + countAtStart + " end: " + countAtEnd);
                     /*
                      * If startThread is -1, we made the hypothesis that the
                      * process running at start was the current one. If the
@@ -180,6 +188,7 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
                     }
 
                     long currentCount = countAtEnd - countAtStart;
+//                    System.out.println("Current count" + currentCount);
                     if (currentCount < 0) {
                         Activator.getDefault().logWarning(String.format("Negative count: start %d, end %d", countAtStart, countAtEnd)); //$NON-NLS-1$
                         currentCount = 0;
@@ -188,6 +197,7 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
                         currentCount = 0;
                     }
                     cpuTotal += currentCount;
+//                    System.out.println("Putting in map " + curCpuName + SPLIT_STRING + curTidName + ":" + currentCount );
                     map.put(curCpuName + SPLIT_STRING + curTidName, currentCount);
                     addToMap(totalMap, curTidName, currentCount);
                     totalTime += (currentCount);
