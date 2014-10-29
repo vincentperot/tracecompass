@@ -120,19 +120,19 @@
     <module>org.eclipse.tracecompass.tmf.core.tests</module>
     <module>org.eclipse.tracecompass.tmf.ui</module>
     <module>org.eclipse.tracecompass.tmf.ui.tests</module>
-    <module>org.eclipse.tracecompass.tmf.ui.swtbot.tests</module>
+    <!--module>org.eclipse.tracecompass.tmf.ui.swtbot.tests</module-->
     <module>org.eclipse.tracecompass.tmf.help</module>
 
     <module>org.eclipse.tracecompass.tmf.ctf</module>
     <module>org.eclipse.tracecompass.tmf.ctf.core</module>
     <module>org.eclipse.tracecompass.tmf.ctf.core.tests</module>
-    <module>org.eclipse.tracecompass.tmf.ctf.ui.swtbot.tests</module>
+    <!--module>org.eclipse.tracecompass.tmf.ctf.ui.swtbot.tests</module-->
 
     <module>org.eclipse.tracecompass.tmf.pcap</module>
     <module>org.eclipse.tracecompass.tmf.pcap.core</module>
     <module>org.eclipse.tracecompass.tmf.pcap.core.tests</module>
     <module>org.eclipse.tracecompass.tmf.pcap.ui</module>
-    <module>org.eclipse.tracecompass.tmf.pcap.ui.swtbot.tests</module>
+    <!--module>org.eclipse.tracecompass.tmf.pcap.ui.swtbot.tests</module-->
     <module>org.eclipse.tracecompass.tmf.pcap.help</module>
 
     <module>org.eclipse.tracecompass.tmf.analysis.xml.core</module>
@@ -143,7 +143,7 @@
     <module>org.eclipse.tracecompass.help</module>
     <module>org.eclipse.tracecompass.releng-site</module>
     <module>org.eclipse.tracecompass.target</module>
-    <module>org.eclipse.tracecompass.testing</module>
+    <!--module>org.eclipse.tracecompass.testing</module-->
 
     <module>org.eclipse.tracecompass.lttng2.control</module>
     <module>org.eclipse.tracecompass.lttng2.control.core</module>
@@ -156,7 +156,7 @@
     <module>org.eclipse.tracecompass.lttng2.kernel.core.tests</module>
     <module>org.eclipse.tracecompass.lttng2.kernel.ui</module>
     <module>org.eclipse.tracecompass.lttng2.kernel.ui.tests</module>
-    <module>org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests</module>
+    <!--module>org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests</module-->
 
     <module>org.eclipse.tracecompass.lttng2.ust</module>
     <module>org.eclipse.tracecompass.lttng2.ust.core</module>
