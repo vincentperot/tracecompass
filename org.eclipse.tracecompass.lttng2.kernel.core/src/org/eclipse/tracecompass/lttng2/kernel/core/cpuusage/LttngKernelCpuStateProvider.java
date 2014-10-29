@@ -43,7 +43,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class LttngKernelCpuStateProvider extends AbstractTmfStateProvider {
 
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     /* For each CPU, maps the last time a thread was scheduled in */
     private final Map<String, Long> fLastStartTimes = new HashMap<>();
@@ -119,10 +119,11 @@ public class LttngKernelCpuStateProvider extends AbstractTmfStateProvider {
                      * time changes when the process is scheduled out. Nothing
                      * happens when the process is scheduled in.
                      */
-                    long prevCumulativeTime = value.unboxLong();
+                    long prevCumulativeTime = Math.max(0, value.unboxLong());
                     long newCumulativeTime = prevCumulativeTime + (ts - startTime);
 
                     value = TmfStateValue.newValueLong(newCumulativeTime);
+                    System.out.println("Handling sched_switch for tid " + prevTid + " on cpu " + cpu + ":" + newCumulativeTime );
                     ss.modifyAttribute(ts, value, cumulativeTimeQuark);
                     fLastStartTimes.put(cpu, ts);
                 }

@@ -66,8 +66,9 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
          * This analysis depends on the LTTng kernel analysis, so we'll start
          * that build at the same time
          */
-        LttngKernelAnalysisModule module = getTrace().getAnalysisModuleOfClass(LttngKernelAnalysisModule.class, LttngKernelAnalysisModule.ID);
-        if (module != null) {
+        Iterable<LttngKernelAnalysisModule> kernelModules = getTrace().getAnalysisModulesOfClass(LttngKernelAnalysisModule.class);
+        if (kernelModules.iterator().hasNext()) {
+            LttngKernelAnalysisModule module = kernelModules.iterator().next();
             module.schedule();
         }
         return super.executeAnalysis(monitor);
@@ -91,7 +92,7 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
         if (trace == null || cpuSs == null) {
             return map;
         }
-        ITmfStateSystem kernelSs = TmfStateSystemAnalysisModule.getStateSystem(trace, LttngKernelAnalysisModule.ID);
+        ITmfStateSystem kernelSs = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(trace, LttngKernelAnalysisModule.class);
         if (kernelSs == null) {
             return map;
         }
@@ -188,6 +189,7 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
                         currentCount = 0;
                     }
                     cpuTotal += currentCount;
+                    System.out.println("Putting in map " + curCpuName + SPLIT_STRING + curTidName + ":" + currentCount );
                     map.put(curCpuName + SPLIT_STRING + curTidName, currentCount);
                     addToMap(totalMap, curTidName, currentCount);
                     totalTime += (currentCount);
