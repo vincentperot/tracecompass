@@ -23,9 +23,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement.ValuePriorityLevel;
@@ -45,16 +48,17 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
  * @author Geneviève Bastien
  * @since 3.0
  */
+@NonNullByDefault
 public abstract class TmfAbstractAnalysisModule extends TmfComponent implements IAnalysisModule {
 
-    private String fName, fId;
+    private @Nullable String fName, fId;
     private boolean fAutomatic = false, fStarted = false;
-    private volatile ITmfTrace fTrace;
+    private volatile @Nullable ITmfTrace fTrace;
     private final Map<String, Object> fParameters = new HashMap<>();
     private final List<String> fParameterNames = new ArrayList<>();
     private final List<IAnalysisOutput> fOutputs = new ArrayList<>();
     private List<IAnalysisParameterProvider> fParameterProviders = new ArrayList<>();
-    private Job fJob = null;
+    private @Nullable Job fJob = null;
 
     private final Object syncObj = new Object();
 
@@ -105,9 +109,6 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
 
     @Override
     public void setTrace(ITmfTrace trace) throws TmfAnalysisException {
-        if (trace == null) {
-            throw new TmfAnalysisException(Messages.TmfAbstractAnalysisModule_NullTrace);
-        }
         if (fTrace != null) {
             throw new TmfAnalysisException(NLS.bind(Messages.TmfAbstractAnalysisModule_TraceSetMoreThanOnce, getName()));
         }
@@ -132,7 +133,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
      *
      * @return The trace
      */
-    protected ITmfTrace getTrace() {
+    protected @Nullable ITmfTrace getTrace() {
         return fTrace;
     }
 
@@ -142,7 +143,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
     }
 
     @Override
-    public synchronized void setParameter(String name, Object value) {
+    public synchronized void setParameter(String name, @Nullable Object value) {
         if (!fParameterNames.contains(name)) {
             throw new RuntimeException(NLS.bind(Messages.TmfAbstractAnalysisModule_InvalidParameter, name, getName()));
         }
@@ -176,7 +177,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
     }
 
     @Override
-    public Object getParameter(String name) {
+    public @Nullable Object getParameter(String name) {
         Object paramValue = fParameters.get(name);
         /* The parameter is not set, maybe it can be provided by someone else */
         if ((paramValue == null) && (fTrace != null)) {
@@ -260,7 +261,8 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
         cancel();
     }
 
-    private void execute(@NonNull final ITmfTrace trace) {
+    @SuppressWarnings("null")
+    private void execute(final ITmfTrace trace) {
 
         /*
          * TODO: The analysis in a job should be done at the analysis manager
@@ -286,16 +288,20 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
          */
         fJob = new Job(NLS.bind(Messages.TmfAbstractAnalysisModule_RunningAnalysis, getName())) {
             @Override
-            protected IStatus run(final IProgressMonitor monitor) {
+            protected @Nullable IStatus run(final @Nullable IProgressMonitor monitor) {
+                IProgressMonitor mon = monitor;
+                if (mon == null) {
+                    mon = new NullProgressMonitor();
+                }
                 try {
-                    monitor.beginTask("", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
+                    mon.beginTask("", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
                     broadcast(new TmfStartAnalysisSignal(TmfAbstractAnalysisModule.this, TmfAbstractAnalysisModule.this));
-                    fAnalysisCancelled = !executeAnalysis(monitor);
+                    fAnalysisCancelled = !executeAnalysis(mon);
                 } catch (TmfAnalysisException e) {
                     Activator.logError("Error executing analysis with trace " + trace.getName(), e); //$NON-NLS-1$
                 } finally {
                     synchronized (syncObj) {
-                        monitor.done();
+                        mon.done();
                         setAnalysisCompleted();
                     }
                     TmfTraceManager.refreshSupplementaryFiles(trace);
@@ -317,6 +323,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
         fJob.schedule();
     }
 
+    @SuppressWarnings("null")
     @Override
     public IStatus schedule() {
         synchronized (syncObj) {
@@ -410,7 +417,11 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
      * @return Full help text for the module
      */
     protected String getFullHelpText() {
-        return NLS.bind(Messages.TmfAbstractAnalysisModule_AnalysisModule, getName());
+        String text = NLS.bind(Messages.TmfAbstractAnalysisModule_AnalysisModule, getName());
+        if (text == null) {
+            text = ""; //$NON-NLS-1$
+        }
+        return text;
     }
 
     /**
@@ -422,7 +433,11 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
      * @return Short help text describing the module
      */
     protected String getShortHelpText(ITmfTrace trace) {
-        return NLS.bind(Messages.TmfAbstractAnalysisModule_AnalysisForTrace, getName(), trace.getName());
+        String text = NLS.bind(Messages.TmfAbstractAnalysisModule_AnalysisForTrace, getName(), trace.getName());
+        if (text == null) {
+            text = ""; //$NON-NLS-1$
+        }
+        return text;
     }
 
     /**
@@ -434,7 +449,8 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
      *            The trace to apply the analysis to
      * @return Help text
      */
-    protected String getTraceCannotExecuteHelpText(@NonNull ITmfTrace trace) {
+    @SuppressWarnings("null")
+    protected String getTraceCannotExecuteHelpText(ITmfTrace trace) {
         StringBuilder builder = new StringBuilder();
         builder.append(NLS.bind(Messages.TmfAbstractAnalysisModule_AnalysisCannotExecute, getName()));
         for (TmfAnalysisRequirement requirement : getAnalysisRequirements()) {
@@ -460,9 +476,6 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
 
     @Override
     public String getHelpText(ITmfTrace trace) {
-        if (trace == null) {
-            return getHelpText();
-        }
         String text = getShortHelpText(trace);
         if (!canExecute(trace)) {
             text = text + "\n\n" + getTraceCannotExecuteHelpText(trace); //$NON-NLS-1$
@@ -470,6 +483,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
         return text;
     }
 
+    @SuppressWarnings("null")
     @Override
     public Iterable<TmfAnalysisRequirement> getAnalysisRequirements() {
         return Collections.EMPTY_SET;

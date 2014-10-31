@@ -68,8 +68,13 @@ public class TmfAnalysisModuleHelperXml implements IAnalysisModuleHelper {
         fType = type;
     }
 
+    @SuppressWarnings("null")
     @Override
     public String getId() {
+        /*
+         * The attribute ID cannot be null because the XML has been validated
+         * and it is mandatory
+         */
         return fSourceElement.getAttribute(TmfXmlStrings.ID);
     }
 

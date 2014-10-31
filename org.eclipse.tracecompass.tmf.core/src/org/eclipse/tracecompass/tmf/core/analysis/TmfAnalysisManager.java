@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.core.analysis.TmfAnalysisModuleSources;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -29,6 +31,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * @author Geneviève Bastien
  * @since 3.0
  */
+@NonNullByDefault
 public class TmfAnalysisManager {
 
     private static final Map<String, IAnalysisModuleHelper> fAnalysisModules = new HashMap<>();
@@ -104,6 +107,7 @@ public class TmfAnalysisManager {
      *
      * @return The map of available {@link IAnalysisModuleHelper}
      */
+    @SuppressWarnings("null")
     public static synchronized Map<String, IAnalysisModuleHelper> getAnalysisModules() {
         if (fAnalysisModules.isEmpty()) {
             for (IAnalysisModuleSource source : fSources) {
@@ -124,6 +128,7 @@ public class TmfAnalysisManager {
      *            The trace class to get modules for
      * @return The map of available {@link IAnalysisModuleHelper}
      */
+    @SuppressWarnings("null")
     public static Map<String, IAnalysisModuleHelper> getAnalysisModules(Class<? extends ITmfTrace> traceclass) {
         Map<String, IAnalysisModuleHelper> allModules = getAnalysisModules();
         Map<String, IAnalysisModuleHelper> map = new HashMap<>();
@@ -142,7 +147,7 @@ public class TmfAnalysisManager {
      *            Id of the analysis module to get
      * @return The {@link IAnalysisModuleHelper}
      */
-    public static IAnalysisModuleHelper getAnalysisModule(String id) {
+    public static @Nullable IAnalysisModuleHelper getAnalysisModule(String id) {
         Map<String, IAnalysisModuleHelper> map = getAnalysisModules();
         return map.get(id);
     }

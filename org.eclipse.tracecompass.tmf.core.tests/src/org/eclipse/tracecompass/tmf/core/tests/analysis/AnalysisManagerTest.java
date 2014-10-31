@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleSource;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisManager;
@@ -34,13 +35,13 @@ import org.junit.Test;
 public class AnalysisManagerTest {
 
     /** Id of analysis module with parameter */
-    public static final String MODULE_PARAM = "org.eclipse.linuxtools.tmf.core.tests.analysis.test";
+    public static final @NonNull String MODULE_PARAM = "org.eclipse.linuxtools.tmf.core.tests.analysis.test";
     /** ID of analysis module with parameter and default value */
-    public static final String MODULE_PARAM_DEFAULT = "org.eclipse.linuxtools.tmf.core.tests.analysis.test2";
+    public static final @NonNull String MODULE_PARAM_DEFAULT = "org.eclipse.linuxtools.tmf.core.tests.analysis.test2";
     /** ID of analysis module for trace 2 classes only */
-    public static final String MODULE_SECOND = "org.eclipse.linuxtools.tmf.core.tests.analysis.testother";
+    public static final @NonNull String MODULE_SECOND = "org.eclipse.linuxtools.tmf.core.tests.analysis.testother";
     /** Id of analysis module with requirements */
-    public static final String MODULE_REQ = "org.eclipse.linuxtools.tmf.core.tests.analysis.reqtest";
+    public static final @NonNull String MODULE_REQ = "org.eclipse.linuxtools.tmf.core.tests.analysis.reqtest";
 
     private ITmfTrace fTrace;
 
@@ -81,6 +82,7 @@ public class AnalysisManagerTest {
      * Test suite for {@link TmfAnalysisManager#getAnalysisModules(Class)} Use
      * the test TMF trace and test trace2 stubs as sample traces
      */
+    @SuppressWarnings("null")
     @Test
     public void testListForTraces() {
         /* Generic TmfTrace */
@@ -102,6 +104,7 @@ public class AnalysisManagerTest {
     /**
      * Test suite to test refresh of analysis module when adding a {@link IAnalysisModuleSource}
      */
+    @SuppressWarnings("null")
     @Test
     public void testSources() {
         /* Make sure that modules in the new source are not in the list already */
