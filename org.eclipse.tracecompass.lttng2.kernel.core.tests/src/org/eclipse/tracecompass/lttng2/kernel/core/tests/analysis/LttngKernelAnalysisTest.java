@@ -79,6 +79,7 @@ public class LttngKernelAnalysisTest {
     /**
      * Test the LTTng kernel analysis execution
      */
+    @SuppressWarnings("null")
     @Test
     public void testAnalysisExecution() {
         fKernelAnalysisModule.setId("test");

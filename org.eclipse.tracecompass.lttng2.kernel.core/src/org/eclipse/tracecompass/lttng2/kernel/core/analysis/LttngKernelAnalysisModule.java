@@ -66,7 +66,7 @@ public class LttngKernelAnalysisModule extends TmfStateSystemAnalysisModule {
             );
 
     /** The requirements as an immutable set */
-    private static final ImmutableSet<TmfAnalysisRequirement> REQUIREMENTS;
+    private static final @NonNull ImmutableSet<TmfAnalysisRequirement> REQUIREMENTS;
 
     static {
         /* initialize the requirement: domain and events */
@@ -76,7 +76,11 @@ public class LttngKernelAnalysisModule extends TmfStateSystemAnalysisModule {
         TmfAnalysisRequirement eventReq = new TmfAnalysisRequirement(SessionConfigStrings.CONFIG_ELEMENT_EVENT, REQUIRED_EVENTS, ValuePriorityLevel.MANDATORY);
         eventReq.addValues(OPTIONAL_EVENTS, ValuePriorityLevel.OPTIONAL);
 
-        REQUIREMENTS = ImmutableSet.of(domainReq, eventReq);
+        ImmutableSet<TmfAnalysisRequirement> reqSet = ImmutableSet.of(domainReq, eventReq);
+        if (reqSet == null) {
+            throw new IllegalStateException();
+        }
+        REQUIREMENTS = reqSet;
     }
 
     @Override
@@ -91,6 +95,7 @@ public class LttngKernelAnalysisModule extends TmfStateSystemAnalysisModule {
         return HISTORY_TREE_FILE_NAME;
     }
 
+    @SuppressWarnings("null")
     @Override
     protected String getFullHelpText() {
         return Messages.LttngKernelAnalysisModule_Help;
