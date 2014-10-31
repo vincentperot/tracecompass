@@ -57,11 +57,13 @@ public class AnalysisModuleTestHelper implements IAnalysisModuleHelper {
         fModule = module;
     }
 
+    @SuppressWarnings("null")
     @Override
     public String getId() {
         return fModule.name();
     }
 
+    @SuppressWarnings("null")
     @Override
     public String getName() {
         return fModule.name();

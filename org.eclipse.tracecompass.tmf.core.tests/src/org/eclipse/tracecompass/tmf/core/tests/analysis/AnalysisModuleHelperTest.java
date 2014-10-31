@@ -133,6 +133,7 @@ public class AnalysisModuleHelperTest {
      * {@link TmfAnalysisModuleHelperConfigElement#newModule(ITmfTrace)} method
      * for the 2 modules
      */
+    @SuppressWarnings("null")
     @Test
     public void testNewModule() {
         /* Test analysis module with traceStub */
@@ -183,6 +184,7 @@ public class AnalysisModuleHelperTest {
     /**
      * Test for the initialization of parameters from the extension points
      */
+    @SuppressWarnings("null")
     @Test
     public void testParameters() {
         ITmfTrace trace = TmfTestTrace.A_TEST_10K.getTrace();
@@ -192,6 +194,7 @@ public class AnalysisModuleHelperTest {
          * able to set the parameter
          */
         IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_PARAM);
+        assertNotNull(helper);
         IAnalysisModule module = null;
         try {
             module = helper.newModule(trace);
@@ -210,6 +213,7 @@ public class AnalysisModuleHelperTest {
 
         /* This module has a parameter with default value */
         helper = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_PARAM_DEFAULT);
+        assertNotNull(helper);
         try {
             module = helper.newModule(trace);
             assertEquals(3, module.getParameter(TestAnalysis.PARAM_TEST));
@@ -230,6 +234,7 @@ public class AnalysisModuleHelperTest {
          * error
          */
         helper = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_SECOND);
+        assertNotNull(helper);
         Exception exception = null;
         try {
             module = helper.newModule(fTrace);
