@@ -87,7 +87,11 @@ public final class TmfAnalysisModuleSourceConfigElement implements IAnalysisModu
                 typeElements.add(element);
             }
         }
-        return typeElements.toArray(new IConfigurationElement[typeElements.size()]);
+        IConfigurationElement[] typeElems = typeElements.toArray(new IConfigurationElement[typeElements.size()]);
+        if (typeElems == null) {
+            throw new IllegalStateException();
+        }
+        return typeElems;
     }
 
     /**
