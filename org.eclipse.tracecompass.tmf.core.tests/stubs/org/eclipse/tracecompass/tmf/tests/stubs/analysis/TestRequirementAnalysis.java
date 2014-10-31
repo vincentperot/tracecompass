@@ -61,6 +61,7 @@ public class TestRequirementAnalysis extends TmfAbstractAnalysisModule {
     public void setTrace(ITmfTrace trace) throws TmfAnalysisException {
     }
 
+    @SuppressWarnings("null")
     @Override
     public Iterable<TmfAnalysisRequirement> getAnalysisRequirements() {
         Map<String, TmfAnalysisRequirement> requirements = new HashMap<>();

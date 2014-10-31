@@ -14,7 +14,8 @@ package org.eclipse.tracecompass.tmf.core.analysis;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.component.ITmfComponent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -42,6 +43,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * @author Geneviève Bastien
  * @since 3.0
  */
+@NonNullByDefault
 public interface IAnalysisModule extends ITmfComponent, IAnalysisRequirementProvider {
 
     // --------------------------------------------------------
@@ -69,7 +71,6 @@ public interface IAnalysisModule extends ITmfComponent, IAnalysisRequirementProv
      *
      * @return The id of the module
      */
-    @NonNull
     String getId();
 
     /**
@@ -118,7 +119,7 @@ public interface IAnalysisModule extends ITmfComponent, IAnalysisRequirementProv
      *            The value (subclasses may type-check it)
      * @throws RuntimeException
      */
-    void setParameter(String name, Object value);
+    void setParameter(String name, @Nullable Object value);
 
     /**
      * Gets the value of a parameter
@@ -127,7 +128,7 @@ public interface IAnalysisModule extends ITmfComponent, IAnalysisRequirementProv
      *            Name of the parameter
      * @return The value of a parameter
      */
-    Object getParameter(String name);
+    @Nullable Object getParameter(String name);
 
     // -----------------------------------------------------
     // Functionalities
@@ -142,7 +143,7 @@ public interface IAnalysisModule extends ITmfComponent, IAnalysisRequirementProv
      *            The trace to analyze
      * @return Whether the analysis can be executed
      */
-    boolean canExecute(@NonNull ITmfTrace trace);
+    boolean canExecute(ITmfTrace trace);
 
     /**
      * Schedule the execution of the analysis. If the trace has been set and is
