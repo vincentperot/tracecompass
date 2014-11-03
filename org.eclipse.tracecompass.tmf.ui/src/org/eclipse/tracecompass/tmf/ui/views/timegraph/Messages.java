@@ -12,6 +12,7 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.timegraph;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 
 /**
@@ -23,11 +24,11 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.tmf.ui.views.timegraph.messages"; //$NON-NLS-1$
 
-    public static String AbstractTimeGraphtView_NextText;
-    public static String AbstractTimeGraphView_NextTooltip;
-    public static String AbstractTimeGraphView_PreviousText;
-    public static String AbstractTimeGraphView_PreviousTooltip;
-    public static String TimeGraphPresentationProvider_multipleStates;
+    public static @Nullable String AbstractTimeGraphtView_NextText;
+    public static @Nullable String AbstractTimeGraphView_NextTooltip;
+    public static @Nullable String AbstractTimeGraphView_PreviousText;
+    public static @Nullable String AbstractTimeGraphView_PreviousTooltip;
+    public static @Nullable String TimeGraphPresentationProvider_multipleStates;
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

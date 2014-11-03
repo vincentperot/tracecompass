@@ -27,6 +27,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -98,13 +99,13 @@ public abstract class AbstractTimeGraphView extends TmfView {
     // ------------------------------------------------------------------------
 
     /** The timegraph wrapper */
-    private ITimeGraphWrapper fTimeGraphWrapper;
+    private @Nullable ITimeGraphWrapper fTimeGraphWrapper;
 
     /** The selected trace */
-    private ITmfTrace fTrace;
+    private @Nullable ITmfTrace fTrace;
 
     /** The timegraph entry list */
-    private List<TimeGraphEntry> fEntryList;
+    private List<TimeGraphEntry> fEntryList = new ArrayList<>();
 
     /** The trace to entry list hash map */
     private final Map<ITmfTrace, List<TimeGraphEntry>> fEntryListMap = new HashMap<>();
@@ -122,16 +123,16 @@ public abstract class AbstractTimeGraphView extends TmfView {
     private final int fDisplayWidth;
 
     /** The zoom thread */
-    private ZoomThread fZoomThread;
+    private @Nullable ZoomThread fZoomThread;
 
     /** The next resource action */
-    private Action fNextResourceAction;
+    private @Nullable Action fNextResourceAction;
 
     /** The previous resource action */
-    private Action fPreviousResourceAction;
+    private @Nullable Action fPreviousResourceAction;
 
     /** A comparator class */
-    private Comparator<ITimeGraphEntry> fEntryComparator = null;
+    private @Nullable Comparator<ITimeGraphEntry> fEntryComparator = null;
 
     /** The redraw state used to prevent unnecessary queuing of display runnables */
     private State fRedrawState = State.IDLE;
@@ -143,22 +144,22 @@ public abstract class AbstractTimeGraphView extends TmfView {
     private final TimeGraphPresentationProvider fPresentation;
 
     /** The tree column label array, or null if combo is not used */
-    private String[] fColumns;
+    private @Nullable String[] fColumns;
 
     /** The tree label provider, or null if combo is not used */
-    private TreeLabelProvider fLabelProvider = null;
+    private @Nullable TreeLabelProvider fLabelProvider = null;
 
     /** The relative weight of the sash, ignored if combo is not used */
     private int[] fWeight = { 1, 1 };
 
     /** The filter column label array, or null if filter is not used */
-    private String[] fFilterColumns;
+    private @Nullable String[] fFilterColumns;
 
     /** The pack done flag */
     private boolean fPackDone = false;
 
     /** The filter label provider, or null if filter is not used */
-    private TreeLabelProvider fFilterLabelProvider;
+    private @Nullable TreeLabelProvider fFilterLabelProvider;
 
     // ------------------------------------------------------------------------
     // Classes
@@ -172,6 +173,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
 
         void addSelectionListener(ITimeGraphSelectionListener iTimeGraphSelectionListener);
 
+        @Nullable
         ISelectionProvider getSelectionProvider();
 
         void setFocus();
@@ -182,6 +184,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
 
         void setInput(Object input);
 
+        @Nullable
         Object getInput();
 
         void redraw();
@@ -193,7 +196,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
     private class TimeGraphViewerWrapper implements ITimeGraphWrapper {
         private TimeGraphViewer viewer;
 
-        private TimeGraphViewerWrapper(Composite parent, int style) {
+        private TimeGraphViewerWrapper(@Nullable Composite parent, int style) {
             viewer = new TimeGraphViewer(parent, style);
         }
 
@@ -213,7 +216,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
         }
 
         @Override
-        public ISelectionProvider getSelectionProvider() {
+        public @Nullable ISelectionProvider getSelectionProvider() {
             return viewer.getSelectionProvider();
         }
 
@@ -233,7 +236,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
         }
 
         @Override
-        public Object getInput() {
+        public @Nullable Object getInput() {
             return viewer.getInput();
         }
 
@@ -256,7 +259,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
     private class TimeGraphComboWrapper implements ITimeGraphWrapper {
         private TimeGraphCombo combo;
 
-        private TimeGraphComboWrapper(Composite parent, int style) {
+        private TimeGraphComboWrapper(@Nullable Composite parent, int style) {
             combo = new TimeGraphCombo(parent, style, fWeight);
         }
 
@@ -276,7 +279,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
         }
 
         @Override
-        public ISelectionProvider getSelectionProvider() {
+        public @Nullable ISelectionProvider getSelectionProvider() {
             return combo.getTreeViewer();
         }
 
@@ -296,7 +299,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
         }
 
         @Override
-        public Object getInput() {
+        public @Nullable Object getInput() {
             return combo.getInput();
         }
 
@@ -319,11 +322,11 @@ public abstract class AbstractTimeGraphView extends TmfView {
             return combo;
         }
 
-        TreeViewer getTreeViewer() {
+        @Nullable TreeViewer getTreeViewer() {
             return combo.getTreeViewer();
         }
 
-        IAction getShowFilterAction() {
+        @Nullable IAction getShowFilterAction() {
             return combo.getShowFilterAction();
         }
     }
@@ -335,11 +338,11 @@ public abstract class AbstractTimeGraphView extends TmfView {
         }
 
         @Override
-        public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+        public void inputChanged(@Nullable Viewer viewer, @Nullable Object oldInput, @Nullable Object newInput) {
         }
 
         @Override
-        public ITimeGraphEntry[] getElements(Object inputElement) {
+        public @Nullable ITimeGraphEntry[] getElements(@Nullable Object inputElement) {
             if (inputElement != null) {
                 try {
                     return ((List<?>) inputElement).toArray(new ITimeGraphEntry[0]);
@@ -350,20 +353,29 @@ public abstract class AbstractTimeGraphView extends TmfView {
         }
 
         @Override
-        public Object[] getChildren(Object parentElement) {
+        public @Nullable Object[] getChildren(@Nullable Object parentElement) {
+            if (parentElement == null) {
+                return new ITimeGraphEntry[0];
+            }
             ITimeGraphEntry entry = (ITimeGraphEntry) parentElement;
             List<? extends ITimeGraphEntry> children = entry.getChildren();
             return children.toArray(new ITimeGraphEntry[children.size()]);
         }
 
         @Override
-        public Object getParent(Object element) {
+        public @Nullable Object getParent(@Nullable Object element) {
+            if (element == null) {
+                return null;
+            }
             ITimeGraphEntry entry = (ITimeGraphEntry) element;
             return entry.getParent();
         }
 
         @Override
-        public boolean hasChildren(Object element) {
+        public boolean hasChildren(@Nullable Object element) {
+            if (element == null) {
+                return false;
+            }
             ITimeGraphEntry entry = (ITimeGraphEntry) element;
             return entry.hasChildren();
         }
@@ -373,7 +385,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
     private class TimeGraphContentProvider implements ITimeGraphContentProvider {
 
         @Override
-        public ITimeGraphEntry[] getElements(Object inputElement) {
+        public @Nullable ITimeGraphEntry[] getElements(@Nullable Object inputElement) {
             if (inputElement != null) {
                 try {
                     return ((List<?>) inputElement).toArray(new ITimeGraphEntry[0]);
@@ -393,7 +405,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
     protected static class TreeLabelProvider implements ITableLabelProvider, ILabelProvider {
 
         @Override
-        public void addListener(ILabelProviderListener listener) {
+        public void addListener(@Nullable ILabelProviderListener listener) {
         }
 
         @Override
@@ -401,24 +413,26 @@ public abstract class AbstractTimeGraphView extends TmfView {
         }
 
         @Override
-        public boolean isLabelProperty(Object element, String property) {
+        public boolean isLabelProperty(@Nullable Object element, @Nullable String property) {
             return false;
         }
 
         @Override
-        public void removeListener(ILabelProviderListener listener) {
+        public void removeListener(@Nullable ILabelProviderListener listener) {
         }
 
         @Override
-        public Image getColumnImage(Object element, int columnIndex) {
+        public @Nullable Image getColumnImage(@Nullable Object element, int columnIndex) {
             return null;
         }
 
         @Override
-        public String getColumnText(Object element, int columnIndex) {
-            TimeGraphEntry entry = (TimeGraphEntry) element;
-            if (columnIndex == 0) {
-                return entry.getName();
+        public @Nullable String getColumnText(@Nullable Object element, int columnIndex) {
+            if (element != null) {
+                TimeGraphEntry entry = (TimeGraphEntry) element;
+                if (columnIndex == 0) {
+                    return entry.getName();
+                }
             }
             return new String();
         }
@@ -427,7 +441,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
          * @since 3.2
          */
         @Override
-        public Image getImage(Object element) {
+        public @Nullable Image getImage(@Nullable Object element) {
             return null;
         }
 
@@ -435,7 +449,10 @@ public abstract class AbstractTimeGraphView extends TmfView {
          * @since 3.2
          */
         @Override
-        public String getText(Object element) {
+        public @Nullable String getText(@Nullable Object element) {
+            if (element == null) {
+                return null;
+            }
             TimeGraphEntry entry = (TimeGraphEntry) element;
             return entry.getName();
         }
@@ -485,19 +502,23 @@ public abstract class AbstractTimeGraphView extends TmfView {
 
         @Override
         public void run() {
-            if (fZoomEntryList == null) {
-                return;
-            }
             for (TimeGraphEntry entry : fZoomEntryList) {
                 if (fMonitor.isCanceled()) {
                     return;
+                }
+                if (entry == null) {
+                    throw new IllegalStateException();
                 }
                 zoom(entry, fMonitor);
             }
             /* Refresh the arrows when zooming */
             List<ILinkEvent> events = getLinkList(fZoomStartTime, fZoomEndTime, fResolution, fMonitor);
-            if (events != null) {
-                fTimeGraphWrapper.getTimeGraphViewer().setLinks(events);
+            if (!events.isEmpty()) {
+                ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+                if (tgWrapper == null) {
+                    throw new IllegalStateException();
+                }
+                tgWrapper.getTimeGraphViewer().setLinks(events);
                 redraw();
             }
         }
@@ -559,7 +580,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      *
      * @return The time graph combo, or null if combo is not used
      */
-    protected TimeGraphCombo getTimeGraphCombo() {
+    protected @Nullable TimeGraphCombo getTimeGraphCombo() {
         if (fTimeGraphWrapper instanceof TimeGraphComboWrapper) {
             return ((TimeGraphComboWrapper) fTimeGraphWrapper).getTimeGraphCombo();
         }
@@ -571,8 +592,12 @@ public abstract class AbstractTimeGraphView extends TmfView {
      *
      * @return The time graph viewer
      */
-    protected TimeGraphViewer getTimeGraphViewer() {
-        return fTimeGraphWrapper.getTimeGraphViewer();
+    protected @Nullable TimeGraphViewer getTimeGraphViewer() {
+        ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+        if (tgWrapper == null) {
+            throw new IllegalStateException();
+        }
+        return tgWrapper.getTimeGraphViewer();
     }
 
     /**
@@ -656,7 +681,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      *
      * @return The entry comparator
      */
-    protected Comparator<ITimeGraphEntry> getEntryComparator() {
+    protected @Nullable Comparator<ITimeGraphEntry> getEntryComparator() {
         return fEntryComparator;
     }
 
@@ -675,7 +700,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      *
      * @return The trace
      */
-    protected ITmfTrace getTrace() {
+    protected @Nullable ITmfTrace getTrace() {
         return fTrace;
     }
 
@@ -726,7 +751,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      * @return the entry list map
      * @since 3.0
      */
-    protected List<TimeGraphEntry> getEntryList(ITmfTrace trace) {
+    protected @Nullable List<TimeGraphEntry> getEntryList(ITmfTrace trace) {
         synchronized (fEntryListMap) {
             return fEntryListMap.get(trace);
         }
@@ -789,7 +814,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      *
      * @return The "next" button text
      */
-    protected String getNextText() {
+    protected @Nullable String getNextText() {
         return Messages.AbstractTimeGraphtView_NextText;
     }
 
@@ -798,7 +823,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      *
      * @return Tooltip for the "next" button
      */
-    protected String getNextTooltip() {
+    protected @Nullable String getNextTooltip() {
         return Messages.AbstractTimeGraphView_NextTooltip;
     }
 
@@ -807,7 +832,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      *
      * @return The "Previous" button text
      */
-    protected String getPrevText() {
+    protected @Nullable String getPrevText() {
         return Messages.AbstractTimeGraphView_PreviousText;
     }
 
@@ -816,7 +841,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      *
      * @return Tooltip for the "previous" button
      */
-    protected String getPrevTooltip() {
+    protected @Nullable String getPrevTooltip() {
         return Messages.AbstractTimeGraphView_PreviousTooltip;
     }
 
@@ -825,14 +850,15 @@ public abstract class AbstractTimeGraphView extends TmfView {
     // ------------------------------------------------------------------------
 
     @Override
-    public void createPartControl(Composite parent) {
+    public void createPartControl(@Nullable Composite parent) {
+        ITimeGraphWrapper tgWrapper = null;
         if (fColumns == null || fLabelProvider == null) {
-            fTimeGraphWrapper = new TimeGraphViewerWrapper(parent, SWT.NONE);
-            TimeGraphViewer viewer = fTimeGraphWrapper.getTimeGraphViewer();
+            tgWrapper = new TimeGraphViewerWrapper(parent, SWT.NONE);
+            TimeGraphViewer viewer = tgWrapper.getTimeGraphViewer();
             viewer.setTimeGraphContentProvider(new TimeGraphContentProvider());
         } else {
             TimeGraphComboWrapper wrapper = new TimeGraphComboWrapper(parent, SWT.NONE);
-            fTimeGraphWrapper = wrapper;
+            tgWrapper = wrapper;
             TimeGraphCombo combo = wrapper.getTimeGraphCombo();
             combo.setTreeContentProvider(new TreeContentProvider());
             combo.setTreeLabelProvider(fLabelProvider);
@@ -843,11 +869,14 @@ public abstract class AbstractTimeGraphView extends TmfView {
             combo.setTimeGraphContentProvider(new TimeGraphContentProvider());
         }
 
-        fTimeGraphWrapper.setTimeGraphProvider(fPresentation);
+        tgWrapper.setTimeGraphProvider(fPresentation);
 
-        fTimeGraphWrapper.getTimeGraphViewer().addRangeListener(new ITimeGraphRangeListener() {
+        tgWrapper.getTimeGraphViewer().addRangeListener(new ITimeGraphRangeListener() {
             @Override
-            public void timeRangeUpdated(TimeGraphRangeUpdateEvent event) {
+            public void timeRangeUpdated(@Nullable TimeGraphRangeUpdateEvent event) {
+                if (event == null) {
+                    return;
+                }
                 final long startTime = event.getStartTime();
                 final long endTime = event.getEndTime();
                 TmfTimeRange range = new TmfTimeRange(new TmfNanoTimestamp(startTime), new TmfNanoTimestamp(endTime));
@@ -859,19 +888,22 @@ public abstract class AbstractTimeGraphView extends TmfView {
             }
         });
 
-        fTimeGraphWrapper.getTimeGraphViewer().addTimeListener(new ITimeGraphTimeListener() {
+        tgWrapper.getTimeGraphViewer().addTimeListener(new ITimeGraphTimeListener() {
             @Override
-            public void timeSelected(TimeGraphTimeEvent event) {
+            public void timeSelected(@Nullable TimeGraphTimeEvent event) {
+                if (event == null) {
+                    return;
+                }
                 TmfNanoTimestamp startTime = new TmfNanoTimestamp(event.getBeginTime());
                 TmfNanoTimestamp endTime = new TmfNanoTimestamp(event.getEndTime());
                 broadcast(new TmfTimeSynchSignal(AbstractTimeGraphView.this, startTime, endTime));
             }
         });
 
-        fTimeGraphWrapper.getTimeGraphViewer().setTimeFormat(TimeFormat.CALENDAR);
+        tgWrapper.getTimeGraphViewer().setTimeFormat(TimeFormat.CALENDAR);
 
         IStatusLineManager statusLineManager = getViewSite().getActionBars().getStatusLineManager();
-        fTimeGraphWrapper.getTimeGraphViewer().getTimeGraphControl().setStatusLineManager(statusLineManager);
+        tgWrapper.getTimeGraphViewer().getTimeGraphControl().setStatusLineManager(statusLineManager);
 
         // View Action Handling
         makeActions();
@@ -883,12 +915,18 @@ public abstract class AbstractTimeGraphView extends TmfView {
         }
 
         // make selection available to other views
-        getSite().setSelectionProvider(fTimeGraphWrapper.getSelectionProvider());
+        getSite().setSelectionProvider(tgWrapper.getSelectionProvider());
+
+        fTimeGraphWrapper = tgWrapper;
     }
 
     @Override
     public void setFocus() {
-        fTimeGraphWrapper.setFocus();
+        ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+        if (tgWrapper == null) {
+            throw new IllegalStateException();
+        }
+        tgWrapper.setFocus();
     }
 
     // ------------------------------------------------------------------------
@@ -971,15 +1009,19 @@ public abstract class AbstractTimeGraphView extends TmfView {
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
-                if (fTimeGraphWrapper.isDisposed()) {
+                ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+                if (tgWrapper == null) {
+                    throw new IllegalStateException();
+                }
+                if (tgWrapper.isDisposed()) {
                     return;
                 }
                 if (beginTime == endTime) {
-                    fTimeGraphWrapper.getTimeGraphViewer().setSelectedTime(beginTime, true);
+                    tgWrapper.getTimeGraphViewer().setSelectedTime(beginTime, true);
                 } else {
-                    fTimeGraphWrapper.getTimeGraphViewer().setSelectionRange(beginTime, endTime);
+                    tgWrapper.getTimeGraphViewer().setSelectionRange(beginTime, endTime);
                 }
-                startZoomThread(fTimeGraphWrapper.getTimeGraphViewer().getTime0(), fTimeGraphWrapper.getTimeGraphViewer().getTime1());
+                startZoomThread(tgWrapper.getTimeGraphViewer().getTime0(), tgWrapper.getTimeGraphViewer().getTime1());
 
                 synchingToTime(beginTime);
             }
@@ -994,10 +1036,11 @@ public abstract class AbstractTimeGraphView extends TmfView {
      */
     @TmfSignalHandler
     public void synchToRange(final TmfRangeSynchSignal signal) {
-        if (signal.getSource() == this || fTrace == null) {
+        ITmfTrace trace = fTrace;
+        if (signal.getSource() == this || trace == null) {
             return;
         }
-        if (signal.getCurrentRange().getIntersection(fTrace.getTimeRange()) == null) {
+        if (signal.getCurrentRange().getIntersection(trace.getTimeRange()) == null) {
             return;
         }
         final long startTime = signal.getCurrentRange().getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
@@ -1005,10 +1048,14 @@ public abstract class AbstractTimeGraphView extends TmfView {
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
-                if (fTimeGraphWrapper.isDisposed()) {
+                ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+                if (tgWrapper == null) {
+                    throw new IllegalStateException();
+                }
+                if (tgWrapper.isDisposed()) {
                     return;
                 }
-                fTimeGraphWrapper.getTimeGraphViewer().setStartFinishTime(startTime, endTime);
+                tgWrapper.getTimeGraphViewer().setStartFinishTime(startTime, endTime);
                 startZoomThread(startTime, endTime);
             }
         });
@@ -1020,7 +1067,11 @@ public abstract class AbstractTimeGraphView extends TmfView {
      */
     @TmfSignalHandler
     public void updateTimeFormat( final TmfTimestampFormatUpdateSignal signal){
-        fTimeGraphWrapper.refresh();
+        ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+        if (tgWrapper == null) {
+            throw new IllegalStateException();
+        }
+        tgWrapper.refresh();
     }
 
     // ------------------------------------------------------------------------
@@ -1029,12 +1080,17 @@ public abstract class AbstractTimeGraphView extends TmfView {
 
     private void loadTrace() {
         synchronized (fEntryListMap) {
-            fEntryList = fEntryListMap.get(fTrace);
-            if (fEntryList == null) {
+            ITmfTrace trace = fTrace;
+            if (trace == null) {
+                return;
+            }
+            List<TimeGraphEntry> entryList = fEntryListMap.get(trace);
+            if (entryList == null) {
                 rebuild();
             } else {
-                fStartTime = fTrace.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
-                fEndTime = fTrace.getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+                fEntryList = entryList;
+                fStartTime = trace.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+                fEndTime = trace.getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
                 refresh();
             }
         }
@@ -1048,8 +1104,19 @@ public abstract class AbstractTimeGraphView extends TmfView {
         setStartTime(Long.MAX_VALUE);
         setEndTime(Long.MIN_VALUE);
         synchronized (fBuildThreadMap) {
-            for (ITmfTrace trace : getTracesToBuild(fTrace)) {
-                BuildThread buildThread = new BuildThread(trace, fTrace, getName());
+            ITmfTrace mainTrace = fTrace;
+            if (mainTrace == null) {
+                return;
+            }
+            String name = getName();
+            if (name == null) {
+                name = ""; //$NON-NLS-1$
+            }
+            for (ITmfTrace trace : getTracesToBuild(mainTrace)) {
+                if (trace == null) {
+                    continue;
+                }
+                BuildThread buildThread = new BuildThread(trace, mainTrace, name);
                 fBuildThreadMap.put(trace, buildThread);
                 buildThread.start();
             }
@@ -1081,7 +1148,9 @@ public abstract class AbstractTimeGraphView extends TmfView {
      * @since 3.0
      */
     protected Iterable<ITmfTrace> getTracesToBuild(ITmfTrace trace) {
-        return Arrays.asList(TmfTraceManager.getTraceSet(trace));
+        @SuppressWarnings("null")
+        @NonNull List<ITmfTrace> list = Arrays.asList(TmfTraceManager.getTraceSet(trace));
+        return list;
     }
 
     /**
@@ -1146,28 +1215,34 @@ public abstract class AbstractTimeGraphView extends TmfView {
         TmfUiRefreshHandler.getInstance().queueUpdate(this, new Runnable() {
             @Override
             public void run() {
-                if (fTimeGraphWrapper.isDisposed()) {
+                ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+                if (tgWrapper == null) {
+                    throw new IllegalStateException();
+                }
+                if (tgWrapper.isDisposed()) {
                     return;
                 }
                 boolean hasEntries = false;
                 synchronized (fEntryListMap) {
-                    fEntryList = fEntryListMap.get(fTrace);
-                    if (fEntryList == null) {
-                        fEntryList = new CopyOnWriteArrayList<>();
+
+                    List<TimeGraphEntry> entryList = fEntryListMap.get(fTrace);
+                    if (entryList == null) {
+                        entryList = new CopyOnWriteArrayList<>();
                     } else if (fEntryComparator != null) {
-                        List<TimeGraphEntry> list = new ArrayList<>(fEntryList);
+                        List<TimeGraphEntry> list = new ArrayList<>(entryList);
                         Collections.sort(list, fEntryComparator);
-                        fEntryList.clear();
-                        fEntryList.addAll(list);
+                        entryList.clear();
+                        entryList.addAll(list);
                     }
-                    hasEntries = fEntryList.size() != 0;
+                    fEntryList = entryList;
+                    hasEntries = entryList.size() != 0;
                 }
-                if (fEntryList != fTimeGraphWrapper.getInput()) {
-                    fTimeGraphWrapper.setInput(fEntryList);
+                if (fEntryList != tgWrapper.getInput()) {
+                    tgWrapper.setInput(fEntryList);
                 } else {
-                    fTimeGraphWrapper.refresh();
+                    tgWrapper.refresh();
                 }
-                fTimeGraphWrapper.getTimeGraphViewer().setTimeBounds(fStartTime, fEndTime);
+                tgWrapper.getTimeGraphViewer().setTimeBounds(fStartTime, fEndTime);
 
                 long selectionBeginTime = fTrace == null ? 0 : fTraceManager.getSelectionBeginTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
                 long selectionEndTime = fTrace == null ? 0 : fTraceManager.getSelectionEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
@@ -1175,11 +1250,15 @@ public abstract class AbstractTimeGraphView extends TmfView {
                 long endTime = fTrace == null ? 0 : fTraceManager.getCurrentRange().getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
                 startTime = Math.max(startTime, fStartTime);
                 endTime = Math.min(endTime, fEndTime);
-                fTimeGraphWrapper.getTimeGraphViewer().setSelectionRange(selectionBeginTime, selectionEndTime);
-                fTimeGraphWrapper.getTimeGraphViewer().setStartFinishTime(startTime, endTime);
+                tgWrapper.getTimeGraphViewer().setSelectionRange(selectionBeginTime, selectionEndTime);
+                tgWrapper.getTimeGraphViewer().setStartFinishTime(startTime, endTime);
 
-                if (fTimeGraphWrapper instanceof TimeGraphComboWrapper && !fPackDone) {
-                    for (TreeColumn column : ((TimeGraphComboWrapper) fTimeGraphWrapper).getTreeViewer().getTree().getColumns()) {
+                if (tgWrapper instanceof TimeGraphComboWrapper && !fPackDone) {
+                    TreeViewer treeViewer = ((TimeGraphComboWrapper) tgWrapper).getTreeViewer();
+                    if (treeViewer == null) {
+                        return;
+                    }
+                    for (TreeColumn column : treeViewer.getTree().getColumns()) {
                         column.pack();
                     }
                     if (hasEntries) {
@@ -1207,11 +1286,15 @@ public abstract class AbstractTimeGraphView extends TmfView {
         Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
-                if (fTimeGraphWrapper.isDisposed()) {
+                ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+                if (tgWrapper == null) {
+                    throw new IllegalStateException();
+                }
+                if (tgWrapper.isDisposed()) {
                     return;
                 }
-                fTimeGraphWrapper.redraw();
-                fTimeGraphWrapper.update();
+                tgWrapper.redraw();
+                tgWrapper.update();
                 synchronized (fSyncObj) {
                     if (fRedrawState == State.PENDING) {
                         fRedrawState = State.IDLE;
@@ -1225,25 +1308,42 @@ public abstract class AbstractTimeGraphView extends TmfView {
     }
 
     private void startZoomThread(long startTime, long endTime) {
-        if (fZoomThread != null) {
-            fZoomThread.cancel();
+        ZoomThread zoomThread = fZoomThread;
+        if (zoomThread != null) {
+            zoomThread.cancel();
         }
-        fZoomThread = new ZoomThread(fEntryList, startTime, endTime, getName());
-        fZoomThread.start();
+        String name = getName();
+        if (name == null) {
+            name = ""; //$NON-NLS-1$
+        }
+        zoomThread = new ZoomThread(fEntryList, startTime, endTime, name);
+        fZoomThread = zoomThread;
+        zoomThread.start();
     }
 
     private void makeActions() {
-        fPreviousResourceAction = fTimeGraphWrapper.getTimeGraphViewer().getPreviousItemAction();
-        fPreviousResourceAction.setText(getPrevText());
-        fPreviousResourceAction.setToolTipText(getPrevTooltip());
-        fNextResourceAction = fTimeGraphWrapper.getTimeGraphViewer().getNextItemAction();
-        fNextResourceAction.setText(getNextText());
-        fNextResourceAction.setToolTipText(getNextTooltip());
+        ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+        if (tgWrapper == null) {
+            throw new IllegalStateException();
+        }
+        Action previousResourceAction = tgWrapper.getTimeGraphViewer().getPreviousItemAction();
+        fPreviousResourceAction = previousResourceAction;
+        previousResourceAction.setText(getPrevText());
+        previousResourceAction.setToolTipText(getPrevTooltip());
+        Action nextResourceAction = tgWrapper.getTimeGraphViewer().getNextItemAction();
+        fNextResourceAction = nextResourceAction;
+        nextResourceAction.setText(getNextText());
+        nextResourceAction.setToolTipText(getNextTooltip());
     }
 
     private void contributeToActionBars() {
         IActionBars bars = getViewSite().getActionBars();
-        fillLocalToolBar(bars.getToolBarManager());
+        if (bars != null) {
+            IToolBarManager manager = bars.getToolBarManager();
+            if (manager != null) {
+                fillLocalToolBar(manager);
+            }
+        }
     }
 
     /**
@@ -1252,20 +1352,25 @@ public abstract class AbstractTimeGraphView extends TmfView {
      * @param manager the tool bar manager
      */
     protected void fillLocalToolBar(IToolBarManager manager) {
-        if (fTimeGraphWrapper instanceof TimeGraphComboWrapper) {
-            if (fFilterColumns != null && fFilterLabelProvider != null && fFilterColumns.length > 0) {
-                manager.add(((TimeGraphComboWrapper) fTimeGraphWrapper).getShowFilterAction());
+        ITimeGraphWrapper tgWrapper = fTimeGraphWrapper;
+        if (tgWrapper == null) {
+            throw new IllegalStateException();
+        }
+        String[] filterColumns = fFilterColumns;
+        if (tgWrapper instanceof TimeGraphComboWrapper) {
+            if (filterColumns != null && fFilterLabelProvider != null && filterColumns.length > 0) {
+                manager.add(((TimeGraphComboWrapper) tgWrapper).getShowFilterAction());
             }
         }
-        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getShowLegendAction());
+        manager.add(tgWrapper.getTimeGraphViewer().getShowLegendAction());
         manager.add(new Separator());
-        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getResetScaleAction());
-        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getPreviousEventAction());
-        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getNextEventAction());
+        manager.add(tgWrapper.getTimeGraphViewer().getResetScaleAction());
+        manager.add(tgWrapper.getTimeGraphViewer().getPreviousEventAction());
+        manager.add(tgWrapper.getTimeGraphViewer().getNextEventAction());
         manager.add(fPreviousResourceAction);
         manager.add(fNextResourceAction);
-        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getZoomInAction());
-        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getZoomOutAction());
+        manager.add(tgWrapper.getTimeGraphViewer().getZoomInAction());
+        manager.add(tgWrapper.getTimeGraphViewer().getZoomOutAction());
         manager.add(new Separator());
     }
 }
