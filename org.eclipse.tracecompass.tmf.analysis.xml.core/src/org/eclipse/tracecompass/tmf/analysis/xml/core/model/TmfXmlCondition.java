@@ -15,7 +15,7 @@ package org.eclipse.tracecompass.tmf.analysis.xml.core.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
@@ -46,7 +46,7 @@ import org.w3c.dom.Element;
 public class TmfXmlCondition {
 
     private final List<TmfXmlCondition> fConditions = new ArrayList<>();
-    private final ITmfXmlStateValue fStateValue;
+    private final @Nullable ITmfXmlStateValue fStateValue;
     private final ConditionOperator fOperator;
     private final IXmlStateSystemContainer fContainer;
 
@@ -92,13 +92,20 @@ public class TmfXmlCondition {
             fOperator = ConditionOperator.NONE;
             /* The last element is a state value node */
             Element stateValueElement = childElements.remove(childElements.size() - 1);
+            if (stateValueElement == null) {
+                throw new IllegalStateException();
+            }
 
             /*
              * A state value is either preceded by an eventField or a number of
              * state attributes
              */
             if (childElements.size() == 1 && childElements.get(0).getNodeName().equals(TmfXmlStrings.ELEMENT_FIELD)) {
-                fStateValue = modelFactory.createStateValue(stateValueElement, fContainer, childElements.get(0).getAttribute(TmfXmlStrings.NAME));
+                String attribute = childElements.get(0).getAttribute(TmfXmlStrings.NAME);
+                if (attribute == null) {
+                    throw new IllegalArgumentException();
+                }
+                fStateValue = modelFactory.createStateValue(stateValueElement, fContainer, attribute);
             } else {
                 List<ITmfXmlStateAttribute> attributes = new ArrayList<>();
                 for (Element element : childElements) {
@@ -114,12 +121,19 @@ public class TmfXmlCondition {
         case TmfXmlStrings.NOT:
             fOperator = ConditionOperator.NOT;
             fStateValue = null;
-            fConditions.add(modelFactory.createCondition(childElements.get(0), fContainer));
+            Element element = childElements.get(0);
+            if (element == null) {
+                throw new IllegalArgumentException();
+            }
+            fConditions.add(modelFactory.createCondition(element, fContainer));
             break;
         case TmfXmlStrings.AND:
             fOperator = ConditionOperator.AND;
             fStateValue = null;
             for (Element condition : childElements) {
+                if (condition == null) {
+                    continue;
+                }
                 fConditions.add(modelFactory.createCondition(condition, fContainer));
             }
             break;
@@ -127,6 +141,9 @@ public class TmfXmlCondition {
             fOperator = ConditionOperator.OR;
             fStateValue = null;
             for (Element condition : childElements) {
+                if (condition == null) {
+                    continue;
+                }
                 fConditions.add(modelFactory.createCondition(condition, fContainer));
             }
             break;
@@ -144,7 +161,7 @@ public class TmfXmlCondition {
      * @throws AttributeNotFoundException
      *             The state attribute was not found
      */
-    public boolean testForEvent(@NonNull ITmfEvent event) throws AttributeNotFoundException {
+    public boolean testForEvent(ITmfEvent event) throws AttributeNotFoundException {
         ITmfStateSystem ss = fContainer.getStateSystem();
         /*
          * The condition is either the equality check of a state value or a

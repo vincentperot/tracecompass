@@ -49,7 +49,7 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
     /* Path in the State System */
     private final List<ITmfXmlStateAttribute> fPath;
     /* Event field to match with this state value */
-    private final String fEventField;
+    private final @Nullable String fEventField;
 
     /* Whether this state value is an increment of the previous value */
     private final boolean fIncrement;
@@ -108,7 +108,7 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
      * @param attributes
      *            The attributes representing the path to this value
      */
-    protected TmfXmlStateValue(ITmfXmlModelFactory modelFactory, Element node, IXmlStateSystemContainer container, List<ITmfXmlStateAttribute> attributes, String eventField) {
+    protected TmfXmlStateValue(ITmfXmlModelFactory modelFactory, Element node, IXmlStateSystemContainer container, List<ITmfXmlStateAttribute> attributes, @Nullable String eventField) {
         fPath = attributes;
         fContainer = container;
         fEventField = eventField;
@@ -144,7 +144,8 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
         /*
          * Stack Actions : allow to define a stack with PUSH/POP/PEEK methods
          */
-        String stack = node.getAttribute(TmfXmlStrings.ATTRIBUTE_STACK);
+        @SuppressWarnings("null")
+        @NonNull String stack = node.getAttribute(TmfXmlStrings.ATTRIBUTE_STACK);
         fStackType = ValueTypeStack.getTypeFromString(stack);
     }
 
@@ -175,7 +176,7 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
      *
      * @return The state system associated with the state system container
      */
-    protected ITmfStateSystem getStateSystem() {
+    protected @Nullable ITmfStateSystem getStateSystem() {
         return fContainer.getStateSystem();
     }
 
@@ -246,7 +247,7 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
      *            The name of the field of which to get the value
      * @return The value of the event field
      */
-    protected ITmfStateValue getEventFieldValue(@NonNull ITmfEvent event, String fieldName) {
+    protected ITmfStateValue getEventFieldValue(ITmfEvent event, @Nullable String fieldName) {
 
         ITmfStateValue value = TmfStateValue.nullValue();
 
@@ -254,6 +255,9 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
 
         /* Exception for "CPU", returns the source of this event */
         /* FIXME : Nameclash if a eventfield have "cpu" for name. */
+        if (fieldName == null) {
+            throw new IllegalStateException();
+        }
         if (fieldName.equals(TmfXmlStrings.CPU)) {
             return TmfStateValue.newValueInt(Integer.valueOf(event.getSource()));
         }
@@ -432,7 +436,7 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
          * @throws AttributeNotFoundException
          *             Pass through the exception it received
          */
-        public void handleEvent(@NonNull ITmfEvent event, int quark, long timestamp) throws StateValueTypeException, TimeRangeException, AttributeNotFoundException {
+        public void handleEvent(ITmfEvent event, int quark, long timestamp) throws StateValueTypeException, TimeRangeException, AttributeNotFoundException {
             if (fIncrement) {
                 incrementValue(event, quark, timestamp);
             } else {
