@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
@@ -40,6 +41,8 @@ import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModul
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.AbstractTimeGraphView;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphCombo;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
@@ -63,7 +66,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
     /**
      * View ID.
      */
-    public static final String ID = "org.eclipse.linuxtools.lttng2.kernel.ui.views.controlflow"; //$NON-NLS-1$
+    public static final @NonNull String ID = "org.eclipse.linuxtools.lttng2.kernel.ui.views.controlflow"; //$NON-NLS-1$
 
     private static final String PROCESS_COLUMN = Messages.ControlFlowView_processColumn;
     private static final String TID_COLUMN = Messages.ControlFlowView_tidColumn;
@@ -71,7 +74,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
     private static final String BIRTH_TIME_COLUMN = Messages.ControlFlowView_birthTimeColumn;
     private static final String TRACE_COLUMN = Messages.ControlFlowView_traceColumn;
 
-    private static final String[] COLUMN_NAMES = new String[] {
+    private static final @NonNull String[] COLUMN_NAMES = new String[] {
             PROCESS_COLUMN,
             TID_COLUMN,
             PTID_COLUMN,
@@ -79,7 +82,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
             TRACE_COLUMN
     };
 
-    private static final String[] FILTER_COLUMN_NAMES = new String[] {
+    private static final @NonNull String[] FILTER_COLUMN_NAMES = new String[] {
             PROCESS_COLUMN,
             TID_COLUMN
     };
@@ -112,15 +115,20 @@ public class ControlFlowView extends AbstractTimeGraphView {
             section = settings.addNewSection(getClass().getName());
         }
 
-        IAction hideArrowsAction = getTimeGraphCombo().getTimeGraphViewer().getHideArrowsAction(section);
+        TimeGraphCombo tgCombo = getTimeGraphCombo();
+        if (tgCombo == null) {
+            throw new IllegalStateException();
+        }
+
+        IAction hideArrowsAction = tgCombo.getTimeGraphViewer().getHideArrowsAction(section);
         manager.add(hideArrowsAction);
 
-        IAction followArrowBwdAction = getTimeGraphCombo().getTimeGraphViewer().getFollowArrowBwdAction();
+        IAction followArrowBwdAction = tgCombo.getTimeGraphViewer().getFollowArrowBwdAction();
         followArrowBwdAction.setText(Messages.ControlFlowView_followCPUBwdText);
         followArrowBwdAction.setToolTipText(Messages.ControlFlowView_followCPUBwdText);
         manager.add(followArrowBwdAction);
 
-        IAction followArrowFwdAction = getTimeGraphCombo().getTimeGraphViewer().getFollowArrowFwdAction();
+        IAction followArrowFwdAction = tgCombo.getTimeGraphViewer().getFollowArrowFwdAction();
         followArrowFwdAction.setText(Messages.ControlFlowView_followCPUFwdText);
         followArrowFwdAction.setToolTipText(Messages.ControlFlowView_followCPUFwdText);
         manager.add(followArrowFwdAction);
@@ -181,6 +189,9 @@ public class ControlFlowView extends AbstractTimeGraphView {
 
         @Override
         public String getColumnText(Object element, int columnIndex) {
+            if (!(element instanceof ControlFlowEntry)) {
+                return ""; //$NON-NLS-1$
+            }
             ControlFlowEntry entry = (ControlFlowEntry) element;
 
             if (COLUMN_NAMES[columnIndex].equals(Messages.ControlFlowView_processColumn)) {
@@ -205,6 +216,9 @@ public class ControlFlowView extends AbstractTimeGraphView {
 
         @Override
         public String getColumnText(Object element, int columnIndex) {
+            if (!(element instanceof ControlFlowEntry)) {
+                return ""; //$NON-NLS-1$
+            }
             ControlFlowEntry entry = (ControlFlowEntry) element;
 
             if (columnIndex == 0) {
@@ -223,9 +237,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
 
     @Override
     protected void buildEventList(final ITmfTrace trace, ITmfTrace parentTrace, IProgressMonitor monitor) {
-        if (trace == null) {
-            return;
-        }
+
         ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(trace, LttngKernelAnalysisModule.ID);
         if (ssq == null) {
             return;
@@ -336,7 +348,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
         }
     }
 
-    private void updateTree(List<ControlFlowEntry> entryList, ITmfTrace parentTrace) {
+    private void updateTree(List<ControlFlowEntry> entryList, @NonNull ITmfTrace parentTrace) {
         List<TimeGraphEntry> rootListToAdd = new ArrayList<>();
         List<TimeGraphEntry> rootListToRemove = new ArrayList<>();
         List<TimeGraphEntry> rootList = getEntryList(parentTrace);
@@ -374,7 +386,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
         removeFromEntryList(parentTrace, rootListToRemove);
     }
 
-    private void buildStatusEvents(ITmfTrace trace, ControlFlowEntry entry, IProgressMonitor monitor, long start, long end) {
+    private void buildStatusEvents(ITmfTrace trace, ControlFlowEntry entry, @NonNull IProgressMonitor monitor, long start, long end) {
         if (start < entry.getEndTime() && end > entry.getStartTime()) {
             ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), LttngKernelAnalysisModule.ID);
             if (ssq == null) {
@@ -505,12 +517,17 @@ public class ControlFlowView extends AbstractTimeGraphView {
     @Override
     protected void synchingToTime(long time) {
         int selected = getSelectionValue(time);
+        TimeGraphViewer tgViewer = getTimeGraphViewer();
+        TimeGraphCombo tgCombo = getTimeGraphCombo();
+        if (tgViewer == null || tgCombo == null) {
+            return;
+        }
         if (selected > 0) {
-            for (Object element : getTimeGraphViewer().getExpandedElements()) {
+            for (Object element : tgViewer.getExpandedElements()) {
                 if (element instanceof ControlFlowEntry) {
                     ControlFlowEntry entry = (ControlFlowEntry) element;
                     if (entry.getThreadId() == selected) {
-                        getTimeGraphCombo().setSelection(entry);
+                        tgCombo.setSelection(entry);
                         break;
                     }
                 }
@@ -521,8 +538,12 @@ public class ControlFlowView extends AbstractTimeGraphView {
     @Override
     protected List<ILinkEvent> getLinkList(long startTime, long endTime, long resolution, IProgressMonitor monitor) {
         List<ILinkEvent> list = new ArrayList<>();
-        ITmfTrace[] traces = TmfTraceManager.getTraceSet(getTrace());
-        List<TimeGraphEntry> entryList = getEntryList(getTrace());
+        ITmfTrace viewTrace = getTrace();
+        if (viewTrace == null) {
+            return list;
+        }
+        ITmfTrace[] traces = TmfTraceManager.getTraceSet(viewTrace);
+        List<TimeGraphEntry> entryList = getEntryList(viewTrace);
         if (traces == null || entryList == null) {
             return list;
         }
@@ -551,7 +572,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
                     long lastEnd = 0;
                     for (ITmfStateInterval currentThreadInterval : currentThreadIntervals) {
                         if (monitor.isCanceled()) {
-                            return null;
+                            return list;
                         }
                         long time = currentThreadInterval.getStartTime();
                         if (time != lastEnd) {
