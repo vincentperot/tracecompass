@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.Attributes;
 import org.eclipse.tracecompass.internal.lttng2.kernel.ui.Messages;
@@ -50,9 +51,9 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 public class ResourcesView extends AbstractTimeGraphView {
 
     /** View ID. */
-    public static final String ID = "org.eclipse.linuxtools.lttng2.kernel.ui.views.resources"; //$NON-NLS-1$
+    public static final @NonNull String ID = "org.eclipse.linuxtools.lttng2.kernel.ui.views.resources"; //$NON-NLS-1$
 
-    private static final String[] FILTER_COLUMN_NAMES = new String[] {
+    private static final @NonNull String[] FILTER_COLUMN_NAMES = new String[] {
             Messages.ResourcesView_stateTypeName
     };
 
@@ -97,9 +98,7 @@ public class ResourcesView extends AbstractTimeGraphView {
 
     @Override
     protected void buildEventList(ITmfTrace trace, ITmfTrace parentTrace, IProgressMonitor monitor) {
-        if (trace == null) {
-            return;
-        }
+
         ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(trace, LttngKernelAnalysisModule.ID);
         if (ssq == null) {
             return;
@@ -136,7 +135,8 @@ public class ResourcesView extends AbstractTimeGraphView {
             if (traceEntry == null) {
                 traceEntry = new ResourcesEntry(trace, trace.getName(), startTime, endTime, 0);
                 traceEntry.sortChildren(comparator);
-                List<TimeGraphEntry> entryList = Collections.singletonList(traceEntry);
+                @SuppressWarnings("null")
+                @NonNull List<TimeGraphEntry> entryList = Collections.singletonList(traceEntry);
                 addToEntryList(parentTrace, entryList);
             } else {
                 traceEntry.updateEndTime(endTime);

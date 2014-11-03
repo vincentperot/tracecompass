@@ -74,19 +74,19 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
     /** View ID. */
     public static final @NonNull String ID = "org.eclipse.linuxtools.tmf.analysis.xml.ui.views.timegraph"; //$NON-NLS-1$
 
-    private static final String[] DEFAULT_COLUMN_NAMES = new String[] {
+    private static final @NonNull String[] DEFAULT_COLUMN_NAMES = new String[] {
             Messages.XmlTimeGraphView_ColumnName,
             Messages.XmlTimeGraphView_ColumnId,
             Messages.XmlTimeGraphView_ColumnParentId,
     };
 
-    private static final String[] DEFAULT_FILTER_COLUMN_NAMES = new String[] {
+    private static final @NonNull String[] DEFAULT_FILTER_COLUMN_NAMES = new String[] {
             Messages.XmlTimeGraphView_ColumnName,
             Messages.XmlTimeGraphView_ColumnId
     };
 
     /** The relative weight of the sash */
-    private static final int[] fWeight = { 1, 2 };
+    private static final @NonNull int[] fWeight = { 1, 2 };
 
     private static final String EMPTY_STRING = ""; //$NON-NLS-1$
     private static final String SPLIT_STRING = "/"; //$NON-NLS-1$
@@ -169,6 +169,9 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
 
         @Override
         public String getColumnText(Object element, int columnIndex) {
+            if (!(element instanceof XmlEntry)) {
+                return EMPTY_STRING;
+            }
             XmlEntry entry = (XmlEntry) element;
 
             if (DEFAULT_COLUMN_NAMES[columnIndex].equals(Messages.XmlTimeGraphView_ColumnName)) {
@@ -423,7 +426,7 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
                 entryStart, entryEnd, EntryDisplayType.DISPLAY, ss, entryElement);
     }
 
-    private void buildStatusEvent(XmlEntry traceEntry, IProgressMonitor monitor, long start, long end) {
+    private void buildStatusEvent(XmlEntry traceEntry, @NonNull IProgressMonitor monitor, long start, long end) {
         long resolution = (end - start) / getDisplayWidth();
         long startTime = Math.max(start, traceEntry.getStartTime());
         long endTime = Math.min(end + 1, traceEntry.getEndTime());
@@ -516,6 +519,7 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
         return eventList;
     }
 
+    @SuppressWarnings("null")
     @Override
     protected List<ILinkEvent> getLinkList(long startTime, long endTime, long resolution, IProgressMonitor monitor) {
         /* TODO: not implemented yet, need XML to go along */
