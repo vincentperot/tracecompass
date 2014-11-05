@@ -21,12 +21,12 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public class TestAnalysis extends TmfAbstractAnalysisModule {
 
-    private int output = 0;
-
     /**
      * Test parameter. If set, simulate cancellation
      */
     public static final String PARAM_TEST = "test";
+
+    private int output = 0;
 
     /**
      * Constructor

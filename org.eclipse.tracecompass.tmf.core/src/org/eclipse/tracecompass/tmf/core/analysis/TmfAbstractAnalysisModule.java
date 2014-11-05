@@ -260,6 +260,18 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
         cancel();
     }
 
+    /**
+     * Get an iterable list of all analyzes this analysis depends on. These
+     * analyzes will be scheduled before this analysis starts and the current
+     * analysis will not be considered completed until all the dependent
+     * analyzes are finished.
+     *
+     * @return An iterable list of analysis this analyzes depends on.
+     */
+    protected Iterable<IAnalysisModule> getDependentAnalyses() {
+        return Collections.EMPTY_SET;
+    }
+
     private void execute(@NonNull final ITmfTrace trace) {
 
         /*
@@ -281,6 +293,12 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
             fStarted = true;
         }
 
+        /* Execute dependent analyses before creating the job for this one */
+        final Iterable<IAnalysisModule> dependentAnalyses = getDependentAnalyses();
+        for (IAnalysisModule module : dependentAnalyses) {
+            module.schedule();
+        }
+
         /*
          * Actual analysis will be run on a separate thread
          */
@@ -291,6 +309,9 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
                     monitor.beginTask("", IProgressMonitor.UNKNOWN); //$NON-NLS-1$
                     broadcast(new TmfStartAnalysisSignal(TmfAbstractAnalysisModule.this, TmfAbstractAnalysisModule.this));
                     fAnalysisCancelled = !executeAnalysis(monitor);
+                    for (IAnalysisModule module : dependentAnalyses) {
+                        module.waitForCompletion(monitor);
+                    }
                 } catch (TmfAnalysisException e) {
                     Activator.logError("Error executing analysis with trace " + trace.getName(), e); //$NON-NLS-1$
                 } finally {

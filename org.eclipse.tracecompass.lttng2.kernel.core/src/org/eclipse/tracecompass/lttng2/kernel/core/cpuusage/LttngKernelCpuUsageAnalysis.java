@@ -13,11 +13,12 @@
 package org.eclipse.tracecompass.lttng2.kernel.core.cpuusage;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.Activator;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.Attributes;
 import org.eclipse.tracecompass.lttng2.kernel.core.analysis.LttngKernelAnalysisModule;
@@ -27,6 +28,7 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedE
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -61,16 +63,17 @@ public class LttngKernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
     }
 
     @Override
-    protected boolean executeAnalysis(IProgressMonitor monitor) {
+    protected Iterable<IAnalysisModule> getDependentAnalyses() {
+        Set<IAnalysisModule> modules = new HashSet<>();
         /*
          * This analysis depends on the LTTng kernel analysis, so we'll start
          * that build at the same time
          */
-        LttngKernelAnalysisModule module = getTrace().getAnalysisModuleOfClass(LttngKernelAnalysisModule.class, LttngKernelAnalysisModule.ID);
-        if (module != null) {
-            module.schedule();
+        Iterable<LttngKernelAnalysisModule> kernelModules = getTrace().getAnalysisModulesOfClass(LttngKernelAnalysisModule.class);
+        if (kernelModules.iterator().hasNext()) {
+            modules.add(kernelModules.iterator().next());
         }
-        return super.executeAnalysis(monitor);
+        return modules;
     }
 
     /**
