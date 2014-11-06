@@ -59,8 +59,11 @@ public class CtfTmfEvent extends TmfEvent
     private final long fTypeId;
     private final String fEventName;
     private final IEventDeclaration fEventDeclaration;
-    @NonNull
-    private final EventDefinition fEvent;
+    private final @NonNull EventDefinition fEvent;
+    private final String fSource;
+    private final String fReference;
+
+    /** Lazy-loaded field containing the event's payload */
     private ITmfEventField fContent;
 
     // ------------------------------------------------------------------------
@@ -75,12 +78,16 @@ public class CtfTmfEvent extends TmfEvent
         super(trace,
                 rank,
                 timestamp,
-                String.valueOf(cpu), // Source
-                null, // Event type. We don't use TmfEvent's field here, we
-                      // re-implement getType()
-                null, // Content handled with a lazy loaded re-implemented in
-                      // getContent()
-                fileName // Reference
+                /*
+                 * Event type. We don't use TmfEvent's field here, we
+                 * re-implement getType().
+                 */
+                null,
+                /*
+                 * Content handled with a lazy-loaded field re-implemented in
+                 * getContent().
+                 */
+                null
         );
 
         fEventDeclaration = declaration;
@@ -88,7 +95,8 @@ public class CtfTmfEvent extends TmfEvent
         fTypeId = declaration.getId().longValue();
         fEventName = declaration.getName();
         fEvent = eventDefinition;
-
+        fSource = String.valueOf(cpu);
+        fReference = fileName;
     }
 
     /**
@@ -107,14 +115,14 @@ public class CtfTmfEvent extends TmfEvent
                 ITmfContext.UNKNOWN_RANK,
                 new CtfTmfTimestamp(-1),
                 null,
-                null,
-                new TmfEventField("", null, new CtfTmfEventField[0]), //$NON-NLS-1$
-                null);
+                new TmfEventField("", null, new CtfTmfEventField[0])); //$NON-NLS-1$
         fSourceCPU = -1;
         fTypeId = -1;
         fEventName = EMPTY_CTF_EVENT_NAME;
         fEventDeclaration = null;
         fEvent = EventDefinition.NULL_EVENT;
+        fSource = null;
+        fReference = null;
     }
 
     /**
@@ -149,6 +157,24 @@ public class CtfTmfEvent extends TmfEvent
      */
     public long getID() {
         return fTypeId;
+    }
+
+    /**
+     * Return this event's source CPU.
+     *
+     * @return The source CPU
+     */
+    public String getSource() {
+        return fSource;
+    }
+
+    /**
+     * Return this event's reference
+     *
+     * @return The event's reference
+     */
+    public String getReference() {
+        return fReference;
     }
 
     @Override

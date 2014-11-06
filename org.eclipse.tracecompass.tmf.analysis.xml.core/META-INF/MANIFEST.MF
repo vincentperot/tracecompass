@@ -9,7 +9,8 @@ Bundle-Activator: org.eclipse.tracecompass.internal.tmf.analysis.xml.core.Activa
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.tracecompass.tmf.core
+ org.eclipse.tracecompass.tmf.core,
+ org.eclipse.tracecompass.tmf.ctf.core
 Export-Package: org.eclipse.tracecompass.internal.tmf.analysis.xml.core;x-friends:="org.eclipse.tracecompass.tmf.analysis.xml.core.tests",
  org.eclipse.tracecompass.tmf.analysis.xml.core.model,
  org.eclipse.tracecompass.tmf.analysis.xml.core.model.readonly,

@@ -26,6 +26,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.ctf.core.CtfTmfEvent;
 
 /**
  * Creates a state system with the total time spent on CPU for each thread and
@@ -75,7 +76,12 @@ public class LttngKernelCpuStateProvider extends AbstractTmfStateProvider {
     }
 
     @Override
-    protected void eventHandle(ITmfEvent event) {
+    protected void eventHandle(ITmfEvent uncheckedEvent) {
+        if (!(uncheckedEvent instanceof CtfTmfEvent)) {
+            return;
+        }
+        final CtfTmfEvent event = (CtfTmfEvent) uncheckedEvent;
+
         final String eventName = event.getType().getName();
 
         if (eventName.equals(LttngStrings.SCHED_SWITCH)) {

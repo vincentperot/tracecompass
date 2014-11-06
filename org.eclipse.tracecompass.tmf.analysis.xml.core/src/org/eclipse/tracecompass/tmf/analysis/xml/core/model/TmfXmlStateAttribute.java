@@ -28,6 +28,7 @@ import org.eclipse.tracecompass.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.stateprovider.TmfXmlStrings;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.ctf.core.CtfTmfEvent;
 import org.w3c.dom.Element;
 
 /**
@@ -216,8 +217,8 @@ public abstract class TmfXmlStateAttribute implements ITmfXmlStateAttribute {
                     return quark;
                 }
                 /* special case if field is CPU which is not in the field */
-                if (fName.equals(TmfXmlStrings.CPU)) {
-                    quark = getQuarkRelativeAndAdd(startQuark, event.getSource());
+                if (fName.equals(TmfXmlStrings.CPU) && (event instanceof CtfTmfEvent)) {
+                    quark = getQuarkRelativeAndAdd(startQuark, ((CtfTmfEvent) event).getSource());
                 } else {
                     final ITmfEventField content = event.getContent();
                     /* stop if the event field doesn't exist */

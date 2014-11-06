@@ -26,6 +26,7 @@ import org.eclipse.tracecompass.tmf.analysis.xml.core.module.IXmlStateSystemCont
 import org.eclipse.tracecompass.tmf.analysis.xml.core.stateprovider.TmfXmlStrings;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.ctf.core.CtfTmfEvent;
 import org.w3c.dom.Element;
 
 /**
@@ -254,8 +255,8 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
 
         /* Exception for "CPU", returns the source of this event */
         /* FIXME : Nameclash if a eventfield have "cpu" for name. */
-        if (fieldName.equals(TmfXmlStrings.CPU)) {
-            return TmfStateValue.newValueInt(Integer.valueOf(event.getSource()));
+        if (fieldName.equals(TmfXmlStrings.CPU) && (event instanceof CtfTmfEvent)) {
+            return TmfStateValue.newValueInt(Integer.valueOf(((CtfTmfEvent) event).getSource()));
         }
         /* Exception also for "TIMESTAMP", returns the timestamp of this event */
         if (fieldName.equals(TmfXmlStrings.TIMESTAMP)) {
