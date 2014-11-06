@@ -20,6 +20,7 @@
 package org.eclipse.tracecompass.tmf.ui.views.histogram;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -259,13 +260,10 @@ public class HistogramDataModel implements IHistogramDataModel {
     public void setTrace(ITmfTrace trace) {
         this.fTrace = trace;
         fTraceMap.clear();
-        ITmfTrace[] traces = TmfTraceManager.getTraceSet(fTrace);
-        if (traces != null) {
-            int i = 0;
-            for (ITmfTrace tr : traces) {
-                fTraceMap.put(tr, i);
-                i++;
-            }
+        int i = 0;
+        for (ITmfTrace tr : TmfTraceManager.getTraceSet(fTrace)) {
+            fTraceMap.put(tr, i);
+            i++;
         }
     }
 
@@ -284,11 +282,8 @@ public class HistogramDataModel implements IHistogramDataModel {
      * @since 3.0
      */
     public String[] getTraceNames() {
-        ITmfTrace[] traces = TmfTraceManager.getTraceSet(fTrace);
-        if (traces == null) {
-            return new String[0];
-        }
-        String[] traceNames = new String[traces.length];
+        Collection<ITmfTrace> traces = TmfTraceManager.getTraceSet(fTrace);
+        String[] traceNames = new String[traces.size()];
         int i = 0;
         for (ITmfTrace tr : traces) {
             traceNames[i] = tr.getName();
@@ -303,11 +298,11 @@ public class HistogramDataModel implements IHistogramDataModel {
      * @since 3.0
      */
     public int getNbTraces() {
-        ITmfTrace[] traces = TmfTraceManager.getTraceSet(fTrace);
-        if (traces == null) {
+        Collection<ITmfTrace> traces = TmfTraceManager.getTraceSet(fTrace);
+        if (traces.isEmpty()) {
             return 1; //
         }
-        return traces.length;
+        return traces.size();
     }
 
     /**
