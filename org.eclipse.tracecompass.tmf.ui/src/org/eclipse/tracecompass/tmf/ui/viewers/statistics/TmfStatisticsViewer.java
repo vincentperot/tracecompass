@@ -60,6 +60,8 @@ import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsTre
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsTreeNode;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfTreeContentProvider;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * A basic viewer to display statistics in the statistics view.
  *
@@ -501,8 +503,8 @@ public class TmfStatisticsViewer extends TmfViewer {
             // Checks if the trace is already in the statistics tree.
             int numNodeTraces = statisticsTreeNode.getNbChildren();
 
-            ITmfTrace[] traces = TmfTraceManager.getTraceSet(fTrace);
-            int numTraces = traces.length;
+            ImmutableSet<ITmfTrace> traces = TmfTraceManager.getTraceSet(fTrace);
+            int numTraces = traces.size();
 
             if (numTraces == numNodeTraces) {
                 boolean same = true;
@@ -510,8 +512,8 @@ public class TmfStatisticsViewer extends TmfViewer {
                  * Checks if the experiment contains the same traces as when
                  * previously selected.
                  */
-                for (int i = 0; i < numTraces; i++) {
-                    String traceName = traces[i].getName();
+                for (ITmfTrace trace : traces) {
+                    String traceName = trace.getName();
                     if (!statisticsTreeNode.containsChild(traceName)) {
                         same = false;
                         break;

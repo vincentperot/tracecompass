@@ -17,7 +17,6 @@
 package org.eclipse.tracecompass.tmf.ui.views.timegraph;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -1081,7 +1080,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      * @since 3.0
      */
     protected Iterable<ITmfTrace> getTracesToBuild(ITmfTrace trace) {
-        return Arrays.asList(TmfTraceManager.getTraceSet(trace));
+        return TmfTraceManager.getTraceSet(trace);
     }
 
     /**

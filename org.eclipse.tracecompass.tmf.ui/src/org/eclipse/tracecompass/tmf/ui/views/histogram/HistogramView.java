@@ -61,6 +61,8 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.ui.IActionBars;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * The purpose of this view is to provide graphical time distribution statistics about the trace events.
  * <p>
@@ -750,9 +752,9 @@ public class HistogramView extends TmfView {
 
         fTimeSpanControl.setValue(duration);
 
-        ITmfTrace[] traces = TmfTraceManager.getTraceSet(fTrace);
-        if (traces != null) {
-            this.showTraceAction.setEnabled(traces.length < fFullTraceHistogram.getMaxNbTraces());
+        ImmutableSet<ITmfTrace> traces = TmfTraceManager.getTraceSet(fTrace);
+        if (!traces.isEmpty()) {
+            this.showTraceAction.setEnabled(traces.size() < fFullTraceHistogram.getMaxNbTraces());
         }
         updateLegendArea();
 
@@ -768,8 +770,8 @@ public class HistogramView extends TmfView {
         }
         disposeLegendImages();
         if (fFullTraceHistogram.showTraces()) {
-            ITmfTrace[] traces = TmfTraceManager.getTraceSet(fTrace);
-            fLegendImages = new Image[traces.length];
+            ImmutableSet<ITmfTrace> traces = TmfTraceManager.getTraceSet(fTrace);
+            fLegendImages = new Image[traces.size()];
             int traceIndex = 0;
             for (ITmfTrace trace : traces) {
                 fLegendImages[traceIndex] = new Image(fLegendArea.getDisplay(), 16, 16);

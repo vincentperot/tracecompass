@@ -174,10 +174,10 @@ public class TmfTraceManagerTest {
         selectTrace(trace2);
 
         ITmfTrace[] expected = new ITmfTrace[] { trace2 };
-        ITmfTrace[] actual = tm.getActiveTraceSet();
+        ImmutableSet<ITmfTrace> actual = tm.getActiveTraceSet();
 
-        assertEquals(1, actual.length);
-        assertArrayEquals(expected, actual);
+        assertEquals(1, actual.size());
+        assertArrayEquals(expected, actual.toArray(new ITmfTrace[1]));
     }
 
     /**
@@ -190,10 +190,10 @@ public class TmfTraceManagerTest {
         openTrace(exp);
 
         ITmfTrace[] expected = new ITmfTrace[] { trace1, trace2 };
-        ITmfTrace[] actual = tm.getActiveTraceSet();
+        ImmutableSet<ITmfTrace> actual = tm.getActiveTraceSet();
 
-        assertEquals(2, actual.length);
-        assertArrayEquals(expected, actual);
+        assertEquals(2, actual.size());
+        assertArrayEquals(expected, actual.toArray(new ITmfTrace[2]));
     }
 
     /**

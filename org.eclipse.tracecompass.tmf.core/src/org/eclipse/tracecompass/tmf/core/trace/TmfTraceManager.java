@@ -45,6 +45,8 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
+import com.google.common.collect.ImmutableSet;
+
 /**
  * Central trace manager for TMF. It tracks the currently opened traces and
  * experiment, as well as the currently-selected time or time range and the
@@ -146,10 +148,10 @@ public final class TmfTraceManager {
     /**
      * Get the trace set of the currently active trace.
      *
-     * @return The active trace set
+     * @return The active trace set, immutable
      * @see #getTraceSet(ITmfTrace)
      */
-    public synchronized ITmfTrace[] getActiveTraceSet() {
+    public synchronized @NonNull ImmutableSet<ITmfTrace> getActiveTraceSet() {
         final ITmfTrace trace = fCurrentTrace;
         return getTraceSet(trace);
     }
@@ -199,17 +201,23 @@ public final class TmfTraceManager {
      *
      * @param trace
      *            The trace or experiment
-     * @return The corresponding trace set
+     * @return The corresponding trace set. The trace set is immutable.
      */
-    public static ITmfTrace[] getTraceSet(ITmfTrace trace) {
+    public static @NonNull ImmutableSet<ITmfTrace> getTraceSet(ITmfTrace trace) {
         if (trace == null) {
-            return null;
+            @SuppressWarnings("null")
+            @NonNull ImmutableSet<ITmfTrace> emptySet = ImmutableSet.of();
+            return emptySet;
         }
         if (trace instanceof TmfExperiment) {
             TmfExperiment exp = (TmfExperiment) trace;
-            return exp.getTraces();
+            @SuppressWarnings("null")
+            @NonNull ImmutableSet<ITmfTrace> tracesList = ImmutableSet.copyOf(Arrays.asList(exp.getTraces()));
+            return tracesList;
         }
-        return new ITmfTrace[] { trace };
+        @SuppressWarnings("null")
+        @NonNull ImmutableSet<ITmfTrace> singleton = ImmutableSet.of(trace);
+        return singleton;
     }
 
     /**
@@ -220,13 +228,14 @@ public final class TmfTraceManager {
      *
      * @param trace
      *            The trace or experiment
-     * @return The corresponding trace set, including the experiment
+     * @return The corresponding trace set, including the experiment. The
+     *         returned set is immutable.
      * @since 3.1
      */
-    public static @NonNull Set<ITmfTrace> getTraceSetWithExperiment(ITmfTrace trace) {
+    public static @NonNull ImmutableSet<ITmfTrace> getTraceSetWithExperiment(ITmfTrace trace) {
         if (trace == null) {
             @SuppressWarnings("null")
-            @NonNull Set<ITmfTrace> emptySet = Collections.EMPTY_SET;
+            @NonNull ImmutableSet<ITmfTrace> emptySet = ImmutableSet.of();
             return emptySet;
         }
         if (trace instanceof TmfExperiment) {
@@ -234,10 +243,12 @@ public final class TmfTraceManager {
             ITmfTrace[] traces = exp.getTraces();
             Set<ITmfTrace> alltraces = new LinkedHashSet<>(Arrays.asList(traces));
             alltraces.add(exp);
-            return alltraces;
+            @SuppressWarnings("null")
+            @NonNull ImmutableSet<ITmfTrace> tracesList = ImmutableSet.copyOf(alltraces);
+            return tracesList;
         }
         @SuppressWarnings("null")
-        @NonNull Set<ITmfTrace> singleton = Collections.singleton(trace);
+        @NonNull ImmutableSet<ITmfTrace> singleton = ImmutableSet.of(trace);
         return singleton;
     }
 
