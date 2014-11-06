@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.ctf.core.tests.types;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.nio.ByteBuffer;
@@ -123,4 +124,37 @@ public class SequenceDeclaration2Test {
         String left = "[declaration] sequence[";
         assertEquals(left, result.substring(0, left.length()));
     }
+
+    /**
+     * Test the hashcode
+     */
+    @Test
+    public void hashcodeTest() {
+        assertEquals(-1004263568, fixture.hashCode());
+        SequenceDeclaration a = new SequenceDeclaration("Hi", IntegerDeclaration.INT_32B_DECL);
+        SequenceDeclaration b = new SequenceDeclaration("Hello", IntegerDeclaration.INT_32B_DECL);
+        SequenceDeclaration c = new SequenceDeclaration("Hi", new StringDeclaration());
+        SequenceDeclaration d = new SequenceDeclaration("Hi", IntegerDeclaration.INT_32B_DECL);
+        assertNotEquals(a.hashCode(), b.hashCode());
+        assertNotEquals(a.hashCode(), c.hashCode());
+        assertEquals(a.hashCode(), d.hashCode());
+    }
+
+    /**
+     * Test the equals
+     */
+    @Test
+    public void equalsTest() {
+        SequenceDeclaration a = new SequenceDeclaration("Hi", IntegerDeclaration.INT_32B_DECL);
+        SequenceDeclaration b = new SequenceDeclaration("Hello", IntegerDeclaration.INT_32B_DECL);
+        SequenceDeclaration c = new SequenceDeclaration("Hi", new StringDeclaration());
+        SequenceDeclaration d = new SequenceDeclaration("Hi", IntegerDeclaration.INT_32B_DECL);
+        assertNotEquals(a, null);
+        assertNotEquals(a, new Object());
+        assertNotEquals(a, b);
+        assertNotEquals(a, c);
+        assertEquals(a, d);
+        assertEquals(a, a);
+    }
+
 }
