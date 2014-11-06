@@ -66,4 +66,7 @@ public abstract class Declaration implements IDeclaration {
         pos = (pos + mask) & ~mask;
         input.position(pos);
     }
+
+
+
 }
