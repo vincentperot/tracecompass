@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.ctf.core.tests.types;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -46,5 +47,34 @@ public class FloatDeclarationTest {
     public void toStringTest() {
         fixture = new FloatDeclaration(8, 24, ByteOrder.nativeOrder(), 0);
         assertTrue(fixture.toString().contains("float"));
+    }
+
+    /**
+     * Test the hashcode
+     */
+    @Test
+    public void hashcodeTest() {
+        assertEquals(5106065, new FloatDeclaration(8, 24, ByteOrder.BIG_ENDIAN, 0).hashCode());
+    }
+
+    /**
+     * Test the equals
+     */
+    @Test
+    public void equalsTest() {
+        FloatDeclaration a = new FloatDeclaration(8, 24, ByteOrder.BIG_ENDIAN, 0);
+        FloatDeclaration b = new FloatDeclaration(8, 24, ByteOrder.LITTLE_ENDIAN, 0);
+        FloatDeclaration c = new FloatDeclaration(8, 24, ByteOrder.BIG_ENDIAN, 8);
+        FloatDeclaration d = new FloatDeclaration(8, 8, ByteOrder.BIG_ENDIAN, 0);
+        FloatDeclaration e = new FloatDeclaration(24, 24, ByteOrder.BIG_ENDIAN, 0);
+        FloatDeclaration f = new FloatDeclaration(8, 24, ByteOrder.BIG_ENDIAN, 0);
+        assertNotEquals(a, null);
+        assertNotEquals(a, new Object());
+        assertNotEquals(a, b);
+        assertNotEquals(a, c);
+        assertNotEquals(a, d);
+        assertNotEquals(a, e);
+        assertEquals(a, f);
+        assertEquals(a, a);
     }
 }

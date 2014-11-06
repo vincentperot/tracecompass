@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
@@ -39,6 +41,7 @@ import com.google.common.collect.Multimap;
  * @author Matthew Khouzam
  * @since 3.1
  */
+@NonNullByDefault
 public class SequenceDeclaration extends CompoundDeclaration {
 
     // ------------------------------------------------------------------------
@@ -47,7 +50,8 @@ public class SequenceDeclaration extends CompoundDeclaration {
 
     private final IDeclaration fElemType;
     private final String fLengthName;
-    private final Multimap<String, String> fPaths = ArrayListMultimap.create();
+    @SuppressWarnings("null")
+    private final transient Multimap<String, String> fPaths = ArrayListMultimap.create();
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -61,7 +65,13 @@ public class SequenceDeclaration extends CompoundDeclaration {
      * @param elemType
      *            The element type
      */
-    public SequenceDeclaration(String lengthName, IDeclaration elemType) {
+    public SequenceDeclaration(@Nullable String lengthName, @Nullable IDeclaration elemType) {
+        if (elemType == null) {
+            throw new IllegalArgumentException("elemType cannot be null"); //$NON-NLS-1$
+        }
+        if (lengthName == null) {
+            throw new IllegalArgumentException("lengthName cannot be null"); //$NON-NLS-1$
+        }
         fElemType = elemType;
         fLengthName = lengthName;
     }
@@ -90,7 +100,7 @@ public class SequenceDeclaration extends CompoundDeclaration {
 
     @Override
     public AbstractArrayDefinition createDefinition(
-            IDefinitionScope definitionScope, String fieldName, BitBuffer input) throws CTFReaderException {
+            @Nullable IDefinitionScope definitionScope, String fieldName, BitBuffer input) throws CTFReaderException {
         IDefinition lenDef = null;
 
         if (definitionScope != null) {
@@ -130,11 +140,13 @@ public class SequenceDeclaration extends CompoundDeclaration {
         Builder<Definition> definitions = new ImmutableList.Builder<>();
         for (int i = 0; i < length; i++) {
             @SuppressWarnings("null")
-            @NonNull String elemName = paths.get(i);
+            @NonNull
+            String elemName = paths.get(i);
             definitions.add(fElemType.createDefinition(definitionScope, elemName, input));
         }
         @SuppressWarnings("null")
-        @NonNull ImmutableList<Definition> build = definitions.build();
+        @NonNull
+        ImmutableList<Definition> build = definitions.build();
         return new ArrayDefinition(this, definitionScope, fieldName, build);
     }
 
@@ -147,6 +159,40 @@ public class SequenceDeclaration extends CompoundDeclaration {
     @Override
     public int getMaximumSize() {
         return Integer.MAX_VALUE;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + fElemType.hashCode();
+        result = prime * result + fLengthName.hashCode();
+        result = prime * result + fPaths.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SequenceDeclaration other = (SequenceDeclaration) obj;
+        if (!fElemType.equals(other.fElemType)) {
+            return false;
+        }
+        if (!fLengthName.equals(other.fLengthName)) {
+            return false;
+        }
+        if (!fPaths.equals(other.fPaths)) {
+            return false;
+        }
+        return true;
     }
 
 }

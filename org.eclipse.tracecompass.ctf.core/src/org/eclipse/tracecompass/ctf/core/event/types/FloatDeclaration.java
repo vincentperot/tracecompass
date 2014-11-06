@@ -13,6 +13,8 @@ package org.eclipse.tracecompass.ctf.core.event.types;
 
 import java.nio.ByteOrder;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
@@ -25,6 +27,7 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
  * @version 1.0
  * @author Matthew Khouzam
  */
+@NonNullByDefault
 public final class FloatDeclaration extends Declaration implements ISimpleDatatypeDeclaration {
 
     // ------------------------------------------------------------------------
@@ -52,10 +55,13 @@ public final class FloatDeclaration extends Declaration implements ISimpleDataty
      * @param alignment
      *            The alignment. Should be &ge; 1
      */
-    public FloatDeclaration(int exponent, int mantissa, ByteOrder byteOrder,
+    public FloatDeclaration(int exponent, int mantissa, @Nullable ByteOrder byteOrder,
             long alignment) {
         fMantissa = mantissa;
         fExponent = exponent;
+        if (byteOrder == null) {
+            throw new IllegalArgumentException("byteOrder cannot be null"); //$NON-NLS-1$
+        }
         fByteOrder = byteOrder;
         fAlignement = Math.max(alignment, 1);
 
@@ -107,7 +113,7 @@ public final class FloatDeclaration extends Declaration implements ISimpleDataty
      * @since 3.0
      */
     @Override
-    public FloatDefinition createDefinition(IDefinitionScope definitionScope,
+    public FloatDefinition createDefinition(@Nullable IDefinitionScope definitionScope,
             String fieldName, BitBuffer input) throws CTFReaderException {
         ByteOrder byteOrder = input.getByteOrder();
         input.setByteOrder(fByteOrder);
@@ -174,4 +180,43 @@ public final class FloatDeclaration extends Declaration implements ISimpleDataty
         ret *= expPow;
         return ret;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (fAlignement ^ (fAlignement >>> 32));
+        result = prime * result + (fByteOrder.equals(ByteOrder.BIG_ENDIAN) ? 4321 : 1234);
+        result = prime * result + fExponent;
+        result = prime * result + fMantissa;
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        FloatDeclaration other = (FloatDeclaration) obj;
+        if (fAlignement != other.fAlignement) {
+            return false;
+        }
+        if (!fByteOrder.equals(other.fByteOrder)) {
+            return false;
+        }
+        if (fExponent != other.fExponent) {
+            return false;
+        }
+        if (fMantissa != other.fMantissa) {
+            return false;
+        }
+        return true;
+    }
+
 }
