@@ -12,9 +12,12 @@
 
 package org.eclipse.tracecompass.ctf.core.event.types;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -232,7 +235,9 @@ public class StructDeclaration extends Declaration {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = (prime * result) + fFieldMap.entrySet().hashCode();
+        for (Entry<String, IDeclaration> field : fFieldMap.entrySet()) {
+            result = prime * result + field.getValue().hashCode();
+        }
         result = (prime * result) + (int) (fMaxAlign ^ (fMaxAlign >>> 32));
         return result;
     }
@@ -249,9 +254,22 @@ public class StructDeclaration extends Declaration {
             return false;
         }
         StructDeclaration other = (StructDeclaration) obj;
-        if (!fFieldMap.entrySet().equals(other.fFieldMap.entrySet())) {
+        if (fFieldMap.size() != other.fFieldMap.size()) {
             return false;
         }
+        // check the order of the fields
+        List<IDeclaration> localDecs = new ArrayList<>();
+        localDecs.addAll(fFieldMap.values());
+        List<IDeclaration> otherDecs = new ArrayList<>();
+        otherDecs.addAll(other.fFieldMap.values());
+        for (int i = 0; i < fFieldMap.size(); i++) {
+            IDeclaration otherDec = otherDecs.get(i);
+            IDeclaration localDec = localDecs.get(i);
+            if (!otherDec.equals(localDec)) {
+                return false;
+            }
+        }
+
         if (fMaxAlign != other.fMaxAlign) {
             return false;
         }
