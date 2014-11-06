@@ -20,7 +20,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
@@ -174,10 +175,10 @@ public class TmfTraceManagerTest {
         selectTrace(trace2);
 
         ITmfTrace[] expected = new ITmfTrace[] { trace2 };
-        ITmfTrace[] actual = tm.getActiveTraceSet();
+        Collection<ITmfTrace> actual = tm.getActiveTraceSet();
 
-        assertEquals(1, actual.length);
-        assertArrayEquals(expected, actual);
+        assertEquals(1, actual.size());
+        assertArrayEquals(expected, actual.toArray(new ITmfTrace[1]));
     }
 
     /**
@@ -190,10 +191,10 @@ public class TmfTraceManagerTest {
         openTrace(exp);
 
         ITmfTrace[] expected = new ITmfTrace[] { trace1, trace2 };
-        ITmfTrace[] actual = tm.getActiveTraceSet();
+        Collection<ITmfTrace> actual = tm.getActiveTraceSet();
 
-        assertEquals(2, actual.length);
-        assertArrayEquals(expected, actual);
+        assertEquals(2, actual.size());
+        assertArrayEquals(expected, actual.toArray(new ITmfTrace[2]));
     }
 
     /**
@@ -202,8 +203,8 @@ public class TmfTraceManagerTest {
     @Test
     public void testTraceSetWithExperiment() {
         /* Test with a trace */
-        Set<ITmfTrace> expected = ImmutableSet.of(trace1);
-        Set<ITmfTrace> actual = TmfTraceManager.getTraceSetWithExperiment(trace1);
+        Collection<ITmfTrace> expected = Collections.singleton(trace1);
+        Collection<ITmfTrace> actual = TmfTraceManager.getTraceSetWithExperiment(trace1);
         assertEquals(1, actual.size());
         assertEquals(expected, actual);
 
