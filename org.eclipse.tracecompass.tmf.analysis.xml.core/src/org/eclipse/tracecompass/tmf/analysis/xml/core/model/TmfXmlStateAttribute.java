@@ -54,7 +54,8 @@ public abstract class TmfXmlStateAttribute implements ITmfXmlStateAttribute {
         EVENTFIELD,
         QUERY,
         LOCATION,
-        SELF
+        SELF,
+        EVENTNAME
     }
 
     /** Type of attribute */
@@ -102,6 +103,10 @@ public abstract class TmfXmlStateAttribute implements ITmfXmlStateAttribute {
             }
             fType = StateAttributeType.QUERY;
             fName = null;
+            break;
+        case TmfXmlStrings.TYPE_EVENT_NAME:
+            fType = StateAttributeType.EVENTNAME;
+            fName = fContainer.getAttributeValue(attribute.getAttribute(TmfXmlStrings.VALUE));
             break;
         case TmfXmlStrings.NULL:
             fType = StateAttributeType.NONE;
@@ -300,6 +305,15 @@ public abstract class TmfXmlStateAttribute implements ITmfXmlStateAttribute {
             case SELF:
                 return startQuark;
             case NONE:
+            case EVENTNAME: {
+                int quark = IXmlStateSystemContainer.ERROR_QUARK;
+                if (event == null) {
+                    Activator.logWarning("XML State attribute: looking for an eventname, but event is null"); //$NON-NLS-1$
+                    return quark;
+                }
+                quark = getQuarkRelativeAndAdd(startQuark, event.getType().getName());
+                return quark;
+            }
             default:
                 return startQuark;
             }
