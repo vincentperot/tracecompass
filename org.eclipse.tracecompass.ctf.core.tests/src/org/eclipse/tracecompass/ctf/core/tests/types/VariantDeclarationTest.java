@@ -12,6 +12,7 @@
 package org.eclipse.tracecompass.ctf.core.tests.types;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
 
@@ -205,5 +206,39 @@ public class VariantDeclarationTest {
         String right = result.substring(0, left.length());
 
         assertEquals(left, right);
+    }
+
+    /**
+     * Test the hashcode
+     */
+    @Test
+    public void hashcodeTest() {
+        assertEquals(923521, fixture.hashCode());
+    }
+
+    /**
+     * Test the equals
+     */
+    @Test
+    public void equalsTest() {
+        VariantDeclaration a = new VariantDeclaration();
+        VariantDeclaration b = new VariantDeclaration();
+        b.addField("hi", new StringDeclaration());
+        VariantDeclaration c = new VariantDeclaration();
+        c.addField("hi", new StringDeclaration());
+        VariantDeclaration d = new VariantDeclaration();
+        assertNotEquals(a, null);
+        assertNotEquals(a, new Object());
+        assertNotEquals(a, b);
+        assertNotEquals(a, c);
+        assertEquals(a, d);
+        assertEquals(a, a);
+        assertEquals(b, c);
+        b.setTag("hi");
+        assertNotEquals(b, c);
+        c.setTag("Hello");
+        assertNotEquals(b, c);
+        c.setTag("hi");
+        assertEquals(b, c);
     }
 }
