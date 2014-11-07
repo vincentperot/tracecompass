@@ -164,7 +164,6 @@ public class SequenceDeclaration extends CompoundDeclaration {
         int result = 1;
         result = prime * result + fElemType.hashCode();
         result = prime * result + fLengthName.hashCode();
-        result = prime * result + fPaths.hashCode();
         return result;
     }
 
@@ -186,7 +185,25 @@ public class SequenceDeclaration extends CompoundDeclaration {
         if (!fLengthName.equals(other.fLengthName)) {
             return false;
         }
-        if (!fPaths.equals(other.fPaths)) {
+        return true;
+    }
+
+    @Override
+    public boolean isBinaryEquivalent(@Nullable IDeclaration obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SequenceDeclaration other = (SequenceDeclaration) obj;
+        if (!fElemType.isBinaryEquivalent(other.fElemType)) {
+            return false;
+        }
+        if (!fLengthName.equals(other.fLengthName)) {
             return false;
         }
         return true;
