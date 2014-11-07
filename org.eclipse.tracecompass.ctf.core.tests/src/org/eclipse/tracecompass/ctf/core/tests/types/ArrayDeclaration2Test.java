@@ -164,5 +164,9 @@ public class ArrayDeclaration2Test {
         assertNotEquals(a, c);
         assertEquals(a, d);
         assertEquals(a, a);
+        assertFalse(a.isBinaryEquivalent(b));
+        assertFalse(a.isBinaryEquivalent(c));
+        assertTrue(a.isBinaryEquivalent(d));
+        assertTrue(a.isBinaryEquivalent(a));
     }
 }
