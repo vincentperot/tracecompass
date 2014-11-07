@@ -13,12 +13,15 @@
 package org.eclipse.tracecompass.internal.ctf.core.event.types.composite;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Declaration;
+import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
 import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IEventHeaderDeclaration;
@@ -54,9 +57,6 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 @NonNullByDefault
 public class EventHeaderCompactDeclaration extends Declaration implements IEventHeaderDeclaration {
 
-    private static final int COMPACT_SIZE = 1;
-    private static final int VARIANT_SIZE = 2;
-    private static final int EXTENDED_FIELD_SIZE = 2;
     /**
      * The id is 5 bits
      */
@@ -85,9 +85,9 @@ public class EventHeaderCompactDeclaration extends Declaration implements IEvent
     /**
      * Name of the variant according to the spec
      */
-    private static final String V = "v"; //$NON-NLS-1$
 
     private final ByteOrder fByteOrder;
+    private final List<StructDeclaration> fReferenceStructs = new ArrayList<>();
 
     /**
      * Event Header Declaration
@@ -100,6 +100,28 @@ public class EventHeaderCompactDeclaration extends Declaration implements IEvent
             throw new IllegalArgumentException("byteOrder cannot be null"); //$NON-NLS-1$
         }
         fByteOrder = byteOrder;
+        populateReferences();
+    }
+
+    private void populateReferences() {
+        if (!fReferenceStructs .isEmpty()) {
+            return;
+        }
+        StructDeclaration ref = new StructDeclaration(ALIGN);
+        EnumDeclaration id = new EnumDeclaration(IntegerDeclaration.createDeclaration(5, false, 10, fByteOrder, Encoding.NONE, "", 1)); //$NON-NLS-1$
+        id.add(0, 30, "compact"); //$NON-NLS-1$
+        id.add(31, 31, "extended"); //$NON-NLS-1$
+        ref.addField("id", id); //$NON-NLS-1$
+        VariantDeclaration v = new VariantDeclaration();
+        StructDeclaration compact = new StructDeclaration(1);
+        compact.addField("timestamp", IntegerDeclaration.createDeclaration(27, false, 10, fByteOrder, Encoding.NONE, "", 1)); //$NON-NLS-1$ //$NON-NLS-2$
+        StructDeclaration extended = new StructDeclaration(8);
+        extended.addField("id", IntegerDeclaration.createDeclaration(32, false, 10, fByteOrder, Encoding.NONE, "", 8)); //$NON-NLS-1$ //$NON-NLS-2$
+        extended.addField("timestamp", IntegerDeclaration.createDeclaration(64, false, 10, fByteOrder, Encoding.NONE, "", 8)); //$NON-NLS-1$ //$NON-NLS-2$
+        v.addField("compact", compact); //$NON-NLS-1$
+        v.addField("extended", extended); //$NON-NLS-1$
+        ref.addField("v", v); //$NON-NLS-1$
+        fReferenceStructs.add(ref);
     }
 
     @Override
@@ -142,78 +164,16 @@ public class EventHeaderCompactDeclaration extends Declaration implements IEvent
      *            the declaration
      * @return true if the struct is a compact event header
      */
-    public static boolean isCompactEventHeader(@Nullable StructDeclaration declaration) {
+    public boolean isCompactEventHeader(@Nullable StructDeclaration declaration) {
         if (declaration == null) {
             return false;
         }
-
-        IDeclaration iDeclaration = declaration.getFields().get(ID);
-        if (!(iDeclaration instanceof EnumDeclaration)) {
-            return false;
+        for (IDeclaration ref :  fReferenceStructs) {
+            if (ref.isBinaryEquivalent(declaration)) {
+                return true;
+            }
         }
-        EnumDeclaration eId = (EnumDeclaration) iDeclaration;
-        if (eId.getContainerType().getLength() != COMPACT_ID) {
-            return false;
-        }
-        iDeclaration = declaration.getFields().get(V);
-
-        if (!(iDeclaration instanceof VariantDeclaration)) {
-            return false;
-        }
-        VariantDeclaration vDec = (VariantDeclaration) iDeclaration;
-        if (!vDec.hasField(COMPACT) || !vDec.hasField(EXTENDED)) {
-            return false;
-        }
-        if (vDec.getFields().size() != VARIANT_SIZE) {
-            return false;
-        }
-        iDeclaration = vDec.getFields().get(COMPACT);
-        if (!(iDeclaration instanceof StructDeclaration)) {
-            return false;
-        }
-        StructDeclaration compactDec = (StructDeclaration) iDeclaration;
-        if (compactDec.getFields().size() != COMPACT_SIZE) {
-            return false;
-        }
-        if (!compactDec.hasField(TIMESTAMP)) {
-            return false;
-        }
-        iDeclaration = compactDec.getFields().get(TIMESTAMP);
-        if (!(iDeclaration instanceof IntegerDeclaration)) {
-            return false;
-        }
-        IntegerDeclaration tsDec = (IntegerDeclaration) iDeclaration;
-        if (tsDec.getLength() != COMPACT_TS || tsDec.isSigned()) {
-            return false;
-        }
-        iDeclaration = vDec.getFields().get(EXTENDED);
-        if (!(iDeclaration instanceof StructDeclaration)) {
-            return false;
-        }
-        StructDeclaration extendedDec = (StructDeclaration) iDeclaration;
-        if (!extendedDec.hasField(TIMESTAMP)) {
-            return false;
-        }
-        if (extendedDec.getFields().size() != EXTENDED_FIELD_SIZE) {
-            return false;
-        }
-        iDeclaration = extendedDec.getFields().get(TIMESTAMP);
-        if (!(iDeclaration instanceof IntegerDeclaration)) {
-            return false;
-        }
-        tsDec = (IntegerDeclaration) iDeclaration;
-        if (tsDec.getLength() != FULL_TS || tsDec.isSigned()) {
-            return false;
-        }
-        iDeclaration = extendedDec.getFields().get(ID);
-        if (!(iDeclaration instanceof IntegerDeclaration)) {
-            return false;
-        }
-        IntegerDeclaration iId = (IntegerDeclaration) iDeclaration;
-        if (iId.getLength() != ID_SIZE || iId.isSigned()) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     @Override
@@ -240,6 +200,11 @@ public class EventHeaderCompactDeclaration extends Declaration implements IEvent
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean isBinaryEquivalent(@Nullable IDeclaration other) {
+        return fReferenceStructs.get(0).isBinaryEquivalent(other);
     }
 
 }
