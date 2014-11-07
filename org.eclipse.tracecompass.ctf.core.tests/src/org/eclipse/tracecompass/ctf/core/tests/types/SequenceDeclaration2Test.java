@@ -130,7 +130,7 @@ public class SequenceDeclaration2Test {
      */
     @Test
     public void hashcodeTest() {
-        assertEquals(-1004263568, fixture.hashCode());
+        assertEquals(-1140774256, fixture.hashCode());
     }
 
     /**

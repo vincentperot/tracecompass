@@ -379,10 +379,29 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
         return new IntegerDefinition(this, definitionScope, fieldName, value);
     }
 
+
+//
+//    @Override
+//    public String toString() {
+//        /* Only used for debugging */
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("[declaration] integer["); //$NON-NLS-1$
+//        for (String label : fLabels) {
+//            sb.append("label:").append(label).append(' '); //$NON-NLS-1$
+//        }
+//        sb.append("type:").append(fContainerType.toString()); //$NON-NLS-1$
+//        sb.append(']');
+//        String string = sb.toString();
+//        if (string == null) {
+//            throw new IllegalStateException();
+//        }
+//        return string;
+//
+//    }
+
     @Override
     public String toString() {
-        /* Only used for debugging */
-        return "[declaration] integer[" + Integer.toHexString(hashCode()) + ']'; //$NON-NLS-1$
+        return "[declaration] integer[length:" + fLength + (fSigned?" ":" un")+"signed" + " base:" + fBase + " byteOrder:" + fByteOrder + " encoding:" + fEncoding + " alignment:" + fAlignment + "  clock:" + fClock + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$
     }
 
     /**
@@ -529,6 +548,37 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
             return false;
         }
         if (fSigned != other.fSigned) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isBinaryEquivalent(@Nullable IDeclaration obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        IntegerDeclaration other = (IntegerDeclaration) obj;
+        if (fAlignment != other.fAlignment) {
+            return false;
+        }
+        if (fLength != other.fLength) {
+            return false;
+        }
+        if (fSigned != other.fSigned) {
+            return false;
+        }
+        // no need for base
+        // no need for encoding
+        // no need for clock
+        // byte inversion is ok on byte order if the element is one byte long
+        if ((fLength != 8) && !fByteOrder.equals(other.fByteOrder)) {
             return false;
         }
         return true;
