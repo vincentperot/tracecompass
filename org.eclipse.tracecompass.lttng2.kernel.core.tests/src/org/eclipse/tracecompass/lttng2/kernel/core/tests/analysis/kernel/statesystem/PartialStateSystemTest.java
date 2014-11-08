@@ -10,7 +10,7 @@
  *   Bernd Hufmann - Use state system analysis module instead of factory
  ******************************************************************************/
 
-package org.eclipse.tracecompass.lttng2.kernel.core.tests.stateprovider;
+package org.eclipse.tracecompass.lttng2.kernel.core.tests.analysis.kernel.statesystem;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -20,7 +20,8 @@ import java.io.File;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.lttng2.kernel.core.stateprovider.LttngKernelStateProvider;
+import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.LttngEventLayout;
+import org.eclipse.tracecompass.lttng2.kernel.core.analysis.kernel.LttngKernelStateProvider;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
@@ -177,7 +178,7 @@ public class PartialStateSystemTest extends StateSystemTest {
 
         @Override
         protected ITmfStateProvider createStateProvider() {
-            return new LttngKernelStateProvider(getTrace());
+            return new LttngKernelStateProvider(getTrace(), LttngEventLayout.getInstance());
         }
 
         @Override
