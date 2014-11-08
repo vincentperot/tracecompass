@@ -10,7 +10,7 @@
  *   Geneviève Bastien - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.lttng2.kernel.core.tests.analysis;
+package org.eclipse.tracecompass.lttng2.kernel.core.tests.analysis.kernel;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,9 +23,8 @@ import static org.junit.Assume.assumeTrue;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.tracecompass.internal.lttng2.kernel.core.LttngStrings;
 import org.eclipse.tracecompass.lttng2.control.core.session.SessionConfigStrings;
-import org.eclipse.tracecompass.lttng2.kernel.core.analysis.LttngKernelAnalysisModule;
+import org.eclipse.tracecompass.lttng2.kernel.core.analysis.kernel.LttngKernelAnalysis;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
@@ -41,14 +40,14 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Test the {@link LttngKernelAnalysisModule} class
+ * Test the {@link LttngKernelAnalysis} class
  *
  * @author Geneviève Bastien
  */
 public class LttngKernelAnalysisTest {
 
     private ITmfTrace fTrace;
-    private LttngKernelAnalysisModule fKernelAnalysisModule;
+    private LttngKernelAnalysis fKernelAnalysisModule;
 
     /**
      * Class setup
@@ -63,7 +62,7 @@ public class LttngKernelAnalysisTest {
      */
     @Before
     public void setUp() {
-        fKernelAnalysisModule = new LttngKernelAnalysisModule();
+        fKernelAnalysisModule = new LttngKernelAnalysis();
         fTrace = CtfTmfTestTrace.KERNEL.getTrace();
     }
 
@@ -121,7 +120,7 @@ public class LttngKernelAnalysisTest {
     }
 
     /**
-     * Test for {@link LttngKernelAnalysisModule#getAnalysisRequirements()}
+     * Test for {@link LttngKernelAnalysis#getAnalysisRequirements()}
      */
     @Test
     public void testGetAnalysisRequirements() {
@@ -155,21 +154,21 @@ public class LttngKernelAnalysisTest {
 
         /* Events */
         Set<String> expectedEvents = ImmutableSet.of(
-                LttngStrings.EXIT_SYSCALL,
-                LttngStrings.IRQ_HANDLER_ENTRY,
-                LttngStrings.IRQ_HANDLER_EXIT,
-                LttngStrings.SOFTIRQ_ENTRY,
-                LttngStrings.SOFTIRQ_EXIT,
-                LttngStrings.SOFTIRQ_RAISE,
-                LttngStrings.SCHED_SWITCH,
-                LttngStrings.SCHED_PROCESS_FORK,
-                LttngStrings.SCHED_PROCESS_EXIT,
-                LttngStrings.SCHED_PROCESS_FREE,
-                LttngStrings.STATEDUMP_PROCESS_STATE,
-                LttngStrings.SCHED_WAKEUP,
-                LttngStrings.SCHED_WAKEUP_NEW,
-                /* Add the prefix for syscalls */
-                LttngStrings.SYSCALL_PREFIX
+//                LttngStrings.EXIT_SYSCALL,
+//                LttngStrings.IRQ_HANDLER_ENTRY,
+//                LttngStrings.IRQ_HANDLER_EXIT,
+//                LttngStrings.SOFTIRQ_ENTRY,
+//                LttngStrings.SOFTIRQ_EXIT,
+//                LttngStrings.SOFTIRQ_RAISE,
+//                LttngStrings.SCHED_SWITCH,
+//                LttngStrings.SCHED_PROCESS_FORK,
+//                LttngStrings.SCHED_PROCESS_EXIT,
+//                LttngStrings.SCHED_PROCESS_FREE,
+//                LttngStrings.STATEDUMP_PROCESS_STATE,
+//                LttngStrings.SCHED_WAKEUP,
+//                LttngStrings.SCHED_WAKEUP_NEW,
+//                /* Add the prefix for syscalls */
+//                LttngStrings.SYSCALL_PREFIX
                 );
 
         assertEquals(14, eventReq.getValues().size());
