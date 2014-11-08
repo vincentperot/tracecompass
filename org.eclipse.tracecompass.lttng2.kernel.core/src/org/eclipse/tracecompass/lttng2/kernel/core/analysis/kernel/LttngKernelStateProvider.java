@@ -107,7 +107,10 @@ public class LttngKernelStateProvider extends AbstractTmfStateProvider {
         builder.put(layout.eventSchedProcessFork(), SCHED_PROCESS_FORK_IDX);
         builder.put(layout.eventSchedProcessExit(), SCHED_PROCESS_EXIT_IDX);
         builder.put(layout.eventSchedProcessFree(), SCHED_PROCESS_FREE_IDX);
-        builder.put(layout.eventStatedumpProcessState(), STATEDUMP_PROCESS_STATE_IDX);
+
+        if (layout.eventStatedumpProcessState() != null) {
+            builder.put(layout.eventStatedumpProcessState(), STATEDUMP_PROCESS_STATE_IDX);
+        }
 
         for (String eventSchedWakeup : layout.eventsSchedWakeup()) {
             builder.put(eventSchedWakeup, SCHED_WAKEUP_IDX);
