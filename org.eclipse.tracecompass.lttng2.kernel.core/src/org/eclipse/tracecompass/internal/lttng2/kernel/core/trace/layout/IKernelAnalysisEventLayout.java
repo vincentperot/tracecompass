@@ -15,6 +15,7 @@ package org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Interface to define "concepts" present in the Linux kernel (represented by
@@ -55,7 +56,7 @@ public interface IKernelAnalysisEventLayout {
     String eventSchedProcessFork();
     String eventSchedProcessExit();
     String eventSchedProcessFree();
-    String eventStatedumpProcessState();
+    @Nullable String eventStatedumpProcessState();
     String eventSyscallEntryPrefix();
     String eventCompatSyscallEntryPrefix();
     String eventSyscallExitPrefix();

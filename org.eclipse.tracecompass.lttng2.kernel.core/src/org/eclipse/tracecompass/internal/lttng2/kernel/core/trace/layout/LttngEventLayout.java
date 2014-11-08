@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout;
 
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import com.google.common.collect.ImmutableList;
@@ -137,7 +138,7 @@ public class LttngEventLayout implements IKernelAnalysisEventLayout {
     }
 
     @Override
-    public String eventStatedumpProcessState() {
+    public @NonNull String eventStatedumpProcessState() {
         return STATEDUMP_PROCESS_STATE;
     }
 
