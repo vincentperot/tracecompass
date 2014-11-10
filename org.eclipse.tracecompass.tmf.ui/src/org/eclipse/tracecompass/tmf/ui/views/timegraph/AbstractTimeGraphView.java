@@ -506,12 +506,15 @@ public abstract class AbstractTimeGraphView extends TmfView {
             if (fZoomEntryList == null) {
                 return;
             }
-            for (TimeGraphEntry entry : fZoomEntryList) {
-                if (fMonitor.isCanceled()) {
-                    return;
+            if (fZoomStartTime <= fStartTime && fZoomEndTime >= fEndTime) {
+                for (TimeGraphEntry entry : fZoomEntryList) {
+                    setZoomedEventListNull(entry);
                 }
-                zoom(entry, fMonitor);
+                redraw();
+            } else {
+                zoomEntryList(fZoomEntryList, fZoomStartTime, fZoomEndTime, fResolution, fMonitor);
             }
+
             /* Refresh the arrows when zooming */
             List<ILinkEvent> events = getLinkList(fZoomStartTime, fZoomEndTime, fResolution, fMonitor);
             if (events != null) {
@@ -520,22 +523,11 @@ public abstract class AbstractTimeGraphView extends TmfView {
             }
         }
 
-        private void zoom(TimeGraphEntry entry, IProgressMonitor monitor) {
-            if (fZoomStartTime <= fStartTime && fZoomEndTime >= fEndTime) {
-                entry.setZoomedEventList(null);
-            } else {
-                List<ITimeEvent> zoomedEventList = getEventList(entry, fZoomStartTime, fZoomEndTime, fResolution, monitor);
-                if (zoomedEventList != null) {
-                    entry.setZoomedEventList(zoomedEventList);
-                }
-            }
-            redraw();
+        private void setZoomedEventListNull(TimeGraphEntry entry) {
+            entry.setZoomedEventList(null);
             for (ITimeGraphEntry child : entry.getChildren()) {
-                if (fMonitor.isCanceled()) {
-                    return;
-                }
                 if (child instanceof TimeGraphEntry) {
-                    zoom((TimeGraphEntry) child, monitor);
+                    setZoomedEventListNull((TimeGraphEntry) child);
                 }
             }
         }
@@ -1158,6 +1150,64 @@ public abstract class AbstractTimeGraphView extends TmfView {
     protected abstract @Nullable List<ITimeEvent> getEventList(TimeGraphEntry entry,
             long startTime, long endTime, long resolution,
             IProgressMonitor monitor);
+
+    /**
+     * The view is zooming on an entry list. By default, this method recursively
+     * sets the zoomed event list of each entry by calling the
+     * {@link #getEventList(TimeGraphEntry, long, long, long, IProgressMonitor)}
+     * method.
+     *
+     * A child class may choose to override this method if, for example, getting
+     * the event list of many entries involves doing a same repetitive operation
+     * in an analysis. Overriding this method allows a better management of
+     * analysis resources.
+     *
+     * If this method is overridden, for each entry, the
+     * {@link TimeGraphEntry#setZoomedEventList(List)} method should be called.
+     * Also entry list is not flattened so each entry needs to get the events
+     * for its children. Also, it would be advisable to check the monitor status
+     * and call the {@link #redraw()} method once in a while.
+     *
+     * @param entryList
+     *            The list of top level entries to zoom on
+     * @param startTime
+     *            The beginning of the zoom time range
+     * @param endTime
+     *            The end of the zoom time range
+     * @param resolution
+     *            The resolution (the time difference between 2 points in the
+     *            view)
+     * @param monitor
+     *            The progress monitor object
+     */
+    protected void zoomEntryList(List<TimeGraphEntry> entryList, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
+        for (TimeGraphEntry entry : entryList) {
+            if (monitor.isCanceled()) {
+                return;
+            }
+            zoom(entry, startTime, endTime, resolution, monitor);
+        }
+    }
+
+    private void zoom(TimeGraphEntry entry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
+        if (startTime <= fStartTime && endTime >= fEndTime) {
+            entry.setZoomedEventList(null);
+        } else {
+            List<ITimeEvent> zoomedEventList = getEventList(entry, startTime, endTime, resolution, monitor);
+            if (zoomedEventList != null) {
+                entry.setZoomedEventList(zoomedEventList);
+            }
+        }
+        redraw();
+        for (ITimeGraphEntry child : entry.getChildren()) {
+            if (monitor.isCanceled()) {
+                return;
+            }
+            if (child instanceof TimeGraphEntry) {
+                zoom((TimeGraphEntry) child, startTime, endTime, resolution, monitor);
+            }
+        }
+    }
 
     /**
      * Gets the list of links (displayed as arrows) for a trace in a given
