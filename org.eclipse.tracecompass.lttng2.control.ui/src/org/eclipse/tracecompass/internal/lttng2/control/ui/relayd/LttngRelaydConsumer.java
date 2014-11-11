@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.ILttngRelaydConnector;
 import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.LttngRelaydConnectorFactory;
@@ -183,29 +184,35 @@ public final class LttngRelaydConsumer {
                     while (!monitor.isCanceled()) {
                         List<StreamResponse> attachedStreams = fSession.getStreamList();
                         for (StreamResponse stream : attachedStreams) {
-                            if (stream.getMetadataFlag() != 1) {
-                                IndexResponse indexReply = fRelayd.getNextIndex(stream);
-                                if (indexReply.getStatus() == NextIndexReturnCode.VIEWER_INDEX_OK) {
-                                    long nanoTimeStamp = fCtfTrace.timestampCyclesToNanos(indexReply.getTimestampEnd());
-                                    if (nanoTimeStamp > fTimestampEnd) {
-                                        CtfTmfTimestamp endTime = new CtfTmfTimestamp(nanoTimeStamp);
-                                        TmfTimeRange range = new TmfTimeRange(fCtfTmfTrace.getStartTime(), endTime);
-
-                                        long currentTime = System.nanoTime();
-                                        if (currentTime - fLastSignal > SIGNAL_THROTTLE_NANOSEC) {
-                                            TmfTraceRangeUpdatedSignal signal = new TmfTraceRangeUpdatedSignal(LttngRelaydConsumer.this, fCtfTmfTrace, range);
-                                            fCtfTmfTrace.broadcastAsync(signal);
-                                            fLastSignal = currentTime;
-                                        }
-                                        fTimestampEnd = nanoTimeStamp;
-                                    }
-                                } else if (indexReply.getStatus() == NextIndexReturnCode.VIEWER_INDEX_HUP) {
-                                    // The trace is now complete because the trace session was destroyed
-                                    fCtfTmfTrace.setComplete(true);
-                                    TmfTraceRangeUpdatedSignal signal = new TmfTraceRangeUpdatedSignal(LttngRelaydConsumer.this, fCtfTmfTrace, new TmfTimeRange(fCtfTmfTrace.getStartTime(), new CtfTmfTimestamp(fTimestampEnd)));
-                                    fCtfTmfTrace.broadcastAsync(signal);
-                                    return Status.OK_STATUS;
+                            if (stream.getMetadataFlag() == 1) {
+                                try {
+                                    fCtfTrace.reparseTSDL();
+                                } catch (CTFReaderException e) {
+                                    e.printStackTrace();
                                 }
+                            }
+                            IndexResponse indexReply = fRelayd.getNextIndex(stream);
+                            if (indexReply.getStatus() == NextIndexReturnCode.VIEWER_INDEX_OK) {
+                                long nanoTimeStamp = fCtfTrace.timestampCyclesToNanos(indexReply.getTimestampEnd());
+                                if (nanoTimeStamp > fTimestampEnd) {
+                                    CtfTmfTimestamp endTime = new CtfTmfTimestamp(nanoTimeStamp);
+                                    TmfTimeRange range = new TmfTimeRange(fCtfTmfTrace.getStartTime(), endTime);
+
+                                    long currentTime = System.nanoTime();
+                                    if (currentTime - fLastSignal > SIGNAL_THROTTLE_NANOSEC) {
+                                        TmfTraceRangeUpdatedSignal signal = new TmfTraceRangeUpdatedSignal(LttngRelaydConsumer.this, fCtfTmfTrace, range);
+                                        fCtfTmfTrace.broadcastAsync(signal);
+                                        fLastSignal = currentTime;
+                                    }
+                                    fTimestampEnd = nanoTimeStamp;
+                                }
+                            } else if (indexReply.getStatus() == NextIndexReturnCode.VIEWER_INDEX_HUP) {
+                                // The trace is now complete because the trace
+                                // session was destroyed
+                                fCtfTmfTrace.setComplete(true);
+                                TmfTraceRangeUpdatedSignal signal = new TmfTraceRangeUpdatedSignal(LttngRelaydConsumer.this, fCtfTmfTrace, new TmfTimeRange(fCtfTmfTrace.getStartTime(), new CtfTmfTimestamp(fTimestampEnd)));
+                                fCtfTmfTrace.broadcastAsync(signal);
+                                return Status.OK_STATUS;
                             }
                         }
                     }

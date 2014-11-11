@@ -130,6 +130,7 @@ public class CTFTrace implements IDefinitionScope, AutoCloseable {
     /** Handlers for the metadata files */
     private static final FileFilter METADATA_FILE_FILTER = new MetadataFileFilter();
     private static final Comparator<File> METADATA_COMPARATOR = new MetadataComparator();
+    private long fMetadataPos = 0;
 
     /** Callsite helpers */
     private CTFCallsiteComparator fCtfCallsiteComparator = new CTFCallsiteComparator();
@@ -178,7 +179,7 @@ public class CTFTrace implements IDefinitionScope, AutoCloseable {
         }
 
         /* Open and parse the metadata file */
-        metadata.parseFile();
+        fMetadataPos = metadata.parseFile();
 
         init(path);
     }
@@ -975,6 +976,16 @@ public class CTFTrace implements IDefinitionScope, AutoCloseable {
             fStreams.put(id, stream);
         }
         stream.addInput(new CTFStreamInput(stream, file));
+    }
+
+    /**
+     * Read the next metadata fragment
+     * @throws CTFReaderException
+     */
+    public void reparseTSDL() throws CTFReaderException {
+        Metadata md = new Metadata(this);
+        fMetadataPos = md.parseFragment( fMetadataPos);
+
     }
 }
 

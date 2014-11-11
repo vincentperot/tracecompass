@@ -128,12 +128,13 @@ public class Metadata {
 
     /**
      * Parse the metadata file.
+     * @return
      *
      * @throws CTFReaderException
      *             If there was a problem parsing the metadata
      * @since 3.0
      */
-    public void parseFile() throws CTFReaderException {
+    public long parseFile() throws CTFReaderException {
 
         /*
          * Reader. It will contain a StringReader if we are using packet-based
@@ -150,7 +151,7 @@ public class Metadata {
                                 new FileReader(getMetadataPath()));) {
 
             readMetaDataText(metadataTextInput);
-
+            return metadataFileChannel.position();
         } catch (FileNotFoundException e) {
             throw new CTFReaderException("Cannot find metadata file!"); //$NON-NLS-1$
         } catch (IOException | ParseException e) {
@@ -453,5 +454,31 @@ public class Metadata {
                     + ", ctfMinorVersion=" + fCtfMinorVersion + ']'; //$NON-NLS-1$
         }
 
+    }
+
+    /**
+     * @param fMetadataPos
+     * @return
+     * @throws CTFReaderException
+     */
+    public long parseFragment(long fMetadataPos) throws CTFReaderException {
+        try (FileInputStream fis = new FileInputStream(getMetadataPath());
+                FileChannel metadataFileChannel = fis.getChannel();
+                /* Check if metadata is packet-based, if not it is text based */
+                Reader metadataTextInput =
+                        (isPacketBased(metadataFileChannel) ?
+                                readBinaryMetaData(metadataFileChannel.position(fMetadataPos)) :
+                                new FileReader(getMetadataPath()));) {
+
+            readMetaDataTextFragment(metadataTextInput);
+            return metadataFileChannel.position();
+
+        } catch (FileNotFoundException e) {
+            throw new CTFReaderException("Cannot find metadata file!"); //$NON-NLS-1$
+        } catch (IOException | ParseException e) {
+            throw new CTFReaderException(e);
+        } catch (RecognitionException | RewriteCardinalityException e) {
+            throw new CtfAntlrException(e);
+        }
     }
 }
