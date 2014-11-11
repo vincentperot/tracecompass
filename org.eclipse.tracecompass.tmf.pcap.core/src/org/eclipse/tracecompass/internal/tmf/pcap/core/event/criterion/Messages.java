@@ -10,7 +10,7 @@
  *   Vincent Perot - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.internal.tmf.pcap.ui.editor;
+package org.eclipse.tracecompass.internal.tmf.pcap.core.event.criterion;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
@@ -18,17 +18,15 @@ import org.eclipse.osgi.util.NLS;
 @SuppressWarnings("javadoc")
 public class Messages extends NLS {
 
-    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.internal.tmf.pcap.ui.editor.messages"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME =
+            "org.eclipse.tracecompass.internal.tmf.pcap.core.event.criterion.messages"; //$NON-NLS-1$
 
-    public static @Nullable String PcapEventsTable_Content;
-    public static @Nullable String PcapEventsTable_Destination;
-    public static @Nullable String PcapEventsTable_Protocol;
-    public static @Nullable String PcapEventsTable_Reference;
-    public static @Nullable String PcapEventsTable_Source;
-    public static @Nullable String PcapEventsTable_Timestamp;
+    public static @Nullable String PcapCriterionName_Destination;
+    public static @Nullable String PcapCriterionName_Protocol;
+    public static @Nullable String PcapCriterionName_Reference;
+    public static @Nullable String PcapCriterionName_Source;
 
     static {
-        // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
     }
 

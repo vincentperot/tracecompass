@@ -2,16 +2,6 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.eclipse.linuxtools.tmf.ui.tracetypeui">
-      <type
-            icon="icons/pcap.png"
-            tracetype="org.eclipse.linuxtools.tmf.pcap.core.pcaptrace">
-         <eventTableColumns
-               class="org.eclipse.tracecompass.internal.tmf.pcap.ui.editor.PcapEventTableColumns">
-         </eventTableColumns>
-      </type>
-   </extension>
-   <extension
          point="org.eclipse.ui.views">
       <category
             id="org.eclipse.linuxtools.tmf.pcap.ui.view.category.network"

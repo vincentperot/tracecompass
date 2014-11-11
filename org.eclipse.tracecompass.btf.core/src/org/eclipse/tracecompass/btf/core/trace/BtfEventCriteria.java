@@ -11,18 +11,13 @@
  *   Alexandre Montplaisir - Update to new Event Table API
  *******************************************************************************/
 
-package org.eclipse.tracecompass.btf.ui;
-
-import java.util.Collection;
+package org.eclipse.tracecompass.btf.core.trace;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.btf.core.event.BtfEvent;
-import org.eclipse.tracecompass.btf.core.trace.BtfColumnNames;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
 import org.eclipse.tracecompass.tmf.core.event.criterion.TmfEventFieldCriterion;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.columns.ITmfEventTableColumns;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.columns.TmfEventTableColumn;
 
 import com.google.common.collect.ImmutableList;
 
@@ -31,22 +26,20 @@ import com.google.common.collect.ImmutableList;
  *
  * @author Alexandre Montplaisir
  */
-public class BtfEventTableColumns implements ITmfEventTableColumns {
+public final class BtfEventCriteria {
 
-    // ------------------------------------------------------------------------
-    // Column definition
-    // ------------------------------------------------------------------------
+    private BtfEventCriteria() {}
 
     @SuppressWarnings("null")
-    private static final @NonNull Collection<TmfEventTableColumn> BTF_COLUMNS = ImmutableList.of(
-            new TmfEventTableColumn(ITmfEventCriterion.BaseCriteria.TIMESTAMP),
-            new TmfEventTableColumn(new BtfSourceCriterion()),
-            new TmfEventTableColumn(new BtfSourceInstanceCriterion()),
-            new TmfEventTableColumn(ITmfEventCriterion.BaseCriteria.EVENT_TYPE),
-            new TmfEventTableColumn(new BtfTargetCriterion()),
-            new TmfEventTableColumn(new BtfTargetInstanceCriterion()),
-            new TmfEventTableColumn(new BtfEventCriterion()),
-            new TmfEventTableColumn(new BtfNotesCriterion())
+    private static final @NonNull Iterable<ITmfEventCriterion> BTF_CRITERIA = ImmutableList.of(
+            ITmfEventCriterion.BaseCriteria.TIMESTAMP,
+            new BtfSourceCriterion(),
+            new BtfSourceInstanceCriterion(),
+            ITmfEventCriterion.BaseCriteria.EVENT_TYPE,
+            new BtfTargetCriterion(),
+            new BtfTargetInstanceCriterion(),
+            new BtfEventCriterion(),
+            new BtfNotesCriterion()
             );
 
     /**
@@ -153,12 +146,12 @@ public class BtfEventTableColumns implements ITmfEventTableColumns {
         }
     }
 
-    // ------------------------------------------------------------------------
-    // ITmfEventTableColumns
-    // ------------------------------------------------------------------------
-
-    @Override
-    public Collection<? extends TmfEventTableColumn> getEventTableColumns() {
-        return BTF_COLUMNS;
+    /**
+     * Return the criteria defined for BTF traces.
+     *
+     * @return The criteria
+     */
+    public static Iterable<ITmfEventCriterion> getCriteria() {
+        return BTF_CRITERIA;
     }
 }

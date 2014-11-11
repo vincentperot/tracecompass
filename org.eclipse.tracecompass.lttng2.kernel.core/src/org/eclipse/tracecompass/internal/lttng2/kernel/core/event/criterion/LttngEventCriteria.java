@@ -10,44 +10,36 @@
  *   Alexandre Montplaisir - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.kernel.ui.viewers.events;
-
-import java.util.Collection;
+package org.eclipse.tracecompass.internal.lttng2.kernel.core.event.criterion;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.columns.ITmfEventTableColumns;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.columns.TmfEventTableColumn;
 
 import com.google.common.collect.ImmutableList;
 
 /**
  * Event table columns for LTTng 2.x kernel traces
  */
-public class LttngEventTableColumns implements ITmfEventTableColumns {
+public final class LttngEventCriteria {
 
-    // ------------------------------------------------------------------------
-    // Column definition
-    // ------------------------------------------------------------------------
+    private LttngEventCriteria() {}
 
     @SuppressWarnings("null")
-    private static final @NonNull String CHANNEL_HEADER = Messages.EventsTable_channelColumn;
-
-    @SuppressWarnings("null")
-    private static final @NonNull Collection<TmfEventTableColumn> LTTNG_COLUMNS =
-            ImmutableList.<TmfEventTableColumn> of(
-                    new TmfEventTableColumn(ITmfEventCriterion.BaseCriteria.TIMESTAMP),
-                    new TmfEventTableColumn(new LttngChannelCriterion()),
-                    new TmfEventTableColumn(ITmfEventCriterion.BaseCriteria.EVENT_TYPE),
-                    new TmfEventTableColumn(ITmfEventCriterion.BaseCriteria.CONTENTS));
+    private static final @NonNull Iterable<ITmfEventCriterion> LTTNG_CRITERIA =
+            ImmutableList.of(
+                    ITmfEventCriterion.BaseCriteria.TIMESTAMP,
+                    new LttngChannelCriterion(),
+                    ITmfEventCriterion.BaseCriteria.EVENT_TYPE,
+                    ITmfEventCriterion.BaseCriteria.CONTENTS);
 
     private static class LttngChannelCriterion implements ITmfEventCriterion {
 
         @Override
         public String getName() {
-            return CHANNEL_HEADER;
+            String ret = Messages.CriterionName_Channel;
+            return (ret == null ? EMPTY_STRING : ret);
         }
 
         @Override
@@ -70,12 +62,12 @@ public class LttngEventTableColumns implements ITmfEventTableColumns {
         }
     }
 
-    // ------------------------------------------------------------------------
-    // Constructor
-    // ------------------------------------------------------------------------
-
-    @Override
-    public Collection<? extends TmfEventTableColumn> getEventTableColumns() {
-        return LTTNG_COLUMNS;
+    /**
+     * Get the criteria defined for LTTng kernel traces.
+     *
+     * @return The set of criteria
+     */
+    public static Iterable<ITmfEventCriterion> getCriteria() {
+        return LTTNG_CRITERIA;
     }
 }

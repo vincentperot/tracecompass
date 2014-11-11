@@ -11,9 +11,8 @@
  *   Alexandre Montplaisir - Update for TmfEventTableColumn
  *******************************************************************************/
 
-package org.eclipse.tracecompass.internal.tmf.ui.parsers.custom;
+package org.eclipse.tracecompass.internal.tmf.core.parsers.custom;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -22,31 +21,25 @@ import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomEvent;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTraceDefinition;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTraceDefinition.OutputColumn;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.TmfEventsTable;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.columns.ITmfEventTableColumns;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.columns.TmfEventTableColumn;
 
 import com.google.common.collect.ImmutableList;
 
 /**
- * Event table column definition for Custom {Text|XML} traces.
+ * Event criteria for Custom {Text|XML} traces.
  *
- * Since this definition will be different for every single custom trace, this
- * does not work the same as with {@link ITmfEventTableColumns}.
+ * Since this definition will be different for every single custom trace, we
+ * cannot define specific {@link ITmfEventCriterion} in advance.
  *
- * Instead, one has to call {@link #generateColumns(CustomTraceDefinition)} with
- * the CustomTraceDefinition of the the particular trace to display. Then the
- * returned collection can be passed to the constructor
- * {@link TmfEventsTable#TmfEventsTable(org.eclipse.swt.widgets.Composite, int, Collection)}
- * as usual.
+ * Instead, one has to call {@link #generateCriteria(CustomTraceDefinition)}
+ * with the CustomTraceDefinition of the the particular trace to display.
  *
  * @author Alexandre Montplaisir
  */
-public class CustomEventTableColumns {
+public class CustomEventCriteria {
 
     /**
-     * Column for custom events, which uses an integer ID to represent each
-     * column.
+     * Criteria for custom events, which uses an integer ID to represent each
+     * field.
      */
     private static final class CustomEventFieldCriterion implements ITmfEventCriterion {
 
@@ -57,10 +50,9 @@ public class CustomEventTableColumns {
          * Constructor
          *
          * @param name
-         *            The name (title) of this column
+         *            The name of this criteria
          * @param idx
-         *            The index of this column, which should be the index of the
-         *            field in the event's content to display.
+         *            The index of this field in the event's content to display
          */
         public CustomEventFieldCriterion(@NonNull String name, int idx) {
             fName = name;
@@ -93,18 +85,20 @@ public class CustomEventTableColumns {
     }
 
     /**
-     * Get the event table columns for a given trace definition
+     * Build a set of criteria for a given trace definition
      *
-     * @param definition The {@link CustomTraceDefinition} of the trace for which you want the columns
-     * @return The set of columns for the given trace.
+     * @param definition
+     *            The {@link CustomTraceDefinition} of the trace for which you
+     *            want the columns
+     * @return The set of criteria for the given trace
      */
-    public static Collection<TmfEventTableColumn> generateColumns(CustomTraceDefinition definition) {
-        ImmutableList.Builder<TmfEventTableColumn> builder = new ImmutableList.Builder<>();
+    public static Iterable<ITmfEventCriterion> generateCriteria(CustomTraceDefinition definition) {
+        ImmutableList.Builder<ITmfEventCriterion> builder = new ImmutableList.Builder<>();
         List<OutputColumn> outputs = definition.outputs;
         for (int i = 0; i < outputs.size(); i++) {
             String name = outputs.get(i).name;
             if (name != null) {
-                builder.add(new TmfEventTableColumn(new CustomEventFieldCriterion(name, i)));
+                builder.add(new CustomEventFieldCriterion(name, i));
             }
         }
         return builder.build();
