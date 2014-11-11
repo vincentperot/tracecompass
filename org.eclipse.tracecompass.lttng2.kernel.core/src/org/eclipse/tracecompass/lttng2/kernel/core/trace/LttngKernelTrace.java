@@ -24,10 +24,12 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.Activator;
+import org.eclipse.tracecompass.internal.lttng2.kernel.core.event.criterion.LttngEventCriteria;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.LttngEventLayout;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.PerfEventLayout;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.Lttng26EventLayout;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
@@ -141,6 +143,11 @@ public class LttngKernelTrace extends CtfTmfTrace {
         } catch (final BufferOverflowException e) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, Messages.LttngKernelTrace_TraceReadError + ": " + Messages.LttngKernelTrace_MalformedTrace); //$NON-NLS-1$
         }
+    }
+
+    @Override
+    public Iterable<ITmfEventCriterion> getCriteria() {
+        return LttngEventCriteria.getCriteria();
     }
 
 }

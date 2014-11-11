@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.component.ITmfEventProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransform;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -282,6 +283,17 @@ public interface ITmfTrace extends ITmfEventProvider {
      */
     @NonNull
     <T> Iterable<T> getAnalysisModulesOfClass(Class<T> moduleClass);
+
+    // ------------------------------------------------------------------------
+    // Criteria getters
+    // ------------------------------------------------------------------------
+
+    /**
+     * Return the pre-defined set of criteria exposed by this trace type.
+     *
+     * @return The criteria for this trace
+     */
+    Iterable<ITmfEventCriterion> getCriteria();
 
     // ------------------------------------------------------------------------
     // Trace characteristics getters

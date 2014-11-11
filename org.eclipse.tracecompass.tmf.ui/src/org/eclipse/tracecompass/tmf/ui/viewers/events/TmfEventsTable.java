@@ -206,12 +206,11 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
     /**
      * Default set of columns to use for trace types that do not specify
      * anything
-     * @since 3.2
      */
-    public static final Collection<TmfEventTableColumn> DEFAULT_COLUMNS = ImmutableList.of(
-            new TmfEventTableColumn(ITmfEventCriterion.BaseCriteria.TIMESTAMP),
-            new TmfEventTableColumn(ITmfEventCriterion.BaseCriteria.EVENT_TYPE),
-            new TmfEventTableColumn(ITmfEventCriterion.BaseCriteria.CONTENTS)
+    public static final Iterable<ITmfEventCriterion> DEFAULT_CRITERIA = ImmutableList.of(
+            ITmfEventCriterion.BaseCriteria.TIMESTAMP,
+            ITmfEventCriterion.BaseCriteria.EVENT_TYPE,
+            ITmfEventCriterion.BaseCriteria.CONTENTS
             );
 
     /**
@@ -333,7 +332,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
      *            The size of the event table cache
      */
     public TmfEventsTable(final Composite parent, final int cacheSize) {
-        this(parent, cacheSize, DEFAULT_COLUMNS);
+        this(parent, cacheSize, DEFAULT_CRITERIA);
     }
 
     /**
@@ -360,14 +359,14 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
     }
 
     @Deprecated
-    private static Collection<TmfEventTableColumn> convertFromColumnData(
+    private static Iterable<ITmfEventCriterion> convertFromColumnData(
             org.eclipse.tracecompass.tmf.ui.widgets.virtualtable.ColumnData[] columnData) {
 
-        ImmutableList.Builder<TmfEventTableColumn> builder = new ImmutableList.Builder<>();
+        ImmutableList.Builder<ITmfEventCriterion> builder = new ImmutableList.Builder<>();
         for (org.eclipse.tracecompass.tmf.ui.widgets.virtualtable.ColumnData col : columnData) {
             String fieldName = col.header;
             if (fieldName != null) {
-                builder.add(new TmfEventTableColumn(new TmfEventFieldCriterion(fieldName, fieldName)));
+                builder.add(new TmfEventFieldCriterion(fieldName, fieldName));
             }
         }
         return builder.build();
@@ -380,16 +379,17 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
      *            The parent composite UI object
      * @param cacheSize
      *            The size of the event table cache
-     * @param columns
-     *            The columns to use in this table.
+     * @param criteria
+     *            The criteria to display in this table. One column per
+     *            criterion will be created.
      *            <p>
      *            The iteration order of this collection will correspond to the
-     *            initial ordering of this series of columns in the table.
+     *            initial ordering of the columns in the table.
      *            </p>
      * @since 3.1
      */
     public TmfEventsTable(final Composite parent, int cacheSize,
-            Collection<? extends TmfEventTableColumn> columns) {
+            Iterable<ITmfEventCriterion> criteria) {
         super("TmfEventsTable"); //$NON-NLS-1$
 
         fComposite = new Composite(parent, SWT.NONE);
@@ -415,8 +415,12 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
         fTable.setLinesVisible(true);
 
         // Setup the columns
-        if (columns != null) {
-            fColumns.addAll(columns);
+        if (criteria != null) {
+            for (ITmfEventCriterion criterion : criteria) {
+                if (criterion != null) {
+                    fColumns.add(new TmfEventTableColumn(criterion));
+                }
+            }
         }
 
         TmfMarginColumn collapseCol = new TmfMarginColumn();

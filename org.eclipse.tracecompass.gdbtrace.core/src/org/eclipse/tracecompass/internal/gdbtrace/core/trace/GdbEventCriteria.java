@@ -10,9 +10,7 @@
  *   Alexandre Montplaisir - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.internal.gdbtrace.ui.views.events;
-
-import java.util.Collection;
+package org.eclipse.tracecompass.internal.gdbtrace.core.trace;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.gdbtrace.core.event.GdbTraceEvent;
@@ -20,8 +18,6 @@ import org.eclipse.tracecompass.internal.gdbtrace.core.event.GdbTraceEventConten
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
 import org.eclipse.tracecompass.tmf.core.event.criterion.TmfEventFieldCriterion;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.columns.ITmfEventTableColumns;
-import org.eclipse.tracecompass.tmf.ui.viewers.events.columns.TmfEventTableColumn;
 
 import com.google.common.collect.ImmutableList;
 
@@ -30,17 +26,15 @@ import com.google.common.collect.ImmutableList;
  *
  * @author Alexandre Montplaisir
  */
-public class GdbEventTableColumns implements ITmfEventTableColumns {
+public final class GdbEventCriteria {
 
-    // ------------------------------------------------------------------------
-    // Column definition
-    // ------------------------------------------------------------------------
+    private GdbEventCriteria() {}
 
     @SuppressWarnings("null")
-    static final @NonNull Collection<TmfEventTableColumn> GDB_COLUMNS = ImmutableList.of(
-            new TmfEventTableColumn(new GdbTraceFrameCriterion()),
-            new TmfEventTableColumn(new GdbTracepointCriterion()),
-            new TmfEventTableColumn(new GdbFileCriterion())
+    private static final @NonNull Iterable<ITmfEventCriterion> GDB_CRITERIA = ImmutableList.of(
+            new GdbTraceFrameCriterion(),
+            new GdbTracepointCriterion(),
+            new GdbFileCriterion()
             );
 
     private static class GdbTraceFrameCriterion extends TmfEventFieldCriterion {
@@ -84,12 +78,12 @@ public class GdbEventTableColumns implements ITmfEventTableColumns {
         }
     }
 
-    // ------------------------------------------------------------------------
-    // ITmfEventTableColumns
-    // ------------------------------------------------------------------------
-
-    @Override
-    public Collection<? extends TmfEventTableColumn> getEventTableColumns() {
-        return GDB_COLUMNS;
+    /**
+     * Get the criteria specific to GDB traces.
+     *
+     * @return The set of criteria
+     */
+    public static Iterable<ITmfEventCriterion> getCriteria() {
+        return GDB_CRITERIA;
     }
 }
