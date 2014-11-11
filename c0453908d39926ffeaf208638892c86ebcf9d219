@@ -1,0 +1,9 @@
+Verified+1: Hudson CI
+Code-Review+2: Matthew Khouzam <matthew.khouzam@ericsson.com>
+Verified+1: Matthew Khouzam <matthew.khouzam@ericsson.com>
+Code-Review+1: Genevieve Bastien <gbastien+lttng@versatic.net>
+Submitted-by: Matthew Khouzam <matthew.khouzam@ericsson.com>
+Submitted-at: Tue, 11 Nov 2014 10:34:15 -0500
+Reviewed-on: https://git.eclipse.org/r/36092
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
