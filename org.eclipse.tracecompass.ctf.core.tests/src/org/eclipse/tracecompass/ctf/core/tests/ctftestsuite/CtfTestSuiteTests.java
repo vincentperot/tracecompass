@@ -140,13 +140,16 @@ public class CtfTestSuiteTests {
 
     /**
      * Test opening and reading the trace
+     *
+     * @throws CTFReaderException
+     *             should not happen unless the trace does not exist
      */
     @Test
-    public void testTrace() {
-        try (/* Instantiate the trace (which implies parsing the metadata) */
-                CTFTrace trace = new CTFTrace(fTracePath);
-                /* Read the trace until the end */
-                CTFTraceReader reader = new CTFTraceReader(trace);) {
+    public void testTrace() throws CTFReaderException {
+        /* Instantiate the trace (which implies parsing the metadata) */
+        CTFTrace trace = new CTFTrace(fTracePath);
+        /* Read the trace until the end */
+        try (CTFTraceReader reader = new CTFTraceReader(trace);) {
 
             reader.getCurrentEventDef();
             while (reader.advance()) {
