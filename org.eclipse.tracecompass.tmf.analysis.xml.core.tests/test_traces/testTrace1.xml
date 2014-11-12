@@ -1,0 +1,10 @@
+<trace>
+<event timestamp="1" name="test" source="0">
+</event>
+<event timestamp="3" name="test1" source="0">
+</event>
+<event timestamp="5" name="test" source="0">
+</event>
+<event timestamp="7" name="test1" source="0">
+</event>
+</trace>
