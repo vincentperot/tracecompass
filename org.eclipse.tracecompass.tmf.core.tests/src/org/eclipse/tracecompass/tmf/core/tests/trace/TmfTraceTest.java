@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.tracecompass.internal.tmf.core.component.TmfProviderManager;
 import org.eclipse.tracecompass.tmf.core.component.ITmfEventProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
@@ -43,6 +44,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
 import org.junit.After;
@@ -1342,6 +1344,10 @@ public class TmfTraceTest {
         }
     }
 
+    // ------------------------------------------------------------------------
+    // Other getters
+    // ------------------------------------------------------------------------
+
     /**
      * Run the String getHostId() method test
      */
@@ -1349,5 +1355,16 @@ public class TmfTraceTest {
     public void testTraceHostId() {
         String a = fTrace.getHostId();
         assertEquals("A-Test-10K", a);
+    }
+
+    /**
+     * Test the {@link TmfTrace#getEventAspects} method.
+     */
+    @Test
+    public void testGetEventAspects() {
+        Iterable<ITmfEventAspect> aspects = fTrace.getEventAspects();
+        for (ITmfEventAspect aspect : aspects) {
+            assertTrue(TmfTrace.BASE_ASPECTS.contains(aspect));
+        }
     }
 }
