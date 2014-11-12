@@ -117,7 +117,8 @@ public class StateProviderModuleTest {
 
         fModule.setXmlFile(new Path(TmfXmlTestFiles.VALID_FILE.getFile().getAbsolutePath()));
 
-        try (CtfTmfTrace trace = CtfTmfTestTrace.KERNEL.getTrace();) {
+        try {
+            CtfTmfTrace trace = CtfTmfTestTrace.KERNEL.getTrace();
             fModule.setTrace(trace);
             fModule.schedule();
 

@@ -59,11 +59,10 @@ public class TraceSynchronizationBenchmark {
     public void testSmallTraces() {
         assumeTrue(CtfTmfTestTrace.SYNC_SRC.exists());
         assumeTrue(CtfTmfTestTrace.SYNC_DEST.exists());
-        try (CtfTmfTrace trace1 = CtfTmfTestTrace.SYNC_SRC.getTrace();
-                CtfTmfTrace trace2 = CtfTmfTestTrace.SYNC_DEST.getTrace();) {
-            ITmfTrace[] traces = { trace1, trace2 };
-            runCpuTest(traces, "Match TCP events", 40);
-        }
+        CtfTmfTrace trace1 = CtfTmfTestTrace.SYNC_SRC.getTrace();
+        CtfTmfTrace trace2 = CtfTmfTestTrace.SYNC_DEST.getTrace();
+        ITmfTrace[] traces = { trace1, trace2 };
+        runCpuTest(traces, "Match TCP events", 40);
     }
 
     /**
@@ -74,13 +73,12 @@ public class TraceSynchronizationBenchmark {
         assumeTrue(CtfTmfTestTrace.DJANGO_CLIENT.exists());
         assumeTrue(CtfTmfTestTrace.DJANGO_DB.exists());
         assumeTrue(CtfTmfTestTrace.DJANGO_HTTPD.exists());
-        try (CtfTmfTrace trace1 = CtfTmfTestTrace.DJANGO_CLIENT.getTrace();
-                CtfTmfTrace trace2 = CtfTmfTestTrace.DJANGO_DB.getTrace();
-                CtfTmfTrace trace3 = CtfTmfTestTrace.DJANGO_HTTPD.getTrace();) {
-            ITmfTrace[] traces = { trace1, trace2, trace3 };
-            runCpuTest(traces, "Django traces", 10);
-            runMemoryTest(traces, "Django traces", 10);
-        }
+        CtfTmfTrace trace1 = CtfTmfTestTrace.DJANGO_CLIENT.getTrace();
+        CtfTmfTrace trace2 = CtfTmfTestTrace.DJANGO_DB.getTrace();
+        CtfTmfTrace trace3 = CtfTmfTestTrace.DJANGO_HTTPD.getTrace();
+        ITmfTrace[] traces = { trace1, trace2, trace3 };
+        runCpuTest(traces, "Django traces", 10);
+        runMemoryTest(traces, "Django traces", 10);
     }
 
     private static void runCpuTest(ITmfTrace[] testTraces, String testName, int loop_count) {
