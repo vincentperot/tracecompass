@@ -66,35 +66,36 @@ public class TmfEventParserStub implements ITmfEventParser {
     // ------------------------------------------------------------------------
 
     static final String typePrefix = "Type-";
+
     @Override
     public ITmfEvent parseEvent(final ITmfContext context) {
 
-        if (! (fEventStream instanceof TmfTraceStub)) {
+        if (!(fEventStream instanceof TmfTraceStub)) {
             return null;
         }
 
         // Highly inefficient...
-        final RandomAccessFile stream = ((TmfTraceStub) fEventStream).getStream();
-        if (stream == null) {
-            return null;
-        }
+        try (final RandomAccessFile stream = ((TmfTraceStub) fEventStream).getStream();) {
+            if (stream == null) {
+                return null;
+            }
 
-        //           String name = eventStream.getName();
-        //           name = name.substring(name.lastIndexOf('/') + 1);
+            // String name = eventStream.getName();
+            // name = name.substring(name.lastIndexOf('/') + 1);
 
-        // no need to use synchronized since it's already cover by the calling method
+            // no need to use synchronized since it's already cover by the
+            // calling method
 
-        long location = 0;
-        if (context != null && context.getLocation() != null) {
-            location = (Long) context.getLocation().getLocationInfo();
-            try {
+            long location = 0;
+            if (context != null && context.getLocation() != null) {
+                location = (Long) context.getLocation().getLocationInfo();
                 stream.seek(location);
 
-                final long ts        = stream.readLong();
-                final String source  = stream.readUTF();
-                final String type    = stream.readUTF();
-                final int reference  = stream.readInt();
-                final int typeIndex  = Integer.parseInt(type.substring(typePrefix.length()));
+                final long ts = stream.readLong();
+                final String source = stream.readUTF();
+                final String type = stream.readUTF();
+                final int reference = stream.readInt();
+                final int typeIndex = Integer.parseInt(type.substring(typePrefix.length()));
                 final String[] fields = new String[typeIndex];
                 for (int i = 0; i < typeIndex; i++) {
                     fields[i] = stream.readUTF();
@@ -114,9 +115,9 @@ public class TmfEventParserStub implements ITmfEventParser {
                         fEventStream.createTimestamp(ts * 1000000L),
                         source, fTypes[typeIndex], root, String.valueOf(reference));
                 return event;
-            } catch (final EOFException e) {
-            } catch (final IOException e) {
             }
+        } catch (final EOFException e) {
+        } catch (final IOException e) {
         }
         return null;
     }

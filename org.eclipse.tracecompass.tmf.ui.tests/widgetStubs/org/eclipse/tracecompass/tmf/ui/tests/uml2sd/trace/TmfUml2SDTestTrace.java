@@ -42,14 +42,17 @@ public class TmfUml2SDTestTrace implements ITmfEventParser {
 
     /**
      * Constructor
-     * @param eventStream ITmfTrace implementation
+     *
+     * @param eventStream
+     *            ITmfTrace implementation
      */
     public TmfUml2SDTestTrace(ITmfTrace eventStream) {
         fEventStream = eventStream;
     }
 
     /**
-     * @param eventStream ITmfTrace implementation to set
+     * @param eventStream
+     *            ITmfTrace implementation to set
      */
     public void setTrace(ITmfTrace eventStream) {
         fEventStream = eventStream;
@@ -57,33 +60,32 @@ public class TmfUml2SDTestTrace implements ITmfEventParser {
 
     @Override
     public ITmfEvent parseEvent(ITmfContext context) {
-        if (! (fEventStream instanceof TmfTraceStub)) {
+        if (!(fEventStream instanceof TmfTraceStub)) {
             return null;
         }
 
         // Highly inefficient...
-        RandomAccessFile stream = ((TmfTraceStub) fEventStream).getStream();
+        try (RandomAccessFile stream = ((TmfTraceStub) fEventStream).getStream();) {
 
-//        String name = eventStream.getName();
-//        name = name.substring(name.lastIndexOf('/') + 1);
+            // String name = eventStream.getName();
+            // name = name.substring(name.lastIndexOf('/') + 1);
 
-        long location = 0;
-        if (context != null) {
-            location = (Long) context.getLocation().getLocationInfo();
-        }
+            long location = 0;
+            if (context != null) {
+                location = (Long) context.getLocation().getLocationInfo();
+            }
 
-        try {
             stream.seek(location);
 
-            long ts        = stream.readLong();
-            String source  = stream.readUTF();
-            String type    = stream.readUTF();
+            long ts = stream.readLong();
+            String source = stream.readUTF();
+            String type = stream.readUTF();
             String reference = stream.readUTF();
             String sender = stream.readUTF();
             String receiver = stream.readUTF();
             String signal = stream.readUTF();
 
-            String[] labels = {"sender", "receiver", "signal"};
+            String[] labels = { "sender", "receiver", "signal" };
 
             TmfEventType tmfEventType = new TmfEventType(type, TmfEventField.makeRoot(labels));
 
@@ -108,5 +110,4 @@ public class TmfUml2SDTestTrace implements ITmfEventParser {
         }
         return null;
     }
-
 }
