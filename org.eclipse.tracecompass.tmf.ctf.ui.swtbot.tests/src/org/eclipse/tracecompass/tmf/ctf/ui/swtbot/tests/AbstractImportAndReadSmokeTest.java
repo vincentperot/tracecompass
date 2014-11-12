@@ -73,7 +73,7 @@ public abstract class AbstractImportAndReadSmokeTest {
     protected static final String TRACE_FOLDER = "synctraces";
     /** Trace type name for generic CTF traces */
     protected static final String TRACE_TYPE_NAME = "Generic CTF Trace";
-    /** A Generic CTF Trace*/
+    /** A Generic CTF Trace */
     protected static final CtfTmfTestTrace fTrace = CtfTmfTestTrace.SYNC_DEST;
     /** SWT BOT workbench reference */
     protected static SWTWorkbenchBot fBot;
@@ -213,6 +213,7 @@ public abstract class AbstractImportAndReadSmokeTest {
 
     /**
      * Gets the project Name
+     *
      * @return the project name
      */
     protected abstract String getProjectName();
@@ -234,6 +235,7 @@ public abstract class AbstractImportAndReadSmokeTest {
 
     /**
      * Verifies the Histogram View
+     *
      * @param vp
      *            the view part
      * @param tmfEd
@@ -281,6 +283,7 @@ public abstract class AbstractImportAndReadSmokeTest {
 
     /**
      * Verifies the statistics view
+     *
      * @param vp
      *            the view part
      */
@@ -295,24 +298,25 @@ public abstract class AbstractImportAndReadSmokeTest {
 
     /**
      * Gets an event at a given rank
+     *
      * @param rank
      *            a rank
      * @return the event at given rank
      */
     protected CtfTmfEvent getEvent(int rank) {
-        try (CtfTmfTrace trace = fTrace.getTrace()) {
-            ITmfContext ctx = trace.seekEvent(0);
-            for (int i = 0; i < rank; i++) {
-                trace.getNext(ctx);
-            }
-            return trace.getNext(ctx);
+        CtfTmfTrace trace = fTrace.getTrace();
+        ITmfContext ctx = trace.seekEvent(0);
+        for (int i = 0; i < rank; i++) {
+            trace.getNext(ctx);
         }
+        return trace.getNext(ctx);
     }
 
     /**
      * Gets a view part based on view title
+     *
      * @param viewTile
-     *              a view title
+     *            a view title
      * @return the view part
      */
     protected IViewPart getViewPart(final String viewTile) {
