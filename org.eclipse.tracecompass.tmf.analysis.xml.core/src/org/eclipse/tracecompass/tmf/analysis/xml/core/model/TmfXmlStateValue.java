@@ -26,6 +26,8 @@ import org.eclipse.tracecompass.tmf.analysis.xml.core.module.IXmlStateSystemCont
 import org.eclipse.tracecompass.tmf.analysis.xml.core.stateprovider.TmfXmlStrings;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
+import org.eclipse.tracecompass.tmf.core.event.criterion.TmfCpuCriterion;
 import org.w3c.dom.Element;
 
 /**
@@ -253,10 +255,16 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
         final ITmfEventField content = event.getContent();
 
         /* Exception for "CPU", returns the source of this event */
-        /* FIXME Disabled until we can use event criteria instead */
-//        if (fieldName.equals(TmfXmlStrings.CPU)) {
-//            return TmfStateValue.newValueInt(Integer.valueOf(event.getSource()));
-//        }
+        if (fieldName.equals(TmfXmlStrings.CPU)) {
+            /* See if the event advertises a CPU criterion */
+            Iterable<ITmfEventCriterion> criteria = event.getTrace().getCriteria();
+            for (ITmfEventCriterion criterion : criteria) {
+                if (criterion instanceof TmfCpuCriterion) {
+                    String cpu = criterion.resolveCriterion(event);
+                    return TmfStateValue.newValueInt(Integer.valueOf(cpu));
+                }
+            }
+        }
         /* Exception also for "TIMESTAMP", returns the timestamp of this event */
         if (fieldName.equals(TmfXmlStrings.TIMESTAMP)) {
             return TmfStateValue.newValueLong(event.getTimestamp().getValue());
