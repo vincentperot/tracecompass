@@ -46,7 +46,9 @@ public class CtfIteratorTest {
 
     /**
      * Perform pre-test initialization.
-     * @throws CTFReaderException error
+     *
+     * @throws CTFReaderException
+     *             error
      */
     @Before
     public void setUp() throws CTFReaderException {
@@ -73,7 +75,9 @@ public class CtfIteratorTest {
 
     /**
      * Run the CtfIterator(CtfTmfTrace) constructor on a non init'ed trace.
-     * @throws CTFReaderException error
+     *
+     * @throws CTFReaderException
+     *             error
      */
     @Test
     public void testCtfIterator_noinit() throws CTFReaderException {
@@ -84,7 +88,9 @@ public class CtfIteratorTest {
 
     /**
      * Run the CtfIterator(CtfTmfTrace) constructor on an init'ed trace.
-     * @throws CTFReaderException error
+     *
+     * @throws CTFReaderException
+     *             error
      */
     @Test
     public void testCtfIterator_init() throws CTFReaderException {
@@ -97,7 +103,9 @@ public class CtfIteratorTest {
     /**
      * Run the CtfIterator(CtfTmfTrace,long,long) constructor test, which
      * specifies an initial position for the iterator.
-     * @throws CTFReaderException error
+     *
+     * @throws CTFReaderException
+     *             error
      */
     @Test
     public void testCtfIterator_position() throws CTFReaderException {
@@ -107,7 +115,6 @@ public class CtfIteratorTest {
             assertNotNull(result);
         }
     }
-
 
     /**
      * Run the boolean advance() method test.
@@ -120,7 +127,9 @@ public class CtfIteratorTest {
 
     /**
      * Run the int compareTo(CtfIterator) method test.
-     * @throws CTFReaderException error
+     *
+     * @throws CTFReaderException
+     *             error
      */
     @Test
     public void testCompareTo() throws CTFReaderException {
@@ -133,7 +142,9 @@ public class CtfIteratorTest {
     /**
      * Run the boolean equals(Object) method test. Compare with another iterator
      * on the same trace.
-     * @throws CTFReaderException error
+     *
+     * @throws CTFReaderException
+     *             error
      */
     @Test
     public void testEquals_other() throws CTFReaderException {
@@ -163,9 +174,8 @@ public class CtfIteratorTest {
      */
     @Test
     public void testGetCtfTmfTrace() {
-        try (CtfTmfTrace result = iterator.getCtfTmfTrace();) {
-            assertNotNull(result);
-        }
+        CtfTmfTrace result = iterator.getCtfTmfTrace();
+        assertNotNull(result);
     }
 
     /**

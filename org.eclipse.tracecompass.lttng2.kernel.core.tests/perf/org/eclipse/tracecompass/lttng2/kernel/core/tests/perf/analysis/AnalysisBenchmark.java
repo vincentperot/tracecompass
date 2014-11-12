@@ -64,7 +64,8 @@ public class AnalysisBenchmark {
 
         for (int i = 0; i < LOOP_COUNT; i++) {
             IAnalysisModule module = null;
-            try (LttngKernelTrace trace = new LttngKernelTrace()) {
+            try {
+                LttngKernelTrace trace = new LttngKernelTrace();
                 module = new LttngKernelAnalysis();
                 module.setId("test");
                 trace.initTrace(null, testTrace.getPath(), CtfTmfEvent.class);

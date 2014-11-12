@@ -192,14 +192,12 @@ public class ImportAndReadKernelSmokeTest {
     }
 
     private static CtfTmfEvent getEvent(int rank) {
-        try (CtfTmfTrace trace = CtfTmfTestTrace.SYNTHETIC_TRACE.getTrace()) {
-            ITmfContext ctx = trace.seekEvent(0);
-            for (int i = 0; i < rank; i++) {
-                trace.getNext(ctx);
-            }
-            return trace.getNext(ctx);
+        CtfTmfTrace trace = CtfTmfTestTrace.SYNTHETIC_TRACE.getTrace();
+        ITmfContext ctx = trace.seekEvent(0);
+        for (int i = 0; i < rank; i++) {
+            trace.getNext(ctx);
         }
-
+        return trace.getNext(ctx);
     }
 
     private static IViewPart getViewPart(final String viewTile) {
