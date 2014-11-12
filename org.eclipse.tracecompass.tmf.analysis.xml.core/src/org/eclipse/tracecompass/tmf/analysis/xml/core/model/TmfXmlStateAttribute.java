@@ -28,6 +28,8 @@ import org.eclipse.tracecompass.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.stateprovider.TmfXmlStrings;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
+import org.eclipse.tracecompass.tmf.core.event.criterion.TmfCpuCriterion;
 import org.w3c.dom.Element;
 
 /**
@@ -221,10 +223,17 @@ public abstract class TmfXmlStateAttribute implements ITmfXmlStateAttribute {
                     return quark;
                 }
                 /* special case if field is CPU which is not in the field */
-                /* FIXME Disabled until we can use event criteria */
-//                if (fName.equals(TmfXmlStrings.CPU)) {
-//                    quark = getQuarkRelativeAndAdd(startQuark, event.getSource());
-//                } else {
+                if (fName.equals(TmfXmlStrings.CPU)) {
+                    /* See if the event advertises a CPU criterion */
+                    Iterable<ITmfEventCriterion> criteria = event.getTrace().getCriteria();
+                    for (ITmfEventCriterion criterion : criteria) {
+                        if (criterion instanceof TmfCpuCriterion) {
+                            String cpu = criterion.resolveCriterion(event);
+                            quark = getQuarkRelativeAndAdd(startQuark, cpu);
+                            break;
+                        }
+                    }
+                } else {
                     final ITmfEventField content = event.getContent();
                     /* stop if the event field doesn't exist */
                     if (content.getField(fName) == null) {
@@ -243,7 +252,7 @@ public abstract class TmfXmlStateAttribute implements ITmfXmlStateAttribute {
                         Integer fieldInterger = (Integer) field;
                         quark = getQuarkRelativeAndAdd(startQuark, fieldInterger.toString());
                     }
-//                }
+                }
                 return quark;
             }
             case QUERY: {
