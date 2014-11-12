@@ -9,7 +9,7 @@
  *     Patrick Tassé - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.kernel.core.event.aspect;
+package org.eclipse.tracecompass.tmf.ctf.core.event.aspect;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -17,7 +17,7 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 
     private static final String BUNDLE_NAME =
-            "org.eclipse.tracecompass.internal.lttng2.kernel.core.event.aspect.messages"; //$NON-NLS-1$
+            "org.eclipse.tracecompass.tmf.ctf.core.event.aspect.messages"; //$NON-NLS-1$
 
     public static String AspectName_Channel;
 
