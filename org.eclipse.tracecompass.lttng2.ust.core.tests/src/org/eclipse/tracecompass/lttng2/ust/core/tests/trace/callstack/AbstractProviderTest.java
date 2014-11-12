@@ -50,7 +50,8 @@ import org.junit.rules.Timeout;
 public abstract class AbstractProviderTest {
 
     /** Time-out tests after 20 seconds */
-    @Rule public TestRule globalTimeout= new Timeout(20000);
+    @Rule
+    public TestRule globalTimeout = new Timeout(20000);
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -61,7 +62,6 @@ public abstract class AbstractProviderTest {
     private CtfTmfTrace fTrace = null;
     private ITmfStateSystem fSS = null;
     private TestLttngCallStackModule fModule;
-
 
     // ------------------------------------------------------------------------
     // Abstract methods
@@ -136,30 +136,29 @@ public abstract class AbstractProviderTest {
     public void testOtherUstTrace() {
         /* Initialize the trace and analysis module */
         File suppDir;
-        try (CtfTmfTrace ustTrace = otherUstTrace.getTrace();) {
-            TestLttngCallStackModule module = null;
+        CtfTmfTrace ustTrace = otherUstTrace.getTrace();
+        TestLttngCallStackModule module = null;
+        try {
+            module = new TestLttngCallStackModule();
             try {
-                module = new TestLttngCallStackModule();
-                try {
-                    module.setTrace(ustTrace);
-                } catch (TmfAnalysisException e) {
-                    fail();
-                }
-                module.schedule();
-                assertTrue(module.waitForCompletion());
-
-                /* Make sure the generated state system exists, but is empty */
-                ITmfStateSystem ss = module.getStateSystem();
-                assertNotNull(ss);
-                assertTrue(ss.getStartTime() >= ustTrace.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue());
-                assertEquals(0, ss.getNbAttributes());
-            } finally {
-                if (module != null) {
-                    module.dispose();
-                }
+                module.setTrace(ustTrace);
+            } catch (TmfAnalysisException e) {
+                fail();
             }
-            suppDir = new File(TmfTraceManager.getSupplementaryFileDir(ustTrace));
+            module.schedule();
+            assertTrue(module.waitForCompletion());
+
+            /* Make sure the generated state system exists, but is empty */
+            ITmfStateSystem ss = module.getStateSystem();
+            assertNotNull(ss);
+            assertTrue(ss.getStartTime() >= ustTrace.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue());
+            assertEquals(0, ss.getNbAttributes());
+        } finally {
+            if (module != null) {
+                module.dispose();
+            }
         }
+        suppDir = new File(TmfTraceManager.getSupplementaryFileDir(ustTrace));
         deleteDirectory(suppDir);
         assertFalse(suppDir.exists());
     }

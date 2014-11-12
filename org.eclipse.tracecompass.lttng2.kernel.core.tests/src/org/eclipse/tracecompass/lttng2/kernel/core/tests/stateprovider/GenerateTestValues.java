@@ -30,8 +30,8 @@ import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
  * Small program to regenerate the values used in "TestValues.java" from the
  * current LTTng-kernel state provider.
  *
- * It will write its output the a file called 'TestValues<something>.java' in your
- * temporary files directory.
+ * It will write its output the a file called 'TestValues<something>.java' in
+ * your temporary files directory.
  *
  * @author Alexandre Montplaisir
  */
@@ -57,9 +57,8 @@ public class GenerateTestValues {
 
         /* Prepare the files */
         File logFile = File.createTempFile("TestValues", ".java");
-        try (final CtfTmfTrace trace = testTrace.getTrace();
-                PrintWriter writer = new PrintWriter(new FileWriter(logFile), true);) {
-
+        try (PrintWriter writer = new PrintWriter(new FileWriter(logFile), true);) {
+            final CtfTmfTrace trace = testTrace.getTrace();
             /* Build and query the state system */
             TmfStateSystemAnalysisModule module = new TmfStateSystemAnalysisModule() {
                 @Override

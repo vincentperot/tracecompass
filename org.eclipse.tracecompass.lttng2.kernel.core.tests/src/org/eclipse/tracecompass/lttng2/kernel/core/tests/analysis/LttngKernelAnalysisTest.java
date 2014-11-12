@@ -32,7 +32,6 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.tests.shared.TmfTestHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ctf.core.tests.shared.CtfTmfTestTrace;
-import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -111,13 +110,11 @@ public class LttngKernelAnalysisTest {
 
         /* Test with a CTF trace that does not have required events */
         assumeTrue(CtfTmfTestTrace.CYG_PROFILE.exists());
-        try (CtfTmfTrace trace = CtfTmfTestTrace.CYG_PROFILE.getTrace();) {
-            /*
-             * TODO: This should be false, but for now there is no mandatory
-             * events in the kernel analysis so it will return true.
-             */
-            assertTrue(fKernelAnalysisModule.canExecute(trace));
-        }
+        /*
+         * TODO: This should be false, but for now there is no mandatory events
+         * in the kernel analysis so it will return true.
+         */
+        assertTrue(fKernelAnalysisModule.canExecute(CtfTmfTestTrace.CYG_PROFILE.getTrace()));
     }
 
     /**

@@ -72,7 +72,7 @@ import com.google.common.collect.ImmutableSet;
  */
 public class CtfTmfTrace extends TmfTrace
         implements ITmfEventParser, ITmfTraceProperties, ITmfPersistentlyIndexable,
-        ITmfTraceWithPreDefinedEvents, AutoCloseable {
+        ITmfTraceWithPreDefinedEvents {
 
     // -------------------------------------------
     // Constants
@@ -182,11 +182,6 @@ public class CtfTmfTrace extends TmfTrace
      */
     public CtfIteratorManager getIteratorManager() {
         return fIteratorManager;
-    }
-
-    @Override
-    public void close() {
-        dispose();
     }
 
     @Override
