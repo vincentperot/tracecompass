@@ -62,13 +62,6 @@ import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
  */
 public class CTFTrace implements IDefinitionScope {
 
-    @Override
-    public String toString() {
-        /* Only for debugging, shouldn't be externalized */
-        return "CTFTrace [path=" + fPath + ", major=" + fMajor + ", minor=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-                + fMinor + ", uuid=" + fUuid + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-    }
-
     /**
      * The trace directory on the filesystem.
      */
@@ -144,6 +137,15 @@ public class CTFTrace implements IDefinitionScope {
     // ------------------------------------------------------------------------
 
     /**
+     * Streamed constructor
+     *
+     * @since 3.0
+     */
+    public CTFTrace() {
+        fPath = null;
+    }
+
+    /**
      * Trace constructor.
      *
      * @param path
@@ -183,15 +185,6 @@ public class CTFTrace implements IDefinitionScope {
         init(path);
     }
 
-    /**
-     * Streamed constructor
-     *
-     * @since 3.0
-     */
-    public CTFTrace() {
-        fPath = null;
-    }
-
     private void init(File path) throws CTFReaderException {
 
         /* Open all the trace files */
@@ -219,20 +212,6 @@ public class CTFTrace implements IDefinitionScope {
     // ------------------------------------------------------------------------
 
     /**
-     * Gets an event declaration hash map for a given streamID
-     *
-     * @param streamId
-     *            The ID of the stream from which to read
-     * @return The Hash map with the event declarations
-     * @since 2.0
-     * @deprecated use {@link CTFTrace#getEventDeclarations(Long)}
-     */
-    @Deprecated
-    public Map<Long, IEventDeclaration> getEvents(Long streamId) {
-        return fStreams.get(streamId).getEvents();
-    }
-
-    /**
      * Gets an event declaration list for a given streamID
      *
      * @param streamId
@@ -252,26 +231,10 @@ public class CTFTrace implements IDefinitionScope {
      * @param id
      *            the ID of the event
      * @return the event declaration
-     * @since 2.0
-     * @deprecated use {@link CTFTrace#getEventType(long, int)} instead
-     */
-    @Deprecated
-    public IEventDeclaration getEventType(long streamId, long id) {
-        return getStream(streamId).getEventDeclaration((int) id);
-    }
-
-    /**
-     * Get an event by it's ID
-     *
-     * @param streamId
-     *            The ID of the stream from which to read
-     * @param id
-     *            the ID of the event
-     * @return the event declaration
      * @since 3.2
      */
     public IEventDeclaration getEventType(long streamId, int id) {
-        return getEvents(streamId).get(id);
+        return fStreams.get(streamId).getEventDeclaration(id);
     }
 
     /**
@@ -470,20 +433,6 @@ public class CTFTrace implements IDefinitionScope {
     // Operations
     // ------------------------------------------------------------------------
 
-    private void addStream(CTFStreamInput s) {
-
-        /*
-         * add the stream
-         */
-        CTFStream stream = s.getStream();
-        fStreams.put(stream.getId(), stream);
-
-        /*
-         * index the trace
-         */
-        s.setupIndex();
-    }
-
     /**
      * Tries to open the given file, reads the first packet header of the file
      * and check its validity. This will add a file to a stream as a streaminput
@@ -608,18 +557,18 @@ public class CTFTrace implements IDefinitionScope {
     // Live trace reading
     // ------------------------------------------------------------------------
 
-    /**
-     * Add a new stream file to support new streams while the trace is being
-     * read.
-     *
-     * @param streamFile
-     *            the file of the stream
-     * @throws CTFReaderException
-     *             A stream had an issue being read
-     * @since 3.0
-     */
-    public void addStreamFile(File streamFile) throws CTFReaderException {
-        openStreamInput(streamFile);
+    private void addStream(CTFStreamInput s) {
+
+        /*
+         * add the stream
+         */
+        CTFStream stream = s.getStream();
+        fStreams.put(stream.getId(), stream);
+
+        /*
+         * index the trace
+         */
+        s.setupIndex();
     }
 
     /**
@@ -644,7 +593,7 @@ public class CTFTrace implements IDefinitionScope {
          * If the stream we try to add has the null key, it must be the only
          * one. Thus, if the streams container is not empty, it is not valid.
          */
-        if ((stream.getId() == null) && (fStreams.size() != 0)) {
+        if ((stream.getId() == null) && (nbStreams() != 0)) {
             throw new ParseException("Stream without id with multiple streams"); //$NON-NLS-1$
         }
 
@@ -659,6 +608,50 @@ public class CTFTrace implements IDefinitionScope {
         /* This stream is valid and has a unique id. */
         fStreams.put(stream.getId(), stream);
     }
+
+    /**
+     * Add a new stream
+     *
+     * @param id
+     *            the ID of the stream
+     * @param streamFile
+     *            new file in the stream
+     * @throws CTFReaderException
+     *             The file must exist
+     * @since 3.0
+     */
+    public void addStream(long id, File streamFile) throws CTFReaderException {
+        CTFStream stream = null;
+        final File file = streamFile;
+        if (file == null) {
+            throw new CTFReaderException("cannot create a stream with no file"); //$NON-NLS-1$
+        }
+        if (fStreams.containsKey(id)) {
+            stream = fStreams.get(id);
+        } else {
+            stream = new CTFStream(this);
+            fStreams.put(id, stream);
+        }
+        stream.addInput(new CTFStreamInput(stream, file));
+    }
+
+    /**
+     * Add a new stream file to support new streams while the trace is being
+     * read.
+     *
+     * @param streamFile
+     *            the file of the stream
+     * @throws CTFReaderException
+     *             A stream had an issue being read
+     * @since 3.0
+     */
+    public void addStreamFile(File streamFile) throws CTFReaderException {
+        openStreamInput(streamFile);
+    }
+
+    // ------------------------------------------------------------------------
+    // Environment variable stuff
+    // ------------------------------------------------------------------------
 
     /**
      * Gets the Environment variables from the trace metadata (See CTF spec)
@@ -682,6 +675,10 @@ public class CTFTrace implements IDefinitionScope {
     public void addEnvironmentVar(String varName, String varValue) {
         fEnvironment.put(varName, varValue);
     }
+
+    // ------------------------------------------------------------------------
+    // Clocks
+    // ------------------------------------------------------------------------
 
     /**
      * Add a clock to the clock list
@@ -721,6 +718,30 @@ public class CTFTrace implements IDefinitionScope {
             return fSingleClock;
         }
         return null;
+    }
+
+    /**
+     * Does the trace need to time scale?
+     *
+     * @return if the trace is in ns or cycles.
+     */
+    private boolean clockNeedsScale() {
+        if (getClock() == null) {
+            return false;
+        }
+        return fSingleClock.isClockScaled();
+    }
+
+    /**
+     * the inverse clock for returning to a scale.
+     *
+     * @return 1.0 / scale
+     */
+    private double getInverseTimeScale() {
+        if (getClock() == null) {
+            return 1.0;
+        }
+        return fSingleClock.getClockAntiScale();
     }
 
     /**
@@ -780,30 +801,6 @@ public class CTFTrace implements IDefinitionScope {
     }
 
     /**
-     * Does the trace need to time scale?
-     *
-     * @return if the trace is in ns or cycles.
-     */
-    private boolean clockNeedsScale() {
-        if (getClock() == null) {
-            return false;
-        }
-        return fSingleClock.isClockScaled();
-    }
-
-    /**
-     * the inverse clock for returning to a scale.
-     *
-     * @return 1.0 / scale
-     */
-    private double getInverseTimeScale() {
-        if (getClock() == null) {
-            return 1.0;
-        }
-        return fSingleClock.getClockAntiScale();
-    }
-
-    /**
      * @param cycles
      *            clock cycles since boot
      * @return time in nanoseconds UTC offset
@@ -840,6 +837,10 @@ public class CTFTrace implements IDefinitionScope {
         }
         return retVal - getOffset();
     }
+
+    // ------------------------------------------------------------------------
+    // Callsite
+    // ------------------------------------------------------------------------
 
     /**
      * Adds a callsite
@@ -938,30 +939,15 @@ public class CTFTrace implements IDefinitionScope {
         return callsite;
     }
 
-    /**
-     * Add a new stream
-     *
-     * @param id
-     *            the ID of the stream
-     * @param streamFile
-     *            new file in the stream
-     * @throws CTFReaderException
-     *             The file must exist
-     * @since 3.0
-     */
-    public void addStream(long id, File streamFile) throws CTFReaderException {
-        CTFStream stream = null;
-        final File file = streamFile;
-        if (file == null) {
-            throw new CTFReaderException("cannot create a stream with no file"); //$NON-NLS-1$
-        }
-        if (fStreams.containsKey(id)) {
-            stream = fStreams.get(id);
-        } else {
-            stream = new CTFStream(this);
-            fStreams.put(id, stream);
-        }
-        stream.addInput(new CTFStreamInput(stream, file));
+    // ------------------------------------------------------------------------
+    // toString
+    // ------------------------------------------------------------------------
+
+    @Override
+    public String toString() {
+        /* Only for debugging, shouldn't be externalized */
+        return "CTFTrace [path=" + fPath + ", major=" + fMajor + ", minor=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+                + fMinor + ", uuid=" + fUuid + "]"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 }
 
