@@ -42,6 +42,42 @@ import org.eclipse.tracecompass.tmf.ui.views.uml2sd.util.Messages;
  */
 public class SDViewPref implements ISDPreferences, IPropertyChangeListener {
 
+    private static final int DEFAULT_BLUE = 212;
+    private static final int DEFAULT_GREEN = 176;
+    private static final int DEFAULT_RED = 134;
+    private static final int LIFELINE_HEADER_BLUE = 137;
+    private static final int LIFELINE_HEADER_GREEN = 127;
+    private static final int LIFELINE_HEADER_RED = 129;
+    private static final int FRAME_BLUE = 0;
+    private static final int FRAME_GREEN = 0;
+    private static final int FRAME_RED = 0;
+    private static final int LIFELINE_BLUE = 129;
+    private static final int LIFELINE_GREEN = 129;
+    private static final int LIFELINE_RED = 129;
+    private static final int FOREGROUND_LIFELINE_BLUE = 129;
+    private static final int FOREGROUND_LIFELINE_GREEN = 129;
+    private static final int FOREGROUND_LIFELINE_RED = 129;
+    private static final int FOREGROUND_FRAME_BLUE = 200;
+    private static final int FOREGROUND_FRAME_GREEN = 153;
+    private static final int FOREGROUND_FRAME_RED = 81;
+    private static final int FOREGROUND_LIFELINE_HEADER_RED = 129;
+    private static final int FOREGROUND_LIFELINE_HEADER_GREEN = 127;
+    private static final int FOREGROUND_LIFELINE_HEADER_BLUE = 137;
+    private static final int FOREGROUND_DEFAULT_BLUE = 212;
+    private static final int FOREGROUND_DEFAULT_GREEN = 176;
+    private static final int FOREGROUND_DEFAULT_RED = 134;
+    private static final int BACKGROUND_DEFAULT_BLUE = 255;
+    private static final int BACKGROUND_DEFAULT_GREEN = 255;
+    private static final int BACKGROUND_DEFAULT_RED = 255;
+    private static final int BACKGROUND_LIFELINE_HEADER_BLUE = 244;
+    private static final int BACKGROUND_LIFELINE_HEADER_GREEN = 244;
+    private static final int BACKGROUND_LIFELINE_HEADER_RED = 245;
+    private static final int BACKGROUND_LIFELINE_BLUE = 220;
+    private static final int BACKGROUND_LIFELINE_GREEN = 220;
+    private static final int BACKGROUND_LIFELINE_RED = 220;
+    private static final int BACKGROUND_FRAME_BLUE = 233;
+    private static final int BACKGROUND_FRAME_GREEN = 222;
+    private static final int BACKGROUND_FRAME_RED = 201;
     // ------------------------------------------------------------------------
     // Constants
     // ------------------------------------------------------------------------
@@ -158,13 +194,13 @@ public class SDViewPref implements ISDPreferences, IPropertyChangeListener {
         for (int i = 0; i < PREF_BACK_COLOR_LIST.length; i++) {
             IColor color;
             if ((PREF_BACK_COLOR_LIST[i].equals(PREF_EXEC)) || PREF_BACK_COLOR_LIST[i].equals(PREF_FRAME_NAME)) {
-                color = new ColorImpl(Display.getDefault(), 201, 222, 233);
+                color = new ColorImpl(Display.getDefault(), BACKGROUND_FRAME_RED, BACKGROUND_FRAME_GREEN, BACKGROUND_FRAME_BLUE);
             } else if (PREF_BACK_COLOR_LIST[i].equals(PREF_LIFELINE)) {
-                color = new ColorImpl(Display.getDefault(), 220, 220, 220);
+                color = new ColorImpl(Display.getDefault(), BACKGROUND_LIFELINE_RED, BACKGROUND_LIFELINE_GREEN, BACKGROUND_LIFELINE_BLUE);
             } else if (PREF_BACK_COLOR_LIST[i].equals(PREF_LIFELINE_HEADER)) {
-                color = new ColorImpl(Display.getDefault(), 245, 244, 244);
+                color = new ColorImpl(Display.getDefault(), BACKGROUND_LIFELINE_HEADER_RED, BACKGROUND_LIFELINE_HEADER_GREEN, BACKGROUND_LIFELINE_HEADER_BLUE);
             } else {
-                color = new ColorImpl(Display.getDefault(), 255, 255, 255);
+                color = new ColorImpl(Display.getDefault(), BACKGROUND_DEFAULT_RED, BACKGROUND_DEFAULT_GREEN, BACKGROUND_DEFAULT_BLUE);
             }
             PreferenceConverter.setDefault(fPrefStore, PREF_BACK_COLOR_LIST[i] + BACK_COLOR_POSTFIX, ((Color) color.getColor()).getRGB());
             PreferenceConverter.setDefault(fPrefStore, PREF_BACK_COLOR_LIST[i] + BACK_COLOR_POSTFIX + TEMP_TAG, ((Color) color.getColor()).getRGB());
@@ -174,13 +210,13 @@ public class SDViewPref implements ISDPreferences, IPropertyChangeListener {
         for (int i = 0; i < PREF_FORE_COLOR_LIST.length; i++) {
             IColor color;
             if (PREF_FORE_COLOR_LIST[i].equals(PREF_LIFELINE)) {
-                color = new ColorImpl(Display.getDefault(), 129, 129, 129);
+                color = new ColorImpl(Display.getDefault(), FOREGROUND_LIFELINE_RED, FOREGROUND_LIFELINE_GREEN, FOREGROUND_LIFELINE_BLUE);
             } else if (PREF_FORE_COLOR_LIST[i].equals(PREF_FRAME_NAME)) {
-                color = new ColorImpl(Display.getDefault(), 81, 153, 200);
+                color = new ColorImpl(Display.getDefault(), FOREGROUND_FRAME_RED, FOREGROUND_FRAME_GREEN, FOREGROUND_FRAME_BLUE);
             } else if (PREF_FORE_COLOR_LIST[i].equals(PREF_LIFELINE_HEADER)) {
-                color = new ColorImpl(Display.getDefault(), 129, 127, 137);
+                color = new ColorImpl(Display.getDefault(), FOREGROUND_LIFELINE_HEADER_RED, FOREGROUND_LIFELINE_HEADER_GREEN, FOREGROUND_LIFELINE_HEADER_BLUE);
             } else {
-                color = new ColorImpl(Display.getDefault(), 134, 176, 212);
+                color = new ColorImpl(Display.getDefault(), FOREGROUND_DEFAULT_RED, FOREGROUND_DEFAULT_GREEN, FOREGROUND_DEFAULT_BLUE);
             }
             PreferenceConverter.setDefault(fPrefStore, PREF_FORE_COLOR_LIST[i] + FORE_COLOR_POSTFIX, ((Color) color.getColor()).getRGB());
             PreferenceConverter.setDefault(fPrefStore, PREF_FORE_COLOR_LIST[i] + FORE_COLOR_POSTFIX + TEMP_TAG, ((Color) color.getColor()).getRGB());
@@ -190,13 +226,13 @@ public class SDViewPref implements ISDPreferences, IPropertyChangeListener {
         for (int i = 0; i < PREF_TEXT_COLOR_LIST.length; i++) {
             IColor color;
             if (PREF_TEXT_COLOR_LIST[i].equals(PREF_LIFELINE)) {
-                color = new ColorImpl(Display.getDefault(), 129, 129, 129);
+                color = new ColorImpl(Display.getDefault(), LIFELINE_RED, LIFELINE_GREEN, LIFELINE_BLUE);
             } else if (PREF_TEXT_COLOR_LIST[i].equals(PREF_FRAME_NAME)) {
-                color = new ColorImpl(Display.getDefault(), 0, 0, 0);
+                color = new ColorImpl(Display.getDefault(), FRAME_RED, FRAME_GREEN, FRAME_BLUE);
             } else if (PREF_TEXT_COLOR_LIST[i].equals(PREF_LIFELINE_HEADER)) {
-                color = new ColorImpl(Display.getDefault(), 129, 127, 137);
+                color = new ColorImpl(Display.getDefault(), LIFELINE_HEADER_RED, LIFELINE_HEADER_GREEN, LIFELINE_HEADER_BLUE);
             } else {
-                color = new ColorImpl(Display.getDefault(), 134, 176, 212);
+                color = new ColorImpl(Display.getDefault(), DEFAULT_RED, DEFAULT_GREEN, DEFAULT_BLUE);
             }
             PreferenceConverter.setDefault(fPrefStore, PREF_TEXT_COLOR_LIST[i] + TEXT_COLOR_POSTFIX, ((Color) color.getColor()).getRGB());
             PreferenceConverter.setDefault(fPrefStore, PREF_TEXT_COLOR_LIST[i] + TEXT_COLOR_POSTFIX + TEMP_TAG, ((Color) color.getColor()).getRGB());
