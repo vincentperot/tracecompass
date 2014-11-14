@@ -15,6 +15,7 @@ package org.eclipse.tracecompass.internal.ctf.core.event.types;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
@@ -71,8 +72,11 @@ public final class ArrayDeclaration extends CompoundDeclaration {
      * @param elemType
      *            what type of element is in the array
      */
-    public ArrayDeclaration(int length, IDeclaration elemType) {
+    public ArrayDeclaration(int length, @Nullable IDeclaration elemType) {
         fLength = length;
+        if (elemType == null) {
+            throw new IllegalArgumentException("elemType cannot be null"); //$NON-NLS-1$
+        }
         fElemType = elemType;
     }
 
@@ -99,7 +103,7 @@ public final class ArrayDeclaration extends CompoundDeclaration {
     // ------------------------------------------------------------------------
 
     @Override
-    public AbstractArrayDefinition createDefinition(IDefinitionScope definitionScope,
+    public AbstractArrayDefinition createDefinition(@Nullable IDefinitionScope definitionScope,
             @NonNull String fieldName, BitBuffer input) throws CTFReaderException {
         alignRead(input);
         if (isString()) {
@@ -107,7 +111,7 @@ public final class ArrayDeclaration extends CompoundDeclaration {
             input.get(data);
             return new ByteArrayDefinition(this, definitionScope, fieldName, data);
         }
-        List<Definition> definitions = read(input, definitionScope, fieldName);
+        @NonNull List<Definition> definitions = read(input, definitionScope, fieldName);
         return new ArrayDefinition(this, definitionScope, fieldName, definitions);
     }
 
@@ -118,7 +122,7 @@ public final class ArrayDeclaration extends CompoundDeclaration {
     }
 
     @NonNull
-    private List<Definition> read(@NonNull BitBuffer input, IDefinitionScope definitionScope, String fieldName) throws CTFReaderException {
+    private List<Definition> read(@NonNull BitBuffer input, @Nullable IDefinitionScope definitionScope, String fieldName) throws CTFReaderException {
         Builder<Definition> definitions = new ImmutableList.Builder<>();
         if (!fChildrenNames.containsKey(fieldName)) {
             for (int i = 0; i < fLength; i++) {
@@ -134,7 +138,8 @@ public final class ArrayDeclaration extends CompoundDeclaration {
             definitions.add(fElemType.createDefinition(definitionScope, name, input));
         }
         @SuppressWarnings("null")
-        @NonNull ImmutableList<Definition> ret = definitions.build();
+        @NonNull
+        ImmutableList<Definition> ret = definitions.build();
         return ret;
     }
 
