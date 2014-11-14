@@ -158,4 +158,38 @@ public class SequenceDeclaration extends CompoundDeclaration {
         return Integer.MAX_VALUE;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + fElemType.hashCode();
+        result = prime * result + fLengthName.hashCode();
+        result = prime * result + fPaths.hashCode();
+        return result;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        SequenceDeclaration other = (SequenceDeclaration) obj;
+        if (!fElemType.equals(other.fElemType)) {
+            return false;
+        }
+        if (!fLengthName.equals(other.fLengthName)) {
+            return false;
+        }
+        if (!fPaths.equals(other.fPaths)) {
+            return false;
+        }
+        return true;
+    }
+
 }
