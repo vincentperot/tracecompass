@@ -14,6 +14,8 @@ package org.eclipse.tracecompass.internal.ctf.core.event.types.composite;
 
 import java.nio.ByteOrder;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Declaration;
@@ -49,6 +51,7 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
  *
  * @author Matthew Khouzam
  */
+@NonNullByDefault
 public class EventHeaderCompactDeclaration extends Declaration implements IEventHeaderDeclaration {
 
     private static final int COMPACT_SIZE = 1;
@@ -92,12 +95,15 @@ public class EventHeaderCompactDeclaration extends Declaration implements IEvent
      * @param byteOrder
      *            the byteorder
      */
-    public EventHeaderCompactDeclaration(ByteOrder byteOrder) {
+    public EventHeaderCompactDeclaration(@Nullable ByteOrder byteOrder) {
+        if( byteOrder == null ) {
+            throw new IllegalArgumentException("byteOrder cannot be null"); //$NON-NLS-1$
+        }
         fByteOrder = byteOrder;
     }
 
     @Override
-    public EventHeaderDefinition createDefinition(IDefinitionScope definitionScope, String fieldName, BitBuffer input) throws CTFReaderException {
+    public EventHeaderDefinition createDefinition(@Nullable IDefinitionScope definitionScope, String fieldName, BitBuffer input) throws CTFReaderException {
         alignRead(input);
         ByteOrder bo = input.getByteOrder();
         input.setByteOrder(fByteOrder);
@@ -136,7 +142,10 @@ public class EventHeaderCompactDeclaration extends Declaration implements IEvent
      *            the declaration
      * @return true if the struct is a compact event header
      */
-    public static boolean isCompactEventHeader(StructDeclaration declaration) {
+    public static boolean isCompactEventHeader(@Nullable StructDeclaration declaration) {
+        if (declaration == null) {
+            return false;
+        }
 
         IDeclaration iDeclaration = declaration.getFields().get(ID);
         if (!(iDeclaration instanceof EnumDeclaration)) {
