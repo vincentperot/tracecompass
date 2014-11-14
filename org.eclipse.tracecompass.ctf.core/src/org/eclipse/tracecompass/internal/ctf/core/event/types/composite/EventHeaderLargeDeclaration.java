@@ -14,6 +14,8 @@ package org.eclipse.tracecompass.internal.ctf.core.event.types.composite;
 
 import java.nio.ByteOrder;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Declaration;
@@ -49,6 +51,7 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
  *
  * @author Matthew Khouzam
  */
+@NonNullByDefault
 public class EventHeaderLargeDeclaration extends Declaration implements IEventHeaderDeclaration {
 
     /**
@@ -87,17 +90,43 @@ public class EventHeaderLargeDeclaration extends Declaration implements IEventHe
     private final ByteOrder fByteOrder;
 
     /**
+     * Big-Endian Large Event Header
+     */
+    @SuppressWarnings("null")
+    public static final EventHeaderLargeDeclaration EVENT_HEADER_BIG_ENDIAN = new EventHeaderLargeDeclaration(ByteOrder.BIG_ENDIAN);
+
+    /**
+     * Little-Endian Large Event Header
+     */
+    @SuppressWarnings("null")
+    public static final EventHeaderLargeDeclaration EVENT_HEADER_LITTLE_ENDIAN = new EventHeaderLargeDeclaration(ByteOrder.LITTLE_ENDIAN);
+
+    /**
      * Event Header Declaration
      *
      * @param byteOrder
      *            the byteorder
      */
-    public EventHeaderLargeDeclaration(ByteOrder byteOrder) {
+    private EventHeaderLargeDeclaration(ByteOrder byteOrder) {
         fByteOrder = byteOrder;
     }
 
+    /**
+     * Gets an {@link EventHeaderLargeDeclaration} of a given ByteOrder
+     *
+     * @param byteOrder
+     *            the byte order
+     * @return the header declaration
+     */
+    public static EventHeaderLargeDeclaration getEventHeader(@Nullable ByteOrder byteOrder) {
+        if (byteOrder == ByteOrder.BIG_ENDIAN) {
+            return EVENT_HEADER_BIG_ENDIAN;
+        }
+        return EVENT_HEADER_LITTLE_ENDIAN;
+    }
+
     @Override
-    public EventHeaderDefinition createDefinition(IDefinitionScope definitionScope, String fieldName, BitBuffer input) throws CTFReaderException {
+    public EventHeaderDefinition createDefinition(@Nullable IDefinitionScope definitionScope, String fieldName, BitBuffer input) throws CTFReaderException {
         alignRead(input);
         ByteOrder bo = input.getByteOrder();
         input.setByteOrder(fByteOrder);
@@ -132,7 +161,10 @@ public class EventHeaderLargeDeclaration extends Declaration implements IEventHe
      *            the declaration
      * @return true if the event is a large event header
      */
-    public static boolean isLargeEventHeader(StructDeclaration declaration) {
+    public static boolean isLargeEventHeader(@Nullable StructDeclaration declaration) {
+        if (declaration == null) {
+            return false;
+        }
 
         IDeclaration iDeclaration = declaration.getFields().get(ID);
         if (!(iDeclaration instanceof EnumDeclaration)) {
