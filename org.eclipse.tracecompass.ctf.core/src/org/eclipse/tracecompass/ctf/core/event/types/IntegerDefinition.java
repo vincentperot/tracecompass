@@ -27,7 +27,7 @@ import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
  * @author Matthew Khouzam
  * @author Simon Marchi
  */
-public final class IntegerDefinition extends SimpleDatatypeDefinition {
+public class IntegerDefinition extends SimpleDatatypeDefinition {
 
     // ------------------------------------------------------------------------
     // Attributes

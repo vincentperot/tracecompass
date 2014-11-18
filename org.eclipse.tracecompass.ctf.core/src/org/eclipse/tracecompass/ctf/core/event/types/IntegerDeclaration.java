@@ -372,6 +372,24 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
     @Override
     public IntegerDefinition createDefinition(@Nullable IDefinitionScope definitionScope,
             String fieldName, BitBuffer input) throws CTFReaderException {
+        if( fLength > 64 ){
+            byte []b = new byte[fLength/8];
+            alignRead(input);
+            input.get(b);
+            if( fAlignment!= 8){
+                int shift = (int) (fAlignment & 0xff);
+                byte mask = (byte) (shift -1);
+
+                byte bits1 = 0, bits2 = 0;
+                for(int i = b.length-1; i >= 0; --i) {
+                    bits2 = (byte) (b[i] & mask);
+                    b[i] >>= shift;
+                    b[i] |= bits1 << 8-shift;
+                    bits1 = bits2;
+                }
+            }
+            return new LudicrousIntegerDefinition(this, definitionScope, fieldName, new BigInteger(b));
+        }
         ByteOrder byteOrder = input.getByteOrder();
         input.setByteOrder(fByteOrder);
         long value = read(input);
