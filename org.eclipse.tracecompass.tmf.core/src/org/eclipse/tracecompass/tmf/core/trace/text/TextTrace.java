@@ -22,19 +22,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfEventParser;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
-import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable;
 import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfTraceIndexer;
 import org.eclipse.tracecompass.tmf.core.trace.indexer.TmfBTreeTraceIndexer;
 import org.eclipse.tracecompass.tmf.core.trace.indexer.checkpoint.ITmfCheckpoint;
@@ -53,9 +47,8 @@ import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
  *
  * @since 3.0
  */
-public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace implements ITmfEventParser, ITmfPersistentlyIndexable {
+public abstract class TextTrace<T extends TextTraceEvent> extends AbstractCustomTrace {
 
-    private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final int MAX_LINES = 100;
     private static final int MAX_CONFIDENCE = 100;
 
@@ -69,6 +62,7 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
      * Constructor
      */
     public TextTrace() {
+        fCheckpointSize = -1;
     }
 
     /**
@@ -114,58 +108,6 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
         return new TraceValidationStatus(confidence, Activator.PLUGIN_ID);
 
     }
-    @Override
-    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
-        super.initTrace(resource, path, type);
-        try {
-            fFile = new BufferedRandomAccessFile(getPath(), "r"); //$NON-NLS-1$
-        } catch (IOException e) {
-            throw new TmfTraceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public synchronized void dispose() {
-        super.dispose();
-        if (fFile != null) {
-            try {
-                fFile.close();
-            } catch (IOException e) {
-            } finally {
-                fFile = null;
-            }
-        }
-    }
-
-    @Override
-    public synchronized TextTraceContext seekEvent(ITmfLocation location) {
-        TextTraceContext context = new TextTraceContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
-        if (NULL_LOCATION.equals(location) || fFile == null) {
-            return context;
-        }
-        try {
-            if (location == null) {
-                fFile.seek(0);
-            } else if (location.getLocationInfo() instanceof Long) {
-                fFile.seek((Long) location.getLocationInfo());
-            }
-            long rawPos = fFile.getFilePointer();
-            String line = fFile.getNextLine();
-            while (line != null) {
-                Matcher matcher = getFirstLinePattern().matcher(line);
-                if (matcher.matches()) {
-                    setupContext(context, rawPos, line, matcher);
-                    return context;
-                }
-                rawPos = fFile.getFilePointer();
-                line = fFile.getNextLine();
-            }
-            return context;
-        } catch (IOException e) {
-            Activator.logError("Error seeking file: " + getPath(), e); //$NON-NLS-1$
-            return context;
-        }
-    }
 
     private void setupContext(TextTraceContext context, long rawPos, String line, Matcher matcher) throws IOException {
         context.setLocation(new TmfLongLocation(rawPos));
@@ -175,57 +117,11 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
     }
 
     @Override
-    public synchronized TextTraceContext seekEvent(double ratio) {
-        if (fFile == null) {
-            return new TextTraceContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
-        }
-        try {
-            long pos = (long) (ratio * fFile.length());
-            while (pos > 0) {
-                fFile.seek(pos - 1);
-                if (fFile.read() == '\n') {
-                    break;
-                }
-                pos--;
-            }
-            ITmfLocation location = new TmfLongLocation(Long.valueOf(pos));
-            TextTraceContext context = seekEvent(location);
-            context.setRank(ITmfContext.UNKNOWN_RANK);
-            return context;
-        } catch (IOException e) {
-            Activator.logError("Error seeking file: " + getPath(), e); //$NON-NLS-1$
-            return new TextTraceContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
-        }
-    }
-
-    @Override
-    public double getLocationRatio(ITmfLocation location) {
-        if (fFile == null) {
-            return 0;
-        }
-        try {
-            long length = fFile.length();
-            if (length == 0) {
-                return 0;
-            }
-            if (location.getLocationInfo() instanceof Long) {
-                return (double) ((Long) location.getLocationInfo()) / length;
-            }
-        } catch (IOException e) {
-            Activator.logError("Error reading file: " + getPath(), e); //$NON-NLS-1$
-        }
-        return 0;
-    }
-
-    @Override
-    public ITmfLocation getCurrentLocation() {
-        return null;
-    }
-
-    @Override
     public TextTraceEvent parseEvent(ITmfContext tmfContext) {
-        TextTraceContext context = seekEvent(tmfContext.getLocation());
-        return parse(context);
+        if(tmfContext instanceof TextTraceContext){
+            return parse((TextTraceContext) seekEvent(tmfContext.getLocation()));
+        }
+        return null;
     }
 
     @Override
@@ -339,7 +235,7 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
      * @return The string without quotes
      */
     protected static String replaceQuotes(String input) {
-        String out = input.replaceAll("^\"|(\"\\s*)$", "");  //$NON-NLS-1$//$NON-NLS-2$
+        String out = input.replaceAll("^\"|(\"\\s*)$", ""); //$NON-NLS-1$//$NON-NLS-2$
         return out;
     }
 
@@ -354,8 +250,6 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
         String out = input.replaceAll("^\\{|(\\}\\s*)$", "");  //$NON-NLS-1$//$NON-NLS-2$
         return out;
     }
-
-    private static int fCheckpointSize = -1;
 
     @Override
     public synchronized int getCheckpointSize() {
@@ -378,5 +272,15 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
     @Override
     public ITmfLocation restoreLocation(ByteBuffer bufferIn) {
         return new TmfLongLocation(bufferIn);
+    }
+
+    @Override
+    protected BufferedRandomAccessFile getFile() {
+        return fFile;
+    }
+
+    @Override
+    protected void setFile(BufferedRandomAccessFile file) {
+        fFile = file;
     }
 }
