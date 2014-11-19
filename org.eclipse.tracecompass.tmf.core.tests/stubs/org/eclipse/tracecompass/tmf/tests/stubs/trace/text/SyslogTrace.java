@@ -12,6 +12,7 @@
 
 package org.eclipse.tracecompass.tmf.tests.stubs.trace.text;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -24,7 +25,10 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimePreferences;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampFormat;
+import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
 import org.eclipse.tracecompass.tmf.core.trace.text.TextTrace;
+import org.eclipse.tracecompass.tmf.core.trace.text.TextTraceContext;
 import org.eclipse.tracecompass.tmf.core.trace.text.TextTraceEventContent;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.text.SyslogEventType.Index;
 
@@ -95,8 +99,23 @@ public class SyslogTrace extends TextTrace<SyslogEvent> {
                 timestamp,
                 SyslogEventType.INSTANCE,
                 content); //$NON-NLS-1$
-
         return event;
+    }
+
+    @Override
+    protected TextTraceContext match(TmfContext context, long rawPos, String line) throws IOException {
+        final Matcher matcher = LINE1_PATTERN.matcher(line);
+        if (matcher.matches()) {
+            if (context instanceof TextTraceContext) {
+                TextTraceContext textTraceContext = (TextTraceContext) context;
+                textTraceContext.setLocation(new TmfLongLocation(rawPos));
+                textTraceContext.firstLineMatcher = matcher;
+                textTraceContext.firstLine = line;
+                textTraceContext.nextLineLocation = getFile().getFilePointer();
+                return textTraceContext;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -112,5 +131,4 @@ public class SyslogTrace extends TextTrace<SyslogEvent> {
     public ITmfTimestamp getInitialRangeOffset() {
         return new TmfTimestamp(60, ITmfTimestamp.SECOND_SCALE);
     }
-
 }

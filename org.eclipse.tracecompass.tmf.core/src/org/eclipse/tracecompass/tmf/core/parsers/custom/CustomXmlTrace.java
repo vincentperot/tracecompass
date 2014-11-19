@@ -16,7 +16,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,24 +26,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
-import org.eclipse.tracecompass.internal.tmf.core.parsers.custom.CustomEventAspects;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfEventParser;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
-import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable;
-import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfTraceIndexer;
-import org.eclipse.tracecompass.tmf.core.trace.indexer.TmfBTreeTraceIndexer;
-import org.eclipse.tracecompass.tmf.core.trace.indexer.checkpoint.ITmfCheckpoint;
-import org.eclipse.tracecompass.tmf.core.trace.indexer.checkpoint.TmfCheckpoint;
-import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
+import org.eclipse.tracecompass.tmf.core.trace.text.AbstractCustomTrace;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -61,9 +50,8 @@ import org.xml.sax.SAXParseException;
  * @author Patrick Tassé
  * @since 3.0
  */
-public class CustomXmlTrace extends TmfTrace implements ITmfEventParser, ITmfPersistentlyIndexable {
+public class CustomXmlTrace extends AbstractCustomTrace {
 
-    private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final int DEFAULT_CACHE_SIZE = 100;
     private static final int MAX_LINES = 100;
     private static final int CONFIDENCE = 100;
@@ -106,115 +94,6 @@ public class CustomXmlTrace extends TmfTrace implements ITmfEventParser, ITmfPer
         this(definition);
         setCacheSize((pageSize > 0) ? pageSize : DEFAULT_CACHE_SIZE);
         initTrace(resource, path, CustomXmlEvent.class);
-    }
-
-    @Override
-    public void initTrace(final IResource resource, final String path, final Class<? extends ITmfEvent> eventType) throws TmfTraceException {
-        super.initTrace(resource, path, eventType);
-        try {
-            fFile = new BufferedRandomAccessFile(getPath(), "r"); //$NON-NLS-1$
-        } catch (IOException e) {
-            throw new TmfTraceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public synchronized void dispose() {
-        super.dispose();
-        if (fFile != null) {
-            try {
-                fFile.close();
-            } catch (IOException e) {
-            } finally {
-                fFile = null;
-            }
-        }
-    }
-
-    @Override
-    public ITmfTraceIndexer getIndexer() {
-        return super.getIndexer();
-    }
-
-    @Override
-    public Iterable<ITmfEventAspect> getEventAspects() {
-        return CustomEventAspects.generateAspects(fDefinition);
-    }
-
-    @Override
-    public synchronized TmfContext seekEvent(final ITmfLocation location) {
-        final CustomXmlTraceContext context = new CustomXmlTraceContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
-        if (NULL_LOCATION.equals(location) || fFile == null) {
-            return context;
-        }
-        try {
-            if (location == null) {
-                fFile.seek(0);
-            } else if (location.getLocationInfo() instanceof Long) {
-                fFile.seek((Long) location.getLocationInfo());
-            }
-            long rawPos = fFile.getFilePointer();
-            String line = fFile.getNextLine();
-            while (line != null) {
-                final int idx = indexOfElement(fRecordInputElement.getElementName(), line, 0);
-                if (idx != -1) {
-                    context.setLocation(new TmfLongLocation(rawPos + idx));
-                    return context;
-                }
-                rawPos = fFile.getFilePointer();
-                line = fFile.getNextLine();
-            }
-            return context;
-        } catch (final IOException e) {
-            Activator.logError("Error seeking event. File: " + getPath(), e); //$NON-NLS-1$
-            return context;
-        }
-
-    }
-
-    @Override
-    public synchronized TmfContext seekEvent(final double ratio) {
-        if (fFile == null) {
-            return new CustomTxtTraceContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
-        }
-        try {
-            long pos = Math.round(ratio * fFile.length());
-            while (pos > 0) {
-                fFile.seek(pos - 1);
-                if (fFile.read() == '\n') {
-                    break;
-                }
-                pos--;
-            }
-            final ITmfLocation location = new TmfLongLocation(pos);
-            final TmfContext context = seekEvent(location);
-            context.setRank(ITmfContext.UNKNOWN_RANK);
-            return context;
-        } catch (final IOException e) {
-            Activator.logError("Error seeking event. File: " + getPath(), e); //$NON-NLS-1$
-            return new CustomXmlTraceContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
-        }
-    }
-
-    @Override
-    public synchronized double getLocationRatio(final ITmfLocation location) {
-        if (fFile == null) {
-            return 0;
-        }
-        try {
-            if (location.getLocationInfo() instanceof Long) {
-                return ((Long) location.getLocationInfo()).doubleValue() / fFile.length();
-            }
-        } catch (final IOException e) {
-            Activator.logError("Error getting location ration. File: " + getPath(), e); //$NON-NLS-1$
-        }
-        return 0;
-    }
-
-    @Override
-    public ITmfLocation getCurrentLocation() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -565,28 +444,32 @@ public class CustomXmlTrace extends TmfTrace implements ITmfEventParser, ITmfPer
         return new TraceValidationStatus(0, Activator.PLUGIN_ID);
     }
 
-    private static int fCheckpointSize = -1;
+    @Override
+    protected BufferedRandomAccessFile getFile() {
+        return fFile;
+    }
 
     @Override
-    public synchronized int getCheckpointSize() {
-        if (fCheckpointSize == -1) {
-            TmfCheckpoint c = new TmfCheckpoint(TmfTimestamp.ZERO, new TmfLongLocation(0L), 0);
-            ByteBuffer b = ByteBuffer.allocate(ITmfCheckpoint.MAX_SERIALIZE_SIZE);
-            b.clear();
-            c.serialize(b);
-            fCheckpointSize = b.position();
+    protected void setFile(BufferedRandomAccessFile file) {
+        fFile = file;
+    }
+
+    @Override
+    protected TmfContext match(TmfContext context, long rawPos, String line) throws IOException {
+        final int idx = indexOfElement(fRecordInputElement.getElementName(), line, 0);
+        if (idx != -1) {
+            context.setLocation(new TmfLongLocation(rawPos + idx));
+            return context;
         }
-
-        return fCheckpointSize;
+        return null;
     }
 
+    /**
+     * @since 3.1
+     */
     @Override
-    public ITmfLocation restoreLocation(ByteBuffer bufferIn) {
-        return new TmfLongLocation(bufferIn);
+    protected CustomXmlTraceContext getNullContext() {
+        return new CustomXmlTraceContext(NULL_LOCATION, ITmfContext.UNKNOWN_RANK);
     }
 
-    @Override
-    protected ITmfTraceIndexer createIndexer(int interval) {
-        return new TmfBTreeTraceIndexer(this, interval);
-    }
 }
