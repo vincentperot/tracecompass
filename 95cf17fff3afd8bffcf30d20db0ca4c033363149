@@ -1,0 +1,7 @@
+Verified+1: Hudson CI
+Code-Review+2: Marc-Andre Laperle <marc-andre.laperle@ericsson.com>
+Submitted-by: Matthew Khouzam <matthew.khouzam@ericsson.com>
+Submitted-at: Tue, 18 Nov 2014 19:36:52 -0500
+Reviewed-on: https://git.eclipse.org/r/36664
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
