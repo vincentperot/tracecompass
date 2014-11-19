@@ -25,9 +25,10 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
+import org.eclipse.tracecompass.tmf.core.event.criterion.TmfCpuCriterion;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
 
 /**
  * Creates a state system with the total time spent on CPU for each thread and
@@ -81,15 +82,20 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
     }
 
     @Override
-    protected void eventHandle(ITmfEvent uncheckedEvent) {
-        if (!(uncheckedEvent instanceof CtfTmfEvent)) {
-            return;
-        }
-        final CtfTmfEvent event = (CtfTmfEvent) uncheckedEvent;
-
+    protected void eventHandle(ITmfEvent event) {
         final String eventName = event.getType().getName();
 
         if (eventName.equals(fLayout.eventSchedSwitch())) {
+            ITmfEventCriterion cpuCriterion = null;
+            for (ITmfEventCriterion criterion : event.getTrace().getCriteria()) {
+                if (criterion instanceof TmfCpuCriterion) {
+                    cpuCriterion = criterion;
+                }
+            }
+            if (cpuCriterion == null) {
+                return;
+            }
+            String cpu = cpuCriterion.resolveCriterion(event);
             /*
              * Fields: string prev_comm, int32 prev_tid, int32 prev_prio, int64
              * prev_state, string next_comm, int32 next_tid, int32 next_prio
@@ -97,7 +103,6 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
 
             ITmfEventField content = event.getContent();
             long ts = event.getTimestamp().getValue();
-            String cpu = String.valueOf(event.getCPU());
 
             Long prevTid = (Long) content.getField(fLayout.fieldPrevTid()).getValue();
 
