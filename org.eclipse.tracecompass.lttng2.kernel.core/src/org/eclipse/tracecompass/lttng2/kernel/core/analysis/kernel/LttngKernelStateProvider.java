@@ -26,9 +26,10 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -141,18 +142,24 @@ public class LttngKernelStateProvider extends AbstractTmfStateProvider {
     }
 
     @Override
-    protected void eventHandle(ITmfEvent uncheckedEvent) {
-        if (!(uncheckedEvent instanceof CtfTmfEvent)) {
+    protected void eventHandle(ITmfEvent event) {
+        TmfCpuAspect cpuAspect = null;
+        for (ITmfEventAspect aspect : event.getTrace().getEventAspects()) {
+            if (aspect instanceof TmfCpuAspect) {
+                cpuAspect = (TmfCpuAspect) aspect;
+            }
+        }
+        if (cpuAspect == null) {
             return;
         }
-        final CtfTmfEvent event = (CtfTmfEvent) uncheckedEvent;
+        String cpu = cpuAspect.resolve(event);
 
         final String eventName = event.getType().getName();
         final long ts = event.getTimestamp().getValue();
 
         try {
             /* Shortcut for the "current CPU" attribute node */
-            final Integer currentCPUNode = ss.getQuarkRelativeAndAdd(getNodeCPUs(), String.valueOf(event.getCPU()));
+            final Integer currentCPUNode = ss.getQuarkRelativeAndAdd(getNodeCPUs(), String.valueOf(cpu));
 
             /*
              * Shortcut for the "current thread" attribute node. It requires
@@ -178,7 +185,7 @@ public class LttngKernelStateProvider extends AbstractTmfStateProvider {
                 /* Mark this IRQ as active in the resource tree.
                  * The state value = the CPU on which this IRQ is sitting */
                 quark = ss.getQuarkRelativeAndAdd(getNodeIRQs(), irqId.toString());
-                value = TmfStateValue.newValueInt(event.getCPU());
+                value = TmfStateValue.newValueInt(Integer.parseInt(cpu));
                 ss.modifyAttribute(ts, value, quark);
 
                 /* Change the status of the running process to interrupted */
@@ -217,7 +224,7 @@ public class LttngKernelStateProvider extends AbstractTmfStateProvider {
                 /* Mark this SoftIRQ as active in the resource tree.
                  * The state value = the CPU on which this SoftIRQ is processed */
                 quark = ss.getQuarkRelativeAndAdd(getNodeSoftIRQs(), softIrqId.toString());
-                value = TmfStateValue.newValueInt(event.getCPU());
+                value = TmfStateValue.newValueInt(Integer.parseInt(cpu));
                 ss.modifyAttribute(ts, value, quark);
 
                 /* Change the status of the running process to interrupted */
