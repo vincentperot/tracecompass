@@ -126,81 +126,81 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
      * The TMF trace reference.
      * @since 2.0
      */
-    protected ITmfTrace fTrace = null;
+    private ITmfTrace fTrace = null;
     /**
      * The current indexing event request.
      */
-    protected ITmfEventRequest fIndexRequest = null;
+    private ITmfEventRequest fIndexRequest = null;
     /**
      * The current request to fill a page.
      */
-    protected ITmfEventRequest fPageRequest = null;
+    private ITmfEventRequest fPageRequest = null;
     /**
      * Flag whether the time range signal was sent by this loader class or not
      */
-    protected volatile boolean fIsSignalSent = false;
+    private volatile boolean fIsSignalSent = false;
 
     // The view and event attributes
     /**
      * The sequence diagram view reference.
      */
-    protected SDView fView = null;
+    private SDView fView = null;
     /**
      * The current sequence diagram frame reference.
      */
-    protected Frame fFrame = null;
+    private Frame fFrame = null;
     /**
      * The list of sequence diagram events of current page.
      */
-    protected List<ITmfSyncSequenceDiagramEvent> fEvents = new ArrayList<>();
+    private List<ITmfSyncSequenceDiagramEvent> fEvents = new ArrayList<>();
 
     // Checkpoint and page attributes
     /**
      * The checkpoints of the whole sequence diagram trace (i.e. start time stamp of each page)
      */
-    protected List<TmfTimeRange> fCheckPoints = new ArrayList<>(MAX_NUM_OF_MSG);
+    private List<TmfTimeRange> fCheckPoints = new ArrayList<>(MAX_NUM_OF_MSG);
     /**
      * The current page displayed.
      */
-    protected volatile int fCurrentPage = 0;
+    private volatile int fCurrentPage = 0;
     /**
      * The current time selected.
      */
-    protected ITmfTimestamp fCurrentTime = null;
+    private ITmfTimestamp fCurrentTime = null;
     /**
      * Flag to specify that selection of message is done by selection or by signal.
      */
-    protected volatile boolean fIsSelect = false;
+    private volatile boolean fIsSelect = false;
 
     // Search attributes
     /**
      * The job for searching across pages.
      */
-    protected SearchJob fFindJob = null;
+    private SearchJob fFindJob = null;
     /**
      * List of found nodes within a page.
      */
-    protected List<GraphNode> fFindResults = new ArrayList<>();
+    private List<GraphNode> fFindResults = new ArrayList<>();
     /**
      * The current find criteria reference
      */
-    protected Criteria fFindCriteria = null;
+    private Criteria fFindCriteria = null;
     /**
      * The current find index within the list of found nodes (<code>fFindeResults</code> within a page.
      */
-    protected volatile int fCurrentFindIndex = 0;
+    private volatile int fCurrentFindIndex = 0;
 
     // Filter attributes
     /**
      * The list of active filters.
      */
-    protected List<FilterCriteria> fFilterCriteria = null;
+    private List<FilterCriteria> fFilterCriteria = null;
 
     // Thread synchronization
     /**
      * The synchronization lock.
      */
-    protected ReentrantLock fLock = new ReentrantLock();
+    private ReentrantLock fLock = new ReentrantLock();
 
     // ------------------------------------------------------------------------
     // Constructors
