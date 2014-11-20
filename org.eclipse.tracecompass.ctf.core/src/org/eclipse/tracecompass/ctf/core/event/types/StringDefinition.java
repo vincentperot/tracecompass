@@ -26,7 +26,7 @@ import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
  * @author Matthew Khouzam
  * @author Simon Marchi
  */
-public final class StringDefinition extends Definition {
+public final class StringDefinition extends Definition implements IResolvable{
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -64,6 +64,11 @@ public final class StringDefinition extends Definition {
     @Override
     public StringDeclaration getDeclaration() {
         return (StringDeclaration) super.getDeclaration();
+    }
+
+    @Override
+    public String resolve() {
+        return getValue();
     }
 
     /**
