@@ -118,4 +118,5 @@ public class LttngKernelAnalysis extends TmfStateSystemAnalysisModule {
     public Iterable<TmfAnalysisRequirement> getAnalysisRequirements() {
         return REQUIREMENTS;
     }
+
 }

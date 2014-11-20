@@ -592,4 +592,5 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
     private static boolean isCompleteTrace(ITmfTrace trace) {
         return !(trace instanceof ITmfTraceCompleteness) || ((ITmfTraceCompleteness) trace).isComplete();
     }
+
 }
