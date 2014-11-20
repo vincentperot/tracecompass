@@ -46,7 +46,24 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
     private final HistoryTree sht;
 
     /** Indicates if the history tree construction is done */
-    protected volatile boolean isFinishedBuilding = false;
+    private volatile boolean isFinishedBuilding = false;
+
+    /**
+     * Indicates if the history tree construction is done
+     *
+     * @return if the history tree construction is done
+     */
+    public boolean isFinishedBuilding() {
+        return isFinishedBuilding;
+    }
+
+    /**
+     * Sets if the history tree is finished building
+     * @param isFinishedBuilding is the history tree finished building
+     */
+    public void setFinishedBuilding(boolean isFinishedBuilding) {
+        this.isFinishedBuilding = isFinishedBuilding;
+    }
 
     /**
      * Constructor for new history files. Use this when creating a new history
@@ -243,7 +260,7 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
 
         try {
             while (interval == null && currentNode.getNodeType() == HTNode.NodeType.CORE) {
-                currentNode = sht.selectNextChild((CoreNode)currentNode, t);
+                currentNode = sht.selectNextChild((CoreNode) currentNode, t);
                 interval = currentNode.getRelevantInterval(key, t);
             }
         } catch (ClosedChannelException e) {
