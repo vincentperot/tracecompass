@@ -54,10 +54,7 @@ public class CTFIndexFile {
             ImmutableList.Builder<StreamInputPacketIndexEntry> pies = new Builder<>();
 
             while (dataIn.available() >= PACKET_SIZE) {
-                StreamInputPacketIndexEntry element = new StreamInputPacketIndexEntry(dataIn);
-                if( header.oldMagic){
-                    element.setTarget(indexFile.getName().replaceAll("\\.idx", "")); //$NON-NLS-1$ //$NON-NLS-2$
-                }
+                StreamInputPacketIndexEntry element = header.oldMagic ? new StreamInputPacketIndexEntry(dataIn, indexFile.getName().substring(0, indexFile.getName().length() - ".idx".length())) : new StreamInputPacketIndexEntry(dataIn); //$NON-NLS-1$
                 pies.add(element); // mmm
             }
             fSipieList = pies.build();
