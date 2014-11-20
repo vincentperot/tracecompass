@@ -24,7 +24,7 @@ import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
  * @author Matthew Khouzam
  * @author Simon Marchi
  */
-public final class FloatDefinition extends Definition {
+public final class FloatDefinition extends Definition implements IResolvable{
     // ------------------------------------------------------------------------
     // Attributes
     // ------------------------------------------------------------------------
@@ -66,6 +66,11 @@ public final class FloatDefinition extends Definition {
      */
     public double getValue() {
         return fValue;
+    }
+
+    @Override
+    public Double resolve() {
+        return getValue();
     }
 
     @Override
