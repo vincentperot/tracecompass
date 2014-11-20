@@ -12,8 +12,15 @@
 
 package org.eclipse.tracecompass.internal.ctf.core.trace;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+
+import org.eclipse.tracecompass.ctf.core.CTFStrings;
+import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
+import org.eclipse.tracecompass.ctf.core.event.types.IResolvable;
+import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+
+import com.google.common.collect.ImmutableMap.Builder;
 
 /**
  * <b><u>StreamInputPacketIndexEntry</u></b>
@@ -22,6 +29,14 @@ import java.util.Map;
  */
 public class StreamInputPacketIndexEntry implements Comparable<StreamInputPacketIndexEntry> {
 
+    private static final long BITS_PER_BYTE = 8L;
+
+
+
+    private static final String CTF_DEVICE = "device"; //$NON-NLS-1$
+
+
+
     // ------------------------------------------------------------------------
     // Attributes
     // ------------------------------------------------------------------------
@@ -29,48 +44,43 @@ public class StreamInputPacketIndexEntry implements Comparable<StreamInputPacket
     /**
      * Offset of the packet in the file, in bytes
      */
-    final private long fOffsetBytes;
-
-    /**
-     * Offset of the data in the packet, in bits
-     */
-    private long fDataOffsetBits = 0;
+    private final long fOffsetBytes;
 
     /**
      * Packet size, in bits
      */
-    private long fPacketSizeBits = 0;
+    private final long fPacketSizeBits;
 
     /**
      * Content size, in bits
      */
-    private long fContentSizeBits = 0;
+    private final long fContentSizeBits;
 
     /**
      * Begin timestamp
      */
-    private long fTimestampBegin = 0;
+    private final long fTimestampBegin;
 
     /**
      * End timestamp
      */
-    private long fTimestampEnd = 0;
+    private final long fTimestampEnd;
 
     /**
      * How many lost events are there?
      */
-    private long fLostEvents = 0;
+    private final long fLostEvents;
 
     /**
      * Which target is being traced
      */
-    private String fTarget;
-    private long fTargetID;
+    private final String fTarget;
+    private final long fTargetID;
 
     /**
      * Attributes of this index entry
      */
-    private final Map<String, Object> fAttributes = new HashMap<>();
+    private final Map<String, Object> fAttributes;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -79,12 +89,119 @@ public class StreamInputPacketIndexEntry implements Comparable<StreamInputPacket
     /**
      * Constructs an index entry.
      *
-     * @param offset
-     *            The offset of the packet in the file, in bytes.
+     * @param dataOffsetBits
+     *            offset in the file for the start of data
+     * @param fileSizeBytes
+     *            number of bytes in a file
      */
 
-    public StreamInputPacketIndexEntry(long offset) {
-        fOffsetBytes = offset;
+    public StreamInputPacketIndexEntry(long dataOffsetBits, long fileSizeBytes) {
+        fContentSizeBits = (fileSizeBytes * 8);
+        fPacketSizeBits = (fileSizeBytes * 8);
+        fOffsetBytes = dataOffsetBits;
+        fLostEvents = 0;
+        fTarget = ""; //$NON-NLS-1$
+        fTargetID = 0;
+        fTimestampBegin = Long.MIN_VALUE;
+        fTimestampEnd = Long.MAX_VALUE;
+        fAttributes = Collections.emptyMap();
+    }
+
+    /**
+     * full Constructor
+     *
+     * @param dataOffsetBits
+     *            offset in the file for the start of data
+     * @param streamPacketContextDef
+     *            packet context
+     * @param fileSizeBytes
+     *            number of bytes in a file
+     * @param lostSoFar
+     *            number of lost events so far
+     */
+    public StreamInputPacketIndexEntry(long dataOffsetBits, StructDefinition streamPacketContextDef, long fileSizeBytes, long lostSoFar) {
+        Builder<String, Object> builder = new Builder<>();
+        for (String field : streamPacketContextDef.getDeclaration()
+                .getFieldsList()) {
+            IDefinition definition = streamPacketContextDef.lookupDefinition(field);
+            if (definition instanceof IResolvable) {
+                builder.put(field, ((IResolvable) definition).resolve());
+            }
+        }
+        fAttributes = builder.build();
+
+        Long contentSize = (Long) this.lookupAttribute(CTFStrings.CONTENT_SIZE);
+        Long packetSize = (Long) this.lookupAttribute(CTFStrings.PACKET_SIZE);
+        Long tsBegin = (Long) this.lookupAttribute(CTFStrings.TIMESTAMP_BEGIN);
+        Long tsEnd = (Long) this.lookupAttribute(CTFStrings.TIMESTAMP_END);
+        String device = (String) this.lookupAttribute(CTF_DEVICE);
+        // LTTng Specific
+        Long cpuId = (Long) this.lookupAttribute(CTFStrings.CPU_ID);
+        Long lostEvents = (Long) this.lookupAttribute(CTFStrings.EVENTS_DISCARDED);
+
+        /* Read the content size in bits */
+        if (contentSize != null) {
+            fContentSizeBits = (contentSize.longValue());
+        } else if (packetSize != null) {
+            fContentSizeBits = (packetSize.longValue());
+        } else {
+            fContentSizeBits = (fileSizeBytes * BITS_PER_BYTE);
+        }
+
+        /* Read the packet size in bits */
+        if (packetSize != null) {
+            fPacketSizeBits = (packetSize.longValue());
+        } else if (this.getContentSizeBits() != 0) {
+            fPacketSizeBits = (getContentSizeBits());
+        } else {
+            fPacketSizeBits = (fileSizeBytes * BITS_PER_BYTE);
+        }
+
+        /* Read the begin timestamp */
+        if (tsBegin != null) {
+            fTimestampBegin = (tsBegin.longValue());
+        } else {
+            fTimestampBegin = Long.MIN_VALUE;
+        }
+
+        /* Read the end timestamp */
+        if (tsEnd != null) {
+            if (tsEnd == -1) {
+                tsEnd = Long.MAX_VALUE;
+            }
+            fTimestampEnd = (tsEnd.longValue());
+        } else {
+            fTimestampEnd = Long.MAX_VALUE;
+        }
+
+        if (device != null) {
+            fTarget = device;
+            fTargetID = Integer.parseInt(device.replaceAll("[\\D]", "")); //$NON-NLS-1$ //$NON-NLS-2$ // slow
+        } else if (cpuId != null) {
+            fTarget = ("CPU" + cpuId.toString()); //$NON-NLS-1$
+            fTargetID = cpuId;
+        } else {
+            fTarget = ""; //$NON-NLS-1$
+            fTargetID = 0;
+        }
+
+        if (lostEvents != null) {
+            fLostEvents = (lostEvents - lostSoFar);
+        } else {
+            fLostEvents = 0;
+        }
+
+        fOffsetBytes = dataOffsetBits;
+    }
+
+    /**
+     * Assign a target to this index entry
+     *
+     * @param target
+     *            The target to assign
+     */
+    public void setTarget(String target) {
+
     }
 
     // ------------------------------------------------------------------------
@@ -122,33 +239,10 @@ public class StreamInputPacketIndexEntry implements Comparable<StreamInputPacket
     }
 
     /**
-     * @return the dataOffsetBits
-     */
-    public long getDataOffsetBits() {
-        return fDataOffsetBits;
-    }
-
-    /**
-     * @param dataOffsetBits
-     *            the dataOffsetBits to set
-     */
-    public void setDataOffsetBits(long dataOffsetBits) {
-        fDataOffsetBits = dataOffsetBits;
-    }
-
-    /**
      * @return the packetSizeBits
      */
     public long getPacketSizeBits() {
         return fPacketSizeBits;
-    }
-
-    /**
-     * @param packetSizeBits
-     *            the packetSizeBits to set
-     */
-    public void setPacketSizeBits(long packetSizeBits) {
-        fPacketSizeBits = packetSizeBits;
     }
 
     /**
@@ -159,26 +253,10 @@ public class StreamInputPacketIndexEntry implements Comparable<StreamInputPacket
     }
 
     /**
-     * @param contentSizeBits
-     *            the contentSizeBits to set
-     */
-    public void setContentSizeBits(long contentSizeBits) {
-        fContentSizeBits = contentSizeBits;
-    }
-
-    /**
      * @return the timestampBegin
      */
     public long getTimestampBegin() {
         return fTimestampBegin;
-    }
-
-    /**
-     * @param timestampBegin
-     *            the timestampBegin to set
-     */
-    public void setTimestampBegin(long timestampBegin) {
-        fTimestampBegin = timestampBegin;
     }
 
     /**
@@ -189,39 +267,12 @@ public class StreamInputPacketIndexEntry implements Comparable<StreamInputPacket
     }
 
     /**
-     * @param timestampEnd
-     *            the timestampEnd to set
-     */
-    public void setTimestampEnd(long timestampEnd) {
-        fTimestampEnd = timestampEnd;
-    }
-
-    /**
      * @return the lostEvents in this packet
      */
     public long getLostEvents() {
         return fLostEvents;
     }
 
-    /**
-     * @param lostEvents
-     *            the lostEvents to set
-     */
-    public void setLostEvents(long lostEvents) {
-        fLostEvents = lostEvents;
-    }
-
-    /**
-     * Add an attribute to this index entry
-     *
-     * @param field
-     *            The name of the attribute
-     * @param value
-     *            The value to insert
-     */
-    public void addAttribute(String field, Object value) {
-        fAttributes.put(field, value);
-    }
 
     /**
      * Retrieve the value of an existing attribute
@@ -239,17 +290,6 @@ public class StreamInputPacketIndexEntry implements Comparable<StreamInputPacket
      */
     public String getTarget() {
         return fTarget;
-    }
-
-    /**
-     * Assign a target to this index entry
-     *
-     * @param target
-     *            The target to assign
-     */
-    public void setTarget(String target) {
-        fTarget = target;
-        fTargetID = Integer.parseInt(target.replaceAll("[\\D]", "")); //$NON-NLS-1$ //$NON-NLS-2$ // slow
     }
 
     /**

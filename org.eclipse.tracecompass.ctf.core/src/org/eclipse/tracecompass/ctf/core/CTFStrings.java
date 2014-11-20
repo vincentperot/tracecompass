@@ -34,8 +34,24 @@ public interface CTFStrings {
      */
     static final String LOST_EVENTS_FIELD = "Lost events";
 
-    /**
-     * Name of the field in lost events indicating the time range
-     */
+    /** Name of the field in lost events indicating the time range */
     static final String LOST_EVENTS_DURATION = "duration";
+
+    /** The last timestamp of a packet context */
+    public static final String TIMESTAMP_END = "timestamp_end";
+
+    /** The first timestamp of a packet context */
+    public static final String TIMESTAMP_BEGIN = "timestamp_begin";
+
+    /** The size of a packet in a packet context */
+    public static final String PACKET_SIZE = "packet_size";
+
+    /** The amount of data used in a packet in a packet context */
+    public static final String CONTENT_SIZE = "content_size";
+
+    /** The cpu_id of a packet in a packet context */
+    public static final String CPU_ID = "cpu_id";
+
+    /** The number of lost events in a packet in a packet context */
+    public static final String EVENTS_DISCARDED = "events_discarded";
 }
