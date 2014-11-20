@@ -25,7 +25,7 @@ import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
  * @author Matthew Khouzam
  * @author Simon Marchi
  */
-public final class EnumDefinition extends SimpleDatatypeDefinition {
+public final class EnumDefinition extends SimpleDatatypeDefinition implements IResolvable{
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -93,6 +93,11 @@ public final class EnumDefinition extends SimpleDatatypeDefinition {
     @Override
     public EnumDeclaration getDeclaration() {
         return (EnumDeclaration) super.getDeclaration();
+    }
+
+    @Override
+    public String resolve() {
+        return getValue();
     }
 
     // ------------------------------------------------------------------------

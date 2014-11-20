@@ -145,7 +145,7 @@ public class CTFStreamInput implements IDefinitionScope {
      */
     public String getFilename() {
         String name = fFile.getName();
-        if( name == null){
+        if (name == null) {
             throw new IllegalStateException("File cannot have a null name"); //$NON-NLS-1$
         }
         return name;
@@ -294,6 +294,18 @@ public class CTFStreamInput implements IDefinitionScope {
     }
 
     private static ByteBuffer getByteBufferAt(FileChannel fc, long position, long size) throws CTFReaderException, IOException {
+        if (position < 0L) {
+            throw new CTFReaderException("Negative position"); //$NON-NLS-1$
+        }
+        if (size < 0L) {
+            throw new CTFReaderException("Negative size"); //$NON-NLS-1$
+        }
+        if (position + size < 0) {
+            throw new CTFReaderException("Position + size overflow"); //$NON-NLS-1$
+        }
+        if (size > Integer.MAX_VALUE) {
+            throw new CTFReaderException("Size exceeds Integer.MAX_VALUE"); //$NON-NLS-1$
+        }
         MappedByteBuffer map = fc.map(MapMode.READ_ONLY, position, size);
         if (map == null) {
             throw new CTFReaderException("Failed to allocate mapped byte buffer"); //$NON-NLS-1$
@@ -309,7 +321,8 @@ public class CTFStreamInput implements IDefinitionScope {
          */
         long remain = fc.size() - packetOffsetBytes;
         /*
-         * Initial size, it is the minimum of the the file size and the maximum possible size of the
+         * Initial size, it is the minimum of the the file size and the maximum
+         * possible size of the map
          */
         long mapSize = Math.min(remain, MAP_SIZE);
         if (maxSize < mapSize) {
@@ -321,7 +334,7 @@ public class CTFStreamInput implements IDefinitionScope {
          */
         try {
             return getByteBufferAt(fc, packetOffsetBytes, mapSize);
-        } catch (IllegalArgumentException | IOException e) {
+        } catch (IOException e) {
             throw new CTFReaderException(e);
         }
     }

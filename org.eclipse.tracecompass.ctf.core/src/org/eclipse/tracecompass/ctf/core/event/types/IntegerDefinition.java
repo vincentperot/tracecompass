@@ -27,7 +27,7 @@ import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
  * @author Matthew Khouzam
  * @author Simon Marchi
  */
-public final class IntegerDefinition extends SimpleDatatypeDefinition {
+public final class IntegerDefinition extends SimpleDatatypeDefinition implements IResolvable {
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -92,6 +92,11 @@ public final class IntegerDefinition extends SimpleDatatypeDefinition {
     @Override
     public String getStringValue() {
         return this.toString();
+    }
+
+    @Override
+    public Long resolve() {
+        return getValue();
     }
 
     @Override

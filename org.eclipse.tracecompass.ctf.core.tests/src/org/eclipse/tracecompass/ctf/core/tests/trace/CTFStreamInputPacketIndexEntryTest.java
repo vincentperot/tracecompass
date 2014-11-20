@@ -13,6 +13,7 @@ package org.eclipse.tracecompass.ctf.core.tests.trace;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.nio.ByteBuffer;
 
@@ -58,6 +59,15 @@ public class CTFStreamInputPacketIndexEntryTest {
         assertNotNull(fixture);
         assertEquals(expectedResult, fixture.toString());
     }
+
+    /**
+     * Run the StreamInputPacketIndexEntry(long) constructor test.
+     */
+    @Test
+    public void testStreamInputPacketIndexEntry_includes() {
+        assertTrue(fixture.includes(0));
+    }
+
 
     /**
      * Run the String toString() method test.
