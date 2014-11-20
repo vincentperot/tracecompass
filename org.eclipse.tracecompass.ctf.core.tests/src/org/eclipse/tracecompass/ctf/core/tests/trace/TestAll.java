@@ -11,6 +11,7 @@
 
 package org.eclipse.tracecompass.ctf.core.tests.trace;
 
+import org.eclipse.tracecompass.ctf.core.tests.perf.trace.CTFTraceCallsitePerformanceTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
