@@ -18,8 +18,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputData;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputLine;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -82,25 +80,26 @@ public class CustomTxtEvent extends CustomEvent {
      *            The input line to read
      * @param matcher
      *            The regex matcher to use
+     * @since 1.0
      */
-    public void processGroups(InputLine input, Matcher matcher) {
-        if (input.columns == null) {
+    public void processGroups(CustomTxtInputLine input, Matcher matcher) {
+        if (input.getColumns()== null) {
             return;
         }
-        for (int i = 0; i < input.columns.size(); i++) {
-            InputData column = input.columns.get(i);
+        for (int i = 0; i < input.getColumns().size(); i++) {
+            CustomTxtDataColumn column = input.getColumns().get(i);
             if (i < matcher.groupCount() && matcher.group(i + 1) != null) {
                 String value = matcher.group(i + 1).trim();
                 if (value.length() == 0) {
                     continue;
                 }
-                String name = column.name;
-                if (column.action == CustomTraceDefinition.ACTION_SET) {
+                String name = column.getName();
+                if (column.getAction() == CustomTraceDefinition.ACTION_SET) {
                     fData.put(name, value);
                     if (name.equals(CustomTraceDefinition.TAG_TIMESTAMP)) {
-                        fData.put(TIMESTAMP_INPUT_FORMAT_KEY, column.format);
+                        fData.put(TIMESTAMP_INPUT_FORMAT_KEY, column.getFormat());
                     }
-                } else if (column.action == CustomTraceDefinition.ACTION_APPEND) {
+                } else if (column.getAction() == CustomTraceDefinition.ACTION_APPEND) {
                     String s = fData.get(name);
                     if (s != null) {
                         fData.put(name, s + value);
@@ -110,12 +109,12 @@ public class CustomTxtEvent extends CustomEvent {
                     if (name.equals(CustomTraceDefinition.TAG_TIMESTAMP)) {
                         String timeStampInputFormat = fData.get(TIMESTAMP_INPUT_FORMAT_KEY);
                         if (timeStampInputFormat != null) {
-                            fData.put(TIMESTAMP_INPUT_FORMAT_KEY, timeStampInputFormat + column.format);
+                            fData.put(TIMESTAMP_INPUT_FORMAT_KEY, timeStampInputFormat + column.getFormat());
                         } else {
-                            fData.put(TIMESTAMP_INPUT_FORMAT_KEY, column.format);
+                            fData.put(TIMESTAMP_INPUT_FORMAT_KEY, column.getFormat());
                         }
                     }
-                } else if (column.action == CustomTraceDefinition.ACTION_APPEND_WITH_SEPARATOR) {
+                } else if (column.getAction() == CustomTraceDefinition.ACTION_APPEND_WITH_SEPARATOR) {
                     String s = fData.get(name);
                     if (s != null) {
                         fData.put(name, s + " | " + value); //$NON-NLS-1$
@@ -125,9 +124,9 @@ public class CustomTxtEvent extends CustomEvent {
                     if (name.equals(CustomTraceDefinition.TAG_TIMESTAMP)) {
                         String timeStampInputFormat = fData.get(TIMESTAMP_INPUT_FORMAT_KEY);
                         if (timeStampInputFormat != null) {
-                            fData.put(TIMESTAMP_INPUT_FORMAT_KEY, timeStampInputFormat + " | " + column.format); //$NON-NLS-1$
+                            fData.put(TIMESTAMP_INPUT_FORMAT_KEY, timeStampInputFormat + " | " + column.getFormat()); //$NON-NLS-1$
                         } else {
-                            fData.put(TIMESTAMP_INPUT_FORMAT_KEY, column.format);
+                            fData.put(TIMESTAMP_INPUT_FORMAT_KEY, column.getFormat());
                         }
                     }
                 }

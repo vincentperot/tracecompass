@@ -21,18 +21,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -56,7 +52,7 @@ import org.xml.sax.SAXException;
 public class CustomTxtTraceDefinition extends CustomTraceDefinition {
 
     /** Input lines */
-    public List<InputLine> inputs;
+    public List<CustomTxtInputLine> inputs;
 
     /**
      * Custom text label used internally and therefore should not be
@@ -115,7 +111,7 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
      * Default constructor.
      */
     public CustomTxtTraceDefinition() {
-        this(CUSTOM_TXT_CATEGORY, "", new ArrayList<InputLine>(0), new ArrayList<OutputColumn>(0), ""); //$NON-NLS-1$ //$NON-NLS-2$
+        this(CUSTOM_TXT_CATEGORY, "", new ArrayList<CustomTxtInputLine>(0), new ArrayList<OutputColumn>(0), ""); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     /**
@@ -132,342 +128,13 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
      * @param timeStampOutputFormat
      *            The timestamp format to use
      */
-    public CustomTxtTraceDefinition(String category, String traceType, List<InputLine> inputs,
+    public CustomTxtTraceDefinition(String category, String traceType, List<CustomTxtInputLine> inputs,
             List<OutputColumn> outputs, String timeStampOutputFormat) {
         this.categoryName = category;
         this.definitionName = traceType;
         this.inputs = inputs;
         this.outputs = outputs;
         this.timeStampOutputFormat = timeStampOutputFormat;
-    }
-
-    /**
-     * Wrapper to store a line of the log file
-     */
-    public static class InputLine {
-
-        /** Data columns of this line */
-        public List<InputData> columns;
-
-        /** Cardinality of this line (see {@link Cardinality}) */
-        public Cardinality cardinality;
-
-        /** Parent line */
-        public InputLine parentInput;
-
-        /** Level of this line */
-        public int level;
-
-        /** Next input line in the file */
-        public InputLine nextInput;
-
-        /** Children of this line (if one "event" spans many lines) */
-        public List<InputLine> childrenInputs;
-
-        private String regex;
-        private Pattern pattern;
-
-        /**
-         * Default (empty) constructor.
-         */
-        public InputLine() {
-        }
-
-        /**
-         * Constructor.
-         *
-         * @param cardinality
-         *            Cardinality of this line.
-         * @param regex
-         *            Regex
-         * @param columns
-         *            Columns to use
-         */
-        public InputLine(Cardinality cardinality, String regex, List<InputData> columns) {
-            this.cardinality = cardinality;
-            this.regex = regex;
-            this.columns = columns;
-        }
-
-        /**
-         * Set the regex of this input line
-         *
-         * @param regex
-         *            Regex to set
-         */
-        public void setRegex(String regex) {
-            this.regex = regex;
-            this.pattern = null;
-        }
-
-        /**
-         * Get the current regex
-         *
-         * @return The current regex
-         */
-        public String getRegex() {
-            return regex;
-        }
-
-        /**
-         * Get the Pattern object of this line's regex
-         *
-         * @return The Pattern
-         * @throws PatternSyntaxException
-         *             If the regex does not parse correctly
-         */
-        public Pattern getPattern() throws PatternSyntaxException {
-            if (pattern == null) {
-                pattern = Pattern.compile(regex);
-            }
-            return pattern;
-        }
-
-        /**
-         * Add a child line to this line.
-         *
-         * @param input
-         *            The child input line
-         */
-        public void addChild(InputLine input) {
-            if (childrenInputs == null) {
-                childrenInputs = new ArrayList<>(1);
-            } else if (childrenInputs.size() > 0) {
-                InputLine last = childrenInputs.get(childrenInputs.size() - 1);
-                last.nextInput = input;
-            }
-            childrenInputs.add(input);
-            input.parentInput = this;
-            input.level = this.level + 1;
-        }
-
-        /**
-         * Set the next input line.
-         *
-         * @param input
-         *            The next input line
-         */
-        public void addNext(InputLine input) {
-            if (parentInput != null) {
-                int index = parentInput.childrenInputs.indexOf(this);
-                parentInput.childrenInputs.add(index + 1, input);
-                InputLine next = nextInput;
-                nextInput = input;
-                input.nextInput = next;
-            }
-            input.parentInput = this.parentInput;
-            input.level = this.level;
-        }
-
-        /**
-         * Move this line up in its parent's children.
-         */
-        public void moveUp() {
-            if (parentInput != null) {
-                int index = parentInput.childrenInputs.indexOf(this);
-                if (index > 0) {
-                    parentInput.childrenInputs.add(index - 1, parentInput.childrenInputs.remove(index));
-                    parentInput.childrenInputs.get(index).nextInput = nextInput;
-                    nextInput = parentInput.childrenInputs.get(index);
-                }
-            }
-        }
-
-        /**
-         * Move this line down in its parent's children.
-         */
-        public void moveDown() {
-            if (parentInput != null) {
-                int index = parentInput.childrenInputs.indexOf(this);
-                if (index < parentInput.childrenInputs.size() - 1) {
-                    parentInput.childrenInputs.add(index + 1, parentInput.childrenInputs.remove(index));
-                    nextInput = parentInput.childrenInputs.get(index).nextInput;
-                    parentInput.childrenInputs.get(index).nextInput = this;
-                }
-            }
-        }
-
-        /**
-         * Add a data column to this line
-         *
-         * @param column
-         *            The column to add
-         */
-        public void addColumn(InputData column) {
-            if (columns == null) {
-                columns = new ArrayList<>(1);
-            }
-            columns.add(column);
-        }
-
-        /**
-         * Get the next input lines.
-         *
-         * @param countMap
-         *            The map of line "sets".
-         * @return The next list of lines.
-         */
-        public List<InputLine> getNextInputs(Map<InputLine, Integer> countMap) {
-            List<InputLine> nextInputs = new ArrayList<>();
-            InputLine next = nextInput;
-            while (next != null) {
-                nextInputs.add(next);
-                if (next.cardinality.min > 0) {
-                    return nextInputs;
-                }
-                next = next.nextInput;
-            }
-            if (parentInput != null && parentInput.level > 0) {
-                int parentCount = countMap.get(parentInput);
-                if (parentCount < parentInput.getMaxCount()) {
-                    nextInputs.add(parentInput);
-                }
-                if (parentCount < parentInput.getMinCount()) {
-                    return nextInputs;
-                }
-                nextInputs.addAll(parentInput.getNextInputs(countMap));
-            }
-            return nextInputs;
-        }
-
-        /**
-         * Get the minimum possible amount of entries.
-         *
-         * @return The minimum
-         */
-        public int getMinCount() {
-            return cardinality.min;
-        }
-
-        /**
-         * Get the maximum possible amount of entries.
-         *
-         * @return The maximum
-         */
-        public int getMaxCount() {
-            return cardinality.max;
-        }
-
-        @Override
-        public String toString() {
-            return regex + " " + cardinality; //$NON-NLS-1$
-        }
-    }
-
-    /**
-     * Data column for input lines.
-     */
-    public static class InputData {
-
-        /** Name of this column */
-        public String name;
-
-        /** Action id */
-        public int action;
-
-        /** Format */
-        public String format;
-
-        /**
-         * Default (empty) constructor
-         */
-        public InputData() {
-        }
-
-        /**
-         * Full constructor
-         *
-         * @param name
-         *            Name
-         * @param action
-         *            Action
-         * @param format
-         *            Format
-         */
-        public InputData(String name, int action, String format) {
-            this.name = name;
-            this.action = action;
-            this.format = format;
-        }
-
-        /**
-         * Constructor with default format
-         *
-         * @param name
-         *            Name
-         * @param action
-         *            Action
-         */
-        public InputData(String name, int action) {
-            this.name = name;
-            this.action = action;
-        }
-    }
-
-    /**
-     * Input line cardinality
-     */
-    public static class Cardinality {
-
-        /** Representation of infinity */
-        public final static int INF = Integer.MAX_VALUE;
-
-        /** Preset for [1, 1] */
-        public final static Cardinality ONE = new Cardinality(1, 1);
-
-        /** Preset for [1, inf] */
-        public final static Cardinality ONE_OR_MORE = new Cardinality(1, INF);
-
-        /** Preset for [0, 1] */
-        public final static Cardinality ZERO_OR_ONE = new Cardinality(0, 1);
-
-        /** Preset for [0, inf] */
-        public final static Cardinality ZERO_OR_MORE = new Cardinality(0, INF);
-
-        private final int min;
-        private final int max;
-
-        /**
-         * Constructor.
-         *
-         * @param min
-         *            Minimum
-         * @param max
-         *            Maximum
-         */
-        public Cardinality(int min, int max) {
-            this.min = min;
-            this.max = max;
-        }
-
-        @Override
-        public String toString() {
-            return "(" + (min >= 0 ? min : "?") + ',' + (max == INF ? "\u221E" : (max >= 0 ? max : "?")) + ')'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + max;
-            result = prime * result + min;
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (!(obj instanceof Cardinality)) {
-                return false;
-            }
-            Cardinality other = (Cardinality) obj;
-            return (this.min == other.min && this.max == other.max);
-        }
     }
 
     @Override
@@ -516,7 +183,7 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
             formatElement.appendChild(doc.createTextNode(timeStampOutputFormat));
 
             if (inputs != null) {
-                for (InputLine inputLine : inputs) {
+                for (CustomTxtInputLine inputLine : inputs) {
                     definitionElement.appendChild(createInputLineElement(inputLine, doc));
                 }
             }
@@ -544,47 +211,37 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
 
             TmfTraceType.addCustomTraceType(CustomTxtTrace.class, categoryName, definitionName);
 
-        } catch (ParserConfigurationException e) {
-            Activator.logError("Error saving CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
-        } catch (TransformerConfigurationException e) {
-            Activator.logError("Error saving CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
-        } catch (TransformerFactoryConfigurationError e) {
-            Activator.logError("Error saving CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
-        } catch (TransformerException e) {
-            Activator.logError("Error saving CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
-        } catch (IOException e) {
-            Activator.logError("Error saving CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
-        } catch (SAXException e) {
+        } catch (ParserConfigurationException | TransformerFactoryConfigurationError | TransformerException | IOException | SAXException e) {
             Activator.logError("Error saving CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
         }
     }
 
-    private Element createInputLineElement(InputLine inputLine, Document doc) {
+    private Element createInputLineElement(CustomTxtInputLine inputLine, Document doc) {
         Element inputLineElement = doc.createElement(INPUT_LINE_ELEMENT);
 
         Element cardinalityElement = doc.createElement(CARDINALITY_ELEMENT);
         inputLineElement.appendChild(cardinalityElement);
-        cardinalityElement.setAttribute(MIN_ATTRIBUTE, Integer.toString(inputLine.cardinality.min));
-        cardinalityElement.setAttribute(MAX_ATTRIBUTE, Integer.toString(inputLine.cardinality.max));
+        cardinalityElement.setAttribute(MIN_ATTRIBUTE, Integer.toString(inputLine.getMinCount()));
+        cardinalityElement.setAttribute(MAX_ATTRIBUTE, Integer.toString(inputLine.getMaxCount()));
 
         Element regexElement = doc.createElement(REGEX_ELEMENT);
         inputLineElement.appendChild(regexElement);
         regexElement.appendChild(doc.createTextNode(inputLine.regex));
 
-        if (inputLine.columns != null) {
-            for (InputData inputData : inputLine.columns) {
+        if (inputLine.getColumns() != null) {
+            for (CustomTxtDataColumn inputData : inputLine.getColumns()) {
                 Element inputDataElement = doc.createElement(INPUT_DATA_ELEMENT);
                 inputLineElement.appendChild(inputDataElement);
-                inputDataElement.setAttribute(NAME_ATTRIBUTE, inputData.name);
-                inputDataElement.setAttribute(ACTION_ATTRIBUTE, Integer.toString(inputData.action));
-                if (inputData.format != null) {
-                    inputDataElement.setAttribute(FORMAT_ATTRIBUTE, inputData.format);
+                inputDataElement.setAttribute(NAME_ATTRIBUTE, inputData.getName());
+                inputDataElement.setAttribute(ACTION_ATTRIBUTE, Integer.toString(inputData.getAction()));
+                if (inputData.getFormat() != null) {
+                    inputDataElement.setAttribute(FORMAT_ATTRIBUTE, inputData.getFormat());
                 }
             }
         }
 
-        if (inputLine.childrenInputs != null) {
-            for (InputLine childInputLine : inputLine.childrenInputs) {
+        if (inputLine.hasChildren()) {
+            for (CustomTxtInputLine childInputLine : inputLine.getChildrenInputs()) {
                 inputLineElement.appendChild(createInputLineElement(childInputLine, doc));
             }
         }
@@ -695,11 +352,7 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
                 }
             }
             return defList.toArray(new CustomTxtTraceDefinition[0]);
-        } catch (ParserConfigurationException e) {
-            Activator.logError("Error loading all in CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
-        } catch (SAXException e) {
-            Activator.logError("Error loading all in CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             Activator.logError("Error loading all in CustomTxtTraceDefinition: path=" + path, e); //$NON-NLS-1$
         }
         return new CustomTxtTraceDefinition[0];
@@ -802,7 +455,7 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
                 Element formatElement = (Element) node;
                 def.timeStampOutputFormat = formatElement.getTextContent();
             } else if (nodeName.equals(INPUT_LINE_ELEMENT)) {
-                InputLine inputLine = extractInputLine((Element) node);
+                CustomTxtInputLine inputLine = extractInputLine((Element) node);
                 if (inputLine != null) {
                     def.inputs.add(inputLine);
                 }
@@ -816,8 +469,8 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
         return def;
     }
 
-    private static InputLine extractInputLine(Element inputLineElement) {
-        InputLine inputLine = new InputLine();
+    private static CustomTxtInputLine extractInputLine(Element inputLineElement) {
+        CustomTxtInputLine inputLine = new CustomTxtInputLine();
         NodeList nodeList = inputLineElement.getChildNodes();
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node node = nodeList.item(i);
@@ -827,7 +480,7 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
                 try {
                     int min = Integer.parseInt(cardinalityElement.getAttribute(MIN_ATTRIBUTE));
                     int max = Integer.parseInt(cardinalityElement.getAttribute(MAX_ATTRIBUTE));
-                    inputLine.cardinality = new Cardinality(min, max);
+                    inputLine.setCardinality( new Cardinality(min, max));
                 } catch (NumberFormatException e) {
                     return null;
                 }
@@ -836,14 +489,14 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
                 inputLine.regex = regexElement.getTextContent();
             } else if (nodeName.equals(INPUT_DATA_ELEMENT)) {
                 Element inputDataElement = (Element) node;
-                InputData inputData = new InputData();
-                inputData.name = inputDataElement.getAttribute(NAME_ATTRIBUTE);
-                inputData.action = Integer.parseInt(inputDataElement.getAttribute(ACTION_ATTRIBUTE));
-                inputData.format = inputDataElement.getAttribute(FORMAT_ATTRIBUTE);
+                CustomTxtDataColumn inputData = new CustomTxtDataColumn();
+                inputData.setName(inputDataElement.getAttribute(NAME_ATTRIBUTE));
+                inputData.setAction(Integer.parseInt(inputDataElement.getAttribute(ACTION_ATTRIBUTE)));
+                inputData.setFormat(inputDataElement.getAttribute(FORMAT_ATTRIBUTE));
                 inputLine.addColumn(inputData);
             } else if (nodeName.equals(INPUT_LINE_ELEMENT)) {
                 Element childInputLineElement = (Element) node;
-                InputLine childInputLine = extractInputLine(childInputLineElement);
+                CustomTxtInputLine childInputLine = extractInputLine(childInputLineElement);
                 if (childInputLine != null) {
                     inputLine.addChild(childInputLine);
                 }
