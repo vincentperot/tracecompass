@@ -415,13 +415,12 @@ public class ControlFlowView extends AbstractTimeGraphView {
         if (realEnd <= realStart) {
             return null;
         }
-        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), LttngKernelAnalysis.ID);
-        if (ssq == null) {
+        LttngKernelAnalysis kernelAnalysis = entry.getTrace().getAnalysisModuleOfClass(LttngKernelAnalysis.class, LttngKernelAnalysis.ID);
+        if (kernelAnalysis == null) {
             return null;
         }
         try {
-            int statusQuark = ssq.getQuarkRelative(entry.getThreadQuark(), Attributes.STATUS);
-            List<ITmfStateInterval> statusIntervals = StateSystemUtils.queryHistoryRange(ssq, statusQuark, realStart, realEnd - 1, resolution, monitor);
+            List<ITmfStateInterval> statusIntervals = kernelAnalysis.getStatusIntervalsForThread(entry.getThreadQuark(), realStart, realEnd, resolution, monitor);
             eventList = new ArrayList<>(statusIntervals.size());
             long lastEndTime = -1;
             for (ITmfStateInterval statusInterval : statusIntervals) {
@@ -442,10 +441,8 @@ public class ControlFlowView extends AbstractTimeGraphView {
                 eventList.add(new TimeEvent(entry, time, duration, status));
                 lastEndTime = time + duration;
             }
-        } catch (AttributeNotFoundException | TimeRangeException e) {
-            e.printStackTrace();
-        } catch (StateSystemDisposedException e) {
-            /* Ignored */
+        } catch (TimeRangeException e) {
+            Activator.getDefault().logError(e.getMessage());
         }
         return eventList;
     }

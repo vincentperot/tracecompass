@@ -565,4 +565,30 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
     private static boolean isCompleteTrace(ITmfTrace trace) {
         return !(trace instanceof ITmfTraceCompleteness) || ((ITmfTraceCompleteness) trace).isComplete();
     }
+
+    // ------------------------------------------------------------------------
+    // Analysis-specific methods
+    // ------------------------------------------------------------------------
+
+    /**
+     * Get the name of the attribute corresponding to a quark. The quark
+     * parameter should have been obtained by querying the analysis, so it is
+     * assumed to exist in the analysis. Otherwise, a RuntimeException is
+     * thrown.
+     *
+     * @param quark
+     *            The quark of the attribute for whom to get the name
+     * @return The attribute name of this quark
+     */
+    public String getAttributeName(Integer quark) {
+        ITmfStateSystem ss = getStateSystem();
+        if (ss == null) {
+            throw new IllegalStateException();
+        }
+        String attributeName = ss.getAttributeName(quark);
+        if (attributeName == null) {
+            throw new IllegalArgumentException();
+        }
+        return attributeName;
+    }
 }
