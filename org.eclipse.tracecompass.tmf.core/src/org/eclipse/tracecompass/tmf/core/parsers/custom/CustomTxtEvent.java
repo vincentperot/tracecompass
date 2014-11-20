@@ -19,7 +19,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputData;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputLine;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -89,12 +88,12 @@ public class CustomTxtEvent extends CustomEvent {
      * @param matcher
      *            The regex matcher to use
      */
-    public void processGroups(InputLine input, Matcher matcher) {
-        if (input.columns == null) {
+    public void processGroups(CustomTxtInputLine input, Matcher matcher) {
+        if (input.getColumns()== null) {
             return;
         }
-        for (int i = 0; i < input.columns.size(); i++) {
-            InputData column = input.columns.get(i);
+        for (int i = 0; i < input.getColumns().size(); i++) {
+            InputData column = input.getColumns().get(i);
             if (i < matcher.groupCount() && matcher.group(i + 1) != null) {
                 String value = matcher.group(i + 1).trim();
                 if (value.length() == 0) {

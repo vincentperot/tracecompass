@@ -30,7 +30,6 @@ import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputLine;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfEventParser;
@@ -139,7 +138,7 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
             long rawPos = fFile.getFilePointer();
             String line = fFile.getNextLine();
             while (line != null) {
-                for (final InputLine input : getFirstLines()) {
+                for (final CustomTxtInputLine input : getFirstLines()) {
                     final Matcher matcher = input.getPattern().matcher(line);
                     if (matcher.matches()) {
                         context.setLocation(new TmfLongLocation(rawPos));
@@ -241,10 +240,10 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
 
         CustomTxtEvent event = parseFirstLine(context);
 
-        final HashMap<InputLine, Integer> countMap = new HashMap<>();
-        InputLine currentInput = null;
-        if (context.inputLine.childrenInputs != null && context.inputLine.childrenInputs.size() > 0) {
-            currentInput = context.inputLine.childrenInputs.get(0);
+        final HashMap<CustomTxtInputLine, Integer> countMap = new HashMap<>();
+        CustomTxtInputLine currentInput = null;
+        if (context.inputLine.hasChildren()) {
+            currentInput = context.inputLine.getChildrenInputs().get(0);
             countMap.put(currentInput, 0);
         }
 
@@ -257,7 +256,7 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
             while (line != null) {
                 boolean processed = false;
                 if (currentInput == null) {
-                    for (final InputLine input : getFirstLines()) {
+                    for (final CustomTxtInputLine input : getFirstLines()) {
                         final Matcher matcher = input.getPattern().matcher(line);
                         if (matcher.matches()) {
                             context.setLocation(new TmfLongLocation(rawPos));
@@ -270,9 +269,9 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
                     }
                 } else {
                     if (countMap.get(currentInput) >= currentInput.getMinCount()) {
-                        final List<InputLine> nextInputs = currentInput.getNextInputs(countMap);
+                        final List<CustomTxtInputLine> nextInputs = currentInput.getNextInputs(countMap);
                         if (nextInputs.size() == 0 || nextInputs.get(nextInputs.size() - 1).getMinCount() == 0) {
-                            for (final InputLine input : getFirstLines()) {
+                            for (final CustomTxtInputLine input : getFirstLines()) {
                                 final Matcher matcher = input.getPattern().matcher(line);
                                 if (matcher.matches()) {
                                     context.setLocation(new TmfLongLocation(rawPos));
@@ -284,7 +283,7 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
                                 }
                             }
                         }
-                        for (final InputLine input : nextInputs) {
+                        for (final CustomTxtInputLine input : nextInputs) {
                             final Matcher matcher = input.getPattern().matcher(line);
                             if (matcher.matches()) {
                                 event.processGroups(input, matcher);
@@ -294,15 +293,15 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
                                 } else {
                                     countMap.put(currentInput, countMap.get(currentInput) + 1);
                                 }
-                                Iterator<InputLine> iter = countMap.keySet().iterator();
+                                Iterator<CustomTxtInputLine> iter = countMap.keySet().iterator();
                                 while (iter.hasNext()) {
-                                    final InputLine inputLine = iter.next();
-                                    if (inputLine.level > currentInput.level) {
+                                    final CustomTxtInputLine inputLine = iter.next();
+                                    if (inputLine.getLevel() > currentInput.getLevel()) {
                                         iter.remove();
                                     }
                                 }
-                                if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
-                                    currentInput = currentInput.childrenInputs.get(0);
+                                if (currentInput.hasChildren()) {
+                                    currentInput = currentInput.getChildrenInputs().get(0);
                                     countMap.put(currentInput, 0);
                                 } else if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
                                     if (currentInput.getNextInputs(countMap).size() > 0) {
@@ -312,8 +311,8 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
                                         }
                                         iter = countMap.keySet().iterator();
                                         while (iter.hasNext()) {
-                                            final InputLine inputLine = iter.next();
-                                            if (inputLine.level > currentInput.level) {
+                                            final CustomTxtInputLine inputLine = iter.next();
+                                            if (inputLine.getLevel() > currentInput.getLevel()) {
                                                 iter.remove();
                                             }
                                         }
@@ -331,8 +330,8 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
                         if (matcher.matches()) {
                             event.processGroups(currentInput, matcher);
                             countMap.put(currentInput, countMap.get(currentInput) + 1);
-                            if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
-                                currentInput = currentInput.childrenInputs.get(0);
+                            if (currentInput.getChildrenInputs() != null && currentInput.getChildrenInputs().size() > 0) {
+                                currentInput = currentInput.getChildrenInputs().get(0);
                                 countMap.put(currentInput, 0);
                             } else if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
                                 if (currentInput.getNextInputs(countMap).size() > 0) {
@@ -340,10 +339,10 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
                                     if (countMap.get(currentInput) == null) {
                                         countMap.put(currentInput, 0);
                                     }
-                                    final Iterator<InputLine> iter = countMap.keySet().iterator();
+                                    final Iterator<CustomTxtInputLine> iter = countMap.keySet().iterator();
                                     while (iter.hasNext()) {
-                                        final InputLine inputLine = iter.next();
-                                        if (inputLine.level > currentInput.level) {
+                                        final CustomTxtInputLine inputLine = iter.next();
+                                        if (inputLine.getLevel() > currentInput.getLevel()) {
                                             iter.remove();
                                         }
                                     }
@@ -361,7 +360,7 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
         } catch (final IOException e) {
             Activator.logError("Error seeking event. File: " + getPath(), e); //$NON-NLS-1$
         }
-        for (final Entry<InputLine, Integer> entry : countMap.entrySet()) {
+        for (final Entry<CustomTxtInputLine, Integer> entry : countMap.entrySet()) {
             if (entry.getValue() < entry.getKey().getMinCount()) {
                 event = null;
             }
@@ -373,7 +372,7 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
     /**
      * @return The first few lines of the text file
      */
-    public List<InputLine> getFirstLines() {
+    public List<CustomTxtInputLine> getFirstLines() {
         return fDefinition.inputs;
     }
 
@@ -419,7 +418,7 @@ public class CustomTxtTrace extends TmfTrace implements ITmfEventParser, ITmfPer
             double matches = 0.0;
             String line = rafile.getNextLine();
             while ((line != null) && (lineCount++ < MAX_LINES)) {
-                for (InputLine inputLine : fDefinition.inputs) {
+                for (CustomTxtInputLine inputLine : fDefinition.inputs) {
                     Matcher matcher = inputLine.getPattern().matcher(line);
                     if (matcher.matches()) {
                         int groupCount = matcher.groupCount();

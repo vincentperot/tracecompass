@@ -83,7 +83,7 @@ import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTraceDefinition;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.Cardinality;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputData;
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputLine;
+import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtInputLine;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampFormat;
@@ -244,11 +244,11 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                     return;
                 }
                 removeLine();
-                InputLine inputLine = (InputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
-                if (inputLine.parentInput == null) {
+                CustomTxtInputLine inputLine = (CustomTxtInputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
+                if (inputLine.hasParent()) {
                     definition.inputs.remove(inputLine);
                 } else {
-                    inputLine.parentInput.childrenInputs.remove(inputLine);
+                    inputLine.getParentInput().getChildrenInputs().remove(inputLine);
                 }
                 treeViewer.refresh();
                 validate();
@@ -261,14 +261,14 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
         addNextButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                InputLine inputLine = new InputLine(Cardinality.ZERO_OR_MORE, "", null); //$NON-NLS-1$
+                CustomTxtInputLine inputLine = new CustomTxtInputLine(Cardinality.ZERO_OR_MORE, "", null); //$NON-NLS-1$
                 if (((List<?>) treeViewer.getInput()).size() == 0) {
                     definition.inputs.add(inputLine);
                 } else if (treeViewer.getSelection().isEmpty()) {
                     return;
                 } else {
-                    InputLine previousInputLine = (InputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
-                    if (previousInputLine.parentInput == null) {
+                    CustomTxtInputLine previousInputLine = (CustomTxtInputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
+                    if (previousInputLine.hasParent()) {
                         for (int i = 0; i < definition.inputs.size(); i++) {
                             if (definition.inputs.get(i).equals(previousInputLine)) {
                                 definition.inputs.add(i + 1, inputLine);
@@ -288,13 +288,13 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
         addChildButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                InputLine inputLine = new InputLine(Cardinality.ZERO_OR_MORE, "", null); //$NON-NLS-1$
+                CustomTxtInputLine inputLine = new CustomTxtInputLine(Cardinality.ZERO_OR_MORE, "", null); //$NON-NLS-1$
                 if (((List<?>) treeViewer.getInput()).size() == 0) {
                     definition.inputs.add(inputLine);
                 } else if (treeViewer.getSelection().isEmpty()) {
                     return;
                 } else {
-                    InputLine parentInputLine = (InputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
+                    CustomTxtInputLine parentInputLine = (CustomTxtInputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
                     parentInputLine.addChild(inputLine);
                 }
                 treeViewer.refresh();
@@ -310,8 +310,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                 if (treeViewer.getSelection().isEmpty()) {
                     return;
                 }
-                InputLine inputLine = (InputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
-                if (inputLine.parentInput == null) {
+                CustomTxtInputLine inputLine = (CustomTxtInputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
+                if (inputLine.hasParent()) {
                     for (int i = 1; i < definition.inputs.size(); i++) {
                         if (definition.inputs.get(i).equals(inputLine)) {
                             definition.inputs.add(i - 1, definition.inputs.remove(i));
@@ -335,8 +335,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                 if (treeViewer.getSelection().isEmpty()) {
                     return;
                 }
-                InputLine inputLine = (InputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
-                if (inputLine.parentInput == null) {
+                CustomTxtInputLine inputLine = (CustomTxtInputLine) ((IStructuredSelection) treeViewer.getSelection()).getFirstElement();
+                if (inputLine.hasParent()) {
                     for (int i = 0; i < definition.inputs.size() - 1; i++) {
                         if (definition.inputs.get(i).equals(inputLine)) {
                             definition.inputs.add(i + 1, definition.inputs.remove(i));
@@ -391,7 +391,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
 
         if (definition == null) {
             definition = new CustomTxtTraceDefinition();
-            definition.inputs.add(new InputLine(Cardinality.ZERO_OR_MORE, DEFAULT_REGEX,
+            definition.inputs.add(new CustomTxtInputLine(Cardinality.ZERO_OR_MORE, DEFAULT_REGEX,
                     Arrays.asList(new InputData(CustomTraceDefinition.TAG_MESSAGE, CustomTraceDefinition.ACTION_SET))));
         }
         loadDefinition(definition);
@@ -470,17 +470,17 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
 
         @Override
         public Object[] getChildren(Object parentElement) {
-            InputLine inputLine = (InputLine) parentElement;
-            if (inputLine.childrenInputs == null) {
-                return new InputLine[0];
+            CustomTxtInputLine inputLine = (CustomTxtInputLine) parentElement;
+            if (inputLine.getChildrenInputs() == null) {
+                return new CustomTxtInputLine[0];
             }
-            return inputLine.childrenInputs.toArray();
+            return inputLine.getChildrenInputs().toArray();
         }
 
         @Override
         public boolean hasChildren(Object element) {
-            InputLine inputLine = (InputLine) element;
-            return (inputLine.childrenInputs != null && inputLine.childrenInputs.size() > 0);
+            CustomTxtInputLine inputLine = (CustomTxtInputLine) element;
+            return inputLine.hasChildren();
         }
 
         @Override
@@ -493,8 +493,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
 
         @Override
         public Object getParent(Object element) {
-            InputLine inputLine = (InputLine) element;
-            return inputLine.parentInput;
+            CustomTxtInputLine inputLine = (CustomTxtInputLine) element;
+            return inputLine.getParentInput();
         }
     }
 
@@ -507,11 +507,11 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
 
         @Override
         public String getText(Object element) {
-            InputLine inputLine = (InputLine) element;
-            if (inputLine.parentInput == null) {
-                return "Root Line " + getName(inputLine) + " " + inputLine.cardinality.toString() + " : " + inputLine.getRegex(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            CustomTxtInputLine inputLine = (CustomTxtInputLine) element;
+            if (inputLine.hasParent()) {
+                return "Root Line " + getName(inputLine) + " " + inputLine.getCardinality().toString() + " : " + inputLine.getRegex(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
-            return "Line " + getName(inputLine) + " " + inputLine.cardinality.toString() + " : " + inputLine.getRegex(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            return "Line " + getName(inputLine) + " " + inputLine.getCardinality().toString() + " : " + inputLine.getRegex(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
     }
 
@@ -523,7 +523,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
             }
             if (!(event.getSelection().isEmpty()) && event.getSelection() instanceof IStructuredSelection) {
                 IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-                InputLine inputLine = (InputLine) sel.getFirstElement();
+                CustomTxtInputLine inputLine = (CustomTxtInputLine) sel.getFirstElement();
                 selectedLine = new Line(lineContainer, getName(inputLine), inputLine);
                 lineContainer.layout();
                 lineScrolledComposite.setMinSize(lineContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, lineContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT).y - 1);
@@ -549,16 +549,16 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
         timestampOutputFormatText.setText(def.timeStampOutputFormat);
         treeViewer.setInput(def.inputs);
         if (def.inputs.size() > 0) {
-            InputLine inputLine = def.inputs.get(0);
+            CustomTxtInputLine inputLine = def.inputs.get(0);
             treeViewer.setSelection(new StructuredSelection(inputLine));
         }
     }
 
-    private String getName(InputLine inputLine) {
-        if (inputLine.parentInput == null) {
+    private String getName(CustomTxtInputLine inputLine) {
+        if (inputLine.hasParent()) {
             return Integer.toString(definition.inputs.indexOf(inputLine) + 1);
         }
-        return getName(inputLine.parentInput) + "." + Integer.toString(inputLine.parentInput.childrenInputs.indexOf(inputLine) + 1); //$NON-NLS-1$
+        return getName(inputLine.getParentInput()) + "." + Integer.toString(inputLine.getParentInput().getChildrenInputs().indexOf(inputLine) + 1); //$NON-NLS-1$
     }
 
     /**
@@ -568,7 +568,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
      */
     public List<String> getInputNames() {
         List<String> inputs = new ArrayList<>();
-        for (InputLine inputLine : definition.inputs) {
+        for (CustomTxtInputLine inputLine : definition.inputs) {
             for (String inputName : getInputNames(inputLine)) {
                 if (!inputs.contains(inputName)) {
                     inputs.add(inputName);
@@ -585,18 +585,18 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
      *            The input line
      * @return The list of input names
      */
-    public List<String> getInputNames(InputLine inputLine) {
+    public List<String> getInputNames(CustomTxtInputLine inputLine) {
         List<String> inputs = new ArrayList<>();
-        if (inputLine.columns != null) {
-            for (InputData inputData : inputLine.columns) {
+        if (inputLine.getColumns() != null) {
+            for (InputData inputData : inputLine.getColumns()) {
                 String inputName = inputData.name;
                 if (!inputs.contains(inputName)) {
                     inputs.add(inputName);
                 }
             }
         }
-        if (inputLine.childrenInputs != null) {
-            for (InputLine childInputLine : inputLine.childrenInputs) {
+        if (inputLine.getChildrenInputs() != null) {
+            for (CustomTxtInputLine childInputLine : inputLine.getChildrenInputs()) {
                 for (String inputName : getInputNames(childInputLine)) {
                     if (!inputs.contains(inputName)) {
                         inputs.add(inputName);
@@ -679,7 +679,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
             String firstEntryTimeStamp = null;
             String firstEntryTimeStampInputFormat = null;
             String line = null;
-            boolean lineIsNull = true; // needed because of JDT bug with continue at label
+            boolean lineIsNull = true; // needed because of JDT bug with
+                                       // continue at label
             event: while (scanner.hasNext() || !lineIsNull) {
                 if (rootLineMatches > 0 && !updateAll) {
                     break;
@@ -690,7 +691,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                 }
                 int length = line.length();
                 String log = line.replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$
-                for (InputLine rootInputLine : definition.inputs) {
+                for (CustomTxtInputLine rootInputLine : definition.inputs) {
                     Pattern pattern;
                     try {
                         pattern = rootInputLine.getPattern();
@@ -709,10 +710,10 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                             firstEntryTimeStamp = data.get(CustomTraceDefinition.TAG_TIMESTAMP);
                             firstEntryTimeStampInputFormat = timeStampFormat;
                         }
-                        HashMap<InputLine, Integer> countMap = new HashMap<>();
-                        InputLine currentInput = null;
-                        if (rootInputLine.childrenInputs != null && rootInputLine.childrenInputs.size() > 0) {
-                            currentInput = rootInputLine.childrenInputs.get(0);
+                        HashMap<CustomTxtInputLine, Integer> countMap = new HashMap<>();
+                        CustomTxtInputLine currentInput = null;
+                        if (rootInputLine.hasChildren()) {
+                            currentInput = rootInputLine.getChildrenInputs().get(0);
                             countMap.put(currentInput, 0);
                         }
                         rawPos += length + 1; // +1 for \n
@@ -722,7 +723,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                             log = line.replaceAll("\r", ""); //$NON-NLS-1$ //$NON-NLS-2$
                             boolean processed = false;
                             if (currentInput == null) {
-                                for (InputLine input : definition.inputs) {
+                                for (CustomTxtInputLine input : definition.inputs) {
                                     try {
                                         matcher = input.getPattern().matcher(log);
                                     } catch (PatternSyntaxException e) {
@@ -734,9 +735,9 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                 }
                             } else {
                                 if (countMap.get(currentInput) >= currentInput.getMinCount()) {
-                                    List<InputLine> nextInputs = currentInput.getNextInputs(countMap);
+                                    List<CustomTxtInputLine> nextInputs = currentInput.getNextInputs(countMap);
                                     if (nextInputs.size() == 0 || nextInputs.get(nextInputs.size() - 1).getMinCount() == 0) {
-                                        for (InputLine input : definition.inputs) {
+                                        for (CustomTxtInputLine input : definition.inputs) {
                                             try {
                                                 matcher = input.getPattern().matcher(log);
                                             } catch (PatternSyntaxException e) {
@@ -747,7 +748,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                             }
                                         }
                                     }
-                                    for (InputLine input : nextInputs) {
+                                    for (CustomTxtInputLine input : nextInputs) {
                                         try {
                                             matcher = input.getPattern().matcher(log);
                                         } catch (PatternSyntaxException e) {
@@ -763,15 +764,15 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                             } else {
                                                 countMap.put(currentInput, countMap.get(currentInput) + 1);
                                             }
-                                            Iterator<InputLine> iter = countMap.keySet().iterator();
+                                            Iterator<CustomTxtInputLine> iter = countMap.keySet().iterator();
                                             while (iter.hasNext()) {
-                                                InputLine inputLine = iter.next();
-                                                if (inputLine.level > currentInput.level) {
+                                                CustomTxtInputLine inputLine = iter.next();
+                                                if (inputLine.getLevel() > currentInput.getLevel()) {
                                                     iter.remove();
                                                 }
                                             }
-                                            if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
-                                                currentInput = currentInput.childrenInputs.get(0);
+                                            if (currentInput.hasChildren()) {
+                                                currentInput = currentInput.getChildrenInputs().get(0);
                                                 countMap.put(currentInput, 0);
                                             } else {
                                                 if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
@@ -782,8 +783,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                                         }
                                                         iter = countMap.keySet().iterator();
                                                         while (iter.hasNext()) {
-                                                            InputLine inputLine = iter.next();
-                                                            if (inputLine.level > currentInput.level) {
+                                                            CustomTxtInputLine inputLine = iter.next();
+                                                            if (inputLine.getLevel() > currentInput.getLevel()) {
                                                                 iter.remove();
                                                             }
                                                         }
@@ -808,8 +809,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                                 COLOR_BLACK, COLOR_LIGHT_YELLOW, SWT.ITALIC));
                                         updatePreviewLine(currentInput, matcher, data, rawPos, rootLineMatches);
                                         countMap.put(currentInput, countMap.get(currentInput) + 1);
-                                        if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
-                                            currentInput = currentInput.childrenInputs.get(0);
+                                        if (currentInput.hasChildren()) {
+                                            currentInput = currentInput.getChildrenInputs().get(0);
                                             countMap.put(currentInput, 0);
                                         } else {
                                             if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
@@ -818,10 +819,10 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                                     if (countMap.get(currentInput) == null) {
                                                         countMap.put(currentInput, 0);
                                                     }
-                                                    Iterator<InputLine> iter = countMap.keySet().iterator();
+                                                    Iterator<CustomTxtInputLine> iter = countMap.keySet().iterator();
                                                     while (iter.hasNext()) {
-                                                        InputLine inputLine = iter.next();
-                                                        if (inputLine.level > currentInput.level) {
+                                                        CustomTxtInputLine inputLine = iter.next();
+                                                        if (inputLine.getLevel() > currentInput.getLevel()) {
                                                             iter.remove();
                                                         }
                                                     }
@@ -874,11 +875,11 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
         }
     }
 
-    private void updatePreviewLine(InputLine line, Matcher matcher, Map<String, String> data, int rawPos, int rootLineMatches) {
-        for (int i = 0; i < line.columns.size(); i++) {
-            InputData input = line.columns.get(i);
+    private void updatePreviewLine(CustomTxtInputLine line, Matcher matcher, Map<String, String> data, int rawPos, int rootLineMatches) {
+        for (int i = 0; i < line.getColumns().size(); i++) {
+            InputData input = line.getColumns().get(i);
             if (i < matcher.groupCount() && matcher.group(i + 1) != null) {
-                if (line.parentInput == null) {
+                if (line.hasParent()) {
                     inputText.setStyleRange(new StyleRange(rawPos + matcher.start(i + 1), matcher.end(i + 1) - matcher.start(i + 1),
                             COLOR_BLACK, COLOR_GREEN, SWT.BOLD));
                 } else {
@@ -936,9 +937,9 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
             }
         }
         // highlight the matching groups that have no corresponponding input
-        for (int i = line.columns.size(); i < matcher.groupCount(); i++) {
+        for (int i = line.getColumns().size(); i < matcher.groupCount(); i++) {
             if (matcher.group(i + 1) != null) {
-                if (line.parentInput == null) {
+                if (line.getParentInput() == null) {
                     inputText.setStyleRange(new StyleRange(rawPos + matcher.start(i + 1), matcher.end(i + 1) - matcher.start(i + 1),
                             COLOR_BLACK, COLOR_MAGENTA));
                 } else {
@@ -983,7 +984,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
         int line2start = line1start + line1.length();
         String line2 = Messages.CustomTxtParserInputWizardPage_matchingRootLine + ' ' + cg + ' ' + ucg + ' ' + ut + " \n"; //$NON-NLS-1$
         int line3start = line2start + line2.length();
-        String line3 = Messages.CustomTxtParserInputWizardPage_matchingOtherLine + ' '  + cg + ' ' + ucg + ' ' + ut + " \n"; //$NON-NLS-1$
+        String line3 = Messages.CustomTxtParserInputWizardPage_matchingOtherLine + ' ' + cg + ' ' + ucg + ' ' + ut + " \n"; //$NON-NLS-1$
         int line4start = line3start + line3.length();
         String line4 = Messages.CustomTxtParserInputWizardPage_matchingOtherLine + ' ' + cg + ' ' + ucg + ' ' + ut + " \n"; //$NON-NLS-1$
         int line5start = line4start + line4.length();
@@ -1037,7 +1038,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
 
     private class Line {
         private static final String INFINITY_STRING = "\u221E"; //$NON-NLS-1$
-        private InputLine inputLine;
+        private CustomTxtInputLine inputLine;
         private Group group;
         private Composite labelComposite;
         private Text regexText;
@@ -1052,7 +1053,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
         private Button addGroupButton;
         private Label addGroupLabel;
 
-        public Line(Composite parent, String name, InputLine inputLine) {
+        public Line(Composite parent, String name, CustomTxtInputLine inputLine) {
             this.inputLine = inputLine;
 
             group = new Group(parent, SWT.NONE);
@@ -1172,13 +1173,13 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                 }
             });
 
-            if (inputLine.cardinality.equals(Cardinality.ZERO_OR_MORE)) {
+            if (inputLine.getCardinality().equals(Cardinality.ZERO_OR_MORE)) {
                 cardinalityCombo.select(0);
-            } else if (inputLine.cardinality.equals(Cardinality.ONE_OR_MORE)) {
+            } else if (inputLine.getCardinality().equals(Cardinality.ONE_OR_MORE)) {
                 cardinalityCombo.select(1);
-            } else if (inputLine.cardinality.equals(Cardinality.ZERO_OR_ONE)) {
+            } else if (inputLine.getCardinality().equals(Cardinality.ZERO_OR_ONE)) {
                 cardinalityCombo.select(2);
-            } else if (inputLine.cardinality.equals(Cardinality.ONE)) {
+            } else if (inputLine.getCardinality().equals(Cardinality.ONE)) {
                 cardinalityCombo.select(3);
             } else {
                 cardinalityCombo.select(4);
@@ -1221,8 +1222,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
             cardinalityMinText.addVerifyListener(digitsListener);
             cardinalityMaxText.addVerifyListener(digitsListener);
 
-            if (inputLine.columns != null) {
-                for (InputData inputData : inputLine.columns) {
+            if (inputLine.getColumns() != null) {
+                for (InputData inputData : inputLine.getColumns()) {
                     InputGroup inputGroup = new InputGroup(group, this, inputs.size() + 1);
                     if (inputData.name.equals(CustomTraceDefinition.TAG_TIMESTAMP)) {
                         inputGroup.tagCombo.select(0);
@@ -1298,16 +1299,16 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
             inputLine.setRegex(selectedLine.regexText.getText());
             switch (cardinalityCombo.getSelectionIndex()) {
             case 0:
-                inputLine.cardinality = Cardinality.ZERO_OR_MORE;
+                inputLine.setCardinality(Cardinality.ZERO_OR_MORE);
                 break;
             case 1:
-                inputLine.cardinality = Cardinality.ONE_OR_MORE;
+                inputLine.setCardinality(Cardinality.ONE_OR_MORE);
                 break;
             case 2:
-                inputLine.cardinality = Cardinality.ZERO_OR_ONE;
+                inputLine.setCardinality(Cardinality.ZERO_OR_ONE);
                 break;
             case 3:
-                inputLine.cardinality = Cardinality.ONE;
+                inputLine.setCardinality(Cardinality.ONE);
                 break;
             case 4: // (?,?)
                 int min,
@@ -1326,13 +1327,13 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                 } catch (NumberFormatException e) {
                     max = -1;
                 }
-                inputLine.cardinality = new Cardinality(min, max);
+                inputLine.setCardinality(new Cardinality(min, max));
                 break;
             default:
-                inputLine.cardinality = Cardinality.ZERO_OR_MORE;
+                inputLine.setCardinality(Cardinality.ZERO_OR_MORE);
                 break;
             }
-            inputLine.columns = new ArrayList<>(inputs.size());
+            inputLine.createColumns(inputs.size());
             for (int i = 0; i < inputs.size(); i++) {
                 InputGroup grp = inputs.get(i);
                 InputData inputData = new InputData();
@@ -1345,7 +1346,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                     }
                 }
                 inputData.action = grp.actionCombo.getSelectionIndex();
-                inputLine.columns.add(inputData);
+                inputLine.getColumns().add(inputData);
             }
         }
     }
@@ -1533,7 +1534,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
         timestampFound = false;
         for (int i = 0; i < definition.inputs.size(); i++) {
 
-            InputLine inputLine = definition.inputs.get(i);
+            CustomTxtInputLine inputLine = definition.inputs.get(i);
             String name = Integer.toString(i + 1);
             errors.append(validateLine(inputLine, name));
         }
@@ -1573,7 +1574,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
      *            The name of the line
      * @return The cleaned up line
      */
-    public StringBuffer validateLine(InputLine inputLine, String name) {
+    public StringBuffer validateLine(CustomTxtInputLine inputLine, String name) {
         StringBuffer errors = new StringBuffer();
         Line line = null;
         if (selectedLine != null && selectedLine.inputLine.equals(inputLine)) {
@@ -1618,8 +1619,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                 line.cardinalityMaxText.setBackground(COLOR_TEXT_BACKGROUND);
             }
         }
-        for (int i = 0; inputLine.columns != null && i < inputLine.columns.size(); i++) {
-            InputData inputData = inputLine.columns.get(i);
+        for (int i = 0; inputLine.getColumns() != null && i < inputLine.getColumns().size(); i++) {
+            InputData inputData = inputLine.getColumns().get(i);
             InputGroup group = null;
             if (line != null) {
                 group = line.inputs.get(i);
@@ -1655,8 +1656,8 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                 }
             }
         }
-        for (int i = 0; inputLine.childrenInputs != null && i < inputLine.childrenInputs.size(); i++) {
-            errors.append(validateLine(inputLine.childrenInputs.get(i), name + "." + (i + 1))); //$NON-NLS-1$
+        for (int i = 0; inputLine.getChildrenInputs() != null && i < inputLine.getChildrenInputs().size(); i++) {
+            errors.append(validateLine(inputLine.getChildrenInputs().get(i), name + "." + (i + 1))); //$NON-NLS-1$
         }
         return errors;
     }
