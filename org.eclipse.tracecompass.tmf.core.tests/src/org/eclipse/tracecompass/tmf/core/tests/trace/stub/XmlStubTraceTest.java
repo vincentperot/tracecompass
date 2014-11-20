@@ -13,6 +13,7 @@
 package org.eclipse.tracecompass.tmf.core.tests.trace.stub;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -29,11 +30,14 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
+import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.tests.TmfCoreTestPlugin;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStub;
 import org.junit.Test;
@@ -122,6 +126,60 @@ public class XmlStubTraceTest {
             fail(e.getMessage());
         }
         assertEquals(4, req.getCount());
+    }
+
+    /**
+     * Test the presence and resolve of the criteria for this trace
+     */
+    @Test
+    public void testCriteria() {
+        TmfXmlTraceStub trace = new TmfXmlTraceStub();
+        IStatus status = trace.validate(null, getAbsolutePath(VALID_FILE).toOSString());
+        if (!status.isOK()) {
+            fail(status.getException().getMessage());
+        }
+
+        try {
+            trace.initTrace(null, getAbsolutePath(VALID_FILE).toOSString(), TmfEvent.class);
+        } catch (TmfTraceException e1) {
+            fail(e1.getMessage());
+        }
+
+        ITmfEventAspect cpuCriterion = null;
+        ITmfEventAspect testCriterion = null;
+        int criteriaCount = 0;
+        for (ITmfEventAspect criterion : trace.getEventAspects()) {
+            criteriaCount++;
+            if (criterion instanceof TmfCpuAspect) {
+                cpuCriterion = criterion;
+            } else if (criterion.getName().equals("test")) {
+                testCriterion = criterion;
+            }
+        }
+        /* Check the presence of the cpu and test criteria */
+        assertEquals("Number of criteria", 5, criteriaCount);
+        assertNotNull(cpuCriterion);
+        assertNotNull(testCriterion);
+
+        ITmfContext ctx;
+        ctx = trace.seekEvent(0L);
+        assertNotNull(ctx);
+        ITmfEvent event = trace.getNext(ctx);
+        assertNotNull(event);
+        assertEquals("Cpu criterion of event 1", "1", cpuCriterion.resolve(event));
+        assertEquals("Test criterion of event 1", "abc", testCriterion.resolve(event));
+        event = trace.getNext(ctx);
+        assertNotNull(event);
+        assertEquals("Cpu criterion of event 2", "1", cpuCriterion.resolve(event));
+        assertEquals("Test criterion of event 2", "abc", testCriterion.resolve(event));
+        event = trace.getNext(ctx);
+        assertNotNull(event);
+        assertEquals("Cpu criterion of event 3", "2", cpuCriterion.resolve(event));
+        assertEquals("Test criterion of event 3", "def", testCriterion.resolve(event));
+        event = trace.getNext(ctx);
+        assertNotNull(event);
+        assertEquals("Cpu criterion of event 4", "1", cpuCriterion.resolve(event));
+        assertEquals("Test criterion of event 4", "def", testCriterion.resolve(event));
     }
 
     private static IStatus testEvent(ITmfEvent event) {
