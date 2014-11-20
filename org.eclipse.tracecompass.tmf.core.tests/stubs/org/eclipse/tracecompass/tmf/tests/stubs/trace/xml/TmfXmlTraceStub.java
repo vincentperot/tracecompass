@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
@@ -29,6 +30,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -37,6 +39,9 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
+import org.eclipse.tracecompass.tmf.core.event.criterion.ITmfEventCriterion;
+import org.eclipse.tracecompass.tmf.core.event.criterion.TmfCpuCriterion;
+import org.eclipse.tracecompass.tmf.core.event.criterion.TmfEventFieldCriterion;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomEventContent;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomXmlEvent;
@@ -49,6 +54,8 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.xml.sax.SAXException;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * An XML development trace using a custom XML trace definition and schema.
@@ -79,8 +86,13 @@ public class TmfXmlTraceStub extends TmfTrace {
     private static final String VALUES_SEPARATOR = " \\| "; //$NON-NLS-1$
     private static final String TYPE_INTEGER = "int"; //$NON-NLS-1$
     private static final String TYPE_LONG = "long"; //$NON-NLS-1$
+    private static final String CRITERION_SPECIAL_EVENT = "set_criterion";
+    private static final String CRITERION_CPU = "cpu";
 
     private final CustomXmlTrace fTrace;
+
+    @SuppressWarnings("null")
+    private Collection<ITmfEventCriterion> fCriteria = TmfTrace.BASE_CRITERIA;
 
     /**
      * Constructor. Constructs the custom XML trace with the appropriate
@@ -105,12 +117,15 @@ public class TmfXmlTraceStub extends TmfTrace {
     }
 
     @Override
-    public void initTrace(IResource resource, String path, Class<? extends ITmfEvent> type) throws TmfTraceException {
+    public void initTrace(@Nullable IResource resource, @Nullable String path, @Nullable Class<? extends ITmfEvent> type) throws TmfTraceException {
         super.initTrace(resource, path, type);
         fTrace.initTrace(resource, path, type);
         ITmfContext ctx;
         /* Set the start and (current) end times for this trace */
         ctx = seekEvent(0L);
+        if (ctx == null) {
+            return;
+        }
         ITmfEvent event = getNext(ctx);
         if (event != null) {
             final ITmfTimestamp curTime = event.getTimestamp();
@@ -120,27 +135,27 @@ public class TmfXmlTraceStub extends TmfTrace {
     }
 
     @Override
-    public ITmfLocation getCurrentLocation() {
+    public @Nullable ITmfLocation getCurrentLocation() {
         return fTrace.getCurrentLocation();
     }
 
     @Override
-    public double getLocationRatio(ITmfLocation location) {
+    public double getLocationRatio(@Nullable ITmfLocation location) {
         return fTrace.getLocationRatio(location);
     }
 
     @Override
-    public ITmfContext seekEvent(ITmfLocation location) {
+    public @Nullable ITmfContext seekEvent(@Nullable ITmfLocation location) {
         return fTrace.seekEvent(location);
     }
 
     @Override
-    public ITmfContext seekEvent(double ratio) {
+    public @Nullable ITmfContext seekEvent(double ratio) {
         return fTrace.seekEvent(ratio);
     }
 
     @Override
-    public IStatus validate(IProject project, String path) {
+    public IStatus validate(@Nullable IProject project, @Nullable String path) {
         File xmlFile = new File(path);
         if (!xmlFile.exists() || !xmlFile.isFile() || !xmlFile.canRead()) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind(org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.Messages.TmfDevelopmentTrace_FileNotFound, path));
@@ -160,10 +175,12 @@ public class TmfXmlTraceStub extends TmfTrace {
         } catch (IOException e) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind(org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.Messages.TmfDevelopmentTrace_IoError, path), e);
         }
-        return Status.OK_STATUS;
+        @SuppressWarnings("null")
+        @NonNull IStatus status = Status.OK_STATUS;
+        return status;
     }
 
-    private static String getStringValue(@NonNull ITmfEventField content, String fieldName) {
+    private static String getStringValue(ITmfEventField content, String fieldName) {
         ITmfEventField field = content.getField(fieldName);
         if (field == null) {
             return EMPTY;
@@ -176,7 +193,10 @@ public class TmfXmlTraceStub extends TmfTrace {
     }
 
     @Override
-    public synchronized ITmfEvent getNext(ITmfContext context) {
+    public synchronized @Nullable ITmfEvent getNext(@Nullable ITmfContext context) {
+        if (context == null) {
+            return null;
+        }
         final ITmfContext savedContext = new TmfContext(context.getLocation(), context.getRank());
         CustomXmlEvent event = fTrace.getNext(context);
         if (event == null) {
@@ -191,6 +211,7 @@ public class TmfXmlTraceStub extends TmfTrace {
         if (content == null) {
             return null;
         }
+
         String fieldString = getStringValue(content, FIELD_NAMES_FIELD);
         String valueString = getStringValue(content, VALUES_FIELD);
         String typeString = getStringValue(content, TYPES_FIELD);
@@ -237,9 +258,16 @@ public class TmfXmlTraceStub extends TmfTrace {
             fieldsArray[i] = new TmfEventField(fields[i], val, null);
         }
 
+        /* Generate the criterion for this trace if it is the criterion special event */
+        String eventName = getStringValue(content, EVENT_NAME_FIELD);
+        if (eventName.equals(CRITERION_SPECIAL_EVENT)) {
+            generateCriteria(fieldsArray);
+            return getNext(context);
+        }
+
         /* Create a new event with new fields and name */
         ITmfEventType customEventType = event.getType();
-        TmfEventType eventType = new TmfEventType(getStringValue(content, EVENT_NAME_FIELD), customEventType.getRootField());
+        TmfEventType eventType = new TmfEventType(eventName, customEventType.getRootField());
         ITmfEventField eventFields = new CustomEventContent(content.getName(), content.getValue(), fieldsArray);
         // FIXME We used to use getSource() to get the CPU. Now this will have
         // to be done differently.
@@ -249,5 +277,56 @@ public class TmfXmlTraceStub extends TmfTrace {
 
         return newEvent;
     }
+
+    private static final class XmlStubCpuCriterion extends TmfCpuCriterion {
+
+        private final ITmfEventCriterion fCriterion;
+
+        public XmlStubCpuCriterion(ITmfEventCriterion criterion) {
+            fCriterion = criterion;
+        }
+
+        @Override
+        public @Nullable String getFilterId() {
+            return getName();
+        }
+
+        @Override
+        public String resolveCriterion(ITmfEvent event) {
+            return fCriterion.resolveCriterion(event);
+        }
+
+    }
+
+    private void generateCriteria(ITmfEventField[] fieldsArray) {
+        ImmutableList.Builder<ITmfEventCriterion> builder = new ImmutableList.Builder<>();
+
+        /* Initialize the default trace criteria */
+        for (ITmfEventCriterion criterion : TmfTrace.BASE_CRITERIA) {
+            builder.add(criterion);
+        }
+
+        for (ITmfEventField field : fieldsArray) {
+            String name = field.getName();
+            if (name == null) {
+                break;
+            }
+            ITmfEventCriterion criterion = new TmfEventFieldCriterion(name, name);
+            if (name.equals(CRITERION_CPU)) {
+                criterion = new XmlStubCpuCriterion(criterion);
+            }
+            builder.add(criterion);
+        }
+        @SuppressWarnings("null")
+        @NonNull Collection<ITmfEventCriterion> criteriaList = builder.build();
+        fCriteria = criteriaList;
+    }
+
+    @Override
+    public Iterable<ITmfEventCriterion> getCriteria() {
+        return fCriteria;
+    }
+
+
 
 }
