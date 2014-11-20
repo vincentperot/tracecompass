@@ -16,7 +16,6 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.equalsNullable;
 
 import java.util.regex.Matcher;
 
-import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputLine;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 
@@ -37,7 +36,7 @@ public class CustomTxtTraceContext extends TmfContext {
     public long nextLineLocation;
 
     /** InputLine object for the currently read line */
-    public InputLine inputLine;
+    public CustomTxtInputLine inputLine;
 
     /**
      * Constructor.
