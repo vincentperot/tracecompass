@@ -13,7 +13,16 @@ package org.eclipse.tracecompass.ctf.core.tests.trace;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.nio.ByteBuffer;
+
+import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
+import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
+import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
+import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
+import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +43,7 @@ public class CTFStreamInputPacketIndexEntryTest {
      */
     @Before
     public void setUp() {
-        fixture = new StreamInputPacketIndexEntry(1L);
+        fixture = new StreamInputPacketIndexEntry(1L, 1L);
     }
 
     /**
@@ -43,27 +52,40 @@ public class CTFStreamInputPacketIndexEntryTest {
     @Test
     public void testStreamInputPacketIndexEntry_1() {
         String expectedResult = "StreamInputPacketIndexEntry [offsetBytes=1, " +
-                "timestampBegin=0, timestampEnd=0]";
+                "timestampBegin=" + Long.MIN_VALUE +
+                ", timestampEnd=" + Long.MAX_VALUE +
+                "]";
 
         assertNotNull(fixture);
         assertEquals(expectedResult, fixture.toString());
     }
 
     /**
-     * Run the String toString() method test.
+     * Run the StreamInputPacketIndexEntry(long) constructor test.
      */
     @Test
-    public void testToString() {
-        String expectedResult = "StreamInputPacketIndexEntry [offsetBytes=1,"+
-                " timestampBegin=1, timestampEnd=1]";
+    public void testStreamInputPacketIndexEntry_includes() {
+        assertTrue(fixture.includes(0));
+    }
 
 
-        fixture.setContentSizeBits(1);
-        fixture.setDataOffsetBits(1);
-        fixture.setTimestampEnd(1L);
-        fixture.setPacketSizeBits(1);
-        fixture.setTimestampBegin(1L);
+    /**
+     * Run the String toString() method test.
+     *
+     * @throws CTFReaderException
+     *             won't happen
+     */
+    @Test
+    public void testToString() throws CTFReaderException {
 
-        assertEquals(expectedResult, fixture.toString());
+        String expectedResult = "StreamInputPacketIndexEntry [offsetBytes=0, timestampBegin=0, timestampEnd=0]";
+        StructDeclaration sd = new StructDeclaration(8);
+        sd.addField("timestamp_begin", IntegerDeclaration.INT_32B_DECL);
+        sd.addField("timestamp_end", IntegerDeclaration.INT_32B_DECL);
+        @SuppressWarnings("null")
+        BitBuffer bb = new BitBuffer(ByteBuffer.allocate(128));
+
+        StructDefinition sdef = sd.createDefinition(null, LexicalScope.PACKET_HEADER, bb);
+        assertEquals(expectedResult, new StreamInputPacketIndexEntry(0, sdef, 10000, 0).toString());
     }
 }

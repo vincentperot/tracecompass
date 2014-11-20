@@ -11,11 +11,16 @@
 
 package org.eclipse.tracecompass.ctf.core.tests.trace;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
+import java.nio.ByteBuffer;
 import java.util.ListIterator;
 
+import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
+import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
+import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
+import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
+import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndex;
 import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
@@ -33,7 +38,6 @@ import org.junit.Test;
 public class CTFStreamInputPacketIndexTest {
 
     private StreamInputPacketIndex fixture;
-    private StreamInputPacketIndexEntry entry;
 
     /**
      * Perform pre-test initialization.
@@ -43,8 +47,7 @@ public class CTFStreamInputPacketIndexTest {
     @Before
     public void setUp() throws CTFReaderException {
         fixture = new StreamInputPacketIndex();
-        fixture.append(new StreamInputPacketIndexEntry(1L));
-        entry = new StreamInputPacketIndexEntry(1L);
+        fixture.append(new StreamInputPacketIndexEntry(1L, 0L));
     }
 
     /**
@@ -55,47 +58,38 @@ public class CTFStreamInputPacketIndexTest {
         assertNotNull(fixture);
     }
 
-    /**
-     * Run the void addEntry(StreamInputPacketIndexEntry) method test, by
-     * specifying only 1 parameter to the entry.
-     *
-     * @throws CTFReaderException
-     */
     @Test
-    public void testAddEntry_1param() throws CTFReaderException {
-        entry.setPacketSizeBits(0);
-        assertNotNull(entry);
-        fixture.append(entry);
+    public void testAppend() throws CTFReaderException {
+        StreamInputPacketIndex red = new StreamInputPacketIndex();
+        StructDeclaration sDec = createPacketHeader();
+        for (int i = 0; i < 100; i += 10) {
+            StructDefinition sdef = createStructDef(sDec, i * 10, i * 10 + 5);
+            assertTrue(red.append(new StreamInputPacketIndexEntry(i, sdef, 0, 0)));
+        }
+        StreamInputPacketIndexEntry element = red.getElement(5);
+        assertEquals(502L, element.lookupAttribute("timestamp_middle"));
+        assertTrue(element.includes(501));
+        assertFalse(element.includes(506));
+        assertFalse(element.includes(409));
     }
 
-    /**
-     * Run the void addEntry(StreamInputPacketIndexEntry) method test by
-     * specifying 2 parameters to the entry.
-     *
-     * @throws CTFReaderException
-     */
-    @Test
-    public void testAddEntry_2params() throws CTFReaderException {
-        entry.setPacketSizeBits(1);
-        entry.setContentSizeBits(0);
-        assertNotNull(entry);
-        fixture.append(entry);
+    private static StructDefinition createStructDef(StructDeclaration sDec, long tsStart, long tsEnd) throws CTFReaderException {
+        ByteBuffer bb = ByteBuffer.allocate(Long.SIZE * 3);
+        assertNotNull(bb);
+        BitBuffer bib = new BitBuffer(bb);
+        bb.putLong(tsStart);
+        bb.putLong(tsEnd);
+        bb.putLong((tsStart + tsEnd) / 2);
+        StructDefinition sdef = sDec.createDefinition(null, LexicalScope.EVENT, bib);
+        return sdef;
     }
 
-    /**
-     * Run the void addEntry(StreamInputPacketIndexEntry) method test, by
-     * specifying all 4 parameters to the entry.
-     *
-     * @throws CTFReaderException
-     */
-    @Test
-    public void testAddEntry_4params() throws CTFReaderException {
-        entry.setTimestampBegin(1L);
-        entry.setPacketSizeBits(1);
-        entry.setContentSizeBits(1);
-        entry.setTimestampEnd(1L);
-        assertNotNull(entry);
-        fixture.append(entry);
+    private static StructDeclaration createPacketHeader() {
+        StructDeclaration sDec = new StructDeclaration(64);
+        sDec.addField("timestamp_begin", IntegerDeclaration.UINT_64B_DECL);
+        sDec.addField("timestamp_end", IntegerDeclaration.UINT_64B_DECL);
+        sDec.addField("timestamp_middle", IntegerDeclaration.UINT_64B_DECL);
+        return sDec;
     }
 
     /**
