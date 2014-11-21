@@ -1,0 +1,10 @@
+Verified+1: Hudson CI
+Code-Review+2: Marc-Andre Laperle <marc-andre.laperle@ericsson.com>
+Verified+1: Marc-Andre Laperle <marc-andre.laperle@ericsson.com>
+Code-Review+2: Genevieve Bastien <gbastien+lttng@versatic.net>
+Verified+1: Genevieve Bastien <gbastien+lttng@versatic.net>
+Submitted-by: Genevieve Bastien <gbastien+lttng@versatic.net>
+Submitted-at: Fri, 21 Nov 2014 11:27:17 -0500
+Reviewed-on: https://git.eclipse.org/r/36343
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
