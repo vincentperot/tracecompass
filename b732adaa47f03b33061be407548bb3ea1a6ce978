@@ -1,0 +1,10 @@
+Verified+1: Hudson CI
+Code-Review+1: Markus Schorn <markus.schorn@windriver.com>
+Code-Review+1: Marc-Andre Laperle <marc-andre.laperle@ericsson.com>
+Verified+1: Marc-Andre Laperle <marc-andre.laperle@ericsson.com>
+Code-Review+2: Bernd Hufmann <bernd.hufmann@ericsson.com>
+Submitted-by: Bernd Hufmann <bernd.hufmann@ericsson.com>
+Submitted-at: Fri, 21 Nov 2014 06:26:54 -0500
+Reviewed-on: https://git.eclipse.org/r/36632
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
