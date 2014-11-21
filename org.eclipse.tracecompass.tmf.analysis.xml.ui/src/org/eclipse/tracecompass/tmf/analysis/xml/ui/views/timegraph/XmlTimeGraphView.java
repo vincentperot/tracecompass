@@ -423,7 +423,7 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
                 entryStart, entryEnd, EntryDisplayType.DISPLAY, ss, entryElement);
     }
 
-    private void buildStatusEvent(XmlEntry traceEntry, IProgressMonitor monitor, long start, long end) {
+    private void buildStatusEvent(XmlEntry traceEntry, @NonNull IProgressMonitor monitor, long start, long end) {
         long resolution = (end - start) / getDisplayWidth();
         long startTime = Math.max(start, traceEntry.getStartTime());
         long endTime = Math.min(end + 1, traceEntry.getEndTime());
@@ -519,7 +519,9 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
     @Override
     protected List<ILinkEvent> getLinkList(long startTime, long endTime, long resolution, IProgressMonitor monitor) {
         /* TODO: not implemented yet, need XML to go along */
-        return Collections.EMPTY_LIST;
+        @SuppressWarnings("null")
+        @NonNull List<ILinkEvent> list = Collections.EMPTY_LIST;
+        return list;
     }
 
 }
