@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.ctf.core.event;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.ctf.core.ITsdlWriter;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
@@ -27,7 +28,7 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
  * @author Matthew Khouzam
  * @since 2.0
  */
-public interface IEventDeclaration {
+public interface IEventDeclaration extends ITsdlWriter {
 
     /**
      * Creates an instance of EventDefinition corresponding to this declaration.

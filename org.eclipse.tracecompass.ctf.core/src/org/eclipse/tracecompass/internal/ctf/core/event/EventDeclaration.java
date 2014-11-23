@@ -249,7 +249,7 @@ public class EventDeclaration implements IEventDeclaration {
      * @return is the id set?
      */
     public boolean idIsSet() {
-        return (fId  != UNSET_EVENT_ID);
+        return (fId != UNSET_EVENT_ID);
     }
 
     /**
@@ -297,6 +297,23 @@ public class EventDeclaration implements IEventDeclaration {
      */
     public void setCustomAttribute(String key, String value) {
         fCustomAttributes.put(key, value);
+    }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nevent {"); //$NON-NLS-1$
+        sb.append("\n\tname = ").append(fName).append(';'); //$NON-NLS-1$
+        if (fId != UNSET_EVENT_ID) {
+            sb.append("\n\tid = ").append(fId).append(';'); //$NON-NLS-1$
+        }
+        if (fStream.isIdSet()) {
+            sb.append("\n\tstream_id = ").append(fStream.getId()).append(';'); //$NON-NLS-1$
+        }
+        if (fFields != null) {
+            sb.append("\n\tfields := ").append(fFields.getTSDL()); //$NON-NLS-1$
+        }
+        return null;
     }
 
     // ------------------------------------------------------------------------
