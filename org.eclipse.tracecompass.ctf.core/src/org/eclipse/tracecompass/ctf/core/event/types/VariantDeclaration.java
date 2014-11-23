@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
@@ -184,6 +185,21 @@ public class VariantDeclaration extends Declaration {
     public String toString() {
         /* Only used for debugging */
         return "[declaration] variant[" + Integer.toHexString(hashCode()) + ']'; //$NON-NLS-1$
+    }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("variant <").append(fTag).append("> {\n"); //$NON-NLS-1$ //$NON-NLS-2$
+        for (Entry<String, IDeclaration> entry : fFields.entrySet()) {
+            sb.append('\n').append('\t')
+                    .append(entry.getValue().getTSDL()).append(' ').
+                    append(entry.getKey()).append(';');
+        }
+        sb.append('}');
+
+        return sb.toString();
+
     }
 
 }

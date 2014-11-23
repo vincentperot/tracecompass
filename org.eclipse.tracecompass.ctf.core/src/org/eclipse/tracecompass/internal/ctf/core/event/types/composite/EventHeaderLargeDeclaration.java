@@ -203,4 +203,20 @@ public class EventHeaderLargeDeclaration extends Declaration implements IEventHe
         return true;
     }
 
+    @Override
+    public String getTSDL() {
+        return  "struct event_header_compact {\n" //$NON-NLS-1$
+                +"\tenum : uint16_t { compact = 0 ... 65534, extended = 65535 } id;\n" //$NON-NLS-1$
+                +"\tvariant <id> {\n" //$NON-NLS-1$
+                + "\t\tstruct {\n" //$NON-NLS-1$
+                + "\t\t\tuint32_clock_monotonic_t timestamp;\n" //$NON-NLS-1$
+                + "\t\t} compact;\n" //$NON-NLS-1$
+                + "\t\tstruct {\n" //$NON-NLS-1$
+                + "\t\t\tuint32_t id;\n" //$NON-NLS-1$
+                + "\t\t\tuint64_clock_monotonic_t timestamp;\n" //$NON-NLS-1$
+                + "\t\t} extended;\n" //$NON-NLS-1$
+                + "\t} v;" //$NON-NLS-1$
+                + "}align(8);\n"; //$NON-NLS-1$
+    }
+
 }

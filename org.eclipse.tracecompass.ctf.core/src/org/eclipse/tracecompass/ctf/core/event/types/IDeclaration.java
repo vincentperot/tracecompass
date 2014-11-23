@@ -13,6 +13,7 @@
 package org.eclipse.tracecompass.ctf.core.event.types;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.ctf.core.ITsdlWriter;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
@@ -31,7 +32,7 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
  * @author Matthew Khouzam
  * @author Simon Marchi
  */
-public interface IDeclaration {
+public interface IDeclaration extends ITsdlWriter{
 
     /**
      * Create a definition from this declaration

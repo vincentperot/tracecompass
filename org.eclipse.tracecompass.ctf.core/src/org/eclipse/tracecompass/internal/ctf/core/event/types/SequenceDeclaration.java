@@ -149,4 +149,11 @@ public class SequenceDeclaration extends CompoundDeclaration {
         return Integer.MAX_VALUE;
     }
 
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(fElemType.getTSDL()).append('[').append(fLengthName).append(']');
+        return sb.toString();
+    }
+
 }

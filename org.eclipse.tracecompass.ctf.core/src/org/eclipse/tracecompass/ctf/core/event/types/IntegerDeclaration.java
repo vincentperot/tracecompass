@@ -471,4 +471,33 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
         return bits;
     }
 
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("integer {") //$NON-NLS-1$
+        .append(" size = ") //$NON-NLS-1$
+        .append(fLength)
+                .append("; base = ") //$NON-NLS-1$
+                .append(fBase)
+
+                .append("; align = ") //$NON-NLS-1$
+                .append(fAlignment)
+                .append("; byte_order = ") //$NON-NLS-1$
+                .append(fByteOrder.equals(ByteOrder.BIG_ENDIAN) ? "be" : "le") //$NON-NLS-1$ //$NON-NLS-2$
+                .append("; encoding = ") //$NON-NLS-1$
+                .append(fEncoding.toString());
+        if (!fClock.isEmpty()) {
+            sb.append("; map = ") //$NON-NLS-1$
+                    .append(fClock);
+        }
+        sb.append("; "); //$NON-NLS-1$
+        sb.append('}');
+        String retVal = sb.toString();
+        if(retVal == null)
+         {
+            throw new IllegalStateException("Could not allocate the memory for an integer tsdl conversion"); //$NON-NLS-1$
+        }
+        return retVal;
+    }
+
 }

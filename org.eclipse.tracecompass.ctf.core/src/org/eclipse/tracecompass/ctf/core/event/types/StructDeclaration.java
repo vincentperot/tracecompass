@@ -15,6 +15,7 @@ package org.eclipse.tracecompass.ctf.core.event.types;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -256,6 +257,20 @@ public class StructDeclaration extends Declaration {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("struct {\n"); //$NON-NLS-1$
+        for (Entry<String, IDeclaration> entry : fFieldMap.entrySet()) {
+            sb.append('\n').append('\t')
+                    .append(entry.getValue().getTSDL()).append(' ').
+                    append(entry.getKey()).append(';');
+        }
+        sb.append("} allign(").append(fMaxAlign).append(')'); //$NON-NLS-1$
+
+        return sb.toString();
     }
 
 }

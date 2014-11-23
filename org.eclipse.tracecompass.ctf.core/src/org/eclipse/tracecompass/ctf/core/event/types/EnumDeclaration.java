@@ -12,6 +12,7 @@
 
 package org.eclipse.tracecompass.ctf.core.event.types;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,6 +22,8 @@ import java.util.Set;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
+
+import com.google.common.base.Joiner;
 
 /**
  * A CTF enum declaration.
@@ -216,6 +219,27 @@ public final class EnumDeclaration extends Declaration implements ISimpleDatatyp
     public String toString() {
         /* Only used for debugging */
         return "[declaration] enum[" + Integer.toHexString(hashCode()) + ']'; //$NON-NLS-1$
+    }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("enum : "); //$NON-NLS-1$
+        sb.append(fContainerType.getTSDL());
+        sb.append('{');
+        Joiner j = Joiner.on(',').skipNulls();
+        List<String> ranges = new ArrayList<>();
+        for(LabelAndRange range : fTable.ranges){
+            StringBuilder rangeString = new StringBuilder();
+            rangeString.append(range.fLabel).append('=').append(range.low);
+            if(range.high!=range.low){
+                rangeString.append(" ... ").append(range.high); //$NON-NLS-1$
+            }
+            ranges.add(rangeString.toString());
+        }
+        sb.append(j.join(ranges));
+        sb.append('}');
+        return null;
     }
 
 }

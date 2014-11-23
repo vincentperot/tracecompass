@@ -174,4 +174,21 @@ public final class FloatDeclaration extends Declaration implements ISimpleDataty
         ret *= expPow;
         return ret;
     }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("float {") //$NON-NLS-1$
+        .append(" exp_dig = ") //$NON-NLS-1$
+        .append(fExponent)
+        .append("; mant_dig = ") //$NON-NLS-1$
+        .append(fMantissa)
+        .append("; align = ") //$NON-NLS-1$
+        .append(fAlignement)
+        .append("; byte_order = ") //$NON-NLS-1$
+        .append(fByteOrder.equals(ByteOrder.BIG_ENDIAN) ? "be" : "le") //$NON-NLS-1$ //$NON-NLS-2$
+        .append("; "); //$NON-NLS-1$
+        sb.append('}');
+        return sb.toString();
+    }
 }

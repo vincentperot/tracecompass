@@ -134,7 +134,8 @@ public final class ArrayDeclaration extends CompoundDeclaration {
             definitions.add(fElemType.createDefinition(definitionScope, name, input));
         }
         @SuppressWarnings("null")
-        @NonNull ImmutableList<Definition> ret = definitions.build();
+        @NonNull
+        ImmutableList<Definition> ret = definitions.build();
         return ret;
     }
 
@@ -142,6 +143,13 @@ public final class ArrayDeclaration extends CompoundDeclaration {
     public int getMaximumSize() {
         long val = (long) fLength * fElemType.getMaximumSize();
         return (int) Math.min(Integer.MAX_VALUE, val);
+    }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(fElemType.getTSDL()).append('[').append(fLength).append(']');
+        return sb.toString();
     }
 
 }

@@ -111,4 +111,11 @@ public class StringDeclaration extends Declaration {
         return "[declaration] string[" + Integer.toHexString(hashCode()) + ']'; //$NON-NLS-1$
     }
 
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("string { encoding = " ).append(fEncoding.toString() ).append(' ').append('}'); //$NON-NLS-1$
+        return sb.toString();
+    }
+
 }
