@@ -62,6 +62,11 @@ public final class ByteArrayDefinition extends AbstractArrayDefinition {
     }
 
     @Override
+    public int getLength() {
+        return fContent.length;
+    }
+
+    @Override
     public synchronized List<Definition> getDefinitions() {
         List<Definition> defs = fDefs;
         if (defs == null) {
@@ -83,18 +88,34 @@ public final class ByteArrayDefinition extends AbstractArrayDefinition {
 
     @Override
     public String toString() {
-        /*
-         * the string is a byte array and may contain more than the string plus
-         * a null char, this will truncate it back to a null char
-         */
-        int pos = -1;
-        for (int i = 0; i < fContent.length; i++) {
-            if (fContent[i] == 0) {
-                pos = i;
-                break;
+        if (((CompoundDeclaration) getDeclaration()).isString()) {
+            /*
+             * the string is a byte array and may contain more than the string
+             * plus a null char, this will truncate it back to a null char
+             */
+            int pos = -1;
+            for (int i = 0; i < fContent.length; i++) {
+                if (fContent[i] == 0) {
+                    pos = i;
+                    break;
+                }
             }
+            byte[] bytes = (pos != -1) ? (Arrays.copyOf(fContent, pos)) : fContent;
+            return new String(bytes);
         }
-        byte[] bytes = (pos != -1) ? (Arrays.copyOf(fContent, pos)) : fContent;
-        return new String(bytes);
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for( int i = 0 ; i < fContent.length; i++){
+            if( i != 0) {
+                b.append(", "); //$NON-NLS-1$
+            }
+            b.append(fContent[i]);
+        }
+        b.append(']');
+        String string = b.toString();
+        if( string == null){
+            throw new IllegalStateException("toString returned null"); //$NON-NLS-1$
+        }
+        return string;
     }
 }

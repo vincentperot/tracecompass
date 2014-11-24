@@ -102,9 +102,13 @@ public final class ArrayDeclaration extends CompoundDeclaration {
     public AbstractArrayDefinition createDefinition(IDefinitionScope definitionScope,
             @NonNull String fieldName, BitBuffer input) throws CTFReaderException {
         alignRead(input);
-        if (isString()) {
+        if (isAlignedBytes()) {
             byte[] data = new byte[fLength];
+            if (input.getByteBuffer().remaining() < fLength) {
+                throw new CTFReaderException("Buffer underflow"); //$NON-NLS-1$
+            }
             input.get(data);
+
             return new ByteArrayDefinition(this, definitionScope, fieldName, data);
         }
         List<Definition> definitions = read(input, definitionScope, fieldName);
