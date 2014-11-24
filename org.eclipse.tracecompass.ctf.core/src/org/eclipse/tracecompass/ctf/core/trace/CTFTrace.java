@@ -29,10 +29,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import org.eclipse.tracecompass.ctf.core.ITsdlWriter;
 import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
 import org.eclipse.tracecompass.ctf.core.event.CTFClock;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
@@ -60,7 +62,7 @@ import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
  * @author Matthew Khouzam
  * @version $Revision: 1.0 $
  */
-public class CTFTrace implements IDefinitionScope {
+public class CTFTrace implements IDefinitionScope, ITsdlWriter {
 
     @Override
     public String toString() {
@@ -962,6 +964,43 @@ public class CTFTrace implements IDefinitionScope {
             fStreams.put(id, stream);
         }
         stream.addInput(new CTFStreamInput(stream, file));
+    }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("/* CTF 1.8 */"); //$NON-NLS-1$
+        sb.append("trace {"); //$NON-NLS-1$
+        sb.append("\n\tmajor = ").append(fMajor).append(';'); //$NON-NLS-1$
+        sb.append("\n\tminor = ").append(fMinor).append(';'); //$NON-NLS-1$
+        sb.append("\n\tuuid = \"").append(fUuid.toString()).append("\";"); //$NON-NLS-1$ //$NON-NLS-2$
+        sb.append("\n\tbyte_order = ").append(fByteOrder.equals(ByteOrder.BIG_ENDIAN) ? "be" : "le").append(';'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        sb.append("\n\tpacket.header := struct {" + //$NON-NLS-1$
+                "\n\t\tuint32_t magic;" + //$NON-NLS-1$
+                "\n\t\tuint8_t uuid[16];" + //$NON-NLS-1$
+                "\n\t};"); //$NON-NLS-1$
+        sb.append('\n');
+        if(!fEnvironment.isEmpty()){
+            sb.append("env = {");
+            for( Entry<String, String> env : fEnvironment.entrySet()){
+                sb.append('\n').append('\t').append(env.getValue()).append(" = ").append(env.getValue()).append(';');
+            }
+            sb.append('\n').append('}');
+        }
+        if(!fClocks.isEmpty()){
+            for(Entry<String, CTFClock> clockElem : fClocks.entrySet()){
+                sb.append('\n').append(clockElem.getValue().getTSDL()).append(';');
+            }
+        }
+        for( Entry<Long, CTFStream> stream : fStreams.entrySet()){
+            sb.append('\n').append(stream.getValue().getTSDL());
+        }
+        for(Entry<Long, CTFStream> entry : fStreams.entrySet()){
+            for(IEventDeclaration event  : entry.getValue().getEventDeclarations()){
+                sb.append('\n').append(event.getTSDL()).append(';');
+            }
+        }
+        return sb.toString();
     }
 }
 
