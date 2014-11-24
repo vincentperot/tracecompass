@@ -14,11 +14,14 @@ package org.eclipse.tracecompass.ctf.core.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.eclipse.tracecompass.ctf.core.ITsdlWriter;
 
 /**
  * Clock description used in CTF traces
  */
-public class CTFClock {
+public class CTFClock implements ITsdlWriter {
 
     private static final long ONE_BILLION_L = 1000000000L;
     private static final double ONE_BILLION_D = 1000000000.0;
@@ -128,6 +131,17 @@ public class CTFClock {
      */
     public boolean isClockScaled() {
         return fIsScaled;
+    }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb= new StringBuilder();
+        sb.append("clock = {"); //$NON-NLS-1$
+        for(Entry<String, Object> entry : fProperties.entrySet()){
+            sb.append("\n\t").append(entry.getKey()).append(" = " ).append(entry.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        sb.append('\n').append('}');
+        return sb.toString();
     }
 
 }
