@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.CompoundDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.Definition;
 import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
@@ -133,25 +134,17 @@ public abstract class CtfTmfEventField extends TmfEventField {
             Collection<Definition> definitions = arrayDef.getDefinitions();
             elemType = arrDecl.getElementType();
             if (elemType instanceof IntegerDeclaration) {
-                /* Array of integers => CTFIntegerArrayField, unless it's a CTFStringField */
+                /*
+                 * Array of integers => CTFIntegerArrayField, unless it's a
+                 * CTFStringField
+                 */
                 IntegerDeclaration elemIntType = (IntegerDeclaration) elemType;
                 /* Are the integers characters and encoded? */
                 if (elemIntType.isCharacter()) {
                     /* it's a CTFStringField */
                     field = new CTFStringField(fieldName, arrayDef.toString());
                 } else {
-                    /* it's a CTFIntegerArrayField */
-                    long[] values = new long[arrayDef.getLength()];
-                    for (int i = 0; i < arrayDef.getLength(); i++) {
-                        IDefinition elem = arrayDef.getDefinitions().get(i);
-                        if (elem == null) {
-                            break;
-                        }
-                        values[i] = ((IntegerDefinition) elem).getValue();
-                    }
-                    field = new CTFIntegerArrayField(fieldName, values,
-                            elemIntType.getBase(),
-                            elemIntType.isSigned());
+                    field = createIntArrayField(fieldName, arrayDef);
                 }
             } else {
                 /* Arrays of elements of any other type */
@@ -168,8 +161,20 @@ public abstract class CtfTmfEventField extends TmfEventField {
                 field = new CTFArrayField(fieldName, elements);
             }
         } else if (fieldDef instanceof ByteArrayDefinition) {
-            /* This is an array of ascii bytes, a.k.a. a String! */
-            field = new CTFStringField(fieldName, fieldDef.toString());
+            ByteArrayDefinition byteArrayDefinition = (ByteArrayDefinition) fieldDef;
+            IDeclaration dec = fieldDef.getDeclaration();
+            if (dec instanceof CompoundDeclaration) {
+                CompoundDeclaration compoundDeclaration = (CompoundDeclaration) dec;
+                if (compoundDeclaration.isString()) {
+                    /* This is an array of ascii bytes, a.k.a. a String! */
+                    field = new CTFStringField(fieldName, byteArrayDefinition.toString());
+                } else {
+                    field = createIntArrayField(fieldName, byteArrayDefinition);
+                }
+
+            } else {
+                field = new CTFStringField(fieldName, Messages.CtfTmfEventField_UnsupportedType + fieldDef.getClass().toString());
+            }
 
         } else if (fieldDef instanceof ICompositeDefinition) {
             ICompositeDefinition strDef = (ICompositeDefinition) fieldDef;
@@ -201,6 +206,25 @@ public abstract class CtfTmfEventField extends TmfEventField {
              */
             field = new CTFStringField(fieldName, Messages.CtfTmfEventField_UnsupportedType + fieldDef.getClass().toString());
         }
+        return field;
+    }
+
+    private static CtfTmfEventField createIntArrayField(String fieldName, AbstractArrayDefinition arrayDef) {
+        CtfTmfEventField field;
+        /* it's a CTFIntegerArrayField */
+        int size = arrayDef.getDefinitions().size();
+        long[] values = new long[size];
+        for (int i = 0; i < size; i++) {
+            IDefinition elem = arrayDef.getDefinitions().get(i);
+            if (elem == null) {
+                break;
+            }
+            values[i] = ((IntegerDefinition) elem).getValue();
+        }
+        IntegerDeclaration elemIntType = (IntegerDeclaration) ((CompoundDeclaration) arrayDef.getDeclaration()).getElementType();
+        field = new CTFIntegerArrayField(fieldName, values,
+                elemIntType.getBase(),
+                elemIntType.isSigned());
         return field;
     }
 
