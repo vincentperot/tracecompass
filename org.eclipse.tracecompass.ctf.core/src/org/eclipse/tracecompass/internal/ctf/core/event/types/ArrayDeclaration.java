@@ -102,7 +102,7 @@ public final class ArrayDeclaration extends CompoundDeclaration {
     public AbstractArrayDefinition createDefinition(IDefinitionScope definitionScope,
             @NonNull String fieldName, BitBuffer input) throws CTFReaderException {
         alignRead(input);
-        if (isString()) {
+        if (isAlignedBytes()) {
             byte[] data = new byte[fLength];
             input.get(data);
             return new ByteArrayDefinition(this, definitionScope, fieldName, data);
