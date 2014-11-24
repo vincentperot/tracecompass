@@ -12,7 +12,6 @@
 
 package org.eclipse.tracecompass.ctf.core.event.types;
 
-
 /**
  * Parent of sequences and arrays
  *
@@ -40,11 +39,27 @@ public abstract class CompoundDeclaration extends Declaration {
      * @return true if this array is in fact an UTF-8 string. false if it's a
      *         "normal" array of generic Definition's.
      */
-    public boolean isString(){
+    public boolean isString() {
         IDeclaration elementType = getElementType();
         if (elementType instanceof IntegerDeclaration) {
             IntegerDeclaration elemInt = (IntegerDeclaration) elementType;
             return elemInt.isCharacter();
+        }
+        return false;
+    }
+
+    /**
+     * Sometimes, strings are encoded as an array of 1-byte integers (each one
+     * being an UTF-8 byte).
+     *
+     * @return true if this array is in fact an UTF-8 string. false if it's a
+     *         "normal" array of generic Definition's.
+     */
+    public boolean isAlignedBytes() {
+        IDeclaration elementType = getElementType();
+        if (elementType instanceof IntegerDeclaration) {
+            IntegerDeclaration elemInt = (IntegerDeclaration) elementType;
+            return (elemInt.getLength() == 8) && ((getAlignment() & 0x03) == 0);
         }
         return false;
     }
