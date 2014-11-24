@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.ctf.core.ITsdlWriter;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IEventHeaderDeclaration;
@@ -36,7 +37,7 @@ import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.Pars
  *
  * @since 3.0
  */
-public class CTFStream {
+public class CTFStream implements ITsdlWriter{
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -372,6 +373,26 @@ public class CTFStream {
      */
     public void addInput(CTFStreamInput input) {
         fInputs.add(input);
+    }
+
+    @Override
+    public String getTSDL() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("stream {"); //$NON-NLS-1$
+        if(isIdSet()){
+            sb.append("\n\tid = ").append(fId).append(';'); //$NON-NLS-1$
+        }
+        if(fEventHeaderDecl != null){
+            sb.append("\n\tevent.header := ").append(fEventHeaderDecl.getTSDL()).append(';'); //$NON-NLS-1$
+        }
+        if(fEventContextDecl != null){
+            sb.append("\n\tevent.context := ").append(fEventContextDecl.getTSDL()).append(';'); //$NON-NLS-1$
+        }
+        if(fTrace.getPacketHeader()!= null){
+            sb.append("\n\tpacket.context := ").append(fTrace.getPacketHeader().getTSDL()).append(';'); //$NON-NLS-1$
+        }
+        sb.append("}"); //$NON-NLS-1$
+        return sb.toString();
     }
 
     @Override
