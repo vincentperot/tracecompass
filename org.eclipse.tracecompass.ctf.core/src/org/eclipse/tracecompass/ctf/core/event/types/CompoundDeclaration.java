@@ -12,7 +12,6 @@
 
 package org.eclipse.tracecompass.ctf.core.event.types;
 
-
 /**
  * Parent of sequences and arrays
  *
@@ -20,6 +19,9 @@ package org.eclipse.tracecompass.ctf.core.event.types;
  * @since 3.1
  */
 public abstract class CompoundDeclaration extends Declaration {
+
+    private static final int BIT_MASK = 0x03;
+    private static final int BITS_PER_BYTE = 8;
 
     /**
      * Get the element type
@@ -40,11 +42,26 @@ public abstract class CompoundDeclaration extends Declaration {
      * @return true if this array is in fact an UTF-8 string. false if it's a
      *         "normal" array of generic Definition's.
      */
-    public boolean isString(){
+    public boolean isString() {
         IDeclaration elementType = getElementType();
         if (elementType instanceof IntegerDeclaration) {
             IntegerDeclaration elemInt = (IntegerDeclaration) elementType;
             return elemInt.isCharacter();
+        }
+        return false;
+    }
+
+    /**
+     * If an array contains 8 bit aligned 8 bit ints, it can be bulk read.
+     *
+     * @return true if this array 1 byte aligned. false if it's a "normal" array
+     *         of generic Definition's.
+     */
+    public boolean isAlignedBytes() {
+        IDeclaration elementType = getElementType();
+        if (elementType instanceof IntegerDeclaration) {
+            IntegerDeclaration elemInt = (IntegerDeclaration) elementType;
+            return (elemInt.getLength() == BITS_PER_BYTE) && ((getAlignment() & BIT_MASK) == 0);
         }
         return false;
     }
