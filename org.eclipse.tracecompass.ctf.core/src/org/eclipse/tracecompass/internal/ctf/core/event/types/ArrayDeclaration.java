@@ -12,6 +12,7 @@
 
 package org.eclipse.tracecompass.internal.ctf.core.event.types;
 
+import java.nio.BufferUnderflowException;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -102,9 +103,13 @@ public final class ArrayDeclaration extends CompoundDeclaration {
     public AbstractArrayDefinition createDefinition(IDefinitionScope definitionScope,
             @NonNull String fieldName, BitBuffer input) throws CTFReaderException {
         alignRead(input);
-        if (isString()) {
+        if (isAlignedBytes()) {
             byte[] data = new byte[fLength];
-            input.get(data);
+            try {
+                input.get(data);
+            } catch (BufferUnderflowException e) {
+                throw new CTFReaderException(e.getMessage(), e);
+            }
             return new ByteArrayDefinition(this, definitionScope, fieldName, data);
         }
         List<Definition> definitions = read(input, definitionScope, fieldName);
@@ -134,7 +139,8 @@ public final class ArrayDeclaration extends CompoundDeclaration {
             definitions.add(fElemType.createDefinition(definitionScope, name, input));
         }
         @SuppressWarnings("null")
-        @NonNull ImmutableList<Definition> ret = definitions.build();
+        @NonNull
+        ImmutableList<Definition> ret = definitions.build();
         return ret;
     }
 
