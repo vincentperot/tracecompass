@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
+import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.Definition;
 import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.FloatDefinition;
@@ -33,7 +34,6 @@ import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndex;
 import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
 
@@ -338,8 +338,8 @@ public class CTFStreamInput implements IDefinitionScope {
         /*
          * Check the trace UUID
          */
-        ArrayDefinition uuidDef =
-                (ArrayDefinition) tracePacketHeaderDef.lookupDefinition("uuid"); //$NON-NLS-1$
+        AbstractArrayDefinition uuidDef =
+                (AbstractArrayDefinition) tracePacketHeaderDef.lookupDefinition("uuid"); //$NON-NLS-1$
         if (uuidDef != null) {
             UUID uuid = Utils.getUUIDfromDefinition(uuidDef);
 
