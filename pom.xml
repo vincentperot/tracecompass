@@ -40,7 +40,7 @@
 
 <properties>
   <base.test.vmargs>-Xms256m -Xmx1024m -XX:MaxPermSize=256m</base.test.vmargs>
-  <tycho-version>0.21.0</tycho-version>
+  <tycho-version>0.22.0</tycho-version>
   <target-platform>tracecompass-e4.4</target-platform>
   <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
   <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -57,6 +57,10 @@
   <pluginRepository>
     <id>tycho-snapshots</id>
     <url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</url>
+  </pluginRepository>
+  <pluginRepository>
+    <id>tycho-staged</id>
+    <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1020/</url>
   </pluginRepository>
 </pluginRepositories>
 
@@ -329,10 +333,7 @@
           <artifactId>tycho-compiler-plugin</artifactId>
           <version>${tycho-version}</version>
           <configuration>
-            <encoding>UTF-8</encoding>
-            <compilerArguments>
-              <properties>${project.basedir}/.settings/org.eclipse.jdt.core.prefs</properties>
-            </compilerArguments>
+            <useProjectSettings>true</useProjectSettings>
           </configuration>
 	 </plugin>
 	<plugin>
