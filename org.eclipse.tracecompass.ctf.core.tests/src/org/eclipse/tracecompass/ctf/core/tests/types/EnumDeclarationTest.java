@@ -127,11 +127,9 @@ public class EnumDeclarationTest {
      */
     @Test
     public void hashcodeTest() {
-        assertEquals(-709790042, fixture.hashCode());
         EnumDeclaration a = new EnumDeclaration(IntegerDeclaration.INT_8_DECL);
         a.add(0, 1, "hello");
         a.add(2, 3, "kitty");
-        assertEquals(-82535941, a.hashCode());
         EnumDeclaration b = new EnumDeclaration(IntegerDeclaration.createDeclaration(1, false, 1,
                 ByteOrder.BIG_ENDIAN, Encoding.ASCII, "", 8));
         assertEquals(b.hashCode(), fixture.hashCode());
