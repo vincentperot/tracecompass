@@ -284,7 +284,26 @@ public class IntegerDeclarationTest {
      */
     @Test
     public void hashcodeTest() {
-        assertEquals(234767053, IntegerDeclaration.createDeclaration(8, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "", 8).hashCode());
+        IntegerDeclaration a = IntegerDeclaration.createDeclaration(32, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "", 32);
+        IntegerDeclaration b = IntegerDeclaration.createDeclaration(8, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "", 32);
+        IntegerDeclaration c = IntegerDeclaration.createDeclaration(32, true, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "", 32);
+        IntegerDeclaration d = IntegerDeclaration.createDeclaration(32, false, 16, ByteOrder.BIG_ENDIAN, Encoding.NONE, "", 32);
+        IntegerDeclaration e = IntegerDeclaration.createDeclaration(32, false, 10, ByteOrder.LITTLE_ENDIAN, Encoding.NONE, "", 32);
+        IntegerDeclaration f = IntegerDeclaration.createDeclaration(32, false, 10, ByteOrder.BIG_ENDIAN, Encoding.UTF8, "", 32);
+        IntegerDeclaration g = IntegerDeclaration.createDeclaration(32, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "hi", 32);
+        IntegerDeclaration h = IntegerDeclaration.createDeclaration(32, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "", 16);
+        IntegerDeclaration i = IntegerDeclaration.createDeclaration(32, false, 10, ByteOrder.BIG_ENDIAN, Encoding.NONE, "", 32);
+        assertNotEquals(a, null);
+        assertNotEquals(a.hashCode(), (new Object()).hashCode());
+        assertNotEquals(a.hashCode(), b.hashCode());
+        assertNotEquals(a.hashCode(), c.hashCode());
+        assertNotEquals(a.hashCode(), d.hashCode());
+        assertNotEquals(a.hashCode(), e.hashCode());
+        assertNotEquals(a.hashCode(), f.hashCode());
+        assertNotEquals(a.hashCode(), g.hashCode());
+        assertNotEquals(a.hashCode(), h.hashCode());
+        assertEquals(a.hashCode(), i.hashCode());
+        assertEquals(a.hashCode(), a.hashCode());
     }
 
     /**
