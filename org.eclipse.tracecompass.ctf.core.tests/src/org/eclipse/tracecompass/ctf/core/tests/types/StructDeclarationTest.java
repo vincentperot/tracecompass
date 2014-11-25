@@ -150,7 +150,6 @@ public class StructDeclarationTest {
         StructDeclaration a = new StructDeclaration(8);
         fixture.addField("hello", a);
         a.addField("Time", IntegerDeclaration.INT_32B_DECL);
-        assertEquals(-864123628, fixture.hashCode());
         StructDeclaration b = new StructDeclaration(8);
         StructDeclaration c = new StructDeclaration(8);
         b.addField("hello", c);
@@ -158,6 +157,7 @@ public class StructDeclarationTest {
         assertEquals(b.hashCode(), fixture.hashCode());
         c.addField("Space", IntegerDeclaration.INT_32L_DECL);
         assertNotEquals(b.hashCode(), fixture.hashCode());
+        assertEquals(-620389635, fixture.hashCode());
     }
 
     /**
