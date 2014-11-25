@@ -22,6 +22,8 @@ package org.eclipse.tracecompass.ctf.core.event;
  */
 public class CTFCallsite implements Comparable<CTFCallsite> {
 
+    private static final int INT_BITS = 32;
+
     private static final long MASK32 = 0x00000000ffffffffL;
 
     /**
@@ -126,9 +128,9 @@ public class CTFCallsite implements Comparable<CTFCallsite> {
          *
          * To get the low int: we bitwise and with the mask.
          */
-        long otherHigh = (other >> 32) & MASK32;
+        long otherHigh = (other >> INT_BITS) & MASK32;
         long otherLow = other & MASK32;
-        long ownHigh = (fIp >> 32) & MASK32;
+        long ownHigh = (fIp >> INT_BITS) & MASK32;
         long ownLow = fIp & MASK32;
         /* are the high values different, if so ignore the lower values */
         if (ownHigh > otherHigh) {
