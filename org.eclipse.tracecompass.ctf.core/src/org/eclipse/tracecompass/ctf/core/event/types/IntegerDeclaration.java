@@ -40,6 +40,14 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
     // Helpers
     // ------------------------------------------------------------------------
 
+    private static final int SIZE_64 = 64;
+    private static final int SIZE_32 = 32;
+    private static final int SIZE_27 = 27;
+    private static final int SIZE_16 = 16;
+    private static final int SIZE_8 = 8;
+    private static final int SIZE_5 = 5;
+    private static final int BYTE_ALIGN = 8;
+    private static final int BASE_10 = 10;
     /**
      * unsigned int 32 bits big endian
      *
@@ -174,9 +182,9 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
      */
     public static IntegerDeclaration createDeclaration(int len, boolean signed, int base,
             @Nullable ByteOrder byteOrder, Encoding encoding, String clock, long alignment) {
-        if (encoding.equals(Encoding.NONE) && (alignment == 8) && (clock.equals("")) && base == 10) { //$NON-NLS-1$
+        if (encoding.equals(Encoding.NONE) && (alignment == BYTE_ALIGN) && (clock.equals("")) && base == BASE_10) { //$NON-NLS-1$
             switch (len) {
-            case 5:
+            case SIZE_5:
                 if (!signed) {
                     if (byteOrder != null && byteOrder.equals(ByteOrder.BIG_ENDIAN)) {
                         return UINT_5B_DECL;
@@ -184,9 +192,9 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
                     return UINT_5L_DECL;
                 }
                 break;
-            case 8:
+            case SIZE_8:
                 return signed ? INT_8_DECL : UINT_8_DECL;
-            case 16:
+            case SIZE_16:
                 if (!signed) {
                     if (byteOrder != null && byteOrder.equals(ByteOrder.BIG_ENDIAN)) {
                         return UINT_16B_DECL;
@@ -194,7 +202,7 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
                     return UINT_16L_DECL;
                 }
                 break;
-            case 27:
+            case SIZE_27:
                 if (!signed) {
                     if (byteOrder != null && byteOrder.equals(ByteOrder.BIG_ENDIAN)) {
                         return UINT_27B_DECL;
@@ -202,7 +210,7 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
                     return UINT_27L_DECL;
                 }
                 break;
-            case 32:
+            case SIZE_32:
                 if (signed) {
                     if (byteOrder != null && byteOrder.equals(ByteOrder.BIG_ENDIAN)) {
                         return INT_32B_DECL;
@@ -213,7 +221,7 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
                     return UINT_32B_DECL;
                 }
                 return UINT_32L_DECL;
-            case 64:
+            case SIZE_64:
                 if (signed) {
                     if (byteOrder != null && byteOrder.equals(ByteOrder.BIG_ENDIAN)) {
                         return INT_64B_DECL;
@@ -269,7 +277,7 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
     }
 
     private IntegerDeclaration(int len, boolean signed, @Nullable ByteOrder byteOrder) {
-        this(len, signed, 10, byteOrder, Encoding.NONE, "", 8); //$NON-NLS-1$
+        this(len, signed, BASE_10, byteOrder, Encoding.NONE, "", BYTE_ALIGN); //$NON-NLS-1$
     }
 
     // ------------------------------------------------------------------------
@@ -318,7 +326,7 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
      * @return is the integer a char
      */
     public boolean isCharacter() {
-        return (fLength == 8) && (fEncoding != Encoding.NONE);
+        return (fLength == SIZE_8) && (fEncoding != Encoding.NONE);
     }
 
     /**
@@ -328,7 +336,7 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
      * @since 3.1
      */
     public boolean isUnsignedByte() {
-        return (fLength == 8) && (!fSigned);
+        return (fLength == SIZE_8) && (!fSigned);
     }
 
     /**
@@ -455,7 +463,7 @@ public class IntegerDeclaration extends Declaration implements ISimpleDatatypeDe
             input.setByteOrder(getByteOrder());
         }
 
-        if (length > 64) {
+        if (length > SIZE_64) {
             throw new CTFReaderException("Cannot read an integer with over 64 bits. Length given: " + length); //$NON-NLS-1$
         }
 
