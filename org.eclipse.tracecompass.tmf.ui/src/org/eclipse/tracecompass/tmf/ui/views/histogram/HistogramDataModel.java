@@ -22,6 +22,8 @@ package org.eclipse.tracecompass.tmf.ui.views.histogram;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
@@ -103,7 +105,8 @@ public class HistogramDataModel implements IHistogramDataModel {
     private int fLastBucket;
 
     // Timestamps
-    private long fFirstBucketTime; // could be negative when analyzing events with descending order!!!
+    private long fFirstBucketTime; // could be negative when analyzing events
+                                   // with descending order!!!
     private long fFirstEventTime;
     private long fEndTime;
     private long fSelectionBegin;
@@ -112,6 +115,8 @@ public class HistogramDataModel implements IHistogramDataModel {
 
     // Private listener lists
     private final ListenerList fModelListeners;
+
+    private final ReadWriteLock fRwLock = new ReentrantReadWriteLock();
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -155,12 +160,18 @@ public class HistogramDataModel implements IHistogramDataModel {
      * @since 2.0
      */
     public HistogramDataModel(long startTime, int nbBuckets) {
-        fFirstBucketTime = fFirstEventTime = fEndTime = startTime;
+        assignStartTime(startTime);
         fNbBuckets = nbBuckets;
         fBuckets = new HistogramBucket[nbBuckets];
         fLostEventsBuckets = new long[nbBuckets];
         fModelListeners = new ListenerList();
         clear();
+    }
+
+    private void assignStartTime(long startTime) {
+        fFirstBucketTime = startTime;
+        fFirstEventTime = startTime;
+        fEndTime = startTime;
     }
 
     /**
@@ -192,9 +203,9 @@ public class HistogramDataModel implements IHistogramDataModel {
         }
     }
 
-
     /**
      * Disposes the data model
+     *
      * @since 3.0
      */
     public void dispose() {
@@ -212,7 +223,10 @@ public class HistogramDataModel implements IHistogramDataModel {
      * @return number of events.
      */
     public long getNbEvents() {
-        return fNbEvents;
+        fRwLock.readLock().lock();
+        long nbEvents = fNbEvents;
+        fRwLock.readLock().unlock();
+        return nbEvents;
     }
 
     /**
@@ -248,12 +262,17 @@ public class HistogramDataModel implements IHistogramDataModel {
      * @return time of first event.
      */
     public long getStartTime() {
-        return fFirstEventTime;
+        fRwLock.readLock().lock();
+        long firstEventTime = fFirstEventTime;
+        fRwLock.readLock().unlock();
+        return firstEventTime;
     }
 
     /**
      * Sets the trace of this model.
-     * @param trace - a {@link ITmfTrace}
+     *
+     * @param trace
+     *            - a {@link ITmfTrace}
      * @since 3.0
      */
     public void setTrace(ITmfTrace trace) {
@@ -271,6 +290,7 @@ public class HistogramDataModel implements IHistogramDataModel {
 
     /**
      * Gets the trace of this model.
+     *
      * @return a {@link ITmfTrace}
      * @since 3.0
      */
@@ -280,6 +300,7 @@ public class HistogramDataModel implements IHistogramDataModel {
 
     /**
      * Gets the traces names of this model.
+     *
      * @return an array of trace names
      * @since 3.0
      */
@@ -299,6 +320,7 @@ public class HistogramDataModel implements IHistogramDataModel {
 
     /**
      * Gets the number of traces of this model.
+     *
      * @return the number of traces of this model.
      * @since 3.0
      */
@@ -320,12 +342,10 @@ public class HistogramDataModel implements IHistogramDataModel {
      * @since 2.0
      */
     public void setTimeRange(long startTime, long endTime) {
-        fFirstBucketTime = fFirstEventTime = fEndTime = startTime;
+        assignStartTime(startTime);
         fBucketDuration = 1;
         updateEndTime();
-        while (endTime >= fTimeLimit) {
-            mergeBuckets();
-        }
+        mergeAllBuckets(endTime);
     }
 
     /**
@@ -338,7 +358,9 @@ public class HistogramDataModel implements IHistogramDataModel {
      */
     public void setEndTime(long endTime) {
         fEndTime = endTime;
+        fRwLock.writeLock().lock();
         fLastBucket = (int) ((endTime - fFirstBucketTime) / fBucketDuration);
+        fRwLock.readLock().lock();
     }
 
     /**
@@ -434,7 +456,8 @@ public class HistogramDataModel implements IHistogramDataModel {
      * @see org.eclipse.tracecompass.tmf.ui.views.distribution.model.IBaseDistributionModel#clear()
      */
     @Override
-    public synchronized void clear() {
+    public void clear() {
+        fRwLock.writeLock().lock();
         Arrays.fill(fBuckets, null);
         Arrays.fill(fLostEventsBuckets, 0);
         fNbEvents = 0;
@@ -446,6 +469,7 @@ public class HistogramDataModel implements IHistogramDataModel {
         fBucketDuration = 1;
         updateEndTime();
         fireModelUpdateNotification();
+        fRwLock.writeLock().lock();
     }
 
     /**
@@ -489,34 +513,19 @@ public class HistogramDataModel implements IHistogramDataModel {
      * @since 3.0
      */
     @Override
-    public synchronized void countEvent(long eventCount, long timestamp, ITmfTrace trace) {
+    public void countEvent(long eventCount, long timestamp, ITmfTrace trace) {
 
         // Validate
         if (timestamp < 0) {
             return;
         }
-
+        fRwLock.writeLock().lock();
         // Set the start/end time if not already done
-        if ((fFirstBucketTime == 0) && (fLastBucket == 0) && (fBuckets[0] == null) && (timestamp > 0)) {
-            fFirstBucketTime = timestamp;
-            fFirstEventTime = timestamp;
-            updateEndTime();
-        }
-
-        if (timestamp < fFirstEventTime) {
-            fFirstEventTime = timestamp;
-        }
-
-        if (fEndTime < timestamp) {
-            fEndTime = timestamp;
-        }
+        setStartAndEndTime(timestamp);
 
         if (timestamp >= fFirstBucketTime) {
 
-            // Compact as needed
-            while (timestamp >= fTimeLimit) {
-                mergeBuckets();
-            }
+            mergeAllBuckets(timestamp);
 
         } else {
 
@@ -540,6 +549,13 @@ public class HistogramDataModel implements IHistogramDataModel {
         }
 
         // Increment the right bucket
+        incrementRightBucket(timestamp, trace);
+        fRwLock.writeLock().unlock();
+
+        fireModelUpdateNotification(eventCount);
+    }
+
+    private void incrementRightBucket(long timestamp, ITmfTrace trace) {
         int index = (int) ((timestamp - fFirstBucketTime) / fBucketDuration);
         if (fBuckets[index] == null) {
             fBuckets[index] = new HistogramBucket(getNbTraces());
@@ -553,8 +569,29 @@ public class HistogramDataModel implements IHistogramDataModel {
         if (fLastBucket < index) {
             fLastBucket = index;
         }
+    }
 
-        fireModelUpdateNotification(eventCount);
+    private void mergeAllBuckets(long timestamp) {
+        // Compact as needed
+        while (timestamp >= fTimeLimit) {
+            mergeBuckets();
+        }
+    }
+
+    private void setStartAndEndTime(long timestamp) {
+        if ((fFirstBucketTime == 0) && (fLastBucket == 0) && (fBuckets[0] == null) && (timestamp > 0)) {
+            fFirstBucketTime = timestamp;
+            fFirstEventTime = timestamp;
+            updateEndTime();
+        }
+
+        if (timestamp < fFirstEventTime) {
+            fFirstEventTime = timestamp;
+        }
+
+        if (fEndTime < timestamp) {
+            fEndTime = timestamp;
+        }
     }
 
     /**
@@ -589,7 +626,8 @@ public class HistogramDataModel implements IHistogramDataModel {
         int lostEventPerBucket = (int) Math.ceil((double) nbLostEvents / nbBucketRange);
         long lastLostCol = Math.max(1, nbLostEvents - lostEventPerBucket * (nbBucketRange - 1));
 
-        // Increment the right bucket, bear in mind that ranges make it almost certain that some lost events are out of range
+        // Increment the right bucket, bear in mind that ranges make it almost
+        // certain that some lost events are out of range
         for (int index = indexStart; index <= indexEnd && index < fLostEventsBuckets.length; index++) {
             if (index == (indexStart + nbBucketRange - 1)) {
                 fLostEventsBuckets[index] += lastLostCol;
@@ -659,13 +697,7 @@ public class HistogramDataModel implements IHistogramDataModel {
             }
         }
 
-        // Scale vertically
-        if (result.fMaxValue > 0) {
-            result.fScalingFactor = (double) height / result.fMaxValue;
-        }
-        if (result.fMaxCombinedValue > 0) {
-            result.fScalingFactorCombined = (double) height / result.fMaxCombinedValue;
-        }
+        scaleVertically(height, result);
 
         fBucketDuration = Math.max(fBucketDuration, 1);
         // Set selection begin and end index in the scaled histogram
@@ -675,6 +707,16 @@ public class HistogramDataModel implements IHistogramDataModel {
         result.fFirstBucketTime = fFirstBucketTime;
         result.fFirstEventTime = fFirstEventTime;
         return result;
+    }
+
+    private static void scaleVertically(int height, HistogramScaledData result) {
+        // Scale vertically
+        if (result.fMaxValue > 0) {
+            result.fScalingFactor = (double) height / result.fMaxValue;
+        }
+        if (result.fMaxCombinedValue > 0) {
+            result.fScalingFactorCombined = (double) height / result.fMaxCombinedValue;
+        }
     }
 
     // ------------------------------------------------------------------------
