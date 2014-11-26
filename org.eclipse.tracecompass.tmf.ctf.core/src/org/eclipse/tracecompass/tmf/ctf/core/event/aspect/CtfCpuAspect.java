@@ -35,10 +35,4 @@ public class CtfCpuAspect extends TmfCpuAspect {
         @NonNull String ret = String.valueOf(cpu);
         return ret;
     }
-
-    @Override
-    public String getFilterId() {
-        return null;
-    }
-
 }
