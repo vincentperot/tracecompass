@@ -1,0 +1,8 @@
+Verified+1: Hudson CI
+Code-Review+2: Alexandre Montplaisir <alexmonthy@voxpopuli.im>
+Code-Review+1: Matthew Khouzam <matthew.khouzam@ericsson.com>
+Submitted-by: Alexandre Montplaisir <alexmonthy@voxpopuli.im>
+Submitted-at: Wed, 26 Nov 2014 15:16:57 -0500
+Reviewed-on: https://git.eclipse.org/r/36363
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
