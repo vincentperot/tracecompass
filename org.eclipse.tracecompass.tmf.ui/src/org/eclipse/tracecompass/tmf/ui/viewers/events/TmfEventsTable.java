@@ -976,8 +976,11 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                 tablePopupMenu.add(new Separator());
 
                 if (item != null) {
-                    final Object data = item.getData();
+                    Object data = item.getData();
                     Separator separator = null;
+                    if ( data instanceof CachedEvent){
+                        data = ((CachedEvent) data).event;
+                    }
                     if (data instanceof ITmfSourceLookup) {
                         ITmfSourceLookup event = (ITmfSourceLookup) data;
                         if (event.getCallsite() != null) {
