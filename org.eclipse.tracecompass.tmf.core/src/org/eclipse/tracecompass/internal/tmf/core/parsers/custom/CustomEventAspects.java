@@ -77,11 +77,6 @@ public class CustomEventAspects {
             }
             return EMPTY_STRING;
         }
-
-        @Override
-        public String getFilterId() {
-            return fName;
-        }
     }
 
     /**

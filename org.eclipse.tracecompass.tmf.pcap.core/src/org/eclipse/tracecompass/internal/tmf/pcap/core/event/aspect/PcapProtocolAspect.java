@@ -14,7 +14,6 @@
 package org.eclipse.tracecompass.internal.tmf.pcap.core.event.aspect;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.tmf.pcap.core.event.PcapEvent;
 import org.eclipse.tracecompass.internal.tmf.pcap.core.protocol.TmfPcapProtocol;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -48,10 +47,5 @@ public class PcapProtocolAspect implements ITmfEventAspect {
         @SuppressWarnings("null")
         @NonNull String proto = protocol.getShortName().toUpperCase();
         return proto;
-    }
-
-    @Override
-    public @Nullable String getFilterId() {
-        return PcapEvent.EVENT_FIELD_PACKET_PROTOCOL;
     }
 }

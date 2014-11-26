@@ -65,11 +65,6 @@ public final class BtfEventAspects {
             String ret = ((BtfEvent) event).getSource();
             return (ret == null ? EMPTY_STRING : ret);
         }
-
-        @Override
-        public String getFilterId() {
-            return ITmfEvent.EVENT_FIELD_SOURCE;
-        }
     }
 
     /**
@@ -106,11 +101,6 @@ public final class BtfEventAspects {
             }
             String ret = ((BtfEvent) event).getReference();
             return (ret == null ? EMPTY_STRING : ret);
-        }
-
-        @Override
-        public String getFilterId() {
-            return ITmfEvent.EVENT_FIELD_REFERENCE;
         }
     }
 
