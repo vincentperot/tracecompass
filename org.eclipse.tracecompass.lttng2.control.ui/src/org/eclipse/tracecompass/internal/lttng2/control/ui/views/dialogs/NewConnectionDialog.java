@@ -16,6 +16,7 @@ import static java.text.MessageFormat.format;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +57,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.Activator;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.messages.Messages;
 
@@ -68,8 +70,7 @@ import org.eclipse.tracecompass.internal.lttng2.control.ui.views.messages.Messag
  */
 public class NewConnectionDialog extends Dialog implements INewConnectionDialog {
 
-    private static final int BUTTONS_NUMBER_OF_COLUMNS = 3;
-    private static final int LABEL_WIDTH_CHARS = 4;
+    private static final int EXTRA_SPACE_CHARS = 4;
     private static final int CONNECTIONTREE_HEIGHT_CHARS = 10;
     private static final int CONNECTIONTREE_WIDTH_CHARS = 40;
     // ------------------------------------------------------------------------
@@ -258,7 +259,7 @@ public class NewConnectionDialog extends Dialog implements INewConnectionDialog 
         label.setText(Messages.TraceControl_NewNodeExistingConnectionGroupName);
         gd = new GridData();
         label.setLayoutData(gd );
-        gd.widthHint = label.computeSize(-1, -1).x + convertWidthInCharsToPixels(LABEL_WIDTH_CHARS);
+        gd.widthHint = label.computeSize(-1, -1).x + convertWidthInCharsToPixels(EXTRA_SPACE_CHARS);
         // Existing connections group
         fConnectionTree = new TreeViewer(dialogComposite);
         gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -281,13 +282,11 @@ public class NewConnectionDialog extends Dialog implements INewConnectionDialog 
         });
 
         Composite buttons = new Composite(dialogComposite, SWT.NONE);
-        layout = new GridLayout(BUTTONS_NUMBER_OF_COLUMNS, true);
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         buttons.setLayout(layout);
-        buttons.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
-
-        new Label(buttons, SWT.NONE);
+        Collection<Widget> widgetCollection = new ArrayList<>();
+        widgetCollection.add(new Label(buttons, SWT.NONE));
 
         fEditButton = new Button(buttons, SWT.PUSH);
         fEditButton.setText(Messages.TraceControl_NewNodeEditButtonName);
@@ -298,6 +297,7 @@ public class NewConnectionDialog extends Dialog implements INewConnectionDialog 
                 onEditConnection();
             }
         });
+        widgetCollection.add(fEditButton);
 
         fNewButton = new Button(buttons, SWT.PUSH);
         fNewButton.setText(Messages.TraceControl_NewNodeCreateButtonText);
@@ -308,7 +308,10 @@ public class NewConnectionDialog extends Dialog implements INewConnectionDialog 
                 onNewConnection();
             }
         });
+        widgetCollection.add(fNewButton);
 
+        layout = new GridLayout(widgetCollection.size(), true);
+        buttons.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
         return dialogComposite;
     }
 
