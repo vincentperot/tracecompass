@@ -739,7 +739,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                 if (items.length != 1) {
                     return;
                 }
-                final Object data = items[0].getData();
+                final Object data = getItemData(items[0]);
                 if (data instanceof ITmfSourceLookup) {
                     ITmfSourceLookup event = (ITmfSourceLookup) data;
                     ITmfCallsite cs = event.getCallsite();
@@ -804,7 +804,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                 if (items.length != 1) {
                     return;
                 }
-                final Object eventData = items[0].getData();
+                final Object eventData = getItemData(items[0]);
                 if (eventData instanceof ITmfModelLookup) {
                     String modelURI = ((ITmfModelLookup) eventData).getModelUri();
 
@@ -969,7 +969,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                 tablePopupMenu.add(new Separator());
 
                 if (item != null) {
-                    Object data = item.getData();
+                    final Object data = getItemData(item);
                     Separator separator = null;
                     if (data instanceof ITmfSourceLookup) {
                         ITmfSourceLookup event = (ITmfSourceLookup) data;
@@ -2603,6 +2603,10 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
         fCache.clear();
         fTable.refresh();
         fTable.redraw();
+    }
+
+    private static Object getItemData(final TableItem item) {
+        return item.getData() instanceof CachedEvent ? ((CachedEvent) item.getData()).event : item.getData();
     }
 
     /**
