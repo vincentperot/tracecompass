@@ -16,7 +16,6 @@ package org.eclipse.tracecompass.tmf.core.tests.trace;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -30,14 +29,12 @@ import java.util.Vector;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.tracecompass.internal.tmf.core.component.TmfProviderManager;
-import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.component.ITmfEventProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
-import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
+import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.tests.TmfCoreTestPlugin;
 import org.eclipse.tracecompass.tmf.core.tests.shared.TmfTestTrace;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -47,7 +44,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
-import org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysis;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
 import org.junit.After;
 import org.junit.Before;
@@ -432,38 +428,6 @@ public class TmfTraceTest {
         assertEquals("getNbEvents", NB_EVENTS, trace.getNbEvents());
 
         trace.dispose();
-    }
-
-    // ------------------------------------------------------------------------
-    // State system, statistics and modules methods
-    // ------------------------------------------------------------------------
-
-    @Test
-    public void testGetModulesByClass() {
-        /* There should not be any modules at this point */
-        Iterable<IAnalysisModule> modules = fTrace.getAnalysisModules();
-        assertFalse(modules.iterator().hasNext());
-
-        /* Open the trace, the modules should be populated */
-        fTrace.traceOpened(new TmfTraceOpenedSignal(this, fTrace, null));
-
-        modules = fTrace.getAnalysisModules();
-        Iterable<TestAnalysis> testModules = fTrace.getAnalysisModulesOfClass(TestAnalysis.class);
-        assertTrue(modules.iterator().hasNext());
-        assertTrue(testModules.iterator().hasNext());
-
-        /*
-         * Make sure all modules of type TestAnalysis are returned in the second
-         * call
-         */
-        for (IAnalysisModule module : modules) {
-            if (module instanceof TestAnalysis) {
-                IAnalysisModule otherModule = fTrace.getAnalysisModule(module.getId());
-                assertNotNull(otherModule);
-                assertTrue(otherModule.equals(module));
-            }
-        }
-
     }
 
     // ------------------------------------------------------------------------
