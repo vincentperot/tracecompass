@@ -46,6 +46,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysis;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
@@ -448,7 +449,7 @@ public class TmfTraceTest {
         fTrace.traceOpened(new TmfTraceOpenedSignal(this, fTrace, null));
 
         modules = fTrace.getAnalysisModules();
-        Iterable<TestAnalysis> testModules = fTrace.getAnalysisModulesOfClass(TestAnalysis.class);
+        Iterable<TestAnalysis> testModules = TmfTraceUtils.getAnalysisModulesOfClass(fTrace, TestAnalysis.class);
         assertTrue(modules.iterator().hasNext());
         assertTrue(testModules.iterator().hasNext());
 
