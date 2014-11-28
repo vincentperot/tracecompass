@@ -25,11 +25,11 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  */
 public class TmfFilterRootNode extends TmfFilterTreeNode {
 
-    @SuppressWarnings("javadoc")
+    /** The node name */
     public static final String NODE_NAME = "ROOT"; //$NON-NLS-1$
 
     private static final String[] VALID_CHILDREN = {
-        TmfFilterNode.NODE_NAME
+            TmfFilterNode.NODE_NAME
     };
 
     /**
@@ -40,6 +40,76 @@ public class TmfFilterRootNode extends TmfFilterTreeNode {
     }
 
     @Override
+    public String getEventType() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getField() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getFilterName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isIgnoreCase() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isNot() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getValue() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEventType(String type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setField(String field) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setFilterName(String filterName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setIgnoreCase(boolean ignoreCase) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setName(String name) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setNot(boolean not) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setValue(String value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getNodeName() {
         return NODE_NAME;
     }
@@ -47,7 +117,7 @@ public class TmfFilterRootNode extends TmfFilterTreeNode {
     @Override
     public boolean matches(ITmfEvent event) {
         for (ITmfFilterTreeNode node : getChildren()) {
-            if (! node.matches(event)) {
+            if (!node.matches(event)) {
                 return false;
             }
         }
@@ -58,5 +128,4 @@ public class TmfFilterRootNode extends TmfFilterTreeNode {
     public List<String> getValidChildren() {
         return Arrays.asList(VALID_CHILDREN);
     }
-
 }

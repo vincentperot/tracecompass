@@ -23,43 +23,95 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  * @version 1.0
  * @author Patrick Tasse
  */
-@SuppressWarnings("javadoc")
 public class TmfFilterNode extends TmfFilterTreeNode {
 
+    /** The node name */
     public static final String NODE_NAME = "FILTER"; //$NON-NLS-1$
+    /** This node supports names */
     public static final String NAME_ATTR = "name"; //$NON-NLS-1$
 
-    String fFilterName;
-
     /**
-     * @param filterName the filter name
+     * Constructor
+     *
+     * @param filterName
+     *            the filter name
      */
     public TmfFilterNode(String filterName) {
         super(null);
-        fFilterName = filterName;
+        setFilterName(filterName);
     }
 
     /**
-     * @param parent the parent node
-     * @param filterName the filter name
+     * Constructor with a name
+     *
+     * @param parent
+     *            the parent node
+     * @param filterName
+     *            the filter name
      */
     public TmfFilterNode(ITmfFilterTreeNode parent, String filterName) {
         super(parent);
-        fFilterName = filterName;
+        setFilterName(filterName);
     }
 
-    /**
-     * @return the filer name
-     */
+    @Override
+    public String getEventType() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getField() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String getFilterName() {
-        return fFilterName;
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * @param filterName the filer name
-     */
+    @Override
+    public boolean isIgnoreCase() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isNot() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getValue() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEventType(String type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setField(String field) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void setFilterName(String filterName) {
-        fFilterName = filterName;
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setIgnoreCase(boolean ignoreCase) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setNot(boolean not) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setValue(String value) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -88,28 +140,14 @@ public class TmfFilterNode extends TmfFilterTreeNode {
 
     @Override
     public String toString() {
-        StringBuffer buf = new StringBuffer();
-        if (getChildrenCount() > 1) {
-            buf.append("( "); //$NON-NLS-1$
-        }
-        for (int i = 0; i < getChildrenCount(); i++) {
-            ITmfFilterTreeNode node = getChildren()[i];
-            buf.append(node.toString());
-            if (i < (getChildrenCount() - 1)) {
-                buf.append(" and "); //$NON-NLS-1$
-            }
-        }
-        if (getChildrenCount() > 1) {
-            buf.append(" )"); //$NON-NLS-1$
-        }
-        return buf.toString();
+        return stringifyChildren(" and ").toString(); //$NON-NLS-1$
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((fFilterName == null) ? 0 : fFilterName.hashCode());
+        result = prime * result + ((getFilterName() == null) ? 0 : getFilterName().hashCode());
         return result;
     }
 
@@ -125,11 +163,11 @@ public class TmfFilterNode extends TmfFilterTreeNode {
             return false;
         }
         TmfFilterNode other = (TmfFilterNode) obj;
-        if (fFilterName == null) {
-            if (other.fFilterName != null) {
+        if (getFilterName() == null) {
+            if (other.getFilterName() != null) {
                 return false;
             }
-        } else if (!fFilterName.equals(other.fFilterName)) {
+        } else if (!getFilterName().equals(other.getFilterName())) {
             return false;
         }
         return true;

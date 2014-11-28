@@ -20,19 +20,82 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  * @version 1.0
  * @author Patrick Tasse
  */
-@SuppressWarnings("javadoc")
 public class TmfFilterOrNode extends TmfFilterTreeNode {
 
+    /** The node name */
     public static final String NODE_NAME = "OR"; //$NON-NLS-1$
+    /** The this node supports <em>NOT</em> */
     public static final String NOT_ATTR = "not"; //$NON-NLS-1$
 
-    private boolean fNot = false;
-
     /**
-     * @param parent the parent node
+     * Constructor
+     *
+     * @param parent
+     *            the parent node
      */
     public TmfFilterOrNode(ITmfFilterTreeNode parent) {
         super(parent);
+    }
+
+
+    @Override
+    public String getEventType() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getField() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getFilterName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isIgnoreCase() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getValue() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setEventType(String type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setField(String field) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setFilterName(String filterName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setIgnoreCase(boolean ignoreCase) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setName(String name) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setValue(String value) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -40,57 +103,26 @@ public class TmfFilterOrNode extends TmfFilterTreeNode {
         return NODE_NAME;
     }
 
-    /**
-     * @return the NOT state
-     */
-    public boolean isNot() {
-        return fNot;
-    }
-
-    /**
-     * @param not the NOT state
-     */
-    public void setNot(boolean not) {
-        this.fNot = not;
-    }
-
     @Override
     public boolean matches(ITmfEvent event) {
         for (ITmfFilterTreeNode node : getChildren()) {
             if (node.matches(event)) {
-                return true ^ fNot;
+                return true ^ isNot();
             }
         }
-        return false & fNot;
+        return false & isNot();
     }
 
     @Override
     public String toString() {
-        StringBuffer buf = new StringBuffer();
-        if (fNot) {
-            buf.append("not "); //$NON-NLS-1$
-        }
-        if (getParent() != null && !(getParent() instanceof TmfFilterRootNode) && !(getParent() instanceof TmfFilterNode)) {
-            buf.append("( "); //$NON-NLS-1$
-        }
-        for (int i = 0; i < getChildrenCount(); i++) {
-            ITmfFilterTreeNode node = getChildren()[i];
-            buf.append(node.toString());
-            if (i < getChildrenCount() - 1) {
-                buf.append(" or "); //$NON-NLS-1$
-            }
-        }
-        if (getParent() != null && !(getParent() instanceof TmfFilterRootNode) && !(getParent() instanceof TmfFilterNode)) {
-            buf.append(" )"); //$NON-NLS-1$
-        }
-        return buf.toString();
+        return stringifyChildren(" or ").toString(); //$NON-NLS-1$
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + (fNot ? 1231 : 1237);
+        result = prime * result + (isNot() ? 1231 : 1237);
         return result;
     }
 
@@ -106,7 +138,7 @@ public class TmfFilterOrNode extends TmfFilterTreeNode {
             return false;
         }
         TmfFilterOrNode other = (TmfFilterOrNode) obj;
-        if (fNot != other.fNot) {
+        if (isNot() != other.isNot()) {
             return false;
         }
         return true;
