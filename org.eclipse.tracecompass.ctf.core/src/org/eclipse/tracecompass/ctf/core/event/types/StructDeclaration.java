@@ -51,6 +51,20 @@ public class StructDeclaration extends Declaration {
     /** maximum bit alignment */
     private long fMaxAlign;
 
+    private static final IFieldCompareHelper BINARY_COMPARER = new IFieldCompareHelper() {
+        @Override
+        public boolean compareField(IDeclaration a, IDeclaration b) {
+            return a.isBinaryEquivalent(b);
+        }
+    };
+
+    private static final IFieldCompareHelper SEMANTIC_COMPARER = new IFieldCompareHelper() {
+        @Override
+        public boolean compareField(IDeclaration a, IDeclaration b) {
+            return a.equals(b);
+        }
+    };
+
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
@@ -250,8 +264,7 @@ public class StructDeclaration extends Declaration {
         return result;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    private boolean comparer(IDeclaration obj,IFieldCompareHelper comparer ) {
         if (this == obj) {
             return true;
         }
@@ -265,7 +278,6 @@ public class StructDeclaration extends Declaration {
         if (fFieldMap.size() != other.fFieldMap.size()) {
             return false;
         }
-
         List<String> localFieldNames = new ArrayList<>();
         localFieldNames.addAll(fFieldMap.keySet());
 
@@ -277,11 +289,10 @@ public class StructDeclaration extends Declaration {
 
         List<IDeclaration> otherDecs = new ArrayList<>();
         otherDecs.addAll(other.fFieldMap.values());
-
-        //check fields in order
+        // Check fields in order
         for (int i = 0; i < fFieldMap.size(); i++) {
-            if ((!localFieldNames.get(i).equals(otherFieldNames.get(i))) ||
-                    (!otherDecs.get(i).equals(localDecs.get(i)))) {
+            if (!comparer.compareField(otherDecs.get(i),localDecs.get(i))||
+                    (!localFieldNames.get(i).equals(otherFieldNames.get(i))) ) {
                 return false;
             }
         }
@@ -294,33 +305,22 @@ public class StructDeclaration extends Declaration {
 
     @Override
     public boolean isBinaryEquivalent(IDeclaration obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof StructDeclaration)) {
-            return false;
-        }
-        StructDeclaration other = (StructDeclaration) obj;
-        if (fFieldMap.size() != other.fFieldMap.size()) {
-            return false;
-        }
-        List<IDeclaration> localDecs = new ArrayList<>();
-        localDecs.addAll(fFieldMap.values());
-        List<IDeclaration> otherDecs = new ArrayList<>();
-        otherDecs.addAll(other.fFieldMap.values());
-        for (int i = 0; i < fFieldMap.size(); i++) {
-            if (!otherDecs.get(i).isBinaryEquivalent(localDecs.get(i))) {
-                return false;
-            }
-        }
+        return comparer(obj, BINARY_COMPARER);
+    }
 
-        if (fMaxAlign != other.fMaxAlign) {
-            return false;
+
+    @Override
+    public boolean equals(Object obj) {
+        if( obj instanceof StructDeclaration) {
+            StructDeclaration structDeclaration = (StructDeclaration) obj;
+            return comparer(structDeclaration, SEMANTIC_COMPARER);
         }
-        return true;
+        return false;
+    }
+
+
+    private interface IFieldCompareHelper {
+        boolean compareField(IDeclaration a, IDeclaration b);
     }
 
 }
