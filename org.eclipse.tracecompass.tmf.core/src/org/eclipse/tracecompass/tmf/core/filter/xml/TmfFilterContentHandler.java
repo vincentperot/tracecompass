@@ -26,7 +26,7 @@ import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterOrNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterRootNode;
-import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterTreeNode;
+import org.eclipse.tracecompass.tmf.core.filter.model.AbstractTmfFilterTreeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode.Type;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -169,8 +169,8 @@ public class TmfFilterContentHandler extends DefaultHandler {
 
         if (fFilterTreeStack.isEmpty()) {
             fRoot = node;
-        } else if (fFilterTreeStack.lastElement() instanceof TmfFilterTreeNode &&
-                node instanceof TmfFilterTreeNode) {
+        } else if (fFilterTreeStack.lastElement() instanceof AbstractTmfFilterTreeNode &&
+                node instanceof AbstractTmfFilterTreeNode) {
             fFilterTreeStack.lastElement().addChild(node);
         }
 

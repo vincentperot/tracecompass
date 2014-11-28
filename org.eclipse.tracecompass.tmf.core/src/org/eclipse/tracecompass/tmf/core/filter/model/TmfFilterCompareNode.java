@@ -20,34 +20,39 @@ import java.util.List;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
-
 /**
  * Filter node for the comparison operation
  *
  * @version 1.0
  * @author Patrick Tasse
  */
-@SuppressWarnings("javadoc")
 public class TmfFilterCompareNode extends TmfFilterTreeNode {
 
+    /** The node name */
     public static final String NODE_NAME = "COMPARE"; //$NON-NLS-1$
+    /** This node supports <em>NOT</em> */
     public static final String NOT_ATTR = "not"; //$NON-NLS-1$
+    /** This node supports fields */
     public static final String FIELD_ATTR = "field"; //$NON-NLS-1$
+    /** This node supports results */
     public static final String RESULT_ATTR = "result"; //$NON-NLS-1$
+    /** This node supports event types */
     public static final String TYPE_ATTR = "type"; //$NON-NLS-1$
+    /** This node supports values */
     public static final String VALUE_ATTR = "value"; //$NON-NLS-1$
 
     /**
      * Supported comparison types
      */
     public static enum Type {
+        /** Number */
         NUM,
+        /** String */
         ALPHA,
+        /** Timestamp */
         TIMESTAMP
     }
 
-    private boolean fNot = false;
-    private String fField;
     private int fResult;
     private Type fType = Type.NUM;
     private String fValue;
@@ -55,38 +60,11 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
     private transient TmfTimestamp fValueTimestamp;
 
     /**
-     * @param parent the parent node
+     * @param parent
+     *            the parent node
      */
     public TmfFilterCompareNode(ITmfFilterTreeNode parent) {
         super(parent);
-    }
-
-    /**
-     * @return the NOT state
-     */
-    public boolean isNot() {
-        return fNot;
-    }
-
-    /**
-     * @param not the NOT state
-     */
-    public void setNot(boolean not) {
-        this.fNot = not;
-    }
-
-    /**
-     * @return the field name
-     */
-    public String getField() {
-        return fField;
-    }
-
-    /**
-     * @param field the field name
-     */
-    public void setField(String field) {
-        this.fField = field;
     }
 
     /**
@@ -97,7 +75,8 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
     }
 
     /**
-     * @param result the compare result
+     * @param result
+     *            the compare result
      */
     public void setResult(int result) {
         this.fResult = result;
@@ -111,7 +90,8 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
     }
 
     /**
-     * @param type the comparison type
+     * @param type
+     *            the comparison type
      */
     public void setType(Type type) {
         this.fType = type;
@@ -119,17 +99,12 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
     }
 
     /**
-     * @return the comparison value
+     * @param value
+     *            the comparison value
      */
-    public String getValue() {
-        return fValue;
-    }
-
-    /**
-     * @param value the comparison value
-     */
+    @Override
     public void setValue(String value) {
-        this.fValue = value;
+        super.setValue(value);
         fValueNumber = null;
         fValueTimestamp = null;
         if (value == null) {
@@ -155,19 +130,19 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
 
     @Override
     public boolean matches(ITmfEvent event) {
-        Object value = getFieldValue(event, fField);
+        Object value = getFieldValue(event, getField());
         if (value == null) {
-            return false ^ fNot;
+            return false ^ isNot();
         }
         if (fType == Type.NUM) {
             if (fValueNumber != null) {
                 if (value instanceof Number) {
                     double valueDouble = ((Number) value).doubleValue();
-                    return (Double.compare(valueDouble, fValueNumber.doubleValue()) == fResult) ^ fNot;
+                    return (Double.compare(valueDouble, fValueNumber.doubleValue()) == fResult) ^ isNot();
                 }
                 try {
                     double valueDouble = NumberFormat.getInstance().parse(value.toString()).doubleValue();
-                    return (Double.compare(valueDouble, fValueNumber.doubleValue()) == fResult) ^ fNot;
+                    return (Double.compare(valueDouble, fValueNumber.doubleValue()) == fResult) ^ isNot();
                 } catch (ParseException e) {
                 }
             }
@@ -179,22 +154,22 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
             } else if (comp > 1) {
                 comp = 1;
             }
-            return (comp == fResult) ^ fNot;
+            return (comp == fResult) ^ isNot();
         } else if (fType == Type.TIMESTAMP) {
             if (fValueTimestamp != null) {
                 if (value instanceof TmfTimestamp) {
                     TmfTimestamp valueTimestamp = (TmfTimestamp) value;
-                    return (valueTimestamp.compareTo(fValueTimestamp) == fResult) ^ fNot;
+                    return (valueTimestamp.compareTo(fValueTimestamp) == fResult) ^ isNot();
                 }
                 try {
                     TmfTimestamp valueTimestamp = new TmfTimestamp((long) (1E9 * NumberFormat
-                                    .getInstance().parse(value.toString()).doubleValue()));
-                    return (valueTimestamp.compareTo(fValueTimestamp) == fResult) ^ fNot;
+                            .getInstance().parse(value.toString()).doubleValue()));
+                    return (valueTimestamp.compareTo(fValueTimestamp) == fResult) ^ isNot();
                 } catch (ParseException e) {
                 }
             }
         }
-        return false ^ fNot;
+        return false ^ isNot();
     }
 
     @Override
@@ -207,14 +182,14 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
         String result = (fResult == 0 ? "= " : fResult < 0 ? "< " : "> "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         String open = (fType == Type.NUM ? "" : fType == Type.ALPHA ? "\"" : "["); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         String close = (fType == Type.NUM ? "" : fType == Type.ALPHA ? "\"" : "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        return fField + (fNot ? " not " : " ") + result + open + fValue + close; //$NON-NLS-1$ //$NON-NLS-2$
+        return getField() + (isNot() ? " not " : " ") + result + open + fValue + close; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
     public ITmfFilterTreeNode clone() {
         TmfFilterCompareNode clone = (TmfFilterCompareNode) super.clone();
-        clone.fField = fField;
-        clone.setValue(fValue);
+        clone.setField(getField());
+        clone.setValue(getValue());
         return clone;
     }
 
@@ -222,8 +197,8 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((fField == null) ? 0 : fField.hashCode());
-        result = prime * result + (fNot ? 1231 : 1237);
+        result = prime * result + ((getField() == null) ? 0 : getField().hashCode());
+        result = prime * result + (isNot() ? 1231 : 1237);
         result = prime * result + fResult;
         result = prime * result + ((fType == null) ? 0 : fType.hashCode());
         result = prime * result + ((fValue == null) ? 0 : fValue.hashCode());
@@ -242,14 +217,14 @@ public class TmfFilterCompareNode extends TmfFilterTreeNode {
             return false;
         }
         TmfFilterCompareNode other = (TmfFilterCompareNode) obj;
-        if (fField == null) {
-            if (other.fField != null) {
+        if (getField() == null) {
+            if (other.getField() != null) {
                 return false;
             }
-        } else if (!fField.equals(other.fField)) {
+        } else if (!getField().equals(other.getField())) {
             return false;
         }
-        if (fNot != other.fNot) {
+        if (isNot() != other.isNot()) {
             return false;
         }
         if (fResult != other.fResult) {

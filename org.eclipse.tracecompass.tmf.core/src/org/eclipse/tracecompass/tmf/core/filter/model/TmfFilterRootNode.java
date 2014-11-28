@@ -25,7 +25,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  */
 public class TmfFilterRootNode extends TmfFilterTreeNode {
 
-    @SuppressWarnings("javadoc")
+    /** The node name */
     public static final String NODE_NAME = "ROOT"; //$NON-NLS-1$
 
     private static final String[] VALID_CHILDREN = {
@@ -58,5 +58,4 @@ public class TmfFilterRootNode extends TmfFilterTreeNode {
     public List<String> getValidChildren() {
         return Arrays.asList(VALID_CHILDREN);
     }
-
 }

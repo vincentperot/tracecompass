@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 Ericsson
+ * Copyright (c) 2014 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -7,251 +7,191 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Yuriy Vashchuk (yvashchuk@gmail.com) - Initial API and implementation
- *   Patrick Tasse - Refactoring
- *   Vincent Perot - Add subfield filtering
+ *   Matthew Khouzam - Initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.core.filter.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import com.google.common.base.Joiner;
 
 /**
- * The base class for the Filter tree nodes
- *
- * @version 1.0
- * @author Yuriy Vashchuk
- * @author Patrick Tasse
+ * Abstract filter node that implement most of the features. These features
+ * should be overridden and stubbed out if you want less features.
  */
-public abstract class TmfFilterTreeNode implements ITmfFilterTreeNode, Cloneable {
+public abstract class TmfFilterTreeNode extends AbstractTmfFilterTreeNode {
 
-    private static final char SLASH = '/';
-    private static final char BACKSLASH = '\\';
-
-    private static final String[] VALID_CHILDREN = {
-            TmfFilterEventTypeNode.NODE_NAME,
-            TmfFilterAndNode.NODE_NAME,
-            TmfFilterOrNode.NODE_NAME,
-            TmfFilterContainsNode.NODE_NAME,
-            TmfFilterEqualsNode.NODE_NAME,
-            TmfFilterMatchesNode.NODE_NAME,
-            TmfFilterCompareNode.NODE_NAME
-    };
-
-    private ITmfFilterTreeNode parent = null;
-    private ArrayList<ITmfFilterTreeNode> children = new ArrayList<>();
-
-    private String fPathAsString = null;
-    private String[] fPathAsArray = null;
+    private boolean fNot;
+    private String fFilterName;
+    private String fField;
+    private String fValue;
+    private String fType;
+    private String fName;
+    private boolean fIgnoreCase;
 
     /**
+     * Constructor
+     *
      * @param parent
-     *            the parent node
+     *            The parent node
      */
-    public TmfFilterTreeNode(final ITmfFilterTreeNode parent) {
-        if (parent != null) {
-            parent.addChild(this);
-        }
+    protected TmfFilterTreeNode(ITmfFilterTreeNode parent) {
+        super(parent);
+        setNot(false);
+        setIgnoreCase(false);
     }
-
-    @Override
-    public ITmfFilterTreeNode getParent() {
-        return parent;
-    }
-
-    @Override
-    public abstract String getNodeName();
-
-    @Override
-    public boolean hasChildren() {
-        return (children.size() > 0);
-    }
-
-    @Override
-    public int getChildrenCount() {
-        return children.size();
-    }
-
-    @Override
-    public ITmfFilterTreeNode[] getChildren() {
-        return children.toArray(new ITmfFilterTreeNode[0]);
-    }
-
-    @Override
-    public ITmfFilterTreeNode getChild(final int index) throws IndexOutOfBoundsException {
-        return children.get(index);
-    }
-
-    @Override
-    public ITmfFilterTreeNode remove() {
-        if (getParent() != null) {
-            getParent().removeChild(this);
-        }
-        return this;
-    }
-
-    @Override
-    public ITmfFilterTreeNode removeChild(ITmfFilterTreeNode node) {
-        children.remove(node);
-        node.setParent(null);
-        return node;
-    }
-
-    @Override
-    public int addChild(final ITmfFilterTreeNode node) {
-        node.setParent(this);
-        if (children.add(node)) {
-            return (children.size() - 1);
-        }
-        return -1;
-    }
-
-    @Override
-    public ITmfFilterTreeNode replaceChild(final int index, final ITmfFilterTreeNode node) throws IndexOutOfBoundsException {
-        node.setParent(this);
-        return children.set(index, node);
-    }
-
-    @Override
-    public void setParent(final ITmfFilterTreeNode parent) {
-        this.parent = parent;
-    }
-
-    @Override
-    public abstract boolean matches(ITmfEvent event);
 
     /**
-     * @param event
-     *            the event
-     * @param field
-     *            the field id
-     * @return the field value
+     * Get the <em>NOT</em> state
+     *
+     * @return the <em>NOT</em> state
      */
-    protected Object getFieldValue(ITmfEvent event, String field) {
-        Object value = null;
-        if (ITmfEvent.EVENT_FIELD_CONTENT.equals(field)) {
-            value = event.getContent().toString();
-        }
-        else if (ITmfEvent.EVENT_FIELD_TYPE.equals(field)) {
-            value = event.getType().getName();
-        }
-        else if (ITmfEvent.EVENT_FIELD_TIMESTAMP.equals(field)) {
-            value = event.getTimestamp().toString();
-        } else {
-            if (field == null) {
-                return null;
-            }
-            ITmfEventField eventField;
-            if (field.isEmpty() || field.charAt(0) != SLASH) {
-                eventField = event.getContent().getField(field);
-            } else {
-                String[] array = getPathArray(field);
-                eventField = event.getContent().getSubField(array);
-            }
-
-            if (eventField != null) {
-                value = eventField.getValue();
-            }
-        }
-        return value;
+    public boolean isNot() {
+        return fNot;
     }
 
-    private String[] getPathArray(String field) {
-
-        // Check if last request was not the same string.
-        if (field.equals(fPathAsString)) {
-            return fPathAsArray;
-        }
-
-        // Generate the new path array
-        StringBuilder sb = new StringBuilder();
-        List<String> list = new ArrayList<>();
-
-        // We start at 1 since the first character is a slash that we want to
-        // ignore.
-        for (int i = 1; i < field.length(); i++) {
-            char charAt = field.charAt(i);
-            if (charAt == SLASH) {
-                // char is slash. Cut here.
-                list.add(sb.toString());
-                sb = new StringBuilder();
-            } else if (charAt == BACKSLASH && i < field.length() - 1 && field.charAt(i + 1) == SLASH) {
-                // Uninterpreted slash. Add it.
-                sb.append(SLASH);
-                i++;
-            } else {
-                // Any other character. Add.
-                sb.append(charAt);
-            }
-        }
-
-        // Last block. Add it to list.
-        list.add(sb.toString());
-
-        // Transform to array
-        String[] array = new String[list.size()];
-        list.toArray(array);
-
-        // Save new values.
-        // Array first for solving concurrency issues
-        fPathAsArray = array;
-        fPathAsString = field;
-
-        return array;
+    /**
+     * Set the <em>NOT</em> state
+     *
+     * @param not
+     *            the <em>NOT</em> state
+     */
+    public void setNot(boolean not) {
+        fNot = not;
     }
 
-    @Override
-    public List<String> getValidChildren() {
-        return Arrays.asList(VALID_CHILDREN);
+    /**
+     * Get the filter name
+     *
+     * @return the filer name
+     */
+    public String getFilterName() {
+        return fFilterName;
     }
 
-    @Override
-    public ITmfFilterTreeNode clone() {
-        try {
-            TmfFilterTreeNode clone = (TmfFilterTreeNode) super.clone();
-            clone.parent = null;
-            clone.children = new ArrayList<>(children.size());
-            for (ITmfFilterTreeNode child : getChildren()) {
-                clone.addChild(child.clone());
-            }
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            return null;
-        }
+    /**
+     * Set the filter name
+     *
+     * @param filterName
+     *            the filer name
+     */
+    public void setFilterName(String filterName) {
+        fFilterName = filterName;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((children == null) ? 0 : children.hashCode());
-        return result;
+    /**
+     * Get the field name
+     *
+     * @return the field name
+     */
+    public String getField() {
+        return fField;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        TmfFilterTreeNode other = (TmfFilterTreeNode) obj;
-        if (children == null) {
-            if (other.children != null) {
-                return false;
-            }
-        } else if (!children.equals(other.children)) {
-            return false;
-        }
-        return true;
+    /**
+     * Set the field name
+     *
+     * @param field
+     *            the field name
+     */
+    public void setField(String field) {
+        fField = field;
     }
+
+    /**
+     * Get the value
+     *
+     * @return the value
+     */
+    public String getValue() {
+        return fValue;
+    }
+
+    /**
+     * Set the value
+     *
+     * @param value
+     *            the value
+     */
+    public void setValue(String value) {
+        fValue = value;
+    }
+
+    /**
+     * Get the event type
+     *
+     * @return the event type
+     */
+    public String getEventType() {
+        return fType;
+    }
+
+    /**
+     * Set the event type
+     *
+     * @param type
+     *            the event type
+     */
+    public void setEventType(String type) {
+        fType = type;
+    }
+
+    /**
+     * Get the category and trace type name
+     *
+     * @return the category and trace type name
+     */
+    public String getName() {
+        return fName;
+    }
+
+    /**
+     * Set the category and trace type name
+     *
+     * @param name
+     *            the category and trace type name
+     */
+    public void setName(String name) {
+        fName = name;
+    }
+    /**
+     * Is the case ignored
+     *
+     * @return the ignoreCase state
+     */
+    public boolean isIgnoreCase() {
+        return fIgnoreCase;
+    }
+
+    /**
+     * Sets whether the case is ignored or not
+     *
+     * @param ignoreCase
+     *            the ignoreCase state
+     */
+    public void setIgnoreCase(boolean ignoreCase) {
+        this.fIgnoreCase = ignoreCase;
+    }
+    /**
+     * Makes a StringBuilder with the operation toString {<not >{ child0 op
+     * child1 op .. childN }
+     *
+     * @param operation
+     *            the separation operator
+     * @return the StringBuilder
+     */
+    protected StringBuilder stringifyChildren(String operation) {
+        StringBuilder buf = new StringBuilder();
+        if (isNot()) {
+            buf.append("not "); //$NON-NLS-1$
+        }
+        if (getParent() != null && !(getParent() instanceof TmfFilterRootNode) && !(getParent() instanceof TmfFilterNode)) {
+            buf.append("( "); //$NON-NLS-1$
+        }
+        Joiner.on(operation).appendTo(buf, getChildren());
+        if (getParent() != null && !(getParent() instanceof TmfFilterRootNode) && !(getParent() instanceof TmfFilterNode)) {
+            buf.append(" )"); //$NON-NLS-1$
+        }
+        return buf;
+    }
+
 }
