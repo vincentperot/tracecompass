@@ -14,10 +14,8 @@ package org.eclipse.tracecompass.ctf.core.event.types;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -197,7 +195,7 @@ public class StructDeclaration extends Declaration {
         alignRead(input);
         final Definition[] myFields = new Definition[fFieldMap.size()];
 
-        StructDefinition structDefinition = new StructDefinition(this,definitionScope,
+        StructDefinition structDefinition = new StructDefinition(this, definitionScope,
                 fieldScope, fieldScope.getName(), checkNotNull(fFieldMap.keySet()), myFields);
         fillStruct(input, myFields, structDefinition);
         return structDefinition;
@@ -250,77 +248,74 @@ public class StructDeclaration extends Declaration {
         return result;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    private boolean testEgality(Object obj, boolean compareMethod) {
         if (this == obj) {
             return true;
-        }
-        if (obj == null) {
-            return false;
         }
         if (!(obj instanceof StructDeclaration)) {
             return false;
         }
         StructDeclaration other = (StructDeclaration) obj;
+        if (testFieldsInOrder(other, compareMethod)) {
+            return false;
+        }
+        if (fMaxAlign != other.fMaxAlign) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean testFieldsInOrder(StructDeclaration other, boolean compareMethod) {
         if (fFieldMap.size() != other.fFieldMap.size()) {
             return false;
         }
-
-        List<String> localFieldNames = new ArrayList<>();
-        localFieldNames.addAll(fFieldMap.keySet());
-
-        List<IDeclaration> localDecs = new ArrayList<>();
-        localDecs.addAll(fFieldMap.values());
-
-        List<String> otherFieldNames = new ArrayList<>();
-        otherFieldNames.addAll(other.fFieldMap.keySet());
-
-        List<IDeclaration> otherDecs = new ArrayList<>();
-        otherDecs.addAll(other.fFieldMap.values());
-
-        //check fields in order
+        Iterator<Entry<String, IDeclaration>> localIterator = fFieldMap.entrySet().iterator();
+        Iterator<Entry<String, IDeclaration>> otherIterator = other.getFields().entrySet().iterator();
+        // Check fields in order
         for (int i = 0; i < fFieldMap.size(); i++) {
-            if ((!localFieldNames.get(i).equals(otherFieldNames.get(i))) ||
-                    (!otherDecs.get(i).equals(localDecs.get(i)))) {
+            if (!isFieldEquivalent(localIterator.next(), otherIterator.next(), compareMethod)) {
                 return false;
             }
         }
+        return true;
+    }
 
-        if (fMaxAlign != other.fMaxAlign) {
+    /**
+     * Compare fields (java docing a private for clarity sake)
+     *
+     * @param leftField
+     *            the field entry (name, declaration)
+     * @param rightField
+     *            the other field entry (name, declaration)
+     * @param compareMethod
+     *            true = equals, false = binary equals
+     * @return true if equivalent false otherwise
+     */
+    private static boolean isFieldEquivalent(Entry<String, IDeclaration> leftField, Entry<String, IDeclaration> rightField, boolean compareMethod) {
+        // check name
+        if (!leftField.getKey().equals(rightField.getKey())) {
             return false;
+        }
+        // check value
+        if (!compareMethod) {
+            if (leftField.getValue().isBinaryEquivalent(rightField.getValue())) {
+                return false;
+            }
+        } else {
+            if (leftField.getValue().equals(rightField.getValue())) {
+                return false;
+            }
         }
         return true;
     }
 
     @Override
     public boolean isBinaryEquivalent(IDeclaration obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof StructDeclaration)) {
-            return false;
-        }
-        StructDeclaration other = (StructDeclaration) obj;
-        if (fFieldMap.size() != other.fFieldMap.size()) {
-            return false;
-        }
-        List<IDeclaration> localDecs = new ArrayList<>();
-        localDecs.addAll(fFieldMap.values());
-        List<IDeclaration> otherDecs = new ArrayList<>();
-        otherDecs.addAll(other.fFieldMap.values());
-        for (int i = 0; i < fFieldMap.size(); i++) {
-            if (!otherDecs.get(i).isBinaryEquivalent(localDecs.get(i))) {
-                return false;
-            }
-        }
-
-        if (fMaxAlign != other.fMaxAlign) {
-            return false;
-        }
-        return true;
+        return testEgality(obj, false);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return testEgality(obj, true);
+    }
 }
