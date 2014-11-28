@@ -51,6 +51,20 @@ public class StructDeclaration extends Declaration {
     /** maximum bit alignment */
     private long fMaxAlign;
 
+    private static final IFieldEgalityHelper BINARY_COMPARER = new IFieldEgalityHelper() {
+        @Override
+        public boolean compareField(IDeclaration a, IDeclaration b) {
+            return a.isBinaryEquivalent(b);
+        }
+    };
+
+    private static final IFieldEgalityHelper SEMANTIC_COMPARER = new IFieldEgalityHelper() {
+        @Override
+        public boolean compareField(IDeclaration a, IDeclaration b) {
+            return a.equals(b);
+        }
+    };
+
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
@@ -197,7 +211,7 @@ public class StructDeclaration extends Declaration {
         alignRead(input);
         final Definition[] myFields = new Definition[fFieldMap.size()];
 
-        StructDefinition structDefinition = new StructDefinition(this,definitionScope,
+        StructDefinition structDefinition = new StructDefinition(this, definitionScope,
                 fieldScope, fieldScope.getName(), checkNotNull(fFieldMap.keySet()), myFields);
         fillStruct(input, myFields, structDefinition);
         return structDefinition;
@@ -250,22 +264,27 @@ public class StructDeclaration extends Declaration {
         return result;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    private boolean testEgality(IDeclaration obj, IFieldEgalityHelper comparer) {
         if (this == obj) {
             return true;
-        }
-        if (obj == null) {
-            return false;
         }
         if (!(obj instanceof StructDeclaration)) {
             return false;
         }
         StructDeclaration other = (StructDeclaration) obj;
+        if (testFieldsInOrder(other, comparer)) {
+            return false;
+        }
+        if (fMaxAlign != other.fMaxAlign) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean testFieldsInOrder(StructDeclaration other, IFieldEgalityHelper comparer) {
         if (fFieldMap.size() != other.fFieldMap.size()) {
             return false;
         }
-
         List<String> localFieldNames = new ArrayList<>();
         localFieldNames.addAll(fFieldMap.keySet());
 
@@ -277,50 +296,35 @@ public class StructDeclaration extends Declaration {
 
         List<IDeclaration> otherDecs = new ArrayList<>();
         otherDecs.addAll(other.fFieldMap.values());
-
-        //check fields in order
+        // Check fields in order
         for (int i = 0; i < fFieldMap.size(); i++) {
-            if ((!localFieldNames.get(i).equals(otherFieldNames.get(i))) ||
-                    (!otherDecs.get(i).equals(localDecs.get(i)))) {
+            if (!comparer.compareField(otherDecs.get(i), localDecs.get(i)) ||
+                    (!localFieldNames.get(i).equals(otherFieldNames.get(i)))) {
                 return false;
             }
-        }
-
-        if (fMaxAlign != other.fMaxAlign) {
-            return false;
         }
         return true;
     }
 
     @Override
     public boolean isBinaryEquivalent(IDeclaration obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof StructDeclaration)) {
-            return false;
-        }
-        StructDeclaration other = (StructDeclaration) obj;
-        if (fFieldMap.size() != other.fFieldMap.size()) {
-            return false;
-        }
-        List<IDeclaration> localDecs = new ArrayList<>();
-        localDecs.addAll(fFieldMap.values());
-        List<IDeclaration> otherDecs = new ArrayList<>();
-        otherDecs.addAll(other.fFieldMap.values());
-        for (int i = 0; i < fFieldMap.size(); i++) {
-            if (!otherDecs.get(i).isBinaryEquivalent(localDecs.get(i))) {
-                return false;
-            }
-        }
+        return testEgality(obj, BINARY_COMPARER);
+    }
 
-        if (fMaxAlign != other.fMaxAlign) {
-            return false;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof StructDeclaration) {
+            StructDeclaration structDeclaration = (StructDeclaration) obj;
+            return testEgality(structDeclaration, SEMANTIC_COMPARER);
         }
-        return true;
+        return false;
+    }
+
+    /**
+     * This needs to be replaced with lambdas when they are available.
+     */
+    private interface IFieldEgalityHelper {
+        boolean compareField(IDeclaration a, IDeclaration b);
     }
 
 }
