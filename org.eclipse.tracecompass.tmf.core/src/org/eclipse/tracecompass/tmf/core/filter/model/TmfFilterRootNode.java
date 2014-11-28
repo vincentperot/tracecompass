@@ -58,5 +58,4 @@ public class TmfFilterRootNode extends TmfFilterTreeNode {
     public List<String> getValidChildren() {
         return Arrays.asList(VALID_CHILDREN);
     }
-
 }

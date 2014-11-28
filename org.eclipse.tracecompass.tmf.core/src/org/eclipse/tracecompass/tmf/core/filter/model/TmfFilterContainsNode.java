@@ -23,7 +23,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  * @version 1.0
  * @author Patrick Tasse
  */
-@SuppressWarnings("javadoc")
 public class TmfFilterContainsNode extends TmfFilterTreeNode {
 
     public static final String NODE_NAME = "CONTAINS"; //$NON-NLS-1$
@@ -32,9 +31,6 @@ public class TmfFilterContainsNode extends TmfFilterTreeNode {
     public static final String VALUE_ATTR = "value"; //$NON-NLS-1$
     public static final String IGNORECASE_ATTR = "ignorecase"; //$NON-NLS-1$
 
-    private boolean fNot = false;
-    private String fField;
-    private String fValue;
     private transient String fValueUpperCase;
     private boolean fIgnoreCase = false;
 
@@ -46,45 +42,11 @@ public class TmfFilterContainsNode extends TmfFilterTreeNode {
     }
 
     /**
-     * @return the NOT state
-     */
-    public boolean isNot() {
-        return fNot;
-    }
-
-    /**
-     * @param not the NOT state
-     */
-    public void setNot(boolean not) {
-        this.fNot = not;
-    }
-
-    /**
-     * @return the field name
-     */
-    public String getField() {
-        return fField;
-    }
-
-    /**
-     * @param field the field name
-     */
-    public void setField(String field) {
-        this.fField = field;
-    }
-
-    /**
-     * @return the contains value
-     */
-    public String getValue() {
-        return fValue;
-    }
-
-    /**
      * @param value the contains value
      */
+    @Override
     public void setValue(String value) {
-        this.fValue = value;
+        super.setValue(value);
         if (value != null) {
             fValueUpperCase = value.toUpperCase();
         }
@@ -111,15 +73,15 @@ public class TmfFilterContainsNode extends TmfFilterTreeNode {
 
     @Override
     public boolean matches(ITmfEvent event) {
-        Object value = getFieldValue(event, fField);
+        Object value = getFieldValue(event, getField());
         if (value == null) {
-            return false ^ fNot;
+            return false ^ isNot();
         }
         String valueString = value.toString();
         if (fIgnoreCase) {
-            return valueString.toUpperCase().contains(fValueUpperCase) ^ fNot;
+            return valueString.toUpperCase().contains(fValueUpperCase) ^ isNot();
         }
-        return valueString.contains(fValue) ^ fNot;
+        return valueString.contains(getValue()) ^ isNot();
     }
 
     @Override
@@ -129,14 +91,14 @@ public class TmfFilterContainsNode extends TmfFilterTreeNode {
 
     @Override
     public String toString() {
-        return fField + (fNot ? " not" : "") + " contains \"" + fValue + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        return getField() + (isNot() ? " not" : "") + " contains \"" + getValue() + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     }
 
     @Override
     public ITmfFilterTreeNode clone() {
         TmfFilterContainsNode clone = (TmfFilterContainsNode) super.clone();
-        clone.fField = fField;
-        clone.setValue(fValue);
+        clone.setField(getField());
+        clone.setValue(getValue());
         return clone;
     }
 
@@ -144,10 +106,10 @@ public class TmfFilterContainsNode extends TmfFilterTreeNode {
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((fField == null) ? 0 : fField.hashCode());
+        result = prime * result + ((getField() == null) ? 0 : getField().hashCode());
         result = prime * result + (fIgnoreCase ? 1231 : 1237);
-        result = prime * result + (fNot ? 1231 : 1237);
-        result = prime * result + ((fValue == null) ? 0 : fValue.hashCode());
+        result = prime * result + (isNot() ? 1231 : 1237);
+        result = prime * result + ((getValue() == null) ? 0 : getValue().hashCode());
         return result;
     }
 
@@ -163,24 +125,24 @@ public class TmfFilterContainsNode extends TmfFilterTreeNode {
             return false;
         }
         TmfFilterContainsNode other = (TmfFilterContainsNode) obj;
-        if (fField == null) {
-            if (other.fField != null) {
+        if (getField() == null) {
+            if (other.getField() != null) {
                 return false;
             }
-        } else if (!fField.equals(other.fField)) {
+        } else if (!getField().equals(other.getField())) {
             return false;
         }
         if (fIgnoreCase != other.fIgnoreCase) {
             return false;
         }
-        if (fNot != other.fNot) {
+        if (isNot() != other.isNot()) {
             return false;
         }
-        if (fValue == null) {
-            if (other.fValue != null) {
+        if (getValue() == null) {
+            if (other.getValue() != null) {
                 return false;
             }
-        } else if (!fValue.equals(other.fValue)) {
+        } else if (!getValue().equals(other.getValue())) {
             return false;
         }
         return true;

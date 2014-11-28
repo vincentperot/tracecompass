@@ -23,15 +23,14 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
  * @version 1.0
  * @author Patrick Tasse
  */
-@SuppressWarnings("javadoc")
 public class TmfFilterEventTypeNode extends TmfFilterTreeNode {
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
-        result = prime * result + ((fName == null) ? 0 : fName.hashCode());
-        result = prime * result + ((fType == null) ? 0 : fType.hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
+        result = prime * result + ((getEventType() == null) ? 0 : getEventType().hashCode());
         return result;
     }
 
@@ -47,18 +46,18 @@ public class TmfFilterEventTypeNode extends TmfFilterTreeNode {
             return false;
         }
         TmfFilterEventTypeNode other = (TmfFilterEventTypeNode) obj;
-        if (fName == null) {
-            if (other.fName != null) {
+        if (getName() == null) {
+            if (other.getName() != null) {
                 return false;
             }
-        } else if (!fName.equals(other.fName)) {
+        } else if (!getName().equals(other.getName())) {
             return false;
         }
-        if (fType == null) {
-            if (other.fType != null) {
+        if (getEventType() == null) {
+            if (other.getEventType() != null) {
                 return false;
             }
-        } else if (!fType.equals(other.fType)) {
+        } else if (!getEventType().equals(other.getEventType())) {
             return false;
         }
         return true;
@@ -67,9 +66,6 @@ public class TmfFilterEventTypeNode extends TmfFilterTreeNode {
     public static final String NODE_NAME = "EVENTTYPE"; //$NON-NLS-1$
     public static final String TYPE_ATTR = "type"; //$NON-NLS-1$
     public static final String NAME_ATTR = "name"; //$NON-NLS-1$
-
-    private String fType;
-    private String fName;
 
     /**
      * @param parent the parent node
@@ -83,46 +79,18 @@ public class TmfFilterEventTypeNode extends TmfFilterTreeNode {
         return NODE_NAME;
     }
 
-    /**
-     * @return the event type
-     */
-    public String getEventType() {
-        return fType;
-    }
-
-    /**
-     * @param type the event type
-     */
-    public void setEventType(String type) {
-        this.fType = type;
-    }
-
-    /**
-     * @return the category and trace type name
-     */
-    public String getName() {
-        return fName;
-    }
-
-    /**
-     * @param name the category and trace type name
-     */
-    public void setName(String name) {
-        this.fName = name;
-    }
-
     @Override
     public boolean matches(ITmfEvent event) {
         boolean match = false;
-        if (fType.contains(":")) { //$NON-NLS-1$
+        if (getEventType().contains(":")) { //$NON-NLS-1$
             // special case for custom parsers
-            if (fType.startsWith(event.getClass().getCanonicalName())) {
-                if (fType.endsWith(event.getType().getName())) {
+            if (getEventType().startsWith(event.getClass().getCanonicalName())) {
+                if (getEventType().endsWith(event.getType().getName())) {
                     match = true;
                 }
             }
         } else {
-            if (event.getClass().getCanonicalName().equals(fType)) {
+            if (event.getClass().getCanonicalName().equals(getEventType())) {
                 match = true;
             }
         }
@@ -149,23 +117,11 @@ public class TmfFilterEventTypeNode extends TmfFilterTreeNode {
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
-        buf.append("EventType is " + fName); //$NON-NLS-1$
+        buf.append("EventType is " + getName()); //$NON-NLS-1$
         if (getChildrenCount() > 0) {
             buf.append(" and "); //$NON-NLS-1$
         }
-        if (getChildrenCount() > 1) {
-            buf.append("( "); //$NON-NLS-1$
-        }
-        for (int i = 0; i < getChildrenCount(); i++) {
-            ITmfFilterTreeNode node = getChildren()[i];
-            buf.append(node.toString());
-            if (i < getChildrenCount() - 1) {
-                buf.append(" and "); //$NON-NLS-1$
-            }
-        }
-        if (getChildrenCount() > 1) {
-            buf.append(" )"); //$NON-NLS-1$
-        }
+        buf.append(stringifyChildren(" and ")); //$NON-NLS-1$
         return buf.toString();
     }
 }
