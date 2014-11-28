@@ -261,8 +261,8 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
                     event.getTrace(), TmfCpuAspect.class);
             for (TmfCpuAspect aspect : cpuAspects) {
                 /* We will just pick the first one we find */
-                String cpu = aspect.resolve(event);
-                return TmfStateValue.newValueInt(Integer.valueOf(cpu));
+                Integer cpu = aspect.resolve(event);
+                return TmfStateValue.newValueInt(cpu);
             }
         }
         /* Exception also for "TIMESTAMP", returns the timestamp of this event */

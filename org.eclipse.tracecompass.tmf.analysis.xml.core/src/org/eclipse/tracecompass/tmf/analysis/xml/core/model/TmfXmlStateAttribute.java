@@ -228,8 +228,8 @@ public abstract class TmfXmlStateAttribute implements ITmfXmlStateAttribute {
                     Iterable<TmfCpuAspect> cpuAspects = TmfTraceUtils.getEventAspectsOfClass(
                             event.getTrace(), TmfCpuAspect.class);
                     for (TmfCpuAspect aspect : cpuAspects) {
-                        String cpu = aspect.resolve(event);
-                        quark = getQuarkRelativeAndAdd(startQuark, cpu);
+                        Integer cpu = aspect.resolve(event);
+                        quark = getQuarkRelativeAndAdd(startQuark, cpu.toString());
                         break;
                     }
                 } else {
