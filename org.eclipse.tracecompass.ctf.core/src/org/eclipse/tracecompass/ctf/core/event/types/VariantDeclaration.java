@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 Ericsson, Ecole Polytechnique de Montreal and others
+ * Copyright (c) 2011, 2015 Ericsson, Ecole Polytechnique de Montreal and others
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
@@ -25,7 +25,7 @@ import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 
 /**
- * A CTFC variant declaration.
+ * A CTF C variant declaration.
  *
  * A variant is similar to a C union, only taking the minimum size of the types,
  * it is a compound data type that contains other datatypes in fields. they are
@@ -44,7 +44,6 @@ public class VariantDeclaration extends Declaration {
     private String fTag = null;
     private static final long ALIGNMENT = 1;
     private final Map<String, IDeclaration> fFields = Collections.synchronizedMap(new HashMap<String, IDeclaration>());
-    private EnumDefinition fTagDef;
     private IDeclaration fDeclarationToPopulate;
     private IDefinitionScope fPrevDefinitionScope;
 
@@ -88,7 +87,6 @@ public class VariantDeclaration extends Declaration {
      */
     public void setTag(String tag) {
         fTag = tag;
-        fTagDef = null;
     }
 
     /**
@@ -123,14 +121,10 @@ public class VariantDeclaration extends Declaration {
             String fieldName, BitBuffer input) throws CTFReaderException {
         alignRead(input);
         if (fPrevDefinitionScope != definitionScope) {
-            fTagDef = null;
             fPrevDefinitionScope = definitionScope;
         }
-        EnumDefinition tagDef = fTagDef;
-        if (tagDef == null) {
-            Definition def = definitionScope.lookupDefinition(fTag);
-            tagDef = (EnumDefinition) ((def instanceof EnumDefinition) ? def : null);
-        }
+        Definition def = definitionScope.lookupDefinition(fTag);
+        EnumDefinition tagDef = (EnumDefinition) ((def instanceof EnumDefinition) ? def : null);
         if (tagDef == null) {
             throw new CTFReaderException("Tag is not defined " + fTag); //$NON-NLS-1$
         }
@@ -154,15 +148,6 @@ public class VariantDeclaration extends Declaration {
      */
     public void addField(String fieldTag, IDeclaration declaration) {
         fFields.put(fieldTag, declaration);
-    }
-
-    /**
-     * gets the tag definition
-     *
-     * @return the fTagDef
-     */
-    public EnumDefinition getTagDef() {
-        return fTagDef;
     }
 
     @Override
@@ -201,7 +186,6 @@ public class VariantDeclaration extends Declaration {
         }
         result = prime * result + ((fPrevDefinitionScope == null) ? 0 : fPrevDefinitionScope.hashCode());
         result = prime * result + ((fTag == null) ? 0 : fTag.hashCode());
-        result = prime * result + ((fTagDef == null) ? 0 : fTagDef.hashCode());
         return result;
     }
 
@@ -226,16 +210,19 @@ public class VariantDeclaration extends Declaration {
         }
         // do not check the order of the fields
 
-        if (!equalsNullable(fFields, other.fFields)) {
-            return false;
+        if (fFields == null) {
+            if (other.fFields != null) {
+                return false;
+            }
+        } else {
+            if (!fFields.equals(other.fFields)) {
+                return false;
+            }
         }
         if (!equalsNullable(fPrevDefinitionScope, other.fPrevDefinitionScope)) {
             return false;
         }
         if (!equalsNullable(fTag, other.fTag)) {
-            return false;
-        }
-        if (!equalsNullable(fTagDef, other.fTagDef)){
             return false;
         }
         return true;
