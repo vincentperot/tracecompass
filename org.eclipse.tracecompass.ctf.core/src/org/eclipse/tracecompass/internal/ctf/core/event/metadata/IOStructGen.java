@@ -1503,7 +1503,7 @@ public class IOStructGen {
         StringDeclaration stringDeclaration = null;
 
         if (children == null) {
-            stringDeclaration = new StringDeclaration();
+            stringDeclaration = StringDeclaration.getStringDeclaration(Encoding.UTF8);
         } else {
             Encoding encoding = Encoding.UTF8;
             for (CommonTree child : children) {
@@ -1538,7 +1538,7 @@ public class IOStructGen {
                 }
             }
 
-            stringDeclaration = new StringDeclaration(encoding);
+            stringDeclaration = StringDeclaration.getStringDeclaration(encoding);
         }
 
         return stringDeclaration;

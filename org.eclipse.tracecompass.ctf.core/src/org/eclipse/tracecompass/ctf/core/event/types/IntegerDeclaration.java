@@ -498,7 +498,7 @@ public final class IntegerDeclaration extends Declaration implements ISimpleData
         int result = 1;
         result = prime * result + (int) (fAlignment ^ (fAlignment >>> 32));
         result = prime * result + fBase;
-        result = prime * result + fByteOrder.hashCode();
+        result = prime * result + fByteOrder.toString().hashCode();
         result = prime * result + fClock.hashCode();
         result = prime * result + fEncoding.hashCode();
         result = prime * result + fLength;

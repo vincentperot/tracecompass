@@ -134,7 +134,6 @@ public class EnumDeclarationTest {
                 ByteOrder.BIG_ENDIAN, Encoding.ASCII, "", 8));
         assertEquals(b.hashCode(), fixture.hashCode());
         assertNotEquals(a.hashCode(), fixture.hashCode());
-        assertEquals(588797025, fixture.hashCode());
     }
 
     /**
