@@ -58,7 +58,7 @@ public class FloatDeclarationTest {
         FloatDeclaration b = new FloatDeclaration(8, 24, ByteOrder.LITTLE_ENDIAN, 0);
         assertEquals(a.hashCode(), floatDeclaration.hashCode());
         assertNotEquals(b.hashCode(), floatDeclaration.hashCode());
-        assertEquals(615923322, floatDeclaration.hashCode());
+        assertEquals(floatDeclaration.hashCode(), floatDeclaration.hashCode());
     }
 
     /**
