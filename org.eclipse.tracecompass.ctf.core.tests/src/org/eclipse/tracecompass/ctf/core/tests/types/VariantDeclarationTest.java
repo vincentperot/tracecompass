@@ -214,8 +214,15 @@ public class VariantDeclarationTest {
      */
     @Test
     public void hashcodeTest() {
-        assertEquals(923521, fixture.hashCode());
-        assertEquals(fixture.hashCode(), new VariantDeclaration().hashCode());
+        VariantDeclaration a = new VariantDeclaration();
+        VariantDeclaration b = new VariantDeclaration();
+        b.addField("hi", StringDeclaration.getStringDeclaration(Encoding.UTF8));
+        VariantDeclaration c = new VariantDeclaration();
+        c.addField("hi", StringDeclaration.getStringDeclaration(Encoding.UTF8));
+        assertEquals(fixture.hashCode(), a.hashCode());
+        assertEquals(b.hashCode(), c.hashCode());
+        assertNotEquals(fixture.hashCode(), c.hashCode());
+        assertNotEquals(a.hashCode(), c.hashCode());
     }
 
     /**

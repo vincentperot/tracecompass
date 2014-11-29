@@ -42,7 +42,6 @@ public class VariantDeclaration extends Declaration {
     private String fTag = null;
     private static final long ALIGNMENT = 1;
     private final Map<String, IDeclaration> fFields = Collections.synchronizedMap(new HashMap<String, IDeclaration>());
-    private EnumDefinition fTagDef;
     private IDeclaration fDeclarationToPopulate;
     private IDefinitionScope fPrevDefinitionScope;
 
@@ -86,7 +85,6 @@ public class VariantDeclaration extends Declaration {
      */
     public void setTag(String tag) {
         fTag = tag;
-        fTagDef = null;
     }
 
     /**
@@ -125,14 +123,10 @@ public class VariantDeclaration extends Declaration {
             String fieldName, BitBuffer input) throws CTFReaderException {
         alignRead(input);
         if (fPrevDefinitionScope != definitionScope) {
-            fTagDef = null;
             fPrevDefinitionScope = definitionScope;
         }
-        EnumDefinition tagDef = fTagDef;
-        if (tagDef == null) {
-            Definition def = definitionScope.lookupDefinition(fTag);
-            tagDef = (EnumDefinition) ((def instanceof EnumDefinition) ? def : null);
-        }
+        Definition def = definitionScope.lookupDefinition(fTag);
+        EnumDefinition tagDef = (EnumDefinition) ((def instanceof EnumDefinition) ? def : null);
         if (tagDef == null) {
             throw new CTFReaderException("Tag is not defined " + fTag); //$NON-NLS-1$
         }
@@ -156,16 +150,6 @@ public class VariantDeclaration extends Declaration {
      */
     public void addField(String fieldTag, IDeclaration declaration) {
         fFields.put(fieldTag, declaration);
-    }
-
-    /**
-     * gets the tag definition
-     *
-     * @return the fTagDef
-     * @since 3.0
-     */
-    public EnumDefinition getTagDef() {
-        return fTagDef;
     }
 
     /**
@@ -207,7 +191,6 @@ public class VariantDeclaration extends Declaration {
         }
         result = prime * result + ((fPrevDefinitionScope == null) ? 0 : fPrevDefinitionScope.hashCode());
         result = prime * result + ((fTag == null) ? 0 : fTag.hashCode());
-        result = prime * result + ((fTagDef == null) ? 0 : fTagDef.hashCode());
         return result;
     }
 
@@ -237,7 +220,7 @@ public class VariantDeclaration extends Declaration {
                 return false;
             }
         } else {
-            if( !fFields.equals(other.fFields)) {
+            if (!fFields.equals(other.fFields)) {
                 return false;
             }
         }
@@ -253,13 +236,6 @@ public class VariantDeclaration extends Declaration {
                 return false;
             }
         } else if (!fTag.equals(other.fTag)) {
-            return false;
-        }
-        if (fTagDef == null) {
-            if (other.fTagDef != null) {
-                return false;
-            }
-        } else if (!fTagDef.equals(other.fTagDef)) {
             return false;
         }
         return true;
