@@ -49,6 +49,7 @@ import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomXmlTrace;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomXmlTraceDefinition;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfNanoTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
@@ -179,7 +180,8 @@ public class TmfXmlTraceStub extends TmfTrace {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, NLS.bind(org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.Messages.TmfDevelopmentTrace_IoError, path), e);
         }
         @SuppressWarnings("null")
-        @NonNull IStatus status = Status.OK_STATUS;
+        @NonNull
+        IStatus status = Status.OK_STATUS;
         return status;
     }
 
@@ -272,9 +274,14 @@ public class TmfXmlTraceStub extends TmfTrace {
         ITmfEventType customEventType = event.getType();
         TmfEventType eventType = new TmfEventType(eventName, customEventType.getRootField());
         ITmfEventField eventFields = new CustomEventContent(content.getName(), content.getValue(), fieldsArray);
-        // FIXME We used to use getSource() to get the CPU. Now this will have
-        // to be done differently.
-        TmfEvent newEvent = new TmfEvent(this, ITmfContext.UNKNOWN_RANK, event.getTimestamp(), eventType, eventFields);
+        /*
+         * TODO: Timestamps for these traces are in nanos, but since the
+         * CustomXmlTrace does not support this format, the timestamp of the
+         * original is in second and we need to convert it. We should do that at
+         * the source when it is supported
+         */
+        ITmfTimestamp timestamp = new TmfNanoTimestamp(event.getTimestamp().getValue() / 1000000000L);
+        TmfEvent newEvent = new TmfEvent(this, ITmfContext.UNKNOWN_RANK, timestamp, eventType, eventFields);
         updateAttributes(savedContext, event.getTimestamp());
         context.increaseRank();
 
@@ -337,7 +344,5 @@ public class TmfXmlTraceStub extends TmfTrace {
     public Iterable<ITmfEventAspect> getEventAspects() {
         return fAspects;
     }
-
-
 
 }
