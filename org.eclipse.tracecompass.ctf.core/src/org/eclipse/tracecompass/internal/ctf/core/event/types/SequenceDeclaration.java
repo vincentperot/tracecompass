@@ -14,8 +14,8 @@ package org.eclipse.tracecompass.internal.ctf.core.event.types;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
@@ -130,14 +130,15 @@ public class SequenceDeclaration extends CompoundDeclaration {
         List<String> paths = (List<String>) fPaths.get(fieldName);
         Builder<Definition> definitions = new ImmutableList.Builder<>();
         for (int i = 0; i < length; i++) {
-            @SuppressWarnings("null")
-            @NonNull
             String elemName = paths.get(i);
+            if (elemName == null) {
+                /* We should not have inserted any null values */
+                throw new IllegalStateException();
+            }
             definitions.add(fElemType.createDefinition(definitionScope, elemName, input));
         }
-        @SuppressWarnings("null")
-        @NonNull ImmutableList<Definition> build = definitions.build();
-        return new ArrayDefinition(this, definitionScope, fieldName, build);
+        List<Definition> list = NonNullUtils.checkForNull(definitions.build());
+        return new ArrayDefinition(this, definitionScope, fieldName, list);
     }
 
     @Override

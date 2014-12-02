@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.Attributes;
 import org.eclipse.tracecompass.lttng2.kernel.core.analysis.cpuusage.LttngKernelCpuUsageAnalysis;
 import org.eclipse.tracecompass.lttng2.kernel.core.analysis.kernel.LttngKernelAnalysis;
@@ -183,8 +183,7 @@ public class CpuUsageComposite extends AbstractTmfTreeViewer {
             for (ITmfTreeViewerEntry entry : rootEntry.getChildren()) {
                 if (entry instanceof CpuUsageEntry) {
                     if (selectedThread.equals(((CpuUsageEntry) entry).getTid())) {
-                        @SuppressWarnings("null")
-                        @NonNull List<ITmfTreeViewerEntry> list = Collections.singletonList(entry);
+                        List<ITmfTreeViewerEntry> list = NonNullUtils.checkForNull(Collections.singletonList(entry));
                         super.setSelection(list);
                         return;
                     }

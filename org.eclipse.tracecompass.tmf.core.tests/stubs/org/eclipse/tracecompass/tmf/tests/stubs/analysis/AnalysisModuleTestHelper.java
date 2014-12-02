@@ -17,6 +17,7 @@ import java.util.Collections;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement;
@@ -64,9 +65,7 @@ public class AnalysisModuleTestHelper implements IAnalysisModuleHelper {
 
     @Override
     public String getName() {
-        @SuppressWarnings("null")
-        @NonNull String name = fModule.name();
-        return name;
+        return NonNullUtils.checkForNull(fModule.name());
     }
 
     @Override

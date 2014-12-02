@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
@@ -194,11 +195,9 @@ public class StructDeclaration extends Declaration {
             LexicalScope fieldScope, @NonNull BitBuffer input) throws CTFReaderException {
         alignRead(input);
         final Definition[] myFields = new Definition[fFieldMap.size()];
-        /*
-         * Key set is NOT null
-         */
-        @SuppressWarnings("null")
-        StructDefinition structDefinition = new StructDefinition(this, definitionScope, fieldScope, fieldScope.getName(), fFieldMap.keySet(), myFields);
+
+        StructDefinition structDefinition = new StructDefinition(this,definitionScope,
+                fieldScope, fieldScope.getName(), NonNullUtils.checkForNull(fFieldMap.keySet()), myFields);
         fillStruct(input, myFields, structDefinition);
         return structDefinition;
     }
@@ -216,12 +215,16 @@ public class StructDeclaration extends Declaration {
         fMaxAlign = Math.max(fMaxAlign, declaration.getAlignment());
     }
 
-    @SuppressWarnings("null")
     private void fillStruct(@NonNull BitBuffer input, final Definition[] myFields, StructDefinition structDefinition) throws CTFReaderException {
         Iterator<Map.Entry<String, IDeclaration>> iter = fFieldMap.entrySet().iterator();
         for (int i = 0; i < fFieldMap.size(); i++) {
             Map.Entry<String, IDeclaration> entry = iter.next();
-            myFields[i] = entry.getValue().createDefinition(structDefinition, entry.getKey(), input);
+            String key = entry.getKey();
+            if (key == null) {
+                /* We should not have inserted null keys... */
+                throw new IllegalStateException();
+            }
+            myFields[i] = entry.getValue().createDefinition(structDefinition, key, input);
         }
     }
 

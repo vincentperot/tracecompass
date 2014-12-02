@@ -12,7 +12,8 @@
 
 package org.eclipse.tracecompass.tmf.core.event.matching;
 
-import org.eclipse.jdt.annotation.NonNull;
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkForNull;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -33,8 +34,7 @@ import com.google.common.hash.Hashing;
 @NonNullByDefault
 public class TcpEventKey implements IEventMatchingKey {
 
-    @SuppressWarnings("null")
-    private static final @NonNull HashFunction HF = Hashing.goodFastHash(32);
+    private static final HashFunction HF = checkForNull(Hashing.goodFastHash(32));
     private final long fSeq;
     private final long fAckseq;
     private final long fFlags;
