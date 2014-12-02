@@ -14,7 +14,8 @@
 package org.eclipse.tracecompass.tmf.core.event;
 
 import java.util.Collection;
-import java.util.Collections;
+
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 
 /**
  * A basic implementation of ITmfEventType.
@@ -91,7 +92,7 @@ public class TmfEventType implements ITmfEventType {
      */
     @Override
     public Collection<String> getFieldNames() {
-        return (fRootField != null) ? fRootField.getFieldNames() : Collections.EMPTY_SET;
+        return (fRootField != null) ? fRootField.getFieldNames() : NonNullUtils.<String>nonNullEmptySet();
     }
 
     // ------------------------------------------------------------------------

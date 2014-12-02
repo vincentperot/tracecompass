@@ -13,7 +13,6 @@
 
 package org.eclipse.tracecompass.tmf.core.analysis;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +28,7 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 import org.osgi.framework.Bundle;
 
 /**
@@ -149,7 +149,7 @@ public class TmfAnalysisModuleHelperConfigElement implements IAnalysisModuleHelp
         if (module != null) {
             return module.getAnalysisRequirements();
         }
-        return Collections.EMPTY_SET;
+        return NonNullUtils.<TmfAnalysisRequirement>nonNullEmptySet();
 
     }
 

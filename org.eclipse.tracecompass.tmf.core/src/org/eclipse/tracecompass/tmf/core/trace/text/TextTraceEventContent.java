@@ -14,12 +14,12 @@
 package org.eclipse.tracecompass.tmf.core.trace.text;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 
 /**
  * Implementation of ITmfEventField for Text Traces.
@@ -64,9 +64,7 @@ public class TextTraceEventContent implements ITmfEventField {
     private TextTraceEventContent(@NonNull String fieldName) {
         fName = fieldName;
         fValue = null;
-        @SuppressWarnings("null")
-        @NonNull List<TextTraceEventContent> fields = Collections.EMPTY_LIST;
-        fFields = fields;
+        fFields = NonNullUtils.<TextTraceEventContent>nonNullEmptyList();
     }
 
     // ------------------------------------------------------------------------

@@ -51,6 +51,7 @@ import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModul
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.AbstractTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphPresentationProvider2;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
@@ -474,7 +475,7 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
     @Override
     protected List<ITimeEvent> getEventList(TimeGraphEntry entry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
         if (!(entry instanceof XmlEntry)) {
-            return Collections.EMPTY_LIST;
+            return NonNullUtils.<ITimeEvent>nonNullEmptyList();
         }
         XmlEntry xmlEntry = (XmlEntry) entry;
         ITmfStateSystem ssq = xmlEntry.getStateSystem();
@@ -520,7 +521,7 @@ public class XmlTimeGraphView extends AbstractTimeGraphView {
     @Override
     protected List<ILinkEvent> getLinkList(long startTime, long endTime, long resolution, IProgressMonitor monitor) {
         /* TODO: not implemented yet, need XML to go along */
-        return Collections.EMPTY_LIST;
+        return NonNullUtils.<ILinkEvent>nonNullEmptyList();
     }
 
 }

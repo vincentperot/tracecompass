@@ -45,6 +45,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 
 /**
  * Central trace manager for TMF. It tracks the currently opened traces and
@@ -127,8 +128,7 @@ public final class TmfTraceManager {
     /**
      * Gets the filter applied to the current trace
      *
-     * @return
-     *          a filter, or <code>null</code>
+     * @return a filter, or <code>null</code>
      * @since 2.2
      */
     public synchronized ITmfFilter getCurrentFilter() {
@@ -226,9 +226,7 @@ public final class TmfTraceManager {
      */
     public static @NonNull Set<ITmfTrace> getTraceSetWithExperiment(ITmfTrace trace) {
         if (trace == null) {
-            @SuppressWarnings("null")
-            @NonNull Set<ITmfTrace> emptySet = Collections.EMPTY_SET;
-            return emptySet;
+            return NonNullUtils.<ITmfTrace> nonNullEmptySet();
         }
         if (trace instanceof TmfExperiment) {
             TmfExperiment exp = (TmfExperiment) trace;
@@ -238,7 +236,8 @@ public final class TmfTraceManager {
             return alltraces;
         }
         @SuppressWarnings("null")
-        @NonNull Set<ITmfTrace> singleton = Collections.singleton(trace);
+        @NonNull
+        Set<ITmfTrace> singleton = Collections.singleton(trace);
         return singleton;
     }
 
@@ -327,7 +326,6 @@ public final class TmfTraceManager {
         fCurrentTrace = trace;
     }
 
-
     /**
      * Handler for the TmfTraceSelectedSignal.
      *
@@ -405,8 +403,8 @@ public final class TmfTraceManager {
     /**
      * Signal handler for the TmfRangeSynchSignal signal.
      *
-     * The current window time range of *all* valid traces will be updated
-     * to the new requested times.
+     * The current window time range of *all* valid traces will be updated to
+     * the new requested times.
      *
      * @param signal
      *            The incoming signal
@@ -513,9 +511,9 @@ public final class TmfTraceManager {
      */
     private static String getTemporaryDir(ITmfTrace trace) {
         String pathName = getTemporaryDirPath() +
-            File.separator +
-            trace.getName() +
-            File.separator;
+                File.separator +
+                trace.getName() +
+                File.separator;
         File dir = new File(pathName);
         if (!dir.exists()) {
             dir.mkdirs();

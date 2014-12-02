@@ -13,7 +13,6 @@
 package org.eclipse.tracecompass.tmf.analysis.xml.ui.module;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.Path;
@@ -30,6 +29,7 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 import org.osgi.framework.Bundle;
 import org.w3c.dom.Element;
 
@@ -149,12 +149,13 @@ public class TmfAnalysisModuleHelperXml implements IAnalysisModuleHelper {
 
     @Override
     public Iterable<Class<? extends ITmfTrace>> getValidTraceTypes() {
-        return Collections.EMPTY_SET;
+        // to be fixed maybe later if it brings warnings
+        return NonNullUtils.nonNullEmptySet();
     }
 
     @Override
     public Iterable<TmfAnalysisRequirement> getAnalysisRequirements() {
-        return Collections.EMPTY_SET;
+        return NonNullUtils.<TmfAnalysisRequirement>nonNullEmptySet();
     }
 
     @Override

@@ -14,8 +14,6 @@ package org.eclipse.tracecompass.internal.tmf.pcap.core.event;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -29,6 +27,7 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 
 import com.google.common.collect.ImmutableList;
 
@@ -210,9 +209,7 @@ public class PcapEvent extends TmfEvent {
         }
 
         if (packet == null) {
-            @SuppressWarnings("null")
-            @NonNull List<TmfPcapProtocol> emptyList = Collections.EMPTY_LIST;
-            fProtocols = emptyList;
+            fProtocols = NonNullUtils.<TmfPcapProtocol>nonNullEmptyList();
             return fProtocols;
         }
         // Go through all the packets and add them to list.

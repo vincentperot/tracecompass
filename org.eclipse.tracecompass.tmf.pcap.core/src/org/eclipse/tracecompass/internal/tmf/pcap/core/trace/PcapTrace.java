@@ -48,6 +48,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -72,8 +73,6 @@ public class PcapTrace extends TmfTrace implements ITmfEventParser, ITmfTracePro
             ITmfEventAspect.BaseAspects.CONTENTS
             );
 
-    @SuppressWarnings("null")
-    private static final @NonNull Map<String, String> EMPTY_MAP = ImmutableMap.of();
     private static final String EMPTY_STRING = ""; //$NON-NLS-1$
     private static final int CONFIDENCE = 50;
     private @Nullable PcapFile fPcapFile;
@@ -244,7 +243,7 @@ public class PcapTrace extends TmfTrace implements ITmfEventParser, ITmfTracePro
     public synchronized Map<String, String> getTraceProperties() {
         PcapFile pcap = fPcapFile;
         if (pcap == null) {
-            return EMPTY_MAP;
+            return NonNullUtils.<String, String>nonNullEmptyMap();
         }
 
         ImmutableMap<String, String> properties = fTraceProperties;

@@ -40,6 +40,7 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 
 /**
  * Base class that analysis modules main class may extend. It provides default
@@ -265,9 +266,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
      * @return An iterable list of analysis this analyzes depends on.
      */
     protected Iterable<IAnalysisModule> getDependentAnalyses() {
-        @SuppressWarnings("null")
-        @NonNull Set<IAnalysisModule> emptySet = Collections.EMPTY_SET;
-        return emptySet;
+        return NonNullUtils.<IAnalysisModule>nonNullEmptyList();
     }
 
     private void execute(final ITmfTrace trace) {
