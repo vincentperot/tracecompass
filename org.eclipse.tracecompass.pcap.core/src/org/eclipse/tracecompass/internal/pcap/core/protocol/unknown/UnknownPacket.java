@@ -16,8 +16,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.pcap.core.packet.Packet;
 import org.eclipse.tracecompass.internal.pcap.core.protocol.PcapProtocol;
 import org.eclipse.tracecompass.internal.pcap.core.trace.PcapFile;
@@ -42,7 +42,7 @@ public class UnknownPacket extends Packet {
     private @Nullable UnknownEndpoint fSourceEndpoint;
     private @Nullable UnknownEndpoint fDestinationEndpoint;
 
-    private @Nullable ImmutableMap<String, String> fFields;
+    private @Nullable Map<String, String> fFields;
 
     /**
      * Constructor of an Unknown Packet object.
@@ -87,8 +87,7 @@ public class UnknownPacket extends Packet {
 
     @Override
     public String toString() {
-        @SuppressWarnings("null")
-        @NonNull byte[] array = fPayload.array();
+        byte[] array = NonNullUtils.check(fPayload.array());
         String string = "Payload: " + ConversionHelper.bytesToHex(array, true); //$NON-NLS-1$
         final Packet child = fChildPacket;
         if (child != null) {
@@ -127,10 +126,9 @@ public class UnknownPacket extends Packet {
 
     @Override
     public Map<String, String> getFields() {
-        ImmutableMap<String, String> map = fFields;
+        Map<String, String> map = fFields;
         if (map == null) {
-            @SuppressWarnings("null")
-            @NonNull byte[] array = fPayload.array();
+            byte[] array = NonNullUtils.check(fPayload.array());
 
             Builder<String, String> builder = ImmutableMap.<String, String> builder()
                     .put("Binary", ConversionHelper.bytesToHex(array, true)); //$NON-NLS-1$
@@ -140,10 +138,8 @@ public class UnknownPacket extends Packet {
             } catch (UnsupportedEncodingException e) {
                 // Do nothing. The string won't be added to the map anyway.
             }
-            @SuppressWarnings("null")
-            @NonNull ImmutableMap<String, String> newMap = builder.build();
-            fFields = newMap;
-            return newMap;
+            fFields = NonNullUtils.check(builder.build());
+            return fFields;
         }
         return map;
     }

@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.ui.TmfXmlUiStrings;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.ui.views.XmlViewInfo;
@@ -62,7 +63,7 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
     private static final long BUILD_UPDATE_TIMEOUT = 500;
 
     @SuppressWarnings("null")
-    private static final @NonNull Pattern WILDCARD_PATTERN = Pattern.compile("\\*"); //$NON-NLS-1$
+    private static final @NonNull Pattern WILDCARD_PATTERN = NonNullUtils.check(Pattern.compile("\\*")); //$NON-NLS-1$
 
     private final ITmfXmlModelFactory fFactory = TmfXmlReadOnlyModelFactory.getInstance();
     private final Map<Integer, SeriesData> fSeriesData = new HashMap<>();
@@ -188,8 +189,7 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
         public List<Integer> getQuarks() {
             /* Get the list of quarks to process with this path */
             String[] paths = fPath.split(SPLIT_STRING);
-            @SuppressWarnings("null")
-            @NonNull List<Integer> quarks = Collections.singletonList(IXmlStateSystemContainer.ROOT_QUARK);
+            List<Integer> quarks = NonNullUtils.check(Collections.singletonList(IXmlStateSystemContainer.ROOT_QUARK));
 
             try {
                 for (String path : paths) {

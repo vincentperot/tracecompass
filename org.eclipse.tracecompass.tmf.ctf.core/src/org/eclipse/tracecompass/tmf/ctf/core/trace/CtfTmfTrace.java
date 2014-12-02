@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.event.CTFClock;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
@@ -92,15 +93,14 @@ public class CtfTmfTrace extends TmfTrace
     /**
      * Event aspects available for all CTF traces
      */
-    @SuppressWarnings("null")
     private static final @NonNull Collection<ITmfEventAspect> CTF_ASPECTS =
-            ImmutableList.of(
+            NonNullUtils.check(ImmutableList.of(
                     ITmfEventAspect.BaseAspects.TIMESTAMP,
                     new CtfChannelAspect(),
                     new CtfCpuAspect(),
                     ITmfEventAspect.BaseAspects.EVENT_TYPE,
                     ITmfEventAspect.BaseAspects.CONTENTS
-                    );
+                    ));
 
     /**
      * The Ctf clock unique identifier field

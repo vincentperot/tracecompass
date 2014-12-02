@@ -14,8 +14,10 @@ package org.eclipse.tracecompass.ctf.core.event.scope;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 import com.google.common.base.Joiner;
 
@@ -183,11 +185,10 @@ public class LexicalScope implements Comparable<LexicalScope> {
      * @param name
      *            the name of the field
      */
-    @SuppressWarnings("null")
     public LexicalScope(@Nullable LexicalScope parent, String name) {
         fName = name;
         if (parent != null) {
-            String pathString = Joiner.on('.').skipNulls().join(parent.fPath, parent.getName());
+            @NonNull String pathString = NonNullUtils.check(Joiner.on('.').skipNulls().join(parent.fPath, parent.getName()));
             /*
              * if joiner return null, we get an NPE... so we won't assign fPath
              * to null
@@ -197,7 +198,7 @@ public class LexicalScope implements Comparable<LexicalScope> {
                  * substring throws an exception or returns a string, it won't
                  * return null
                  */
-                pathString = pathString.substring(1);
+                pathString = NonNullUtils.check(pathString.substring(1));
             }
             fPath = pathString;
             parent.addChild(fName, this);

@@ -26,10 +26,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement.ValuePriorityLevel;
 import org.eclipse.tracecompass.tmf.core.component.TmfComponent;
@@ -265,9 +265,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
      * @return An iterable list of analysis this analyzes depends on.
      */
     protected Iterable<IAnalysisModule> getDependentAnalyses() {
-        @SuppressWarnings("null")
-        @NonNull Set<IAnalysisModule> emptySet = Collections.EMPTY_SET;
-        return emptySet;
+        return NonNullUtils.check(Collections.EMPTY_LIST);
     }
 
     private void execute(final ITmfTrace trace) {
@@ -299,8 +297,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
         /*
          * Actual analysis will be run on a separate thread
          */
-        @SuppressWarnings("null")
-        @NonNull String jobName = NLS.bind(Messages.TmfAbstractAnalysisModule_RunningAnalysis, getName());
+        String jobName = NLS.bind(Messages.TmfAbstractAnalysisModule_RunningAnalysis, getName());
         fJob = new Job(jobName) {
             @Override
             protected @Nullable IStatus run(final @Nullable IProgressMonitor monitor) {
@@ -351,9 +348,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
             execute(trace);
         }
 
-        @SuppressWarnings("null")
-        @NonNull IStatus status = Status.OK_STATUS;
-        return status;
+        return NonNullUtils.check(Status.OK_STATUS);
     }
 
     @Override
@@ -436,9 +431,9 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
      * @return Full help text for the module
      */
     protected String getFullHelpText() {
-        @SuppressWarnings("null")
-        @NonNull String text = NLS.bind(Messages.TmfAbstractAnalysisModule_AnalysisModule, getName());
-        return text;
+        return NonNullUtils.nullToEmptyString(NLS.bind(
+                Messages.TmfAbstractAnalysisModule_AnalysisModule,
+                getName()));
     }
 
     /**
@@ -450,9 +445,9 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
      * @return Short help text describing the module
      */
     protected String getShortHelpText(ITmfTrace trace) {
-        @SuppressWarnings("null")
-        @NonNull String text = NLS.bind(Messages.TmfAbstractAnalysisModule_AnalysisForTrace, getName(), trace.getName());
-        return text;
+        return NonNullUtils.nullToEmptyString(NLS.bind(
+                Messages.TmfAbstractAnalysisModule_AnalysisForTrace,
+                getName(), trace.getName()));
     }
 
     /**
@@ -480,9 +475,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
                 }
             }
         }
-        @SuppressWarnings("null")
-        @NonNull String helpText = builder.toString();
-        return helpText;
+        return NonNullUtils.check(builder.toString());
     }
 
     @Override
@@ -501,8 +494,6 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
 
     @Override
     public Iterable<TmfAnalysisRequirement> getAnalysisRequirements() {
-        @SuppressWarnings("null")
-        @NonNull Iterable<TmfAnalysisRequirement> emptySet = Collections.EMPTY_SET;
-        return emptySet;
+        return NonNullUtils.check(Collections.EMPTY_SET);
     }
 }

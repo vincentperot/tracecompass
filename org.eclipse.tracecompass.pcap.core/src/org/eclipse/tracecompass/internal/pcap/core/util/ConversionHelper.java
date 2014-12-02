@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.pcap.core.protocol.ethernet2.EthernetIIValues;
 
 /**
@@ -27,7 +28,7 @@ import org.eclipse.tracecompass.internal.pcap.core.protocol.ethernet2.EthernetII
 public final class ConversionHelper {
 
     @SuppressWarnings("null")
-    private static final @NonNull char[] HEX_ARRAY = "0123456789abcdef".toCharArray(); //$NON-NLS-1$
+    private static final @NonNull char[] HEX_ARRAY = NonNullUtils.check("0123456789abcdef".toCharArray()); //$NON-NLS-1$
     private static final String EMPTY_STRING = ""; //$NON-NLS-1$
     private static final String DEFAULT_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS"; //$NON-NLS-1$
     private static final DateFormat DATE_FORMATTER = new SimpleDateFormat(DEFAULT_TIME_PATTERN);

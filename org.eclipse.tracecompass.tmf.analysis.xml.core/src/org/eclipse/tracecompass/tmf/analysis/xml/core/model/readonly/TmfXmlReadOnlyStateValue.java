@@ -15,6 +15,7 @@ package org.eclipse.tracecompass.tmf.analysis.xml.core.model.readonly;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.model.ITmfXmlStateAttribute;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.model.TmfXmlStateValue;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.IXmlStateSystemContainer;
@@ -63,7 +64,7 @@ public class TmfXmlReadOnlyStateValue extends TmfXmlStateValue {
      */
     public TmfXmlReadOnlyStateValue(TmfXmlReadOnlyModelFactory modelFactory, Element node,
             IXmlStateSystemContainer container, String eventField) {
-        super(modelFactory, node, container, Collections.EMPTY_LIST, eventField);
+        super(modelFactory, node, container, NonNullUtils.check(Collections.EMPTY_LIST), eventField);
     }
 
 }

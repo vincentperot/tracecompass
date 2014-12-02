@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
@@ -133,10 +134,7 @@ public final class ArrayDeclaration extends CompoundDeclaration {
             }
             definitions.add(fElemType.createDefinition(definitionScope, name, input));
         }
-        @SuppressWarnings("null")
-        @NonNull
-        ImmutableList<Definition> ret = definitions.build();
-        return ret;
+        return NonNullUtils.check(definitions.build());
     }
 
     @Override

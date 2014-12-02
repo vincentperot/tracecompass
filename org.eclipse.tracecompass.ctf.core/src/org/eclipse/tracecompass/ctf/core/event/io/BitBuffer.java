@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 
 /**
@@ -66,9 +67,8 @@ public final class BitBuffer {
     /**
      * Default constructor, makes a big-endian buffer
      */
-    @SuppressWarnings("null")
     public BitBuffer() {
-        this(ByteBuffer.allocateDirect(0), ByteOrder.BIG_ENDIAN);
+        this(NonNullUtils.check(ByteBuffer.allocateDirect(0)), ByteOrder.BIG_ENDIAN);
     }
 
     /**

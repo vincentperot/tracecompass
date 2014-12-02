@@ -12,7 +12,7 @@
 
 package org.eclipse.tracecompass.internal.pcap.core.stream;
 
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.pcap.core.endpoint.ProtocolEndpointPair;
 import org.eclipse.tracecompass.internal.pcap.core.packet.Packet;
 import org.eclipse.tracecompass.internal.pcap.core.protocol.PcapProtocol;
@@ -155,9 +155,7 @@ public class PacketStream {
         StringBuilder sb = new StringBuilder();
         sb.append("Stream " + getUniqueID() + ", Number of Packets: " + getNbPackets() + "\n"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 
-        @SuppressWarnings("null")
-        @NonNull String string = sb.toString();
-        return string;
+        return NonNullUtils.check(sb.toString());
 
     }
 

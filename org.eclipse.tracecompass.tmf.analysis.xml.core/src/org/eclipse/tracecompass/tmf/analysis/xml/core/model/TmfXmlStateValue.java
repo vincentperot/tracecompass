@@ -146,8 +146,10 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
         /*
          * Stack Actions : allow to define a stack with PUSH/POP/PEEK methods
          */
-        @SuppressWarnings("null")
-        @NonNull String stack = node.getAttribute(TmfXmlStrings.ATTRIBUTE_STACK);
+        String stack = node.getAttribute(TmfXmlStrings.ATTRIBUTE_STACK);
+        if (stack == null) {
+            throw new IllegalStateException();
+        }
         fStackType = ValueTypeStack.getTypeFromString(stack);
     }
 

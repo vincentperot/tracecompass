@@ -12,9 +12,9 @@
 
 package org.eclipse.tracecompass.tmf.ui.viewers.events.columns;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 
@@ -88,10 +88,7 @@ public class TmfEventTableColumn {
      * @return The string to display in the column for this event
      */
     public String getItemString(ITmfEvent event) {
-        /* resolve() is NonNull. toString() is not, but should never return null */
-        @SuppressWarnings("null")
-        @NonNull String ret = fAspect.resolve(event).toString();
-        return ret;
+        return NonNullUtils.check(fAspect.resolve(event).toString());
     }
 
     /**
