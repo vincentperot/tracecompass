@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-
 /**
  * An iterator for time events. Events from the zoomed event list override any
  * events from the underlying event list.
@@ -92,7 +91,7 @@ public class EventIterator implements Iterator<ITimeEvent> {
                         if (event.getTime() + event.getDuration() > fZoomedEndTime && fZoomedEndTime < fEndTime) {
                             // the end of the event is partially hidden by the zoomed events and is visible
                             if (event instanceof ITimeEvent2) {
-                                fNext = ((ITimeEvent2) event).split(fZoomedEndTime).getSecond();
+                                fNext = ((ITimeEvent2) event).splitAfter(fZoomedEndTime);
                             } else {
                                 fNext = new TimeEvent(event.getEntry(), fZoomedEndTime, event.getTime() + event.getDuration() - fZoomedEndTime);
                             }
@@ -101,7 +100,7 @@ public class EventIterator implements Iterator<ITimeEvent> {
                             // the start of the event is partially hidden by the zoomed events and is visible
                             fSplitNext = fNext;
                             if (event instanceof ITimeEvent2) {
-                                fNext = ((ITimeEvent2) event).split(fZoomedStartTime).getFirst();
+                                fNext = ((ITimeEvent2) event).splitBefore(fZoomedStartTime);
                             } else {
                                 fNext = new TimeEvent(event.getEntry(), event.getTime(), fZoomedStartTime - event.getTime());
                             }

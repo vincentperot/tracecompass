@@ -12,8 +12,6 @@
 
 package org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model;
 
-import org.eclipse.tracecompass.tmf.core.util.Pair;
-
 /**
  * Extend ITimeEvent interface
  *
@@ -23,13 +21,24 @@ import org.eclipse.tracecompass.tmf.core.util.Pair;
 public interface ITimeEvent2 extends ITimeEvent {
 
     /**
-     * Split an event in two at the specified time. If the time is smaller or
-     * equal to the event's start, the first split event is null. If the time is
-     * greater or equal to the event's end, the second split event is null.
+     * Split an event in two at the specified time and keep the part before the
+     * split. If the time is smaller or equal to the event's start, the returned
+     * event is null.
      *
      * @param time
      *            the time at which the event is to be split
-     * @return a pair of time events
+     * @return The part before the split time
      */
-    Pair<ITimeEvent, ITimeEvent> split(long time);
+    ITimeEvent splitBefore(long time);
+
+    /**
+     * Split an event in two at the specified time and keep the part after the
+     * split. If the time is greater or equal to the event's end, the returned
+     * event is null.
+     *
+     * @param time
+     *            the time at which the event is to be split
+     * @return The part after the split time
+     */
+    ITimeEvent splitAfter(long time);
 }
