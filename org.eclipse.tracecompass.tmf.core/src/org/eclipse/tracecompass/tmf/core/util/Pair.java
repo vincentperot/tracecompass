@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 Ericsson
+ * Copyright (c) 2012, 2014 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -10,8 +10,11 @@
  *   Philippe Sawicki (INF4990.A2010@gmail.com)   - Initial API and implementation
  *   Mathieu Denis    (mathieu.denis55@gmail.com) - Refactored code
  *   Bernd Hufmann - Integrated to TMF, fixed hashCode() and equals() methods
+ *   Alexandre Montplaisir - Made non-null and immutable
  *******************************************************************************/
 package org.eclipse.tracecompass.tmf.core.util;
+
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Pair utility class, encapsulates a pair of objects.
@@ -29,11 +32,11 @@ public class Pair<A, B> {
     /**
      * A reference to the first object.
      */
-    protected A fFirst;
+    private final A fFirst;
     /**
      * A reference to the second object.
      */
-    protected B fSecond;
+    private final B fSecond;
 
     /**
      * Constructor.
@@ -48,21 +51,14 @@ public class Pair<A, B> {
     }
 
     /**
-     * Constructor.
-     */
-    public Pair() {
-        this(null, null);
-    }
-
-    /**
      * Pair hash code.
      */
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((fFirst == null) ? 0 : fFirst.hashCode());
-        result = prime * result + ((fSecond == null) ? 0 : fSecond.hashCode());
+        result = prime * result + fFirst.hashCode();
+        result = prime * result + fSecond.hashCode();
         return result;
     }
 
@@ -70,7 +66,7 @@ public class Pair<A, B> {
      * Object comparison.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -85,18 +81,10 @@ public class Pair<A, B> {
 
         Pair<?, ?> other = (Pair<?, ?>) obj;
 
-        if (fFirst == null) {
-            if (other.fFirst != null) {
-                return false;
-            }
-        } else if (!fFirst.equals(other.fFirst)) {
+        if (!fFirst.equals(other.fFirst)) {
             return false;
         }
-        if (fSecond == null) {
-            if (other.fSecond != null) {
-                return false;
-            }
-        } else if (!fSecond.equals(other.fSecond)) {
+        if (!fSecond.equals(other.fSecond)) {
             return false;
         }
         return true;
@@ -119,28 +107,10 @@ public class Pair<A, B> {
     }
 
     /**
-     * Sets the pair's first object.
-     * @param first
-     *            The pair's first object.
-     */
-    public void setFirst(A first) {
-        fFirst = first;
-    }
-
-    /**
      * Returns a reference to the pair's second object.
      * @return A reference to the pair's second object.
      */
     public B getSecond() {
         return fSecond;
-    }
-
-    /**
-     * Sets the pair's second object.
-     * @param second
-     *            The pair's second object.
-     */
-    public void setSecond(B second) {
-        fSecond = second;
     }
 }
