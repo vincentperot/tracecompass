@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.pcap.core.packet.Packet;
 import org.eclipse.tracecompass.internal.pcap.core.protocol.PcapProtocol;
 import org.eclipse.tracecompass.internal.pcap.core.protocol.pcap.PcapPacket;
@@ -81,8 +82,7 @@ public class PcapEventFactory {
             throw new IllegalArgumentException("The timestamp precision is not valid!"); //$NON-NLS-1$
         }
         Path filePath = pcap.getPath().getFileName();
-        @SuppressWarnings("null") // for .toString()
-        @NonNull String fileName = (filePath == null ? EMPTY_STRING : filePath.toString());
+        @NonNull String fileName = (filePath == null ? EMPTY_STRING : NonNullUtils.check(filePath.toString()));
 
         String dataLink = Messages.PcapEventFactory_LinkType + ':' + LinkTypeHelper.toString((int) pcapPacket.getPcapFile().getDataLinkType());
 
@@ -111,12 +111,8 @@ public class PcapEventFactory {
         while (localPacket != null) {
             subfieldList.clear();
             for (Map.Entry<String, String> entry : localPacket.getFields().entrySet()) {
-
-                @SuppressWarnings("null")
-                @NonNull String key = entry.getKey();
-
-                @SuppressWarnings("null")
-                @NonNull String value = entry.getValue();
+                String key = entry.getKey();
+                String value = entry.getValue();
                 subfieldList.add(new TmfEventField(key, value, null));
             }
             ITmfEventField[] subfieldArray = subfieldList.toArray(new ITmfEventField[subfieldList.size()]);

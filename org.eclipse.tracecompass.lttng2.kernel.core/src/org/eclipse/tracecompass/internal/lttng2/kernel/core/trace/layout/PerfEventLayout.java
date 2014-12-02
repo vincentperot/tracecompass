@@ -14,8 +14,8 @@ package org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout;
 
 import java.util.Collection;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 import com.google.common.collect.ImmutableList;
 
@@ -73,9 +73,8 @@ public class PerfEventLayout implements IKernelAnalysisEventLayout {
         return "sched:sched_switch"; //$NON-NLS-1$
     }
 
-    @SuppressWarnings("null")
-    private static final @NonNull Collection<String> WAKEUP_EVENTS = ImmutableList.of(
-            "sched:sched_wakeup", "sched:sched_wakeup_new"); //$NON-NLS-1$ //$NON-NLS-2$
+    private static final Collection<String> WAKEUP_EVENTS =
+            NonNullUtils.check(ImmutableList.of("sched:sched_wakeup", "sched:sched_wakeup_new")); //$NON-NLS-1$ //$NON-NLS-2$
 
     @Override
     public Collection<String> eventsSchedWakeup() {

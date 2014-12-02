@@ -15,9 +15,11 @@
 package org.eclipse.tracecompass.tmf.core.event;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -42,7 +44,7 @@ public class TmfEventField implements ITmfEventField {
 
     private final @NonNull String fName;
     private final @Nullable Object fValue;
-    private final @NonNull ImmutableMap<String, ITmfEventField> fFields;
+    private final @NonNull Map<String, ITmfEventField> fFields;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -60,7 +62,6 @@ public class TmfEventField implements ITmfEventField {
      * @throws IllegalArgumentException
      *             If 'name' is null, or if 'fields' has duplicate field names.
      */
-    @SuppressWarnings("null") /* ImmutableMap methods do not return @NonNull */
     public TmfEventField(String name, @Nullable Object value, @Nullable ITmfEventField[] fields) {
         if (name == null) {
             throw new IllegalArgumentException();
@@ -69,7 +70,7 @@ public class TmfEventField implements ITmfEventField {
         fValue = value;
 
         if (fields == null) {
-            fFields = ImmutableMap.of();
+            fFields = NonNullUtils.check(ImmutableMap.<String, ITmfEventField> of());
         } else {
             /* Java 8 streams will make this even more simple! */
             ImmutableMap.Builder<String, ITmfEventField> mapBuilder = new ImmutableMap.Builder<>();
@@ -77,7 +78,7 @@ public class TmfEventField implements ITmfEventField {
                 final String curName = field.getName();
                 mapBuilder.put(curName, field);
             }
-            fFields = mapBuilder.build();
+            fFields = NonNullUtils.check(mapBuilder.build());
         }
     }
 

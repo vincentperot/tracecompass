@@ -16,6 +16,7 @@ package org.eclipse.tracecompass.internal.tmf.core.parsers.custom;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomEvent;
@@ -101,8 +102,6 @@ public class CustomEventAspects {
                 builder.add(new CustomEventFieldAspect(name, i));
             }
         }
-        @SuppressWarnings("null")
-        @NonNull Iterable<ITmfEventAspect> ret = builder.build();
-        return ret;
+        return NonNullUtils.check(builder.build());
     }
 }

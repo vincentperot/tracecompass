@@ -47,6 +47,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTimeSynchSignal;
@@ -1128,9 +1129,7 @@ public abstract class AbstractTimeGraphView extends TmfView {
      * @since 3.0
      */
     protected @NonNull Iterable<ITmfTrace> getTracesToBuild(@NonNull ITmfTrace trace) {
-        @SuppressWarnings("null")
-        @NonNull List<ITmfTrace> list = Arrays.asList(TmfTraceManager.getTraceSet(trace));
-        return list;
+        return NonNullUtils.check(Arrays.asList(TmfTraceManager.getTraceSet(trace)));
     }
 
     /**

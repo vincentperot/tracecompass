@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
@@ -97,13 +98,12 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
     /**
      * Basic aspects that should be valid for all trace types.
      */
-    @SuppressWarnings("null")
     public static final @NonNull Collection<ITmfEventAspect> BASE_ASPECTS =
-            ImmutableList.of(
+            NonNullUtils.check(ImmutableList.of(
                     ITmfEventAspect.BaseAspects.TIMESTAMP,
                     ITmfEventAspect.BaseAspects.EVENT_TYPE,
                     ITmfEventAspect.BaseAspects.CONTENTS
-                    );
+                    ));
 
     // ------------------------------------------------------------------------
     // Instance attributes
@@ -302,8 +302,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
     protected IStatus executeAnalysis() {
         MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
 
-        @SuppressWarnings("null")
-        @NonNull Class<? extends TmfTrace> className = this.getClass();
+        Class<? extends TmfTrace> className = NonNullUtils.check(this.getClass());
         Map<String, IAnalysisModuleHelper> modules = TmfAnalysisManager.getAnalysisModules(className);
         for (IAnalysisModuleHelper helper : modules.values()) {
             try {

@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleSource;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisModuleHelperConfigElement;
@@ -88,9 +88,7 @@ public final class TmfAnalysisModuleSourceConfigElement implements IAnalysisModu
                 typeElements.add(element);
             }
         }
-        @SuppressWarnings("null")
-        @NonNull IConfigurationElement[] typeElems = typeElements.toArray(new IConfigurationElement[typeElements.size()]);
-        return typeElems;
+        return NonNullUtils.check(typeElements.toArray(new IConfigurationElement[typeElements.size()]));
     }
 
     /**

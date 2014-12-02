@@ -21,8 +21,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.TreeMap;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.pcap.core.packet.BadPacketException;
 import org.eclipse.tracecompass.internal.pcap.core.protocol.pcap.PcapPacket;
 import org.eclipse.tracecompass.internal.pcap.core.util.ConversionHelper;
@@ -84,9 +84,7 @@ public class PcapFile implements Closeable {
         }
 
         // File is not empty. Try to open.
-        @SuppressWarnings("null")
-        @NonNull SeekableByteChannel channel = Files.newByteChannel(fPcapFilePath);
-        fFileChannel = channel;
+        fFileChannel = NonNullUtils.check(Files.newByteChannel(fPcapFilePath));
 
         // Parse the global header.
         // Read the magic number (4 bytes) from the input stream
@@ -97,26 +95,21 @@ public class PcapFile implements Closeable {
         globalHeader.flip();
         int magicNumber = globalHeader.getInt();
 
-        @SuppressWarnings("null")
-        @NonNull ByteOrder be = ByteOrder.BIG_ENDIAN;
-        @SuppressWarnings("null")
-        @NonNull ByteOrder le = ByteOrder.LITTLE_ENDIAN;
-
         switch (magicNumber) {
         case PcapFileValues.MAGIC_BIG_ENDIAN_MICRO: // file is big endian
-            fByteOrder = be;
+            fByteOrder = NonNullUtils.check(ByteOrder.BIG_ENDIAN);
             fTimestampPrecision = PcapTimestampScale.MICROSECOND;
             break;
         case PcapFileValues.MAGIC_LITTLE_ENDIAN_MICRO: // file is little endian
-            fByteOrder = le;
+            fByteOrder = NonNullUtils.check(ByteOrder.LITTLE_ENDIAN);
             fTimestampPrecision = PcapTimestampScale.MICROSECOND;
             break;
         case PcapFileValues.MAGIC_BIG_ENDIAN_NANO: // file is big endian
-            fByteOrder = be;
+            fByteOrder = NonNullUtils.check(ByteOrder.BIG_ENDIAN);
             fTimestampPrecision = PcapTimestampScale.NANOSECOND;
             break;
         case PcapFileValues.MAGIC_LITTLE_ENDIAN_NANO: // file is little endian
-            fByteOrder = le;
+            fByteOrder = NonNullUtils.check(ByteOrder.LITTLE_ENDIAN);
             fTimestampPrecision = PcapTimestampScale.NANOSECOND;
             break;
         default:

@@ -20,8 +20,8 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.pcap.core.packet.BadPacketException;
 import org.eclipse.tracecompass.internal.pcap.core.packet.Packet;
 import org.eclipse.tracecompass.internal.pcap.core.protocol.PcapProtocol;
@@ -65,7 +65,7 @@ public class IPv4Packet extends Packet {
     private @Nullable IPv4Endpoint fSourceEndpoint;
     private @Nullable IPv4Endpoint fDestinationEndpoint;
 
-    private @Nullable ImmutableMap<String, String> fFields;
+    private @Nullable Map<String, String> fFields;
 
     // TODO Interpret options. See
     // http://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml
@@ -124,12 +124,8 @@ public class IPv4Packet extends Packet {
         packet.get(destination);
 
         try {
-            @SuppressWarnings("null")
-            @NonNull Inet4Address sourceIP = (Inet4Address) InetAddress.getByAddress(source);
-            @SuppressWarnings("null")
-            @NonNull Inet4Address destinationIP = (Inet4Address) InetAddress.getByAddress(destination);
-            fSourceIpAddress = sourceIP;
-            fDestinationIpAddress = destinationIP;
+            fSourceIpAddress = (Inet4Address) NonNullUtils.check(InetAddress.getByAddress(source));
+            fDestinationIpAddress = (Inet4Address) NonNullUtils.check(InetAddress.getByAddress(destination));
         } catch (UnknownHostException e) {
             throw new BadPacketException("The IP Address size is not valid!"); //$NON-NLS-1$
         }
@@ -435,7 +431,7 @@ public class IPv4Packet extends Packet {
 
     @Override
     public Map<String, String> getFields() {
-        ImmutableMap<String, String> map = fFields;
+        Map<String, String> map = fFields;
         if (map == null) {
             Builder<String, String> builder = ImmutableMap.<String, String> builder()
                     .put("Version", String.valueOf(fVersion)) //$NON-NLS-1$
@@ -459,11 +455,8 @@ public class IPv4Packet extends Packet {
                 builder.put("Options", ConversionHelper.bytesToHex(options, true)); //$NON-NLS-1$
 
             }
-            @SuppressWarnings("null")
-            @NonNull
-            ImmutableMap<String, String> newMap = builder.build();
-            fFields = newMap;
-            return newMap;
+            fFields = NonNullUtils.check(builder.build());
+            return fFields;
         }
         return map;
     }

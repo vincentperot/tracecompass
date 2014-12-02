@@ -104,6 +104,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.core.filter.TmfCollapseFilter;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
@@ -360,9 +361,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                 builder.add(new TmfEventFieldAspect(fieldName, fieldName));
             }
         }
-        @SuppressWarnings("null")
-        @NonNull Iterable<ITmfEventAspect> ret = builder.build();
-        return ret;
+        return NonNullUtils.check(builder.build());
     }
 
     /**
