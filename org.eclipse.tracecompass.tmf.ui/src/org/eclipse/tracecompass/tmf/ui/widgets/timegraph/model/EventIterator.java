@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * An iterator for time events. Events from the zoomed event list override any
@@ -32,7 +33,7 @@ public class EventIterator implements Iterator<ITimeEvent> {
     private long fZoomedEndTime;
     private int fIndex = 0;
     private int fZoomedIndex= 0;
-    private ITimeEvent fNext = null;
+    private @NonNull ITimeEvent fNext = UnsetTimeEvent.instance();
     private ITimeEvent fSplitNext = null;
     private ITimeEvent fZoomedNext = null;
 
@@ -79,7 +80,7 @@ public class EventIterator implements Iterator<ITimeEvent> {
 
     @Override
     public boolean hasNext() {
-        if (fNext == null && fEventList != null) {
+        if (fNext == UnsetTimeEvent.instance() && fEventList != null) {
             while (fIndex < fEventList.size()) {
                 ITimeEvent event = fEventList.get(fIndex++);
                 if (event.getTime() + event.getDuration() >= fStartTime && event.getTime() <= fEndTime &&
@@ -88,7 +89,7 @@ public class EventIterator implements Iterator<ITimeEvent> {
                     fNext = event;
                     if (event.getTime() < fZoomedEndTime && event.getTime() + event.getDuration() > fZoomedStartTime) {
                         // the event is partially hidden by the zoomed events and must be split
-                        fNext = null;
+                        fNext = UnsetTimeEvent.instance();
                         if (event.getTime() + event.getDuration() > fZoomedEndTime && fZoomedEndTime < fEndTime) {
                             // the end of the event is partially hidden by the zoomed events and is visible
                             if (event instanceof ITimeEvent2) {
@@ -107,12 +108,12 @@ public class EventIterator implements Iterator<ITimeEvent> {
                             }
                         }
                     }
-                    if (fNext != null) {
+                    if (fNext != UnsetTimeEvent.instance()) {
                         break;
                     }
                 }
             }
-            if (fNext == null) {
+            if (fNext == UnsetTimeEvent.instance()) {
                 fEventList = null;
             }
         }
@@ -131,19 +132,20 @@ public class EventIterator implements Iterator<ITimeEvent> {
             }
         }
 
-        return fNext != null || fZoomedNext != null;
+        return fNext != UnsetTimeEvent.instance() || fZoomedNext != null;
     }
 
     @Override
     public ITimeEvent next() {
         if (hasNext()) {
-            if (fZoomedNext != null && (fNext == null || fZoomedNext.getTime() <= fNext.getTime())) {
+            if (fZoomedNext != null && (fNext == UnsetTimeEvent.instance() || fZoomedNext.getTime() <= fNext.getTime())) {
                 ITimeEvent event = fZoomedNext;
                 fZoomedNext = null;
                 return event;
             }
             ITimeEvent event = fNext;
-            fNext = fSplitNext;
+            ITimeEvent splitNext = fSplitNext;
+            fNext = (splitNext == null ? UnsetTimeEvent.instance() : splitNext);
             fSplitNext = null;
             return event;
         }

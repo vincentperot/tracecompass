@@ -121,14 +121,14 @@ public class TimeEvent implements ITimeEvent2 {
      */
     @Override
     public Pair<ITimeEvent, ITimeEvent> split(long time) {
-        Pair<ITimeEvent, ITimeEvent> pair = new Pair<>();
-        if (time > fTime) {
-            pair.setFirst(new TimeEvent(fEntry, fTime, Math.min(fDuration, time - fTime), fValue));
-        }
-        if (time < fTime + fDuration) {
-            pair.setSecond(new TimeEvent(fEntry, Math.max(fTime, time), fDuration - Math.max(0, time - fTime), fValue));
-        }
-        return pair;
+        ITimeEvent first = (time > fTime ?
+                new TimeEvent(fEntry, fTime, Math.min(fDuration, time - fTime), fValue) :
+                UnsetTimeEvent.instance());
+        ITimeEvent second = (time < fTime + fDuration ?
+                new TimeEvent(fEntry, Math.max(fTime, time), fDuration - Math.max(0, time - fTime), fValue) :
+                UnsetTimeEvent.instance());
+
+        return new Pair<>(first, second);
     }
 
     @Override

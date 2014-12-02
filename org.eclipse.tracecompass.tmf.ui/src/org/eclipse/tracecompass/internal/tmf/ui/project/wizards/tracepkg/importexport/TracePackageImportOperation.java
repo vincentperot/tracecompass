@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.jface.operation.ModalContext;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.project.wizards.tracepkg.AbstractTracePackageOperation;
 import org.eclipse.tracecompass.internal.tmf.ui.project.wizards.tracepkg.TracePackageBookmarkElement;
@@ -332,9 +333,8 @@ public class TracePackageImportOperation extends AbstractTracePackageOperation i
     private IStatus importTraceFiles(TracePackageFilesElement traceFilesElement, TracePackageTraceElement traceElement, IProgressMonitor monitor) {
         List<Pair<String, String>> fileNameAndLabelPairs = new ArrayList<>();
 
-        String sourceName = traceFilesElement.getFileName();
-        String destinationName = traceElement.getImportName();
-
+        String sourceName = NonNullUtils.nullToEmptyString(traceFilesElement.getFileName());
+        String destinationName = NonNullUtils.nullToEmptyString(traceElement.getImportName());
         fileNameAndLabelPairs.add(new Pair<>(sourceName, destinationName));
 
         IPath containerPath = fTmfTraceFolder.getPath();
@@ -393,7 +393,9 @@ public class TracePackageImportOperation extends AbstractTracePackageOperation i
         List<Pair<String, String>> fileNameAndLabelPairs = new ArrayList<>();
         for (TracePackageElement child : suppFilesElement.getChildren()) {
             TracePackageSupplFileElement supplFile = (TracePackageSupplFileElement) child;
-            fileNameAndLabelPairs.add(new Pair<>(supplFile.getText(), new Path(supplFile.getText()).lastSegment()));
+
+            fileNameAndLabelPairs.add(new Pair<>(NonNullUtils.nullToEmptyString(supplFile.getText()),
+                    NonNullUtils.nullToEmptyString(new Path(supplFile.getText()).lastSegment())));
         }
 
         if (!fileNameAndLabelPairs.isEmpty()) {
