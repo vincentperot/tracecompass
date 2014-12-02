@@ -44,6 +44,7 @@ import org.eclipse.tracecompass.tmf.core.statesystem.ITmfAnalysisModuleWithState
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.linecharts.TmfCommonXLineChartViewer;
 import org.w3c.dom.Element;
 
@@ -177,8 +178,8 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
         }
 
         @Override
-        public @Nullable Iterable<TmfXmlLocation> getLocations() {
-            return Collections.EMPTY_SET;
+        public Iterable<TmfXmlLocation> getLocations() {
+            return NonNullUtils.<TmfXmlLocation>nonNullEmptySet();
         }
 
         public DisplayType getType() {

@@ -13,8 +13,6 @@
 
 package org.eclipse.tracecompass.tmf.tests.stubs.analysis;
 
-import java.util.Collections;
-
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
@@ -22,6 +20,7 @@ import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub2;
 import org.osgi.framework.Bundle;
@@ -65,7 +64,8 @@ public class AnalysisModuleTestHelper implements IAnalysisModuleHelper {
     @Override
     public String getName() {
         @SuppressWarnings("null")
-        @NonNull String name = fModule.name();
+        @NonNull
+        String name = fModule.name();
         return name;
     }
 
@@ -150,7 +150,7 @@ public class AnalysisModuleTestHelper implements IAnalysisModuleHelper {
                     AnalysisRequirementFactory.REQUIREMENT_2,
                     AnalysisRequirementFactory.REQUIREMENT_3);
         default:
-            return Collections.EMPTY_SET;
+            return NonNullUtils.<TmfAnalysisRequirement> nonNullEmptySet();
         }
     }
 }

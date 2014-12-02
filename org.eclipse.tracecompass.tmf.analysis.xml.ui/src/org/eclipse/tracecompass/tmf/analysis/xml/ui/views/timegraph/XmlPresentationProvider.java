@@ -28,6 +28,7 @@ import org.eclipse.tracecompass.internal.tmf.analysis.xml.ui.TmfXmlUiStrings;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.module.XmlUtils;
 import org.eclipse.tracecompass.tmf.analysis.xml.core.stateprovider.TmfXmlStrings;
 import org.eclipse.tracecompass.tmf.analysis.xml.ui.views.timegraph.XmlEntry.EntryDisplayType;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -113,7 +114,7 @@ public class XmlPresentationProvider extends TimeGraphPresentationProvider {
          * TODO: Add the XML elements to support adding extra information in the
          * tooltips and implement this
          */
-        return Collections.EMPTY_MAP;
+        return NonNullUtils.<String, String>nonNullEmptyMap();
     }
 
     @Override
