@@ -49,6 +49,7 @@ import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
+import org.eclipse.tracecompass.tmf.core.util.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.util.Pair;
 import org.eclipse.tracecompass.tmf.ui.editors.TmfEventsEditor;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceElement;
@@ -332,9 +333,8 @@ public class TracePackageImportOperation extends AbstractTracePackageOperation i
     private IStatus importTraceFiles(TracePackageFilesElement traceFilesElement, TracePackageTraceElement traceElement, IProgressMonitor monitor) {
         List<Pair<String, String>> fileNameAndLabelPairs = new ArrayList<>();
 
-        String sourceName = traceFilesElement.getFileName();
-        String destinationName = traceElement.getImportName();
-
+        String sourceName = NonNullUtils.nullToEmptyString(traceFilesElement.getFileName());
+        String destinationName = NonNullUtils.nullToEmptyString(traceElement.getImportName());
         fileNameAndLabelPairs.add(new Pair<>(sourceName, destinationName));
 
         IPath containerPath = fTmfTraceFolder.getPath();
@@ -393,7 +393,9 @@ public class TracePackageImportOperation extends AbstractTracePackageOperation i
         List<Pair<String, String>> fileNameAndLabelPairs = new ArrayList<>();
         for (TracePackageElement child : suppFilesElement.getChildren()) {
             TracePackageSupplFileElement supplFile = (TracePackageSupplFileElement) child;
-            fileNameAndLabelPairs.add(new Pair<>(supplFile.getText(), new Path(supplFile.getText()).lastSegment()));
+
+            fileNameAndLabelPairs.add(new Pair<>(NonNullUtils.nullToEmptyString(supplFile.getText()),
+                    NonNullUtils.nullToEmptyString(new Path(supplFile.getText()).lastSegment())));
         }
 
         if (!fileNameAndLabelPairs.isEmpty()) {

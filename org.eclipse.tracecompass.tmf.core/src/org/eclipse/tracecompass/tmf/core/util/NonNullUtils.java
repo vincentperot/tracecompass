@@ -12,7 +12,6 @@
 
 package org.eclipse.tracecompass.tmf.core.util;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -21,7 +20,6 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Alexandre Montplaisir
  */
-@NonNullByDefault
 public class NonNullUtils {
 
     private NonNullUtils() {}
