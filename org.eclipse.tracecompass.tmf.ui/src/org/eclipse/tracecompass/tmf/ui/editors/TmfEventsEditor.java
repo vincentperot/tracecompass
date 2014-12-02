@@ -38,6 +38,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
@@ -371,10 +372,7 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
                 builder.addAll(traceAspects);
             }
         }
-
-        @SuppressWarnings("null")
-        @NonNull Iterable<ITmfEventAspect> ret = builder.build();
-        return ret;
+        return NonNullUtils.checkNotNull(builder.build());
     }
 
     /**
