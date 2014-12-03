@@ -275,87 +275,9 @@ public class SDWidget extends ScrollView implements SelectionListener,
         });
         fAccessible = getViewControl().getAccessible();
 
-        fAccessible.addAccessibleListener(new AccessibleAdapter() {
-            @Override
-            public void getName(AccessibleEvent e) {
-                // Case toolTip
-                if (e.childID == 0) {
-                    if (fToolTipNode != null) {
-                        if (fToolTipNode instanceof Lifeline) {
-                            Lifeline lifeline = (Lifeline) fToolTipNode;
-                            e.result = lifeline.getToolTipText();
-                        } else {
-                            e.result = fToolTipNode.getName() + getPostfixForTooltip(true);
-                        }
-                    }
-                } else {
-                    if (getFocusNode() != null) {
-                        if (getFocusNode() instanceof Lifeline) {
-                            e.result = MessageFormat.format(Messages.SequenceDiagram_LifelineNode, new Object[] { String.valueOf(getFocusNode().getName()) });
-                        }
-                        if (getFocusNode() instanceof BaseMessage) {
-                            BaseMessage mes = (BaseMessage) getFocusNode();
-                            if ((mes.getStartLifeline() != null) && (mes.getEndLifeline() != null)) {
-                                e.result = MessageFormat.format(
-                                        Messages.SequenceDiagram_MessageNode,
-                                        new Object[] { String.valueOf(mes.getName()), String.valueOf(mes.getStartLifeline().getName()), Integer.valueOf(mes.getStartOccurrence()), String.valueOf(mes.getEndLifeline().getName()),
-                                                Integer.valueOf(mes.getEndOccurrence()) });
-                            } else if ((mes.getStartLifeline() == null) && (mes.getEndLifeline() != null)) {
-                                e.result = MessageFormat.format(Messages.SequenceDiagram_FoundMessageNode, new Object[] { String.valueOf(mes.getName()), String.valueOf(mes.getEndLifeline().getName()), Integer.valueOf(mes.getEndOccurrence()) });
-                            } else if ((mes.getStartLifeline() != null) && (mes.getEndLifeline() == null)) {
-                                e.result = MessageFormat.format(Messages.SequenceDiagram_LostMessageNode, new Object[] { String.valueOf(mes.getName()), String.valueOf(mes.getStartLifeline().getName()), Integer.valueOf(mes.getStartOccurrence()) });
-                            }
-                        } else if (getFocusNode() instanceof BasicExecutionOccurrence) {
-                            BasicExecutionOccurrence exec = (BasicExecutionOccurrence) getFocusNode();
-                            e.result = MessageFormat.format(Messages.SequenceDiagram_ExecutionOccurrenceWithParams,
-                                    new Object[] { String.valueOf(exec.getName()), String.valueOf(exec.getLifeline().getName()), Integer.valueOf(exec.getStartOccurrence()), Integer.valueOf(exec.getEndOccurrence()) });
-                        }
+        fAccessible.addAccessibleListener(new AccessibleAdapterExtension());
 
-                    }
-                }
-            }
-        });
-
-        fAccessible.addAccessibleControlListener(new AccessibleControlAdapter() {
-            @Override
-            public void getFocus(AccessibleControlEvent e) {
-                if (fFocusedWidget == -1) {
-                    e.childID = ACC.CHILDID_SELF;
-                } else {
-                    e.childID = fFocusedWidget;
-                }
-            }
-
-            @Override
-            public void getRole(AccessibleControlEvent e) {
-                switch (e.childID) {
-                case ACC.CHILDID_SELF:
-                    e.detail = ACC.ROLE_CLIENT_AREA;
-                    break;
-                case 0:
-                    e.detail = ACC.ROLE_TOOLTIP;
-                    break;
-                case 1:
-                    e.detail = ACC.ROLE_LABEL;
-                    break;
-                default:
-                    break;
-                }
-            }
-
-            @Override
-            public void getState(AccessibleControlEvent e) {
-                e.detail = ACC.STATE_FOCUSABLE;
-                if (e.childID == ACC.CHILDID_SELF) {
-                    e.detail |= ACC.STATE_FOCUSED;
-                } else {
-                    e.detail |= ACC.STATE_SELECTABLE;
-                    if (e.childID == fFocusedWidget) {
-                        e.detail |= ACC.STATE_FOCUSED | ACC.STATE_SELECTED | ACC.STATE_CHECKED;
-                    }
-                }
-            }
-        });
+        fAccessible.addAccessibleControlListener(new AccessibleControlAdapterExtension());
 
         fInsertionCartet = new Caret((Canvas) getViewControl(), SWT.NONE);
         fInsertionCartet.setVisible(false);
@@ -516,24 +438,26 @@ public class SDWidget extends ScrollView implements SelectionListener,
      */
     public void removeSelection(List<GraphNode> list) {
         fSelectedNodeList.removeAll(list);
-        for (int i = 0; i < list.size(); i++) {
-            list.get(i).setSelected(false);
-            list.get(i).setFocused(false);
-        }
+        deselectNodes(list);
         StructuredSelection selection = new StructuredSelection(fSelectedNodeList);
         fSelProvider.setSelection(selection);
+    }
+
+    private static void deselectNodes(List<GraphNode> list) {
+        for ( GraphNode graphNode : list) {
+            graphNode.setSelected(false);
+            graphNode.setFocused(false);
+        }
     }
 
     /**
      * Clear the list of GraphNodes which must be drawn selected.
      */
     public void clearSelection() {
-        for (int i = 0; i < fSelectedNodeList.size(); i++) {
-            fSelectedNodeList.get(i).setSelected(false);
-            fSelectedNodeList.get(i).setFocused(false);
-        }
+        List<GraphNode> list = fSelectedNodeList;
+        deselectNodes(list);
         fCurrentGraphNode = null;
-        fSelectedNodeList.clear();
+        list.clear();
         fSelProvider.setSelection(new StructuredSelection());
     }
 
@@ -1412,28 +1336,27 @@ public class SDWidget extends ScrollView implements SelectionListener,
 
         GraphNode prevNode = getFocusNode();
 
-        if (event.keyCode == SWT.ARROW_RIGHT) {
+        switch (event.keyCode) {
+        case SWT.ARROW_RIGHT:
             traverseRight();
-        }
-
-        if (event.keyCode == SWT.ARROW_LEFT) {
+            break;
+        case SWT.ARROW_LEFT:
             traverseLeft();
-        }
-
-        if (event.keyCode == SWT.ARROW_DOWN) {
+            break;
+        case SWT.ARROW_DOWN:
             traverseDown();
-        }
-
-        if (event.keyCode == SWT.ARROW_UP) {
+            break;
+        case SWT.ARROW_UP:
             traverseUp();
-        }
-
-        if (event.keyCode == SWT.HOME) {
+            break;
+        case SWT.HOME:
             traverseHome();
-        }
-
-        if (event.keyCode == SWT.END) {
+            break;
+        case SWT.END:
             traverseEnd();
+            break;
+        default:
+            break;
         }
 
         if ((!fShiftSelection) && (!fCtrlSelection)) {
@@ -1614,16 +1537,7 @@ public class SDWidget extends ScrollView implements SelectionListener,
                 fDragX = e.x;
                 fDragY = e.y;
                 if (dx != 0 || dy != 0) {
-                    if (fLocalAutoScroll == null) {
-                        if (fLocalAutoScrollTimer == null) {
-                            fLocalAutoScrollTimer = new Timer(true);
-                        }
-                        fLocalAutoScroll = new AutoScroll(this, dx, dy);
-                        fLocalAutoScrollTimer.schedule(fLocalAutoScroll, 0, 75);
-                    } else {
-                        fLocalAutoScroll.fDeltaX = dx;
-                        fLocalAutoScroll.fDeltaY = dy;
-                    }
+                    mouseHasMoved(dx, dy);
                 } else if (fLocalAutoScroll != null) {
                     fLocalAutoScroll.cancel();
                     fLocalAutoScroll = null;
@@ -1633,57 +1547,40 @@ public class SDWidget extends ScrollView implements SelectionListener,
                 redraw();
                 Lifeline node = fFrame.getCloserLifeline(fDragX);
                 if ((node != null) && (node != fDragAndDrop)) {
-                    int y = 0;
-                    int y1 = 0;
                     int height = Metrics.getLifelineHeaderFontHeigth() + 2 * Metrics.LIFELINE_HEARDER_TEXT_V_MARGIN;
                     int hMargin = Metrics.LIFELINE_VT_MAGIN / 4;
                     int x = node.getX();
                     int width = node.getWidth();
-                    if (fFrame.getVisibleAreaY() < node.getY() + node.getHeight() - height - hMargin) {
-                        y = contentsToViewY(Math.round((node.getY() + node.getHeight()) * fZoomValue));
-                    } else {
-                        y = Math.round(height * fZoomValue);
-                    }
-
-                    if (fFrame.getVisibleAreaY() < contentsToViewY(node.getY() - hMargin)) {
-                        y1 = contentsToViewY(Math.round((node.getY() - hMargin) * fZoomValue));
-                    } else {
-                        y1 = Math.round(height * fZoomValue);
-                    }
-
+                    int y = getY(node, height, hMargin);
                     int rx = Math.round(x * fZoomValue);
 
                     fInsertionCartet.setVisible(true);
-                    if ((fInsertionCartet.getImage() != null) && (!fInsertionCartet.getImage().isDisposed())) {
-                        fInsertionCartet.getImage().dispose();
-                    }
+                    disposeImageIfPresent();
                     if (rx <= e.x && Math.round(rx + (width * fZoomValue)) >= e.x) {
                         if (fCollapseProvider != null) {
                             ImageData data = fCollapaseCaretImg.getImageData();
                             data = data.scaledTo(Math.round(fCollapaseCaretImg.getBounds().width * fZoomValue), Math.round(fCollapaseCaretImg.getBounds().height * fZoomValue));
-                            fCurrentCaretImage = new Image(Display.getCurrent(), data);
-                            fInsertionCartet.setImage(fCurrentCaretImage);
-                            fInsertionCartet.setLocation(contentsToViewX(rx + Math.round((width / (float) 2) * fZoomValue)) - fCurrentCaretImage.getBounds().width / 2, y);
+                            int x1 = contentsToViewX(rx + Math.round((width / (float) 2) * fZoomValue)) - fCurrentCaretImage.getBounds().width / 2;
+                            setImageAndCartet(y, data, x1);
                         }
                     } else if (fReorderMode) {
+                        int y1 = getY1(node, height, hMargin);
                         if (rx > e.x) {
-                            if (node.getIndex() > 1 && fFrame.getLifeline(node.getIndex() - 2) == fDragAndDrop) {
+                            if ((node.getIndex() > 1) && (fFrame.getLifeline(node.getIndex() - 2) == fDragAndDrop)) {
                                 return;
                             }
                             ImageData data = fArrowUpCaretImg.getImageData();
                             data = data.scaledTo(Math.round(fArrowUpCaretImg.getBounds().width * fZoomValue), Math.round(fArrowUpCaretImg.getBounds().height * fZoomValue));
-                            fCurrentCaretImage = new Image(Display.getCurrent(), data);
-                            fInsertionCartet.setImage(fCurrentCaretImage);
-                            fInsertionCartet.setLocation(contentsToViewX(Math.round((x - Metrics.LIFELINE_SPACING / 2) * fZoomValue)) - fCurrentCaretImage.getBounds().width / 2, y1);
+                            int x2 = contentsToViewX(Math.round((x - Metrics.LIFELINE_SPACING / 2) * fZoomValue)) - fCurrentCaretImage.getBounds().width / 2;
+                            setImageAndCartet(y1, data, x2);
                         } else {
-                            if (node.getIndex() < fFrame.lifeLinesCount() && fFrame.getLifeline(node.getIndex()) == fDragAndDrop) {
+                            if ((node.getIndex() < fFrame.lifeLinesCount()) && (fFrame.getLifeline(node.getIndex()) == fDragAndDrop)) {
                                 return;
                             }
+                            int x2 = contentsToViewX(Math.round((x + width + Metrics.LIFELINE_SPACING / 2) * fZoomValue)) - fCurrentCaretImage.getBounds().width / 2 + 1;
                             ImageData data = fArrowUpCaretImg.getImageData();
                             data = data.scaledTo(Math.round(fArrowUpCaretImg.getBounds().width * fZoomValue), Math.round(fArrowUpCaretImg.getBounds().height * fZoomValue));
-                            fCurrentCaretImage = new Image(Display.getCurrent(), data);
-                            fInsertionCartet.setImage(fCurrentCaretImage);
-                            fInsertionCartet.setLocation(contentsToViewX(Math.round((x + width + Metrics.LIFELINE_SPACING / 2) * fZoomValue)) - fCurrentCaretImage.getBounds().width / 2 + 1, y1);
+                            setImageAndCartet(y1, data, x2);
                         }
                     }
                 } else {
@@ -1695,38 +1592,58 @@ public class SDWidget extends ScrollView implements SelectionListener,
         }
     }
 
+    private void disposeImageIfPresent() {
+        if ((fInsertionCartet.getImage() != null) && (!fInsertionCartet.getImage().isDisposed())) {
+            fInsertionCartet.getImage().dispose();
+        }
+    }
+
+    private int getY1(Lifeline node, int height, int hMargin) {
+        int y1;
+        if (fFrame.getVisibleAreaY() < contentsToViewY(node.getY() - hMargin)) {
+            y1 = contentsToViewY(Math.round((node.getY() - hMargin) * fZoomValue));
+        } else {
+            y1 = Math.round(height * fZoomValue);
+        }
+        return y1;
+    }
+
+    private int getY(Lifeline node, int height, int hMargin) {
+        int y;
+        if (fFrame.getVisibleAreaY() < node.getY() + node.getHeight() - height - hMargin) {
+            y = contentsToViewY(Math.round((node.getY() + node.getHeight()) * fZoomValue));
+        } else {
+            y = Math.round(height * fZoomValue);
+        }
+        return y;
+    }
+
+    private void setImageAndCartet(int y1, ImageData data, int x2) {
+        fCurrentCaretImage = new Image(Display.getCurrent(), data);
+        fInsertionCartet.setImage(fCurrentCaretImage);
+        fInsertionCartet.setLocation(x2, y1);
+    }
+
+    private void mouseHasMoved(int dx, int dy) {
+        if (fLocalAutoScroll == null) {
+            if (fLocalAutoScrollTimer == null) {
+                fLocalAutoScrollTimer = new Timer(true);
+            }
+            fLocalAutoScroll = new AutoScroll(this, dx, dy);
+            fLocalAutoScrollTimer.schedule(fLocalAutoScroll, 0, 75);
+        } else {
+            fLocalAutoScroll.fDeltaX = dx;
+            fLocalAutoScroll.fDeltaY = dy;
+        }
+    }
+
     @Override
     protected void contentsMouseUpEvent(MouseEvent event) {
         // Just in case the diagram highlight a time compression region
         // this region need to be released when clicking everywhere
         fInsertionCartet.setVisible(false);
         if (fDragAndDrop != null) {
-            if ((fOverView != null) && (!fOverView.isDisposed())) {
-                fOverView.dispose();
-            }
-            fOverView = null;
-            Lifeline node = fFrame.getCloserLifeline(fDragX);
-            if (node != null) {
-                int rx = Math.round(node.getX() * fZoomValue);
-                if (rx <= event.x && Math.round(rx + (node.getWidth() * fZoomValue)) >= event.x) {
-                    if ((fCollapseProvider != null) && (fDragAndDrop != node)) {
-                        fCollapseProvider.collapseTwoLifelines(fDragAndDrop, node);
-                    }
-                } else if (rx < event.x) {
-                    fFrame.insertLifelineAfter(fDragAndDrop, node);
-                    if (node.getIndex() < fFrame.lifeLinesCount()) {
-                        Lifeline temp[] = { fDragAndDrop, fFrame.getLifeline(node.getIndex()) };
-                        fReorderList.add(temp);
-                    } else {
-                        Lifeline temp[] = { fDragAndDrop, null };
-                        fReorderList.add(temp);
-                    }
-                } else {
-                    fFrame.insertLifelineBefore(fDragAndDrop, node);
-                    Lifeline temp[] = { fDragAndDrop, node };
-                    fReorderList.add(temp);
-                }
-            }
+            dragAndDrop(event);
         }
         fDragAndDrop = null;
         redraw();
@@ -1741,6 +1658,35 @@ public class SDWidget extends ScrollView implements SelectionListener,
             fLocalAutoScroll = null;
         }
         super.contentsMouseUpEvent(event);
+    }
+
+    private void dragAndDrop(MouseEvent event) {
+        if ((fOverView != null) && (!fOverView.isDisposed())) {
+            fOverView.dispose();
+        }
+        fOverView = null;
+        Lifeline node = fFrame.getCloserLifeline(fDragX);
+        if (node != null) {
+            int rx = Math.round(node.getX() * fZoomValue);
+            if (rx <= event.x && Math.round(rx + (node.getWidth() * fZoomValue)) >= event.x) {
+                if ((fCollapseProvider != null) && (fDragAndDrop != node)) {
+                    fCollapseProvider.collapseTwoLifelines(fDragAndDrop, node);
+                }
+            } else if (rx < event.x) {
+                fFrame.insertLifelineAfter(fDragAndDrop, node);
+                if (node.getIndex() < fFrame.lifeLinesCount()) {
+                    Lifeline temp[] = { fDragAndDrop, fFrame.getLifeline(node.getIndex()) };
+                    fReorderList.add(temp);
+                } else {
+                    Lifeline temp[] = { fDragAndDrop, null };
+                    fReorderList.add(temp);
+                }
+            } else {
+                fFrame.insertLifelineBefore(fDragAndDrop, node);
+                Lifeline temp[] = { fDragAndDrop, node };
+                fReorderList.add(temp);
+            }
+        }
     }
 
     @Override
@@ -1788,19 +1734,7 @@ public class SDWidget extends ScrollView implements SelectionListener,
             node = fFrame.getNodeAt(x, y);
 
             if ((event.button == 1) || ((node != null) && !node.isSelected())) {
-                if (!fShiftSelection) {
-                    fListStart = node;
-                }
-                if (fShiftSelection) {
-                    clearSelection();
-                    addSelection(fFrame.getNodeList(fListStart, node));
-                } else {
-                    performSelection(node);
-                }
-                fCurrentGraphNode = node;
-                if (node != null) {
-                    node.setFocused(true);
-                }
+                clickOnNode(node);
             }
             redraw();
         }
@@ -1809,6 +1743,104 @@ public class SDWidget extends ScrollView implements SelectionListener,
         }
         fIsDragAndDrop = (event.button == 1);
 
+    }
+
+    private void clickOnNode(GraphNode node) {
+        if (!fShiftSelection) {
+            fListStart = node;
+        }
+        if (fShiftSelection) {
+            clearSelection();
+            addSelection(fFrame.getNodeList(fListStart, node));
+        } else {
+            performSelection(node);
+        }
+        fCurrentGraphNode = node;
+        if (node != null) {
+            node.setFocused(true);
+        }
+    }
+
+    private final class AccessibleControlAdapterExtension extends AccessibleControlAdapter {
+        @Override
+        public void getFocus(AccessibleControlEvent e) {
+            if (fFocusedWidget == -1) {
+                e.childID = ACC.CHILDID_SELF;
+            } else {
+                e.childID = fFocusedWidget;
+            }
+        }
+
+        @Override
+        public void getRole(AccessibleControlEvent e) {
+            switch (e.childID) {
+            case ACC.CHILDID_SELF:
+                e.detail = ACC.ROLE_CLIENT_AREA;
+                break;
+            case 0:
+                e.detail = ACC.ROLE_TOOLTIP;
+                break;
+            case 1:
+                e.detail = ACC.ROLE_LABEL;
+                break;
+            default:
+                break;
+            }
+        }
+
+        @Override
+        public void getState(AccessibleControlEvent e) {
+            e.detail = ACC.STATE_FOCUSABLE;
+            if (e.childID == ACC.CHILDID_SELF) {
+                e.detail |= ACC.STATE_FOCUSED;
+            } else {
+                e.detail |= ACC.STATE_SELECTABLE;
+                if (e.childID == fFocusedWidget) {
+                    e.detail |= ACC.STATE_FOCUSED | ACC.STATE_SELECTED | ACC.STATE_CHECKED;
+                }
+            }
+        }
+    }
+
+    private final class AccessibleAdapterExtension extends AccessibleAdapter {
+        @Override
+        public void getName(AccessibleEvent e) {
+            // Case toolTip
+            if (e.childID == 0) {
+                if (fToolTipNode != null) {
+                    if (fToolTipNode instanceof Lifeline) {
+                        Lifeline lifeline = (Lifeline) fToolTipNode;
+                        e.result = lifeline.getToolTipText();
+                    } else {
+                        e.result = fToolTipNode.getName() + getPostfixForTooltip(true);
+                    }
+                }
+            } else {
+                if (getFocusNode() != null) {
+                    if (getFocusNode() instanceof Lifeline) {
+                        e.result = MessageFormat.format(Messages.SequenceDiagram_LifelineNode, new Object[] { String.valueOf(getFocusNode().getName()) });
+                    }
+                    if (getFocusNode() instanceof BaseMessage) {
+                        BaseMessage mes = (BaseMessage) getFocusNode();
+                        if ((mes.getStartLifeline() != null) && (mes.getEndLifeline() != null)) {
+                            e.result = MessageFormat.format(
+                                    Messages.SequenceDiagram_MessageNode,
+                                    new Object[] { String.valueOf(mes.getName()), String.valueOf(mes.getStartLifeline().getName()), Integer.valueOf(mes.getStartOccurrence()), String.valueOf(mes.getEndLifeline().getName()),
+                                            Integer.valueOf(mes.getEndOccurrence()) });
+                        } else if ((mes.getStartLifeline() == null) && (mes.getEndLifeline() != null)) {
+                            e.result = MessageFormat.format(Messages.SequenceDiagram_FoundMessageNode, new Object[] { String.valueOf(mes.getName()), String.valueOf(mes.getEndLifeline().getName()), Integer.valueOf(mes.getEndOccurrence()) });
+                        } else if ((mes.getStartLifeline() != null) && (mes.getEndLifeline() == null)) {
+                            e.result = MessageFormat.format(Messages.SequenceDiagram_LostMessageNode, new Object[] { String.valueOf(mes.getName()), String.valueOf(mes.getStartLifeline().getName()), Integer.valueOf(mes.getStartOccurrence()) });
+                        }
+                    } else if (getFocusNode() instanceof BasicExecutionOccurrence) {
+                        BasicExecutionOccurrence exec = (BasicExecutionOccurrence) getFocusNode();
+                        e.result = MessageFormat.format(Messages.SequenceDiagram_ExecutionOccurrenceWithParams,
+                                new Object[] { String.valueOf(exec.getName()), String.valueOf(exec.getLifeline().getName()), Integer.valueOf(exec.getStartOccurrence()), Integer.valueOf(exec.getEndOccurrence()) });
+                    }
+
+                }
+            }
+        }
     }
 
     /**
