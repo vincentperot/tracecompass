@@ -63,7 +63,15 @@ public class TmfXmlReadOnlyStateValue extends TmfXmlStateValue {
      */
     public TmfXmlReadOnlyStateValue(TmfXmlReadOnlyModelFactory modelFactory, Element node,
             IXmlStateSystemContainer container, String eventField) {
-        super(modelFactory, node, container, Collections.EMPTY_LIST, eventField);
+        super(modelFactory, node, container, nullList(), eventField);
+    }
+
+    private static List<ITmfXmlStateAttribute> nullList() {
+        final List<ITmfXmlStateAttribute> emptyList = Collections.<ITmfXmlStateAttribute>emptyList();
+        if (emptyList == null) {
+            throw new IllegalStateException();
+        }
+        return emptyList;
     }
 
 }
