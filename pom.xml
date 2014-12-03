@@ -173,6 +173,10 @@
     <module>org.eclipse.tracecompass.target</module>
     <module>org.eclipse.tracecompass.testing</module>
 
+    <module>org.eclipse.tracecompass.analysis.linux.core</module>
+    <module>org.eclipse.tracecompass.analysis.linux.core.tests</module>
+    <module>org.eclipse.tracecompass.analysis.linux.ui</module>
+
     <module>org.eclipse.tracecompass.lttng2.control</module>
     <module>org.eclipse.tracecompass.lttng2.control.core</module>
     <module>org.eclipse.tracecompass.lttng2.control.core.tests</module>
@@ -182,8 +186,6 @@
     <module>org.eclipse.tracecompass.lttng2.kernel</module>
     <module>org.eclipse.tracecompass.lttng2.kernel.core</module>
     <module>org.eclipse.tracecompass.lttng2.kernel.core.tests</module>
-    <module>org.eclipse.tracecompass.lttng2.kernel.ui</module>
-    <module>org.eclipse.tracecompass.lttng2.kernel.ui.tests</module>
     <module>org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests</module>
 
     <module>org.eclipse.tracecompass.lttng2.ust</module>

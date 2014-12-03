@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.linuxtools.tmf.core.analysis">
+      <module
+            analysis_module="org.eclipse.tracecompass.analysis.linux.core.kernelanalysis.KernelAnalysis"
+            automatic="true"
+            id="org.eclipse.tracecompass.analysis.linux.kernel"
+            name="%analysis.lttngkernel">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.analysis.linux.core.trace.IKernelTrace">
+         </tracetype>
+      </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.analysis.linux.core.cpuusage.KernelCpuUsageAnalysis"
+            automatic="false"
+            id="org.eclipse.tracecompass.analysis.linux.cpuusage"
+            name="%cpuusage.lttng.kernel">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.analysis.linux.core.trace.IKernelTrace">
+         </tracetype>
+      </module>
+   </extension>
+</plugin>

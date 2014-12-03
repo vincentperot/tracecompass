@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
       <module
-            analysis_module="org.eclipse.tracecompass.lttng2.kernel.core.analysis.cpuusage.LttngKernelCpuUsageAnalysis"
+            analysis_module="org.eclipse.tracecompass.analysis.linux.core.kernelanalysis.KernelAnalysis"
             automatic="false"
             id="lttng2.kernel.core.tests.cpuusage"
             name="lttng2.kernel.core.tests.cpuusage">
@@ -14,7 +14,7 @@
          </tracetype>
       </module>
       <module
-            analysis_module="org.eclipse.tracecompass.lttng2.kernel.core.analysis.kernel.LttngKernelAnalysis"
+            analysis_module="org.eclipse.tracecompass.analysis.linux.core.kernelanalysis.KernelAnalysis"
             automatic="false"
             id="lttng2.kernel.core.tests.kernel.analysis"
             name="lttng2.kernel.core.tests.kernel.analysis">

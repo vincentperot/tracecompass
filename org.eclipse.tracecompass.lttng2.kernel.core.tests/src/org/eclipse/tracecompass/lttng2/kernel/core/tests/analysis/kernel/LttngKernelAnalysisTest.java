@@ -23,8 +23,8 @@ import static org.junit.Assume.assumeTrue;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.tracecompass.analysis.linux.core.kernelanalysis.KernelAnalysis;
 import org.eclipse.tracecompass.lttng2.control.core.session.SessionConfigStrings;
-import org.eclipse.tracecompass.lttng2.kernel.core.analysis.kernel.LttngKernelAnalysis;
 import org.eclipse.tracecompass.lttng2.kernel.core.trace.LttngKernelTrace;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement;
@@ -43,14 +43,14 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Test the {@link LttngKernelAnalysis} class
+ * Test the {@link KernelAnalysis} class
  *
  * @author Geneviève Bastien
  */
 public class LttngKernelAnalysisTest {
 
     private LttngKernelTrace fTrace;
-    private LttngKernelAnalysis fKernelAnalysisModule;
+    private KernelAnalysis fKernelAnalysisModule;
 
     /**
      * Class setup
@@ -65,7 +65,7 @@ public class LttngKernelAnalysisTest {
      */
     @Before
     public void setUp() {
-        fKernelAnalysisModule = new LttngKernelAnalysis();
+        fKernelAnalysisModule = new KernelAnalysis();
         fTrace = new LttngKernelTrace();
         try {
             fTrace.initTrace(null, CtfTmfTestTrace.KERNEL.getPath(), CtfTmfEvent.class);
@@ -133,7 +133,7 @@ public class LttngKernelAnalysisTest {
     }
 
     /**
-     * Test for {@link LttngKernelAnalysis#getAnalysisRequirements()}
+     * Test for {@link KernelAnalysis#getAnalysisRequirements()}
      */
     @Test
     public void testGetAnalysisRequirements() {
