@@ -22,5 +22,6 @@ Export-Package: org.eclipse.tracecompass.internal.lttng2.kernel.ui;x-friends:="o
  org.eclipse.tracecompass.internal.lttng2.kernel.ui.views;x-friends:="org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests",
  org.eclipse.tracecompass.internal.lttng2.kernel.ui.views.controlflow;x-friends:="org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests",
  org.eclipse.tracecompass.internal.lttng2.kernel.ui.views.cpuusage;x-friends:="org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests",
- org.eclipse.tracecompass.internal.lttng2.kernel.ui.views.resources;x-friends:="org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests"
+ org.eclipse.tracecompass.internal.lttng2.kernel.ui.views.resources;x-friends:="org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests",
+ org.eclipse.tracecompass.internal.lttng2.kernel.ui.views.vm.vcpuview;x-friends:="org.eclipse.tracecompass.lttng2.analysis.vm.ui.tests"
 Import-Package: com.google.common.collect
