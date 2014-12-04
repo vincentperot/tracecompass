@@ -38,6 +38,14 @@
             name="%cpuusage.view.name"
             restorable="true">
       </view>
+      <view
+            allowMultiple="false"
+            category="org.eclipse.linuxtools.tmf.ui.views.category"
+            class="org.eclipse.tracecompass.internal.lttng2.kernel.ui.views.vm.vcpuview.VirtualMachineView"
+            id="lttng2.analysis.vm.ui.vmview"
+            name="%vcpuview.name"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
@@ -76,6 +84,13 @@
             id="org.eclipse.linuxtools.lttng2.kernel.ui.views.cpuusage">
          <analysisId
                id="org.eclipse.linuxtools.lttng2.kernel.core.cpuusage">
+         </analysisId>
+      </output>
+      <output
+            class="org.eclipse.tracecompass.tmf.ui.analysis.TmfAnalysisViewOutput"
+            id="lttng2.analysis.vm.ui.vmview">
+         <analysisId
+               id="lttng2.analysis.vm.core.VirtualMachineAnalysisModule">
          </analysisId>
       </output>
    </extension>
