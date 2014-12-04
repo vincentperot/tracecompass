@@ -1,0 +1,30 @@
+/*******************************************************************************
+ * Copyright (c) 2014 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Mohamad Gebai - Initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.tracecompass.internal.lttng2.kernel.core.analysis.vm;
+
+/**
+ * Attributes used by this plugin
+ *
+ * @author Mohamad Gebai
+ */
+@SuppressWarnings({"javadoc","nls"})
+public interface VmAttributes {
+
+    /* First-level attributes */
+    static final String VIRTUAL_MACHINES = "Virtual Machines";
+
+    /* Sub-attributes for virtual CPUs */
+    static final String STATUS = "Status";
+    static final String HOST_THREAD = "Host Thread";
+
+}

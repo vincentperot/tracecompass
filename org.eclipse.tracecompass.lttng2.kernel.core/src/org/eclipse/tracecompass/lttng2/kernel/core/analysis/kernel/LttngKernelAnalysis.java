@@ -196,6 +196,7 @@ public class LttngKernelAnalysis extends TmfStateSystemAnalysisModule {
         @NonNull
         Collection<Integer> empty = Collections.EMPTY_SET;
         return empty;
+
     }
 
     /**
@@ -272,8 +273,7 @@ public class LttngKernelAnalysis extends TmfStateSystemAnalysisModule {
         } catch (AttributeNotFoundException | StateSystemDisposedException | TimeRangeException e) {
         }
         @SuppressWarnings("null")
-        @NonNull
-        List<ITmfStateInterval> empty = Collections.EMPTY_LIST;
+        @NonNull List<ITmfStateInterval> empty = Collections.EMPTY_LIST;
         return empty;
     }
 
