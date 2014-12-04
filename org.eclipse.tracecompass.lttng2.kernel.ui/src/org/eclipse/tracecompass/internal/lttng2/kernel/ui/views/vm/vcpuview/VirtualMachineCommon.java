@@ -1,0 +1,41 @@
+/*******************************************************************************
+ * Copyright (c) 2014 École Polytechnique de Montréal
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Mohamad Gebai - Initial API and implementation
+ *   Geneviève Bastien - Initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.tracecompass.internal.lttng2.kernel.ui.views.vm.vcpuview;
+
+/**
+ * @author Mohamad Gebai
+ */
+public class VirtualMachineCommon {
+    /** Type of resource */
+    public static enum Type {
+        /** Null resources (filler rows, etc.) */
+        NULL,
+        /** Entries for VMs */
+        VM,
+        /** Entries for VCPUs */
+        VCPU,
+        /** Entries for Threads */
+        THREAD,
+
+
+        /** Other VM */
+        OTHER_VM,
+        /** Thread */
+        ENTRY_THREAD,
+        /** host */
+        HOST,
+        /** Thread from host */
+        HOST_THREAD
+    }
+}
