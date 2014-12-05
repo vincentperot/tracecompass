@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
 import org.eclipse.tracecompass.internal.ctf.core.Activator;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputReaderTimestampComparator;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputReaderTimestampComparator;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;

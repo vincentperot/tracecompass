@@ -18,22 +18,22 @@ import static org.junit.Assert.assertNull;
 import java.nio.ByteBuffer;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.io.Util;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.SequenceDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.ICompoundDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.SequenceDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.VariantDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.VariantDefinition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -134,7 +134,7 @@ public class StructDefinitionTest {
     @Test
     public void testLookupArray() {
         String name = INT_ID;
-        AbstractArrayDefinition result = fixture.lookupArrayDefinition(name);
+        ICompoundDefinition result = fixture.lookupArrayDefinition(name);
         assertNull(result);
     }
 
@@ -185,7 +185,7 @@ public class StructDefinitionTest {
     @Test
     public void testLookupFixedStringDefinition() {
         String name = SEQUENCE_ID;
-        AbstractArrayDefinition result = fixture.lookupArrayDefinition(name);
+        ICompoundDefinition result = fixture.lookupArrayDefinition(name);
         assertNotNull(result);
     }
 

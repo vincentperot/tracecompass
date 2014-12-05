@@ -19,11 +19,11 @@ import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
 import org.eclipse.tracecompass.internal.ctf.core.Activator;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
 
 import com.google.common.collect.ImmutableList;
 

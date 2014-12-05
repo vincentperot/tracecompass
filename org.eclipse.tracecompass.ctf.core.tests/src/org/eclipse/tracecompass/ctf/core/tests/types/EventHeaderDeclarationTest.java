@@ -18,19 +18,19 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.FloatDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.composite.EventHeaderCompactDeclaration;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.composite.EventHeaderDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.composite.EventHeaderLargeDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.Encoding;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.FloatDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.VariantDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.composite.EventHeaderCompactDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.composite.EventHeaderDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.composite.EventHeaderLargeDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -385,8 +385,8 @@ public class EventHeaderDeclarationTest {
         assertNotNull(def);
         assertEquals(ID, def.getId());
         assertEquals(TIMESTAMP, def.getTimestamp());
-        assertEquals(ID, ((IntegerDefinition) def.getDefinition("id")).getValue());
-        assertEquals(TIMESTAMP, ((IntegerDefinition) def.getDefinition("timestamp")).getValue());
+        assertEquals(ID, ((IntegerDefinition) def.getDefinition("id")).getIntegerValue());
+        assertEquals(TIMESTAMP, ((IntegerDefinition) def.getDefinition("timestamp")).getIntegerValue());
     }
 
     /**
@@ -410,8 +410,8 @@ public class EventHeaderDeclarationTest {
         assertNotNull(def);
         assertEquals(ID, def.getId());
         assertEquals(TIMESTAMP, def.getTimestamp());
-        assertEquals(ID, ((IntegerDefinition) def.getDefinition("id")).getValue());
-        assertEquals(TIMESTAMP, ((IntegerDefinition) def.getDefinition("timestamp")).getValue());
+        assertEquals(ID, ((IntegerDefinition) def.getDefinition("id")).getIntegerValue());
+        assertEquals(TIMESTAMP, ((IntegerDefinition) def.getDefinition("timestamp")).getIntegerValue());
     }
 
     /**

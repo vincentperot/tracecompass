@@ -13,7 +13,7 @@ package org.eclipse.tracecompass.ctf.core.tests.trace;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputReaderTimestampComparator;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputReaderTimestampComparator;
 import org.junit.Before;
 import org.junit.Test;
 
