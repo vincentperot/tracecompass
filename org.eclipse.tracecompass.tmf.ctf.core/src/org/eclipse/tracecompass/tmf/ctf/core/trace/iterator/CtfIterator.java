@@ -14,8 +14,8 @@
 package org.eclipse.tracecompass.tmf.ctf.core.trace.iterator;
 
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
@@ -132,7 +132,7 @@ public class CtfIterator extends CTFTraceReader
      * @return CtfTmfEvent The current event
      */
     public synchronized CtfTmfEvent getCurrentEvent() {
-        final CTFStreamInputReader top = super.getPrio().peek();
+        final ICTFStreamInputReader top = super.getPrio().peek();
         if (top != null) {
             if (!fCurLocation.equals(fPreviousLocation)) {
                 fPreviousLocation = fCurLocation;
@@ -151,7 +151,7 @@ public class CtfIterator extends CTFTraceReader
      * @return long The current timestamp location
      */
     public synchronized long getCurrentTimestamp() {
-        final CTFStreamInputReader top = super.getPrio().peek();
+        final ICTFStreamInputReader top = super.getPrio().peek();
         if (top != null) {
             long ts = top.getCurrentEvent().getTimestamp();
             return fTrace.getCTFTrace().timestampCyclesToNanos(ts);

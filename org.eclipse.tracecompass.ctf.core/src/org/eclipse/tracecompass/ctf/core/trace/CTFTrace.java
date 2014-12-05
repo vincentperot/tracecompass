@@ -33,21 +33,23 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
-import org.eclipse.tracecompass.ctf.core.event.CTFClock;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
-import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
-import org.eclipse.tracecompass.ctf.core.event.types.Definition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFCallsite;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFClock;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.Definition;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IDefinitionScope;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
-import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
-import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStream;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.CTFCallsiteComparator;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.LexicalScope;
+import org.eclipse.tracecompass.internal.ctf.core.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
 
 /**
  * A CTF trace on the file system.
@@ -110,7 +112,7 @@ public class CTFTrace implements IDefinitionScope {
      * This is only used when opening the trace files, to read the first packet
      * header and see if they are valid trace files.
      */
-    private StructDefinition fPacketHeaderDef;
+    private ICompositeDefinition fPacketHeaderDef;
 
     /**
      * Collection of streams contained in the trace.
@@ -219,20 +221,6 @@ public class CTFTrace implements IDefinitionScope {
     // ------------------------------------------------------------------------
 
     /**
-     * Gets an event declaration hash map for a given streamID
-     *
-     * @param streamId
-     *            The ID of the stream from which to read
-     * @return The Hash map with the event declarations
-     * @since 2.0
-     * @deprecated use {@link CTFTrace#getEventDeclarations(Long)}
-     */
-    @Deprecated
-    public Map<Long, IEventDeclaration> getEvents(Long streamId) {
-        return fStreams.get(streamId).getEvents();
-    }
-
-    /**
      * Gets an event declaration list for a given streamID
      *
      * @param streamId
@@ -242,36 +230,6 @@ public class CTFTrace implements IDefinitionScope {
      */
     public Collection<IEventDeclaration> getEventDeclarations(Long streamId) {
         return fStreams.get(streamId).getEventDeclarations();
-    }
-
-    /**
-     * Get an event by it's ID
-     *
-     * @param streamId
-     *            The ID of the stream from which to read
-     * @param id
-     *            the ID of the event
-     * @return the event declaration
-     * @since 2.0
-     * @deprecated use {@link CTFTrace#getEventType(long, int)} instead
-     */
-    @Deprecated
-    public IEventDeclaration getEventType(long streamId, long id) {
-        return getStream(streamId).getEventDeclaration((int) id);
-    }
-
-    /**
-     * Get an event by it's ID
-     *
-     * @param streamId
-     *            The ID of the stream from which to read
-     * @param id
-     *            the ID of the event
-     * @return the event declaration
-     * @since 3.2
-     */
-    public IEventDeclaration getEventType(long streamId, int id) {
-        return getEvents(streamId).get(id);
     }
 
     /**
@@ -496,7 +454,7 @@ public class CTFTrace implements IDefinitionScope {
      * @throws CTFReaderException
      *             if there is a file error
      */
-    private CTFStream openStreamInput(File streamFile) throws CTFReaderException {
+    private ICTFStream openStreamInput(File streamFile) throws CTFReaderException {
         ByteBuffer byteBuffer;
         BitBuffer streamBitBuffer;
         CTFStream stream;
@@ -557,7 +515,7 @@ public class CTFTrace implements IDefinitionScope {
         return stream;
     }
 
-    private void validateUUID(StructDefinition packetHeaderDef) throws CTFReaderException {
+    private void validateUUID(ICompositeDefinition packetHeaderDef) throws CTFReaderException {
         IDefinition lookupDefinition = packetHeaderDef.lookupDefinition("uuid"); //$NON-NLS-1$
         ArrayDefinition uuidDef = (ArrayDefinition) lookupDefinition;
         if (uuidDef != null) {
@@ -568,9 +526,9 @@ public class CTFTrace implements IDefinitionScope {
         }
     }
 
-    private static void validateMagicNumber(StructDefinition packetHeaderDef) throws CTFReaderException {
+    private static void validateMagicNumber(ICompositeDefinition packetHeaderDef) throws CTFReaderException {
         IntegerDefinition magicDef = (IntegerDefinition) packetHeaderDef.lookupDefinition("magic"); //$NON-NLS-1$
-        int magic = (int) magicDef.getValue();
+        int magic = (int) magicDef.getIntegerValue();
         if (magic != Utils.CTF_MAGIC) {
             throw new CTFReaderException("CTF magic mismatch"); //$NON-NLS-1$
         }
@@ -594,12 +552,12 @@ public class CTFTrace implements IDefinitionScope {
      * @param lookupPath
      *            String
      * @return Definition
-     * @see org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope#lookupDefinition(String)
+     * @see org.eclipse.tracecompass.ctf.core.types.IDefinitionScope#lookupDefinition(String)
      */
     @Override
     public Definition lookupDefinition(String lookupPath) {
         if (lookupPath.equals(LexicalScope.TRACE_PACKET_HEADER.toString())) {
-            return fPacketHeaderDef;
+            return (Definition)fPacketHeaderDef;
         }
         return null;
     }
@@ -651,7 +609,7 @@ public class CTFTrace implements IDefinitionScope {
         /*
          * If a stream with the same ID already exists, it is not valid.
          */
-        CTFStream existingStream = fStreams.get(stream.getId());
+        ICTFStream existingStream = fStreams.get(stream.getId());
         if (existingStream != null) {
             throw new ParseException("Stream id already exists"); //$NON-NLS-1$
         }
@@ -757,7 +715,7 @@ public class CTFTrace implements IDefinitionScope {
         long currentStart = Long.MAX_VALUE;
         for (CTFStream stream : fStreams.values()) {
             for (CTFStreamInput si : stream.getStreamInputs()) {
-                currentStart = Math.min(currentStart, si.getIndex().getEntries().get(0).getTimestampBegin());
+                currentStart = Math.min(currentStart, si.getTimestampStart());
             }
         }
         return timestampCyclesToNanos(currentStart);

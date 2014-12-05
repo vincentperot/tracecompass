@@ -14,10 +14,10 @@ package org.eclipse.tracecompass.tmf.ctf.core.event;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.ctf.core.CTFStrings;
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.ctf.core.types.ISimpleDatatypeDefinition;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.ctf.core.timestamp.CtfTmfTimestamp;
@@ -69,7 +69,7 @@ public final class CtfTmfEventFactory {
         if (eventDecl.getName().equals(CTFStrings.LOST_EVENT_NAME)) {
             IDefinition nbLostEventsDef = eventDef.getFields().getDefinition(CTFStrings.LOST_EVENTS_FIELD);
             IDefinition durationDef = eventDef.getFields().getDefinition(CTFStrings.LOST_EVENTS_DURATION);
-            if (!(nbLostEventsDef instanceof IntegerDefinition) || !(durationDef instanceof IntegerDefinition)) {
+            if (!(nbLostEventsDef instanceof ISimpleDatatypeDefinition) || !(durationDef instanceof ISimpleDatatypeDefinition)) {
                 /*
                  * One or both of these fields doesn't exist, or is not of the
                  * right type. The event claims to be a "lost event", but is
@@ -77,8 +77,8 @@ public final class CtfTmfEventFactory {
                  */
                 return getNullEvent(originTrace);
             }
-            long nbLostEvents = ((IntegerDefinition) nbLostEventsDef).getValue();
-            long duration = ((IntegerDefinition) durationDef).getValue();
+            long nbLostEvents = ((ISimpleDatatypeDefinition) nbLostEventsDef).getIntegerValue();
+            long duration = ((ISimpleDatatypeDefinition) durationDef).getIntegerValue();
             CtfTmfTimestamp timestampEnd = new CtfTmfTimestamp(
                     originTrace.getCTFTrace().timestampCyclesToNanos(ts) + duration);
 

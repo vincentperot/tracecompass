@@ -23,12 +23,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFTraceReader;
 import org.eclipse.tracecompass.ctf.core.trace.Metadata;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -92,7 +93,7 @@ public class CTFTraceGrowingTest {
     @Test
     public void testAddStream() throws CTFReaderException {
         File stream = new File(fPathName + "/" + "channel1");
-        try (CTFTraceReader reader = new CTFTraceReader(fixture);) {
+        try (ICTFTraceReader reader = new CTFTraceReader(fixture);) {
             fixture.addStreamFile(stream);
             reader.update();
             assertTrue(reader.advance());
@@ -109,7 +110,7 @@ public class CTFTraceGrowingTest {
     @Test
     public void testAddTwoStreams1() throws CTFReaderException {
         File stream = new File(fPathName + "/" + "channel1");
-        try (CTFTraceReader reader = new CTFTraceReader(fixture);) {
+        try (ICTFTraceReader reader = new CTFTraceReader(fixture);) {
             fixture.addStreamFile(stream);
             stream = new File(fPathName + "/" + "channel2");
             fixture.addStreamFile(stream);
@@ -130,7 +131,7 @@ public class CTFTraceGrowingTest {
     @Test
     public void testAddTwoStreams2() throws CTFReaderException {
         File stream = new File(fPathName + "/" + "channel1");
-        try (CTFTraceReader reader = new CTFTraceReader(fixture);) {
+        try (ICTFTraceReader reader = new CTFTraceReader(fixture);) {
             fixture.addStreamFile(stream);
             stream = new File(fPathName + "/" + "channel2");
             reader.update();
@@ -153,7 +154,7 @@ public class CTFTraceGrowingTest {
     @Test
     public void testAddTwoStreams3() throws CTFReaderException {
         File stream = new File(fPathName + "/" + "channel1");
-        try (CTFTraceReader reader = new CTFTraceReader(fixture);) {
+        try (ICTFTraceReader reader = new CTFTraceReader(fixture);) {
             fixture.addStreamFile(stream);
             stream = new File(fPathName + "/" + "channel2");
             reader.update();
@@ -181,7 +182,7 @@ public class CTFTraceGrowingTest {
     @Test(expected = CTFReaderException.class)
     public void testAddStreamFail() throws CTFReaderException {
         File stream = new File(fPathName + "/" + "metadata");
-        try (CTFTraceReader reader = new CTFTraceReader(fixture);) {
+        try (ICTFTraceReader reader = new CTFTraceReader(fixture);) {
             fixture.addStreamFile(stream);
             assertNull(reader.getCurrentEventDef());
         }

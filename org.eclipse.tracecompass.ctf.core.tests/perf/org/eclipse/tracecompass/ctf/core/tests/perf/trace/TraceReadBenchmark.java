@@ -19,11 +19,12 @@ import static org.junit.Assume.assumeTrue;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
 import org.junit.Test;
 
 /**
@@ -69,7 +70,7 @@ public class TraceReadBenchmark {
             pm.start();
             try {
                 CTFTrace trace = testTrace.getTrace();
-                try (CTFTraceReader traceReader = new CTFTraceReader(trace);) {
+                try (ICTFTraceReader traceReader = new CTFTraceReader(trace);) {
 
                     while (traceReader.hasMoreEvents()) {
                         EventDefinition ed = traceReader.getCurrentEventDef();

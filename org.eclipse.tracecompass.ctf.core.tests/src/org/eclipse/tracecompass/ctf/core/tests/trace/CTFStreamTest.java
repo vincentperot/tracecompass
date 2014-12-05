@@ -20,15 +20,16 @@ import java.io.FilenameFilter;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInput;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
-import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStream;
+import org.eclipse.tracecompass.ctf.core.types.IDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStream;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -96,7 +97,7 @@ public class CTFStreamTest {
     @Test
     public void testStream() throws CTFReaderException {
         CTFTrace trace = testTrace.getTrace();
-        CTFStream result = new CTFStream(trace);
+        ICTFStream result = new CTFStream(trace);
         assertNotNull(result);
     }
 

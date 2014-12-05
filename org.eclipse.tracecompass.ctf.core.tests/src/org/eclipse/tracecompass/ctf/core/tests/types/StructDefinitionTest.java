@@ -18,23 +18,23 @@ import static org.junit.Assert.assertNull;
 import java.nio.ByteBuffer;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.io.Util;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.SequenceDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.Encoding;
+import org.eclipse.tracecompass.ctf.core.types.ICompoundDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IVariantDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.SequenceDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.VariantDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -95,20 +95,20 @@ public class StructDefinitionTest {
         bytes[8] = 2;
         bytes[13] = 3;
         BitBuffer bb = new BitBuffer(Util.testMemory(ByteBuffer.wrap(bytes)));
-        fixture = sDec.createDefinition(null, TEST_STRUCT_ID, bb);
+        fixture = (StructDefinition) sDec.createDefinition(null, TEST_STRUCT_ID, bb);
         EnumDefinition eDef = tagDec.createDefinition(fixture, TAG_ID, bb);
         assertNotNull(eDef);
-        VariantDefinition vd = varDec.createDefinition(fixture, VAR_FIELD_NAME, bb);
+        IVariantDefinition vd = varDec.createDefinition(fixture, VAR_FIELD_NAME, bb);
         assertNotNull(vd);
         // Create an empty struct
         StructDeclaration esDec = new StructDeclaration(32);
-        emptyStruct = esDec.createDefinition(null, TEST_STRUCT_ID, bb);
+        emptyStruct = (StructDefinition) esDec.createDefinition(null, TEST_STRUCT_ID, bb);
 
         // Create a simple struct with two items
         StructDeclaration ssDec = new StructDeclaration(32);
         ssDec.addField(INT_ID, id);
         ssDec.addField(STRING_ID, sd);
-        simpleStruct = ssDec.createDefinition(null, TEST_STRUCT_ID, bb);
+        simpleStruct = (StructDefinition) ssDec.createDefinition(null, TEST_STRUCT_ID, bb);
     }
 
     /**
@@ -135,7 +135,7 @@ public class StructDefinitionTest {
     @Test
     public void testLookupArray() {
         String name = INT_ID;
-        AbstractArrayDefinition result = fixture.lookupArrayDefinition(name);
+        ICompoundDefinition result = fixture.lookupArrayDefinition(name);
         assertNull(result);
     }
 
@@ -186,7 +186,7 @@ public class StructDefinitionTest {
     @Test
     public void testLookupFixedStringDefinition() {
         String name = SEQUENCE_ID;
-        AbstractArrayDefinition result = fixture.lookupArrayDefinition(name);
+        ICompoundDefinition result = fixture.lookupArrayDefinition(name);
         assertNotNull(result);
     }
 
@@ -218,7 +218,7 @@ public class StructDefinitionTest {
     @Test
     public void testLookupVariant() {
         String name = VAR_FIELD_NAME;
-        VariantDefinition result = fixture.lookupVariant(name);
+        IVariantDefinition result = fixture.lookupVariant(name);
 
         assertNotNull(result);
     }

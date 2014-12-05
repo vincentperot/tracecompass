@@ -19,21 +19,23 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.Definition;
-import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFResponse;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInput;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.types.Definition;
+import org.eclipse.tracecompass.ctf.core.types.Encoding;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStream;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInputReader;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -116,7 +118,7 @@ public class CTFStreamInputReaderTest {
     @Test(expected = CTFReaderException.class)
     public void testStreamInputReader_invalid() throws CTFReaderException, IOException {
         CTFStreamInput streamInput = new CTFStreamInput(new CTFStream(new CTFTrace("")), new File(""));
-        try (CTFStreamInputReader result = new CTFStreamInputReader(streamInput)) {
+        try (ICTFStreamInputReader result = new CTFStreamInputReader(streamInput)) {
             assertNotNull(result);
         }
     }
@@ -144,7 +146,7 @@ public class CTFStreamInputReaderTest {
      */
     @Test
     public void testGetCurrentPacketContext() {
-        StructDefinition result = fixture.getCurrentEvent().getPacketContext();
+        ICompositeDefinition result = fixture.getCurrentEvent().getPacketContext();
         assertNotNull(result);
     }
 

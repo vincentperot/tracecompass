@@ -32,11 +32,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.CTFClock;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFClock;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -233,7 +234,7 @@ public class CtfTmfTrace extends TmfTrace
             if (!temp.majorIsSet()) {
                 status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, Messages.CtfTmfTrace_MajorNotSet);
             } else {
-                try (CTFTraceReader ctfTraceReader = new CTFTraceReader(temp);) {
+                try (ICTFTraceReader ctfTraceReader = new CTFTraceReader(temp);) {
                     if (!ctfTraceReader.hasMoreEvents()) {
                         // TODO: This will need an additional check when we
                         // support live traces

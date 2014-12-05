@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStream;
 import org.eclipse.tracecompass.ctf.core.trace.Metadata;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -191,12 +191,12 @@ public class MetadataTest {
     protected CTFTrace testSingleFragment() throws CTFReaderException {
         fixture = new Metadata();
         CTFTrace trace = fixture.getTrace();
-        for (CTFStream s : trace.getStreams()) {
+        for (ICTFStream s : trace.getStreams()) {
             fail("This should be empty, has" + s.toString());
         }
         fixture.parseText(mdStart);
         int count = 0;
-        for (CTFStream s : trace.getStreams()) {
+        for (ICTFStream s : trace.getStreams()) {
             count++;
             assertNotNull(s);
         }

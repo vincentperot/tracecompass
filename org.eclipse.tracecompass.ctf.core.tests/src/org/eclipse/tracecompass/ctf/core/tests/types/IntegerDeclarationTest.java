@@ -19,8 +19,8 @@ import static org.junit.Assert.assertNotNull;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
 
-import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.Encoding;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 
