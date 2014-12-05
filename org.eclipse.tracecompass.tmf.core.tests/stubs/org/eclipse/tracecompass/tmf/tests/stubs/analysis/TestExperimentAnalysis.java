@@ -85,7 +85,6 @@ public class TestExperimentAnalysis extends TmfStateSystemAnalysisModule {
                     ss.modifyAttribute(event.getTimestamp().getValue(), TmfStateValue.newValueInt(++fCount), quarkId);
                     fTraces.add(event.getTrace());
                 } catch (TimeRangeException | AttributeNotFoundException | StateValueTypeException e) {
-
                 }
             }
         }

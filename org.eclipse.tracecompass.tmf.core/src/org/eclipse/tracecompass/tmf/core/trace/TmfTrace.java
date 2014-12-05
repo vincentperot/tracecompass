@@ -291,15 +291,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
         getIndexer().buildIndex(0, TmfTimeRange.ETERNITY, waitForCompletion);
     }
 
-    /**
-     * Instantiate the applicable analysis modules and executes the analysis
-     * modules that are meant to be automatically executed
-     *
-     * @return An IStatus indicating whether the analysis could be run
-     *         successfully or not
-     * @since 3.0
-     */
-    protected IStatus executeAnalysis() {
+    private IStatus executeAnalysis() {
         MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
 
         @SuppressWarnings("null")
@@ -314,6 +306,26 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
                 }
             } catch (TmfAnalysisException e) {
                 status.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, e.getMessage()));
+            }
+        }
+        return status;
+    }
+
+    /**
+     * Instantiate the applicable analysis modules for this trace and the traces
+     * that are part of the same trace set and executes the analysis modules
+     * that are meant to be automatically executed.
+     *
+     * @return An IStatus indicating whether the analysis could be run
+     *         successfully or not
+     * @since 3.0
+     */
+    protected IStatus executeAllAnalysis() {
+        MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
+
+        for (ITmfTrace trace : TmfTraceManager.getTraceSetWithExperiment(this)) {
+            if (trace instanceof TmfTrace) {
+                status.add(((TmfTrace) trace).executeAnalysis());
             }
         }
         return status;
@@ -695,18 +707,15 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
             return;
         }
 
-        /*
-         * The signal is either for this trace, or for an experiment containing
-         * this trace.
-         */
-        IStatus status = executeAnalysis();
-        if (!status.isOK()) {
-            Activator.log(status);
-        }
-
         TmfTraceManager.refreshSupplementaryFiles(this);
 
         if (signal.getTrace() == this) {
+            /* Execute the analyses */
+            IStatus status = executeAllAnalysis();
+            if (!status.isOK()) {
+                Activator.log(status);
+            }
+
             /* Additionally, the signal is directly for this trace. */
             if (getNbEvents() == 0) {
                 return;
