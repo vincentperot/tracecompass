@@ -183,8 +183,16 @@ public class CtfTmfEvent extends TmfEvent
         CtfTmfEventType ctfTmfEventType = new CtfTmfEventType(fEventName, getContent());
 
         /* Register the event type in the owning trace, but only if there is one */
-        CtfTmfTrace trace = getTrace();
-        trace.registerEventType(ctfTmfEventType);
+        try {
+            CtfTmfTrace trace = getTrace();
+            trace.registerEventType(ctfTmfEventType);
+        } catch (IllegalStateException e) {
+            /*
+             * FIXME: This is needed because this method is called by the
+             * FilterViewer without having a trace associated with it. This
+             * should be fixed at the source.
+             */
+        }
 
         return ctfTmfEventType;
     }
