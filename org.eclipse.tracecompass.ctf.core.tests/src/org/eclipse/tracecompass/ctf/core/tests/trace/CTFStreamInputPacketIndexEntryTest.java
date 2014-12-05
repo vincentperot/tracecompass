@@ -14,7 +14,7 @@ package org.eclipse.tracecompass.ctf.core.tests.trace;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputPacketIndexEntry;
 import org.junit.Before;
 import org.junit.Test;
 

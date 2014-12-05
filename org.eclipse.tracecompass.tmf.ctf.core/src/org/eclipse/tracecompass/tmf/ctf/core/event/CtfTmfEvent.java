@@ -19,12 +19,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFCallsite;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDefinition;
 import org.eclipse.tracecompass.tmf.core.event.ITmfCustomAttributes;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
@@ -270,7 +269,7 @@ public class CtfTmfEvent extends TmfEvent
         if (structFields != null) {
             if (structFields.getFieldNames() != null) {
                 for (String curFieldName : structFields.getFieldNames()) {
-                    fields.add(CtfTmfEventField.parseField((IDefinition) structFields.getDefinition(curFieldName), curFieldName));
+                    fields.add(CtfTmfEventField.parseField(structFields.getDefinition(curFieldName), curFieldName));
                 }
             }
         }
@@ -280,7 +279,7 @@ public class CtfTmfEvent extends TmfEvent
             for (String contextName : structContext.getFieldNames()) {
                 /* Prefix field name */
                 String curContextName = CtfConstants.CONTEXT_FIELD_PREFIX + contextName;
-                fields.add(CtfTmfEventField.parseField((IDefinition) structContext.getDefinition(contextName), curContextName));
+                fields.add(CtfTmfEventField.parseField(structContext.getDefinition(contextName), curContextName));
             }
         }
 

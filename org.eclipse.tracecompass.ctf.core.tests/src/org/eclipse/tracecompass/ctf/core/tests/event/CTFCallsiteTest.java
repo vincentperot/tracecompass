@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFCallsite;
 import org.junit.Test;
 
 /**

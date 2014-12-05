@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.ByteOrder;
 
-import org.eclipse.tracecompass.ctf.core.event.types.FloatDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.FloatDeclaration;
 import org.junit.Test;
 
 @SuppressWarnings("javadoc")
