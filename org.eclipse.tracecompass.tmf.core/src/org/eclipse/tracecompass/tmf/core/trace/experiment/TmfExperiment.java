@@ -27,7 +27,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
@@ -666,9 +665,8 @@ public class TmfExperiment extends TmfTrace implements ITmfEventParser, ITmfPers
         if (signal.getTrace() == this) {
             initializeStreamingMonitor();
 
-            /* Initialize the analysis */
-            MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
-            status.add(executeAnalysis());
+            /* Execute the analyses */
+            IStatus status = executeAllAnalysis();
             if (!status.isOK()) {
                 Activator.log(status);
             }

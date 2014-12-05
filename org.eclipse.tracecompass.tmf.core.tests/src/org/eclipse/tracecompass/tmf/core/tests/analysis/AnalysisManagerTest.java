@@ -72,11 +72,17 @@ public class AnalysisManagerTest {
         /* At least 3 modules should be found */
         assertTrue(modules.size() >= 3);
 
+        /* automatic attribute not set in plugin.xml */
         IAnalysisModuleHelper module = modules.get(MODULE_PARAM_DEFAULT);
-        assertTrue(module.isAutomatic());
+        assertFalse(module.isAutomatic());
 
+        /* automatic attribute set to false in plugin.xml */
         module = modules.get(MODULE_PARAM);
         assertFalse(module.isAutomatic());
+
+        /* automatic attribute set to true in plugin.xml */
+        module = modules.get(MODULE_SECOND);
+        assertTrue(module.isAutomatic());
     }
 
     /**

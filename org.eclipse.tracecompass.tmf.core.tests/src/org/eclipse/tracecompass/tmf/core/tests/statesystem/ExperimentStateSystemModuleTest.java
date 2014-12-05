@@ -21,7 +21,6 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
-import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.tests.shared.TmfTestTrace;
@@ -59,11 +58,9 @@ public class ExperimentStateSystemModuleTest {
     @Before
     public void setupTraces() {
         ITmfTrace trace = TmfTestTrace.A_TEST_10K.getTrace();
-        TmfSignalManager.deregister(trace);
         ITmfTrace trace2 = TmfTestTrace.A_TEST_10K2.getTrace();
-        TmfSignalManager.deregister(trace2);
         ITmfTrace[] traces = { trace, trace2 };
-        fExperiment = new TmfExperimentStub("Test", traces, 1000);
+        fExperiment = new TmfExperimentStub("Test ss experiment", traces, 1000);
         fExperiment.traceOpened(new TmfTraceOpenedSignal(this, fExperiment, null));
 
         fModule = (TmfStateSystemAnalysisModule) fExperiment.getAnalysisModule(MODULE_SS);
