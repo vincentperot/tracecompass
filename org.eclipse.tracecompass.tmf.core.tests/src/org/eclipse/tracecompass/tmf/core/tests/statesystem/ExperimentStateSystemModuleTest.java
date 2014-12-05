@@ -92,6 +92,7 @@ public class ExperimentStateSystemModuleTest {
             try {
                 int quark = ss.getQuarkAbsolute(TestExperimentAnalysis.TRACE_QUARK_NAME);
                 ITmfStateInterval interval = ss.querySingleState(ss.getCurrentEndTime(), quark);
+                System.out.println("Exp ss value at " + ss.getCurrentEndTime() + ": " + interval);
                 assertEquals(2, interval.getStateValue().unboxInt());
             } catch (AttributeNotFoundException e) {
                 fail("The quark for number of traces does not exist");
