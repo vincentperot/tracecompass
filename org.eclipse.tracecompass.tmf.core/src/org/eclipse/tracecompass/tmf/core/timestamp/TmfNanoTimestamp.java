@@ -67,6 +67,12 @@ public class TmfNanoTimestamp extends TmfTimestamp {
 
     @Override
     public int compareTo(final ITmfTimestamp ts) {
+        if( ts == TmfTimestamp.BIG_BANG) {
+            return 1;
+        }
+        if (ts == TmfTimestamp.BIG_CRUNCH) {
+            return -1;
+        }
         if (ts instanceof TmfNanoTimestamp) {
             final long delta = getValue() - ts.getValue();
             return (delta == 0) ? 0 : (delta > 0) ? 1 : -1;

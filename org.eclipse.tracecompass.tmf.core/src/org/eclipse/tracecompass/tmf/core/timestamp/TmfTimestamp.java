@@ -255,10 +255,10 @@ public class TmfTimestamp implements ITmfTimestamp {
         if (this == ts || (fValue == ts.getValue() && fScale == ts.getScale())) {
             return 0;
         }
-        if ((fValue == BIG_BANG.getValue() && fScale == BIG_BANG.getScale()) || (ts.getValue() == BIG_CRUNCH.getValue() && ts.getScale() == BIG_CRUNCH.getScale())) {
+        if (ts == BIG_CRUNCH) {
             return -1;
         }
-        if ((fValue == BIG_CRUNCH.getValue() && fScale == BIG_CRUNCH.getScale()) || (ts.getValue() == BIG_BANG.getValue() && ts.getScale() == BIG_BANG.getScale())) {
+        if (ts == BIG_BANG) {
             return 1;
         }
 
