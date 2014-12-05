@@ -22,15 +22,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
-import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
-import org.eclipse.tracecompass.ctf.core.event.types.Definition;
-import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.types.Definition;
+import org.eclipse.tracecompass.ctf.core.types.Encoding;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.LexicalScope;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -116,7 +117,7 @@ public class CTFEventDefinitionTest {
     private static void test(int rank, EventDefinition ed) {
         String title = "event #" + rank;
         assertEquals(title, 100L, ed.getTimestamp());
-        StructDefinition context = ed.getContext();
+        ICompositeDefinition context = ed.getContext();
         if (rank >= 4) {
             assertNotNull(title, context);
             if (rank >= 12) {

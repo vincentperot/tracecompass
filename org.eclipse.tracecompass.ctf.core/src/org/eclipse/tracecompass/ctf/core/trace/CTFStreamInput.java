@@ -21,21 +21,21 @@ import java.nio.file.StandardOpenOption;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
-import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
-import org.eclipse.tracecompass.ctf.core.event.types.Definition;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.FloatDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.types.Definition;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndex;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.IDefinitionScope;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.LexicalScope;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputPacketIndex;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.FloatDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
 
 /**
  * <b><u>StreamInput</u></b>
@@ -328,7 +328,7 @@ public class CTFStreamInput implements IDefinitionScope {
         IntegerDefinition magicDef = (IntegerDefinition) tracePacketHeaderDef
                 .lookupDefinition("magic"); //$NON-NLS-1$
         if (magicDef != null) {
-            int magic = (int) magicDef.getValue();
+            int magic = (int) magicDef.getIntegerValue();
             if (magic != Utils.CTF_MAGIC) {
                 throw new CTFReaderException(
                         "CTF magic mismatch " + Integer.toHexString(magic) + " vs " + Integer.toHexString(Utils.CTF_MAGIC)); //$NON-NLS-1$//$NON-NLS-2$

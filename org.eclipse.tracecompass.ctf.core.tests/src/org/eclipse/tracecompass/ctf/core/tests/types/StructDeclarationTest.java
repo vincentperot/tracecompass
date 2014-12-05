@@ -19,13 +19,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.ByteBuffer;
 
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -166,7 +167,7 @@ public class StructDeclarationTest {
     @Test
     public void equalsTest() {
         StructDeclaration a = new StructDeclaration(8);
-        StructDeclaration b = new StructDeclaration(16);
+        ICompositeDeclaration b = new StructDeclaration(16);
         StructDeclaration c = new StructDeclaration(8);
         StructDeclaration d = new StructDeclaration(8);
         StructDeclaration e = new StructDeclaration(8);

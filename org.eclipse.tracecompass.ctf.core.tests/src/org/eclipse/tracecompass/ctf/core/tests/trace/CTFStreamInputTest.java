@@ -22,11 +22,11 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
 import org.junit.Before;
 import org.junit.Test;
 

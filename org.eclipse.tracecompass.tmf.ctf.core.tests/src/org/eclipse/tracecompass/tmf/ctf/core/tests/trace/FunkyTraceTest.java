@@ -12,15 +12,16 @@
 
 package org.eclipse.tracecompass.tmf.ctf.core.tests.trace;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
+
+import java.util.List;
 
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
-import org.eclipse.tracecompass.tmf.ctf.core.CtfEnumPair;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
 import org.eclipse.tracecompass.tmf.ctf.core.tests.shared.CtfTmfTestTrace;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
@@ -30,6 +31,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * More advanced CTF tests using "funky_trace", a trace generated with the
@@ -149,9 +152,8 @@ public class FunkyTraceTest {
                 (ITmfEventField[]) event.getContent().getField("complex_structure").getValue();
 
         assertEquals("variant_selector", complexStruct[0].getName());
-        CtfEnumPair variant1 = (CtfEnumPair) complexStruct[0].getValue();
-        assertEquals("INT16_TYPE", variant1.getStringValue());
-        assertEquals(Long.valueOf(1), variant1.getLongValue());
+        String variant1 = (String) complexStruct[0].getValue();
+        assertEquals("INT16_TYPE", variant1);
 
         assertEquals("a_string", complexStruct[1].getName());
         assertEquals("Test string", complexStruct[1].getValue());
@@ -167,9 +169,10 @@ public class FunkyTraceTest {
         assertEquals(Long.valueOf(10), innerStruct[0].getValue());
 
         assertEquals("a_sequence", innerStruct[1].getName());
-        long[] seqValues = (long[]) innerStruct[1].getValue();
-        long[] expectedValues = { 4, 3, 2, 1, 0, -1, -2, -3, -4, -5 };
-        assertArrayEquals(expectedValues, seqValues);
+        List<?> seqValues = (List<?>) innerStruct[1].getValue();
+        List<Long> expectedValues = ImmutableList.<Long>of( 4L, 3L, 2L, 1L, 0L, -1L, -2L, -3L, -4L, -5L );
+        assertTrue(expectedValues.containsAll(seqValues));
+        assertTrue(seqValues.containsAll(expectedValues));
     }
 
     // ------------------------------------------------------------------------

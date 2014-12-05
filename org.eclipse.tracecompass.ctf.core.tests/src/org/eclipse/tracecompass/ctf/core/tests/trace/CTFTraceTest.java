@@ -25,14 +25,15 @@ import java.io.File;
 import java.nio.ByteOrder;
 import java.util.UUID;
 
-import org.eclipse.tracecompass.ctf.core.event.CTFClock;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFClock;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -168,7 +169,7 @@ public class CTFTraceTest {
      */
     @Test
     public void testGetPacketHeader() {
-        StructDeclaration result = fixture.getPacketHeader();
+        ICompositeDeclaration result = fixture.getPacketHeader();
         assertNotNull(result);
     }
 

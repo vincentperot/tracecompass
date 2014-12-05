@@ -19,27 +19,28 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
-import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.CompoundDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.Definition;
-import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.FloatDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.io.Util;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.Definition;
+import org.eclipse.tracecompass.ctf.core.types.Encoding;
+import org.eclipse.tracecompass.ctf.core.types.ICompoundDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IIntersectsDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.IDefinitionScope;
+import org.eclipse.tracecompass.internal.ctf.core.types.ArrayDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.CompoundDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.FloatDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.VariantDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.VariantDefinition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -167,7 +168,7 @@ public class VariantDefinitionTest {
                 );
         String fieldName = "";
         declaration.setTag("");
-        VariantDefinition result = declaration.createDefinition(definitionScope, fieldName, bb);
+        IIntersectsDefinition result = declaration.createDefinition(definitionScope, fieldName, bb);
         assertNotNull(result);
     }
 
@@ -221,7 +222,7 @@ public class VariantDefinitionTest {
      */
     @Test
     public void testLookupArray() {
-        AbstractArrayDefinition result = fixture.lookupArrayDefinition(ENUM_3);
+        ICompoundDefinition result = fixture.lookupArrayDefinition(ENUM_3);
         assertNull(result);
     }
 
@@ -276,7 +277,7 @@ public class VariantDefinitionTest {
      */
     @Test
     public void testLookupVariant() {
-        VariantDefinition result = fixture.lookupVariant(ENUM_8);
+        IIntersectsDefinition result = fixture.lookupVariant(ENUM_8);
         assertNull(result);
     }
 

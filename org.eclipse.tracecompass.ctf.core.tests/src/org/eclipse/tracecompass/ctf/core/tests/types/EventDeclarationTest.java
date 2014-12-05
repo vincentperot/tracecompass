@@ -18,14 +18,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
-import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -208,7 +209,7 @@ public class EventDeclarationTest {
      */
     @Test
     public void testGetFields() {
-        StructDeclaration result = fixture.getFields();
+        ICompositeDeclaration result = fixture.getFields();
         assertNotNull(result);
     }
 

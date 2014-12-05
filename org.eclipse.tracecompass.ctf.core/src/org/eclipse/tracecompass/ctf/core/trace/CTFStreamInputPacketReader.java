@@ -18,26 +18,28 @@ import java.nio.channels.FileChannel.MapMode;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.CTFStrings;
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
-import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
-import org.eclipse.tracecompass.ctf.core.event.types.Definition;
-import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IEventHeaderDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.SimpleDatatypeDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.Definition;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IEventHeaderDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IIntersectsDefinition;
+import org.eclipse.tracecompass.ctf.core.types.ISimpleDatatypeDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
-import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.composite.EventHeaderDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.IDefinitionScope;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.LexicalScope;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.SimpleDatatypeDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.VariantDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.composite.EventHeaderDefinition;
 
 import com.google.common.collect.ImmutableList;
 
@@ -383,9 +385,9 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
                 StructDefinition StructEventHeaderDef = (StructDefinition) fCurrentStreamEventHeaderDef;
                 /* Check for the event id. */
                 IDefinition idDef = StructEventHeaderDef.lookupDefinition("id"); //$NON-NLS-1$
-                SimpleDatatypeDefinition simpleIdDef = null;
+                ISimpleDatatypeDefinition simpleIdDef = null;
                 if (idDef instanceof SimpleDatatypeDefinition) {
-                    simpleIdDef = ((SimpleDatatypeDefinition) idDef);
+                    simpleIdDef = ((ISimpleDatatypeDefinition) idDef);
                 } else if (idDef != null) {
                     throw new CTFReaderException("Id defintion not an integer, enum or float definiton in event header."); //$NON-NLS-1$
                 }
@@ -401,7 +403,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
                 if (variantDef instanceof VariantDefinition) {
 
                     /* Get the variant current field */
-                    StructDefinition variantCurrentField = (StructDefinition) ((VariantDefinition) variantDef).getCurrentField();
+                    StructDefinition variantCurrentField = (StructDefinition) ((IIntersectsDefinition) variantDef).getCurrentField();
 
                     /*
                      * Try to get the id field in the current field of the
@@ -410,7 +412,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
                      */
                     IDefinition vIdDef = variantCurrentField.lookupDefinition("id"); //$NON-NLS-1$
                     if (vIdDef instanceof IntegerDefinition) {
-                        simpleIdDef = (SimpleDatatypeDefinition) vIdDef;
+                        simpleIdDef = (ISimpleDatatypeDefinition) vIdDef;
                     }
 
                     /*
@@ -420,7 +422,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
                     timestampDef = variantCurrentField.lookupInteger("timestamp"); //$NON-NLS-1$
                 }
                 if (simpleIdDef != null) {
-                    eventID = simpleIdDef.getIntegerValue().intValue();
+                    eventID = (int) simpleIdDef.getIntegerValue();
                 }
                 if (timestampDef != null) {
                     timestamp = calculateTimestamp(timestampDef);

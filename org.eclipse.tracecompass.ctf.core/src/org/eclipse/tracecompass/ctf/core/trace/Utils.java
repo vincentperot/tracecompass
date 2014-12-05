@@ -14,11 +14,13 @@ package org.eclipse.tracecompass.ctf.core.trace;
 
 import java.util.UUID;
 
-import org.eclipse.tracecompass.ctf.core.event.types.AbstractArrayDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.CompoundDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
+import org.eclipse.tracecompass.ctf.core.types.ICompoundDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.ICompoundDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.AbstractArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.CompoundDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
 
 /**
  * Various utilities.
@@ -113,7 +115,7 @@ public final class Utils {
         if (!(declaration instanceof CompoundDeclaration)) {
             throw new CTFReaderException("UUID must be a sequence of unsigned bytes"); //$NON-NLS-1$
         }
-        CompoundDeclaration uuidDec = (CompoundDeclaration) declaration;
+        ICompoundDeclaration uuidDec = (ICompoundDeclaration) declaration;
 
         IDeclaration uuidElem = uuidDec.getElementType();
         if (!(uuidElem instanceof IntegerDeclaration)) {
@@ -126,13 +128,13 @@ public final class Utils {
         return getUUID(uuidDef, uuidArray);
     }
 
-    private static UUID getUUID(AbstractArrayDefinition uuidDef, byte[] uuidArray) throws CTFReaderException {
+    private static UUID getUUID(ICompoundDefinition uuidDef, byte[] uuidArray) throws CTFReaderException {
         for (int i = 0; i < uuidArray.length; i++) {
             IntegerDefinition uuidByteDef = (IntegerDefinition) uuidDef.getDefinitions().get(i);
             if (uuidByteDef == null) {
                 throw new CTFReaderException("UUID incomplete, only " + i + " bytes available"); //$NON-NLS-1$ //$NON-NLS-2$
             }
-            uuidArray[i] = (byte) uuidByteDef.getValue();
+            uuidArray[i] = (byte) uuidByteDef.getIntegerValue();
         }
 
         UUID uuid = Utils.makeUUID(uuidArray);

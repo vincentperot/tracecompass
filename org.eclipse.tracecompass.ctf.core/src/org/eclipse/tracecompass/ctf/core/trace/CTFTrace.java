@@ -33,21 +33,21 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
-import org.eclipse.tracecompass.ctf.core.event.CTFClock;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
-import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
-import org.eclipse.tracecompass.ctf.core.event.types.Definition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFCallsite;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFClock;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.Definition;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
-import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
-import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.CTFCallsiteComparator;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.IDefinitionScope;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.LexicalScope;
+import org.eclipse.tracecompass.internal.ctf.core.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
 
 /**
  * A CTF trace on the file system.
@@ -570,7 +570,7 @@ public class CTFTrace implements IDefinitionScope {
 
     private static void validateMagicNumber(StructDefinition packetHeaderDef) throws CTFReaderException {
         IntegerDefinition magicDef = (IntegerDefinition) packetHeaderDef.lookupDefinition("magic"); //$NON-NLS-1$
-        int magic = (int) magicDef.getValue();
+        int magic = (int) magicDef.getIntegerValue();
         if (magic != Utils.CTF_MAGIC) {
             throw new CTFReaderException("CTF magic mismatch"); //$NON-NLS-1$
         }
@@ -594,7 +594,7 @@ public class CTFTrace implements IDefinitionScope {
      * @param lookupPath
      *            String
      * @return Definition
-     * @see org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope#lookupDefinition(String)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.IDefinitionScope#lookupDefinition(String)
      */
     @Override
     public Definition lookupDefinition(String lookupPath) {

@@ -19,25 +19,21 @@ package org.eclipse.tracecompass.tmf.ctf.core.event;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.tracecompass.ctf.core.event.types.CompoundDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.Definition;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.FloatDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.ByteArrayDefinition;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDefinition;
+import org.eclipse.tracecompass.ctf.core.types.ICompoundDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.ICompoundDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.ctf.core.types.IIntersectsDefinition;
+import org.eclipse.tracecompass.ctf.core.types.ISimpleDatatypeDefinition;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.ctf.core.CtfEnumPair;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 /**
  * The CTF implementation of the TMF event field model
@@ -83,22 +79,6 @@ public abstract class CtfTmfEventField extends TmfEventField {
      * @param fieldName
      *            String The name to assign to this field
      * @return The resulting CtfTmfEventField object
-     * @deprecated use {@link CtfTmfEventField#parseField(IDefinition, String)}
-     */
-    @Deprecated
-    public static CtfTmfEventField parseField(Definition fieldDef,
-            String fieldName) {
-        return parseField((IDefinition) fieldDef, fieldName);
-    }
-
-    /**
-     * Factory method to instantiate CtfTmfEventField objects.
-     *
-     * @param fieldDef
-     *            The CTF Definition of this event field
-     * @param fieldName
-     *            String The name to assign to this field
-     * @return The resulting CtfTmfEventField object
      * @since 3.1
      */
     public static CtfTmfEventField parseField(IDefinition fieldDef,
@@ -106,56 +86,38 @@ public abstract class CtfTmfEventField extends TmfEventField {
         CtfTmfEventField field = null;
 
         /* Determine the Definition type */
-        if (fieldDef instanceof IntegerDefinition) {
-            IntegerDefinition intDef = (IntegerDefinition) fieldDef;
-            int base = intDef.getDeclaration().getBase();
-            field = new CTFIntegerField(fieldName, intDef.getValue(), base, intDef.getDeclaration().isSigned());
+        if (fieldDef instanceof ISimpleDatatypeDefinition) {
+            ISimpleDatatypeDefinition simpleDef = (ISimpleDatatypeDefinition) fieldDef;
+            field = new CTFSimpleField(fieldName, simpleDef);
 
-        } else if (fieldDef instanceof EnumDefinition) {
-            EnumDefinition enumDef = (EnumDefinition) fieldDef;
-            field = new CTFEnumField(fieldName, new CtfEnumPair(enumDef.getValue(), enumDef.getIntegerValue()));
-
-        } else if (fieldDef instanceof StringDefinition) {
-            field = new CTFStringField(fieldName, ((StringDefinition) fieldDef).getValue());
-
-        } else if (fieldDef instanceof FloatDefinition) {
-            FloatDefinition floatDef = (FloatDefinition) fieldDef;
-            field = new CTFFloatField(fieldName, floatDef.getValue());
-
-        } else if (fieldDef instanceof ArrayDefinition) {
-            ArrayDefinition arrayDef = (ArrayDefinition) fieldDef;
-            IDeclaration decl = arrayDef.getDeclaration();
-            if (!(decl instanceof CompoundDeclaration)) {
+        } else if (fieldDef instanceof ICompoundDefinition) {
+            ICompoundDefinition compoundDef = (ICompoundDefinition) fieldDef;
+            IDeclaration decl = compoundDef.getDeclaration();
+            if (!(decl instanceof ICompoundDeclaration)) {
                 throw new IllegalArgumentException("Array definitions should only come from sequence or array declarations"); //$NON-NLS-1$
             }
-            CompoundDeclaration arrDecl = (CompoundDeclaration) decl;
-            IDeclaration elemType = null;
-            Collection<Definition> definitions = arrayDef.getDefinitions();
-            elemType = arrDecl.getElementType();
-            if (elemType instanceof IntegerDeclaration) {
-                /* Array of integers => CTFIntegerArrayField, unless it's a CTFStringField */
-                IntegerDeclaration elemIntType = (IntegerDeclaration) elemType;
-                /* Are the integers characters and encoded? */
-                if (elemIntType.isCharacter()) {
-                    /* it's a CTFStringField */
-                    field = new CTFStringField(fieldName, arrayDef.toString());
-                } else {
-                    /* it's a CTFIntegerArrayField */
-                    long[] values = new long[arrayDef.getLength()];
-                    for (int i = 0; i < arrayDef.getLength(); i++) {
-                        IDefinition elem = arrayDef.getDefinitions().get(i);
-                        if (elem == null) {
-                            break;
-                        }
-                        values[i] = ((IntegerDefinition) elem).getValue();
+            ICompoundDeclaration compoundDeclaration = (ICompoundDeclaration) decl;
+            List<IDefinition> definitions = compoundDef.getDefinitions();
+            if (compoundDeclaration.isInteger()) {
+                /* it's a CTFIntegerArrayField */
+                Builder<Long> values = ImmutableList.<Long> builder();
+                Builder<String> valueNames = ImmutableList.<String> builder();
+                for (int i = 0; i < definitions.size(); i++) {
+                    IDefinition elem = definitions.get(i);
+                    if (elem == null) {
+                        break;
                     }
-                    field = new CTFIntegerArrayField(fieldName, values,
-                            elemIntType.getBase(),
-                            elemIntType.isSigned());
+                    values.add(((Long) ((ISimpleDatatypeDefinition) elem).getValue()).longValue());
+                    valueNames.add(((ISimpleDatatypeDefinition) elem).toString());
+
                 }
+                field = new CTFIntegerArrayField(fieldName, values.build(),
+                        valueNames.build());
+
             } else {
                 /* Arrays of elements of any other type */
-                CtfTmfEventField[] elements = new CtfTmfEventField[arrayDef.getLength()];
+                CtfTmfEventField[] elements = new CtfTmfEventField[definitions.size()];
+
                 /* Parse the elements of the array. */
                 int i = 0;
                 for (IDefinition definition : definitions) {
@@ -164,13 +126,8 @@ public abstract class CtfTmfEventField extends TmfEventField {
                     elements[i] = curField;
                     i++;
                 }
-
                 field = new CTFArrayField(fieldName, elements);
             }
-        } else if (fieldDef instanceof ByteArrayDefinition) {
-            /* This is an array of ascii bytes, a.k.a. a String! */
-            field = new CTFStringField(fieldName, fieldDef.toString());
-
         } else if (fieldDef instanceof ICompositeDefinition) {
             ICompositeDefinition strDef = (ICompositeDefinition) fieldDef;
 
@@ -181,8 +138,8 @@ public abstract class CtfTmfEventField extends TmfEventField {
             }
             field = new CTFStructField(fieldName, list.toArray(new CtfTmfEventField[list.size()]));
 
-        } else if (fieldDef instanceof VariantDefinition) {
-            VariantDefinition varDef = (VariantDefinition) fieldDef;
+        } else if (fieldDef instanceof IIntersectsDefinition) {
+            IIntersectsDefinition varDef = (IIntersectsDefinition) fieldDef;
 
             String curFieldName = varDef.getCurrentFieldName();
             IDefinition curFieldDef = varDef.getCurrentField();
@@ -216,10 +173,9 @@ public abstract class CtfTmfEventField extends TmfEventField {
  *
  * @author alexmont
  */
-final class CTFIntegerField extends CtfTmfEventField {
+final class CTFSimpleField extends CtfTmfEventField {
 
-    private final int fBase;
-    private final boolean fSigned;
+    private final ISimpleDatatypeDefinition fDefinition;
 
     /**
      * A CTF "IntegerDefinition" can be an integer of any byte size, so in the
@@ -227,52 +183,33 @@ final class CTFIntegerField extends CtfTmfEventField {
      *
      * @param name
      *            The name of this field
-     * @param longValue
-     *            The integer value of this field
-     * @param signed
-     *            Is the value signed or not
      */
-    CTFIntegerField(String name, long longValue, int base, boolean signed) {
-        super(name, longValue, null);
-        fSigned = signed;
-        fBase = base;
-    }
-
-    @Override
-    public Long getValue() {
-        return (Long) super.getValue();
+    CTFSimpleField(String name, ISimpleDatatypeDefinition def) {
+        super(name, def.getValue(), null);
+        fDefinition = def;
     }
 
     @Override
     public String getFormattedValue() {
-        return IntegerDefinition.formatNumber(getValue(), fBase, fSigned);
+        return fDefinition.toString();
     }
 
 }
 
-/**
- * The CTF field implementation for string fields
- *
- * @author alexmont
- */
 final class CTFStringField extends CtfTmfEventField {
 
     /**
-     * Constructor for CTFStringField.
+     * constructor
      *
-     * @param strValue
-     *            The string value of this field
      * @param name
-     *            The name of this field
+     *            field name
+     * @param value
+     *            field value
      */
-    CTFStringField(String name, String strValue) {
-        super(name, strValue, null);
+    protected CTFStringField(String name, String value) {
+        super(name, value, null);
     }
 
-    @Override
-    public String getValue() {
-        return (String) super.getValue();
-    }
 }
 
 /**
@@ -282,9 +219,9 @@ final class CTFStringField extends CtfTmfEventField {
  */
 final class CTFIntegerArrayField extends CtfTmfEventField {
 
-    private final int fBase;
-    private final boolean fSigned;
     private String fFormattedValue = null;
+    private final List<String> fValueNames;
+    private final List<Long> fValues;
 
     /**
      * Constructor for CTFIntegerArrayField.
@@ -297,25 +234,22 @@ final class CTFIntegerArrayField extends CtfTmfEventField {
      * @param signed
      *            Are the values in the array signed or not
      */
-    CTFIntegerArrayField(String name, long[] longValues, int base, boolean signed) {
+    CTFIntegerArrayField(String name, List<Long> longValues, List<String> valueNames) {
         super(name, longValues, null);
-        fBase = base;
-        fSigned = signed;
+        fValueNames = valueNames;
+        fValues = longValues;
+
     }
 
     @Override
-    public long[] getValue() {
-        return (long[]) super.getValue();
+    public List<Long> getValue() {
+        return fValues;
     }
 
     @Override
     public synchronized String getFormattedValue() {
         if (fFormattedValue == null) {
-            List<String> strings = new ArrayList<>();
-            for (long value : getValue()) {
-                strings.add(IntegerDefinition.formatNumber(value, fBase, fSigned));
-            }
-            fFormattedValue = strings.toString();
+            fFormattedValue = fValueNames.toString();
         }
         return fFormattedValue;
     }
@@ -336,11 +270,11 @@ final class CTFArrayField extends CtfTmfEventField {
      *
      * @param name
      *            The name of this field
-     * @param elements
+     * @param compoundDef
      *            The array elements of this field
      */
-    CTFArrayField(String name, CtfTmfEventField[] elements) {
-        super(name, elements, elements);
+    CTFArrayField(String name, CtfTmfEventField[] compoundDef) {
+        super(name, compoundDef, compoundDef);
     }
 
     @Override

@@ -22,12 +22,13 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.IEventHeaderDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
-import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.ctf.core.trace.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.ICompositeDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IEventHeaderDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
 
 /**
  * <b><u>Stream</u></b>
@@ -186,8 +187,8 @@ public class CTFStream {
      * @deprecated use {@link CTFStream#getEventHeaderDeclaration()}
      */
     @Deprecated
-    public StructDeclaration getEventHeaderDecl() {
-        return (StructDeclaration) ((fEventHeaderDecl instanceof StructDeclaration) ? fEventHeaderDecl : null);
+    public ICompositeDeclaration getEventHeaderDecl() {
+        return (ICompositeDeclaration) ((fEventHeaderDecl instanceof StructDeclaration) ? fEventHeaderDecl : null);
     }
 
     /**
