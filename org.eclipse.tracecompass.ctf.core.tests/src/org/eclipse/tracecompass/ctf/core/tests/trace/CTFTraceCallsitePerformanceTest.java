@@ -18,10 +18,10 @@ import static org.junit.Assume.assumeTrue;
 import java.util.Random;
 import java.util.TreeSet;
 
-import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
+import org.eclipse.tracecompass.ctf.core.trace.event.CTFCallsite;
 import org.junit.Before;
 import org.junit.Test;
 

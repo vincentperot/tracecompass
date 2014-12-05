@@ -19,24 +19,27 @@ import static org.junit.Assert.assertEquals;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.FloatDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.FloatDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StringDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
-import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
-import org.eclipse.tracecompass.ctf.core.event.types.VariantDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDeclaration;
-import org.eclipse.tracecompass.internal.ctf.core.event.types.SequenceDeclaration;
+import org.eclipse.tracecompass.ctf.core.types.IDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.types.ArrayDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.EnumDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.FloatDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.FloatDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.IntegerDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.SequenceDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StringDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.types.StructDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.types.VariantDeclaration;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEventField;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * The class <code>CtfTmfEventFieldTest</code> contains tests for the class
@@ -180,7 +183,7 @@ public class CtfTmfEventFieldTest {
     @Test
     public void testParseField_float() {
         FloatDefinition fieldDef = (FloatDefinition) fixture.lookupDefinition(FLOAT);
-        CtfTmfEventField result = CtfTmfEventField.parseField((IDefinition)fieldDef, "_" + NAME);
+        CtfTmfEventField result = CtfTmfEventField.parseField(fieldDef, "_" + NAME);
         assertEquals("test=2.0", result.toString());
     }
 
@@ -233,9 +236,9 @@ public class CtfTmfEventFieldTest {
     public void testParseField_sequence_value() {
         IDefinition fieldDef = fixture.lookupDefinition(SEQ);
         CtfTmfEventField result = CtfTmfEventField.parseField(fieldDef, NAME);
-        long[] values = (long[]) result.getValue();
-        long[] expected = new long[] { 2, 2 };
-        assertArrayEquals(expected, values);
+        List<?> values = (List<?>)result.getValue();
+        List<Long>expected = ImmutableList.<Long>of(2L,2L);
+        assertArrayEquals(expected.toArray(), values.toArray());
     }
 
     /**
@@ -245,7 +248,7 @@ public class CtfTmfEventFieldTest {
     public void testParseField_string() {
         IDefinition fieldDef = fixture.lookupDefinition(STR);
         CtfTmfEventField result = CtfTmfEventField.parseField(fieldDef, NAME);
-        assertEquals("test=two", result.toString());
+        assertEquals("test=\"two\"", result.toString());
     }
 
     /**
@@ -256,7 +259,7 @@ public class CtfTmfEventFieldTest {
     public void testParseField_array_string() {
         IDefinition fieldDef = fixture.lookupArrayDefinition(ARRAY_STR);
         CtfTmfEventField result = CtfTmfEventField.parseField(fieldDef, NAME);
-        assertEquals("test=[two, two]", result.toString());
+        assertEquals("test=[\"two\", \"two\"]", result.toString());
     }
 
     /**
@@ -266,7 +269,7 @@ public class CtfTmfEventFieldTest {
     public void testParseField_struct() {
         IDefinition fieldDef = fixture.lookupDefinition(STRUCT);
         CtfTmfEventField result = CtfTmfEventField.parseField(fieldDef, NAME);
-        assertEquals("test=[str=two, int=2]", result.toString());
+        assertEquals("test=[str=\"two\", int=2]", result.toString());
     }
 
     /**
@@ -277,7 +280,7 @@ public class CtfTmfEventFieldTest {
     public void testParseField_array_struct() {
         IDefinition fieldDef = fixture.lookupArrayDefinition(ARRAY_STRUCT);
         CtfTmfEventField result = CtfTmfEventField.parseField(fieldDef, NAME);
-        assertEquals("test=[[str=two, int=2], [str=two, int=2]]", result.toString());
+        assertEquals("test=[[str=\"two\", int=2], [str=\"two\", int=2]]", result.toString());
     }
 
     /**
@@ -287,7 +290,7 @@ public class CtfTmfEventFieldTest {
     public void testParseField_enum() {
         IDefinition fieldDef = fixture.lookupDefinition(ENUM);
         CtfTmfEventField result = CtfTmfEventField.parseField(fieldDef, NAME);
-        assertEquals("test=float", result.toString());
+        assertEquals("float", result.getValue());
     }
 
     /**
@@ -298,7 +301,7 @@ public class CtfTmfEventFieldTest {
     public void testParseField_array_enum() {
         IDefinition fieldDef = fixture.lookupArrayDefinition(ARRAY_ENUM);
         CtfTmfEventField result = CtfTmfEventField.parseField(fieldDef, NAME);
-        assertEquals("test=[float, float]", result.toString());
+        assertEquals("[test[0]={ value = float, container = 2 }, test[1]={ value = float, container = 2 }]", result.getValue());
     }
 
     /**

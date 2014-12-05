@@ -18,8 +18,8 @@ import java.util.Collection;
 import java.util.ListIterator;
 
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndex;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputPacketIndex;
+import org.eclipse.tracecompass.internal.ctf.core.trace.stream.StreamInputPacketIndexEntry;
 import org.junit.Before;
 import org.junit.Test;
 

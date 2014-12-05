@@ -17,8 +17,8 @@ import static org.junit.Assert.assertEquals;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
+import org.eclipse.tracecompass.internal.ctf.core.io.BitBuffer;
 import org.junit.Before;
 import org.junit.Test;
 

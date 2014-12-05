@@ -15,7 +15,7 @@ package org.eclipse.tracecompass.ctf.core.tests.scope;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
+import org.eclipse.tracecompass.internal.ctf.core.trace.event.scope.LexicalScope;
 import org.junit.Test;
 
 /**

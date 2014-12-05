@@ -24,8 +24,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ArrayDeclaration2Test.class,
-    ArrayDefinition2Test.class,
+    ArrayDeclarationTest.class,
+    ArrayDefinitionTest.class,
     DefinitionTest.class,
     EnumDeclarationTest.class,
     EnumDefinitionTest.class,
