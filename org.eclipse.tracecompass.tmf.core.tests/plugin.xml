@@ -6,7 +6,8 @@
       <module
          id="org.eclipse.linuxtools.tmf.core.tests.analysis.test"
          name="Test analysis"
-         analysis_module="org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysis">
+         analysis_module="org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysis"
+         automatic="false">
          <parameter
                name="test">
          </parameter>
@@ -21,8 +22,7 @@
       <module
          id="org.eclipse.linuxtools.tmf.core.tests.analysis.test2"
          name="Test analysis 2"
-         analysis_module="org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysis"
-         automatic="true">
+         analysis_module="org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysis">
          <parameter
                default_value="3"
                name="test">
@@ -57,7 +57,8 @@
       <module
             analysis_module="org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestExperimentAnalysis"
             id="org.eclipse.linuxtools.tmf.core.tests.experiment"
-            name="Experiment analysis">
+            name="Experiment analysis"
+            automatic="false">
          <tracetype
                applies="true"
                class="org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfExperimentStub">
@@ -66,7 +67,8 @@
       <module
             analysis_module="org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestRequirementAnalysis"
             id="org.eclipse.linuxtools.tmf.core.tests.analysis.reqtest"
-            name="Test analysis requirements">
+            name="Test analysis requirements"
+            automatic="false">
          <tracetype
                class="org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub">
          </tracetype>
