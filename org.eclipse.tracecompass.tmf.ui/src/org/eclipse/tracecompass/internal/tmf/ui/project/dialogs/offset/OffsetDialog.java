@@ -80,8 +80,8 @@ import org.eclipse.ui.dialogs.PatternFilter;
 public class OffsetDialog extends Dialog {
 
     private static final int TREE_EDITOR_MIN_WIDTH = 50;
-    private static final String EDITOR_KEY = "$editor$";  //$NON-NLS-1$
-    private static final String WIDTH_KEY = "$width$";  //$NON-NLS-1$
+    private static final String EDITOR_KEY = "$editor$"; //$NON-NLS-1$
+    private static final String WIDTH_KEY = "$width$"; //$NON-NLS-1$
 
     private static final TmfTimestampFormat TIME_FORMAT = new TmfTimestampFormat("yyyy-MM-dd HH:mm:ss.SSS SSS SSS"); //$NON-NLS-1$
     private static final TmfTimestampFormat OFFSET_FORMAT = new TmfTimestampFormat("T.SSS SSS SSS"); //$NON-NLS-1$
@@ -492,7 +492,7 @@ public class OffsetDialog extends Dialog {
         fRefTimeColumn.setWidth(0);
         fRefTimeColumn.setResizable(false);
         fButtonViewerColumn.getColumn().setWidth(0);
-        fAdvancedMessageLabel.setText("");  //$NON-NLS-1$
+        fAdvancedMessageLabel.setText(""); //$NON-NLS-1$
     }
 
     private void setAdvancedMode() {
@@ -521,7 +521,8 @@ public class OffsetDialog extends Dialog {
             @Override
             public void run() {
                 for (TmfTraceElement traceElement : fOffsetMap.keySet()) {
-                    if (traceElement.getResource().equals(signal.getEvent().getTrace().getResource())) {
+                    ITmfTrace trace = signal.getEvent().getTrace();
+                    if (trace != null && traceElement.getResource().equals(trace.getResource())) {
                         fRefTimeMap.put(traceElement, signal.getEvent().getTimestamp());
                         fViewer.getViewer().update(traceElement, null);
                         break;

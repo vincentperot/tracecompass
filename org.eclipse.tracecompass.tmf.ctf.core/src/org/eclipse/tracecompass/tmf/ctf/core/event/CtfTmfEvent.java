@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
@@ -90,8 +91,7 @@ public class CtfTmfEvent extends TmfEvent
                  * Content handled with a lazy-loaded field re-implemented in
                  * getContent().
                  */
-                null
-        );
+                null);
 
         fEventDeclaration = declaration;
         fSourceCPU = cpu;
@@ -170,7 +170,7 @@ public class CtfTmfEvent extends TmfEvent
     }
 
     @Override
-    public CtfTmfTrace getTrace() {
+    public @Nullable CtfTmfTrace getTrace() {
         /*
          * Should be of the right type, since we take a CtfTmfTrace at the
          * constructor
@@ -181,12 +181,13 @@ public class CtfTmfEvent extends TmfEvent
     @Override
     public ITmfEventType getType() {
         CtfTmfEventType ctfTmfEventType = new CtfTmfEventType(fEventName, getContent());
-
         /* Register the event type in the owning trace, but only if there is one */
-        CtfTmfTrace trace = getTrace();
-        trace.registerEventType(ctfTmfEventType);
-
-        return ctfTmfEventType;
+        final CtfTmfTrace trace = getTrace();
+        if (trace != null) {
+            trace.registerEventType(ctfTmfEventType);
+            return ctfTmfEventType;
+        }
+        return null;
     }
 
     /**
@@ -221,6 +222,9 @@ public class CtfTmfEvent extends TmfEvent
     public CtfTmfCallsite getCallsite() {
         CTFCallsite callsite = null;
         CtfTmfTrace trace = getTrace();
+        if (trace == null) {
+            return null;
+        }
         CTFTrace ctfTrace = trace.getCTFTrace();
         /* Should not happen, but it is a good check */
         if (ctfTrace == null) {

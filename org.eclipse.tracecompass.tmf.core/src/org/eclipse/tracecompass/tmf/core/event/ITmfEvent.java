@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.tmf.core.event;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -75,9 +76,9 @@ public interface ITmfEvent extends IAdaptable {
     // ------------------------------------------------------------------------
 
     /**
-     * @return the trace that 'owns' the event
+     * @return the trace that 'owns' the event, could be null
      */
-    @NonNull ITmfTrace getTrace();
+    @Nullable ITmfTrace getTrace();
 
     /**
      * @return the event rank within the parent trace

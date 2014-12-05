@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 /**
  * An aspect is a piece of information that can be extracted, directly or
@@ -24,8 +25,8 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
  * Simple examples could be timestamp, or event fields. But it could also be
  * something like a state system request, at the timestamp of the given event.
  *
- * The aspect can then be used to populate event table columns, to filter
- * on to only keep certain events, to plot XY charts, etc.
+ * The aspect can then be used to populate event table columns, to filter on to
+ * only keep certain events, to plot XY charts, etc.
  *
  * @author Alexandre Montplaisir
  */
@@ -140,8 +141,12 @@ public interface ITmfEventAspect {
 
             @Override
             public String resolve(ITmfEvent event) {
-                String ret = event.getTrace().getName();
-                return (ret == null ? EMPTY_STRING : ret);
+                ITmfTrace trace = event.getTrace();
+                if (trace != null) {
+                    String ret = trace.getName();
+                    return (ret == null ? EMPTY_STRING : ret);
+                }
+                return EMPTY_STRING;
             }
 
             @Override
@@ -200,5 +205,6 @@ public interface ITmfEventAspect {
      *
      * @return The filter_id
      */
-    @Nullable String getFilterId();
+    @Nullable
+    String getFilterId();
 }

@@ -15,6 +15,7 @@ package org.eclipse.tracecompass.tmf.core.event;
 
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -105,12 +106,8 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     // ------------------------------------------------------------------------
 
     @Override
-    public ITmfTrace getTrace() {
-        ITmfTrace trace = fTrace;
-        if (trace == null) {
-            throw new IllegalStateException("Null traces are only allowed on special kind of events and getTrace() should not be called on them"); //$NON-NLS-1$
-        }
-        return trace;
+    public @Nullable ITmfTrace getTrace() {
+        return fTrace;
     }
 
     @Override

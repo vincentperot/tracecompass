@@ -22,6 +22,7 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfModelLookup;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfSourceLookup;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.properties.ReadOnlyTextPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -174,7 +175,7 @@ public class TmfEventPropertySource implements IPropertySource {
 
         @Override
         public IPropertyDescriptor[] getPropertyDescriptors() {
-            List<IPropertyDescriptor> descriptors= new ArrayList<>();
+            List<IPropertyDescriptor> descriptors = new ArrayList<>();
             if (fSourceLookup.getCallsite() != null) {
                 descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_FILE_NAME, NAME_FILE_NAME));
                 descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_LINE_NUMBER, NAME_LINE_NUMBER));
@@ -188,7 +189,7 @@ public class TmfEventPropertySource implements IPropertySource {
 
         @Override
         public Object getPropertyValue(Object id) {
-            if  (id.equals(ID_FILE_NAME)) {
+            if (id.equals(ID_FILE_NAME)) {
                 return fSourceLookup.getCallsite().getFileName();
             } else if (id.equals(ID_FUNCTION_NAME)) {
                 return fSourceLookup.getCallsite().getFunctionName();
@@ -259,7 +260,8 @@ public class TmfEventPropertySource implements IPropertySource {
     /**
      * Default constructor
      *
-     * @param event the event
+     * @param event
+     *            the event
      */
     public TmfEventPropertySource(ITmfEvent event) {
         super();
@@ -273,7 +275,7 @@ public class TmfEventPropertySource implements IPropertySource {
 
     @Override
     public IPropertyDescriptor[] getPropertyDescriptors() {
-        List<IPropertyDescriptor> descriptors= new ArrayList<>();
+        List<IPropertyDescriptor> descriptors = new ArrayList<>();
 
         /* Display basic event information */
         descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_TIMESTAMP, NAME_TIMESTAMP));
@@ -284,7 +286,7 @@ public class TmfEventPropertySource implements IPropertySource {
         descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_CONTENT, NAME_CONTENT));
 
         /* Display source lookup information, if the event supplies it */
-        if ((fEvent instanceof ITmfSourceLookup) && (((ITmfSourceLookup)fEvent).getCallsite() != null)) {
+        if ((fEvent instanceof ITmfSourceLookup) && (((ITmfSourceLookup) fEvent).getCallsite() != null)) {
             descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_SOURCE_LOOKUP, NAME_SOURCE_LOOKUP));
         }
 
@@ -311,11 +313,12 @@ public class TmfEventPropertySource implements IPropertySource {
         } else if (id.equals(ID_TYPE) && fEvent.getType() != null) {
             return fEvent.getType().toString();
         } else if (id.equals(ID_TRACE)) {
-            return fEvent.getTrace().getName();
+            ITmfTrace trace = fEvent.getTrace();
+            return trace == null ? EMPTY_STRING : trace.getName();
         } else if (id.equals(ID_MODEL_URI)) {
-            return ((ITmfModelLookup)fEvent).getModelUri();
+            return ((ITmfModelLookup) fEvent).getModelUri();
         } else if (id.equals(ID_SOURCE_LOOKUP)) {
-            return new SourceLookupPropertySource(((ITmfSourceLookup)fEvent));
+            return new SourceLookupPropertySource(((ITmfSourceLookup) fEvent));
         } else if (id.equals(ID_CONTENT) && fEvent.getContent() != null) {
             return new ContentPropertySource(fEvent.getContent());
         } else if (id.equals(ID_CUSTOM_ATTRIBUTE)) {

@@ -226,7 +226,12 @@ public class CustomEvent extends TmfEvent {
             TmfTimestampFormat timestampFormat = new TmfTimestampFormat(timestampInputFormat);
             try {
                 long time = timestampFormat.parseValue(timestampString);
-                timestamp = new TmfNanoTimestamp(getTrace().getTimestampTransform().transform(time));
+                ITmfTrace trace = getTrace();
+                if (trace != null) {
+                    timestamp = new TmfNanoTimestamp(trace.getTimestampTransform().transform(time));
+                } else {
+                    timestamp = new TmfNanoTimestamp(time);
+                }
                 setTimestamp(timestamp);
             } catch (ParseException e) {
                 setTimestamp(TmfTimestamp.ZERO);

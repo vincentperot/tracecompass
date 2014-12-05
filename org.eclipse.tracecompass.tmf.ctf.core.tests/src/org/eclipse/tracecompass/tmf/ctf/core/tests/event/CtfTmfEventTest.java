@@ -166,6 +166,7 @@ public class CtfTmfEventTest {
     public void testGetters() {
         long rank = fixture.getRank();
         try (CtfTmfTrace trace = fixture.getTrace();) {
+            assertNotNull(trace);
             assertEquals("kernel", trace.getName());
         }
         String reference = fixture.getReference();
@@ -206,7 +207,9 @@ public class CtfTmfEventTest {
      */
     @Test
     public void testNullEvent() {
-        CtfTmfEvent nullEvent2 = CtfTmfEventFactory.getNullEvent(fixture.getTrace());
+        CtfTmfTrace trace = fixture.getTrace();
+        assertNotNull(trace);
+        CtfTmfEvent nullEvent2 = CtfTmfEventFactory.getNullEvent(trace);
         assertSame(nullEvent2, nullEvent);
         assertNotNull(nullEvent);
         assertEquals(-1, nullEvent.getCPU());

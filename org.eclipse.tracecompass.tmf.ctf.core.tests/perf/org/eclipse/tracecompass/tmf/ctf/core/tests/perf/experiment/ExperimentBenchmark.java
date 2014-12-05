@@ -151,8 +151,9 @@ public class ExperimentBenchmark {
         @Override
         public void handleData(ITmfEvent event) {
             super.handleData(event);
-            if (!fTraces.contains(event.getTrace().getName())) {
-                fTraces.add(event.getTrace().getName());
+            ITmfTrace trace = event.getTrace();
+            if (trace != null && !fTraces.contains(trace.getName())) {
+                fTraces.add(trace.getName());
             }
         }
 

@@ -97,8 +97,13 @@ public class SyncAlgorithmFullyIncremental extends SynchronizationAlgorithm {
 
     @Override
     protected void processMatch(TmfEventDependency match) {
-        String host1 = match.getSourceEvent().getTrace().getHostId();
-        String host2 = match.getDestinationEvent().getTrace().getHostId();
+        ITmfTrace host1Trace = match.getSourceEvent().getTrace();
+        ITmfTrace host2Trace = match.getDestinationEvent().getTrace();
+        if (host1Trace == null || host2Trace == null) {
+            return;
+        }
+        String host1 = host1Trace.getHostId();
+        String host2 = host2Trace.getHostId();
 
         /* Process only if source and destination are different */
         if (host1.equals(host2)) {
@@ -278,7 +283,9 @@ public class SyncAlgorithmFullyIncremental extends SynchronizationAlgorithm {
             fNbMatches++;
 
             /* Initialize data depending on the which hull the match is part of */
-            if (match.getSourceEvent().getTrace().getHostId().compareTo(match.getDestinationEvent().getTrace().getHostId()) > 0) {
+            ITmfTrace sourceTrace = match.getSourceEvent().getTrace();
+            ITmfTrace destTrace = match.getDestinationEvent().getTrace();
+            if (sourceTrace != null && destTrace != null && sourceTrace.getHostId().compareTo(destTrace.getHostId()) > 0) {
                 boundList = fUpperBoundList;
                 otherBoundList = fLowerBoundList;
                 line = fLmin;
