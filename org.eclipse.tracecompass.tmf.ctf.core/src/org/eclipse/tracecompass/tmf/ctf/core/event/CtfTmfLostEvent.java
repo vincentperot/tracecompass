@@ -51,7 +51,7 @@ public class CtfTmfLostEvent extends CtfTmfEvent implements ITmfLostEvent {
      * @param nbLost
      *            The number of lost events in the range
      */
-    CtfTmfLostEvent(CtfTmfTrace trace,
+    CtfTmfLostEvent(@NonNull CtfTmfTrace trace,
             long rank,
             String fileName,
             int cpu,

@@ -270,25 +270,26 @@ public class TmfTraceElement extends TmfCommonProjectElement implements IActionF
     }
 
     /**
-     * Instantiate a <code>ITmfEvent</code> object based on the trace type and
-     * the corresponding extension.
+     * Get the class of <code>ITmfEvent</code> based on the trace type and the
+     * corresponding extension.
      *
-     * @return the <code>ITmfEvent</code> or <code>null</code> for an error
+     * @return the <code>ITmfEvent</code> class or <code>null</code> for an
+     *         error
      */
-    public ITmfEvent instantiateEvent() {
+    public Class<? extends ITmfEvent> getEventClass() {
         try {
             if (getTraceType() != null) {
                 if (getTraceType().startsWith(CustomTxtTrace.class.getCanonicalName())) {
                     for (CustomTxtTraceDefinition def : CustomTxtTraceDefinition.loadAll()) {
                         if (getTraceType().equals(CustomTxtTrace.class.getCanonicalName() + ':' + def.categoryName+ ':' + def.definitionName)) {
-                            return new CustomTxtEvent(def);
+                            return CustomTxtEvent.class;
                         }
                     }
                 }
                 if (getTraceType().startsWith(CustomXmlTrace.class.getCanonicalName())) {
                     for (CustomXmlTraceDefinition def : CustomXmlTraceDefinition.loadAll()) {
                         if (getTraceType().equals(CustomXmlTrace.class.getCanonicalName() + ':' + def.categoryName+ ':' + def.definitionName)) {
-                            return new CustomXmlEvent(def);
+                            return CustomXmlEvent.class;
                         }
                     }
                 }
@@ -297,7 +298,7 @@ public class TmfTraceElement extends TmfCommonProjectElement implements IActionF
                     return null;
                 }
                 ITmfEvent event = (ITmfEvent) ce.createExecutableExtension(TmfTraceType.EVENT_TYPE_ATTR);
-                return event;
+                return event.getClass();
             }
         } catch (CoreException e) {
             Activator.getDefault().logError("Error instantiating ITmfEvent object for trace " + getName(), e); //$NON-NLS-1$

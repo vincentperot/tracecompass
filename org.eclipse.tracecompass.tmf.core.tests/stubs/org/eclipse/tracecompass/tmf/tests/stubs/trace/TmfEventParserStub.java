@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Vector;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
@@ -40,13 +41,13 @@ public class TmfEventParserStub implements ITmfEventParser {
 
     private static final int NB_TYPES = 10;
     private final TmfEventType[] fTypes;
-    private final ITmfTrace fEventStream;
+    private final @NonNull ITmfTrace fEventStream;
 
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
 
-    public TmfEventParserStub(final ITmfTrace eventStream) {
+    public TmfEventParserStub(final @NonNull ITmfTrace eventStream) {
         fEventStream = eventStream;
         fTypes = new TmfEventType[NB_TYPES];
         for (int i = 0; i < NB_TYPES; i++) {

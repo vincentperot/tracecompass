@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.tmf.ui.tests.uml2sd.trace;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -32,7 +34,7 @@ import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
  */
 public class TmfUml2SDTestTrace implements ITmfEventParser {
 
-    ITmfTrace fEventStream;
+    private ITmfTrace fEventStream;
 
     /**
      * Default Constructor
@@ -100,7 +102,7 @@ public class TmfUml2SDTestTrace implements ITmfEventParser {
             fields[2] = new TmfEventField("signal", signal, null);
 
             ITmfEventField tmfContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, content, fields);
-            ITmfEvent tmfEvent = new TmfEvent(fEventStream, ITmfContext.UNKNOWN_RANK, new TmfTimestamp(ts, -9), tmfEventType, tmfContent);
+            ITmfEvent tmfEvent = new TmfEvent(checkNotNull(fEventStream), ITmfContext.UNKNOWN_RANK, new TmfTimestamp(ts, -9), tmfEventType, tmfContent);
 
             return tmfEvent;
         } catch (final EOFException e) {

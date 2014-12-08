@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.btf.core.analysis;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.btf.core.event.BtfEvent;
 import org.eclipse.tracecompass.btf.core.trace.BtfColumnNames;
 import org.eclipse.tracecompass.btf.core.trace.BtfTrace;
@@ -109,7 +110,7 @@ public class BtfStateProvider extends AbstractTmfStateProvider {
      * @param trace
      *            The trace for which we will be building this state system
      */
-    public BtfStateProvider(BtfTrace trace) {
+    public BtfStateProvider(@NonNull BtfTrace trace) {
         super(trace, TmfEvent.class, "Btf State Provider"); //$NON-NLS-1$
     }
 

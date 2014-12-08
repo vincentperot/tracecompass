@@ -27,6 +27,14 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 public abstract class TextTraceEvent extends TmfEvent {
 
     /**
+     * Default constructor. Only for extension points.
+     */
+    @Deprecated
+    protected TextTraceEvent() {
+        super();
+    }
+
+    /**
      * Full Constructor.
      *
      * Compared to {@link TmfEvent}'s constructor, 'content' is restricted to a
@@ -41,7 +49,7 @@ public abstract class TextTraceEvent extends TmfEvent {
      * @param content
      *            The event content (payload)
      */
-    public TextTraceEvent(TextTrace<? extends TextTraceEvent> parentTrace,
+    public TextTraceEvent(@NonNull TextTrace<? extends TextTraceEvent> parentTrace,
             final ITmfTimestamp timestamp,
             final ITmfEventType type,
             final TextTraceEventContent content) {

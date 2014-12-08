@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.internal.gdbtrace.core.event;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.gdbtrace.core.trace.GdbTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
@@ -39,8 +40,9 @@ public class GdbTraceEvent extends TmfEvent {
     /**
      * Default constructor
      */
+    @Deprecated
     public GdbTraceEvent() {
-        super(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+        super();
         fSource = null;
         fReference = null;
     }
@@ -61,7 +63,7 @@ public class GdbTraceEvent extends TmfEvent {
      * @param reference
      *            the event reference
      */
-    public GdbTraceEvent(GdbTrace trace, ITmfTimestamp timestamp, String source,
+    public GdbTraceEvent(@NonNull GdbTrace trace, ITmfTimestamp timestamp, String source,
             ITmfEventType type, GdbTraceEventContent content, String reference) {
         super(trace, ITmfContext.UNKNOWN_RANK, timestamp, type, content);
         fSource = source;

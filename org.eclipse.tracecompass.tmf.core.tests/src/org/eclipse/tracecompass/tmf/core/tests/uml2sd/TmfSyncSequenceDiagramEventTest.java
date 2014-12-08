@@ -25,6 +25,7 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.uml2sd.TmfSyncSequenceDiagramEvent;
+import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
 import org.junit.Test;
 
 /**
@@ -48,7 +49,7 @@ public class TmfSyncSequenceDiagramEventTest {
      */
     public TmfSyncSequenceDiagramEventTest() {
         fContent1 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some content", null);
-        fEvent1 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp1, fType, fContent1);
+        fEvent1 = new TmfEvent(new TmfTraceStub(), ITmfContext.UNKNOWN_RANK, fTimestamp1, fType, fContent1);
     }
 
     /**

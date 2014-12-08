@@ -69,7 +69,7 @@ public class XmlStateProvider extends AbstractTmfStateProvider implements IXmlSt
      * @param file
      *            Path to the XML file containing the state provider definition
      */
-    public XmlStateProvider(ITmfTrace trace, @NonNull String stateid, IPath file) {
+    public XmlStateProvider(@NonNull ITmfTrace trace, @NonNull String stateid, IPath file) {
         super(trace, ITmfEvent.class, stateid);
         fStateId = stateid;
         fFilePath = file;

@@ -56,7 +56,11 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
      */
     @Deprecated
     public TmfEvent() {
-        this(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+        fTrace = null;
+        fRank = ITmfContext.UNKNOWN_RANK;
+        fTimestamp = null;
+        fType = null;
+        fContent = null;
     }
 
     /**
@@ -75,7 +79,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
      *            the event content (payload)
      * @since 2.0
      */
-    public TmfEvent(final ITmfTrace trace,
+    public TmfEvent(final @NonNull ITmfTrace trace,
             final long rank,
             final ITmfTimestamp timestamp,
             final ITmfEventType type,

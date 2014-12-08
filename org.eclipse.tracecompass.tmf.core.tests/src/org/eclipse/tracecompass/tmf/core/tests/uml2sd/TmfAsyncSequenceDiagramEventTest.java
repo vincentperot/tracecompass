@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
@@ -24,13 +25,17 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.uml2sd.TmfAsyncSequenceDiagramEvent;
+import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
 import org.junit.Test;
 
 /**
  * TmfAsyncSequenceDiagramEventTest
  */
 public class TmfAsyncSequenceDiagramEventTest {
+
+    private static final @NonNull ITmfTrace TRACE = new TmfTraceStub();
 
     private final String fTypeId  = "Some type";
     private final String fLabel0  = "label1";
@@ -51,10 +56,10 @@ public class TmfAsyncSequenceDiagramEventTest {
      */
     public TmfAsyncSequenceDiagramEventTest() {
         fContent1 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some content", null);
-        fEvent1 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp1, fType, fContent1);
+        fEvent1 = new TmfEvent(TRACE, ITmfContext.UNKNOWN_RANK, fTimestamp1, fType, fContent1);
 
         fContent2 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some other content", null);
-        fEvent2 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp2, fType, fContent2);
+        fEvent2 = new TmfEvent(TRACE, ITmfContext.UNKNOWN_RANK, fTimestamp2, fType, fContent2);
     }
 
     /**

@@ -32,17 +32,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 public class CustomTxtEvent extends CustomEvent {
 
     /**
-     * Constructor
-     *
-     * @param definition
-     *            Trace definition
-     */
-    public CustomTxtEvent(CustomTxtTraceDefinition definition) {
-        super(definition);
-        setType(new CustomTxtEventType(definition));
-    }
-
-    /**
      * Construct a custom text event from an existing TmfEvent.
      *
      * @param definition
@@ -67,7 +56,7 @@ public class CustomTxtEvent extends CustomEvent {
      *            Event type
      */
     public CustomTxtEvent(CustomTxtTraceDefinition definition,
-            ITmfTrace parentTrace, ITmfTimestamp timestamp, TmfEventType type) {
+            @NonNull ITmfTrace parentTrace, ITmfTimestamp timestamp, TmfEventType type) {
         super(definition, parentTrace, timestamp, type);
     }
 

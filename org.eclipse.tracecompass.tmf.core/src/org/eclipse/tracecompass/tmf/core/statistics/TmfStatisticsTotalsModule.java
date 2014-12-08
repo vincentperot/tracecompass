@@ -12,6 +12,8 @@
 
 package org.eclipse.tracecompass.tmf.core.statistics;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
@@ -54,7 +56,7 @@ public class TmfStatisticsTotalsModule extends TmfStateSystemAnalysisModule {
 
     @Override
     protected ITmfStateProvider createStateProvider() {
-        return new StatsProviderTotals(getTrace());
+        return new StatsProviderTotals(checkNotNull(getTrace()));
     }
 
     @Override
@@ -92,7 +94,7 @@ public class TmfStatisticsTotalsModule extends TmfStateSystemAnalysisModule {
          * @param trace
          *            The trace for which we build this state system
          */
-        public StatsProviderTotals(ITmfTrace trace) {
+        public StatsProviderTotals(@NonNull ITmfTrace trace) {
             super(trace, ITmfEvent.class , NAME);
         }
 

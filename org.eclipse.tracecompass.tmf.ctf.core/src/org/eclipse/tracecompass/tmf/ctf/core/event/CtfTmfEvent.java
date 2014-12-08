@@ -76,7 +76,7 @@ public class CtfTmfEvent extends TmfEvent
     /**
      * Constructor used by {@link CtfTmfEventFactory#createEvent}
      */
-    CtfTmfEvent(CtfTmfTrace trace, long rank, CtfTmfTimestamp timestamp,
+    CtfTmfEvent(@NonNull CtfTmfTrace trace, long rank, CtfTmfTimestamp timestamp,
             String fileName, int cpu, IEventDeclaration declaration, @NonNull EventDefinition eventDefinition) {
         super(trace,
                 rank,
@@ -112,7 +112,7 @@ public class CtfTmfEvent extends TmfEvent
      * @param trace
      *            The trace associated with this event
      */
-    CtfTmfEvent(CtfTmfTrace trace) {
+    CtfTmfEvent(@NonNull CtfTmfTrace trace) {
         super(trace,
                 ITmfContext.UNKNOWN_RANK,
                 new CtfTmfTimestamp(-1),
@@ -130,9 +130,18 @@ public class CtfTmfEvent extends TmfEvent
      * Default constructor. Do not use directly, but it needs to be present
      * because it's used in extension points, and the framework will use this
      * constructor to get the class type.
+     *
+     * @deprecated Only for extension point usage, not for normal use
      */
+    @Deprecated
     public CtfTmfEvent() {
-        this(null);
+        super();
+        fSourceCPU = -1;
+        fTypeId = -1;
+        fEventName = EMPTY_CTF_EVENT_NAME;
+        fEventDeclaration = null;
+        fEvent = EventDefinition.NULL_EVENT;
+        fReference = null;
     }
 
     // ------------------------------------------------------------------------

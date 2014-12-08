@@ -16,6 +16,7 @@ package org.eclipse.tracecompass.internal.lttng2.ust.core.memoryusage;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.lttng2.ust.core.trace.LttngUstTrace;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
@@ -53,7 +54,7 @@ public class MemoryUsageStateProvider extends AbstractTmfStateProvider {
      * @param trace
      *            trace
      */
-    public MemoryUsageStateProvider(LttngUstTrace trace) {
+    public MemoryUsageStateProvider(@NonNull LttngUstTrace trace) {
         super(trace, CtfTmfEvent.class, "Ust:Memory"); //$NON-NLS-1$
     }
 

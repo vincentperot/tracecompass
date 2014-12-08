@@ -12,6 +12,7 @@
 
 package org.eclipse.tracecompass.tmf.core.statesystem;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -45,7 +46,7 @@ public interface ITmfStateProvider {
      *
      * @return The associated trace
      */
-    ITmfTrace getTrace();
+    @NonNull ITmfTrace getTrace();
 
     /**
      * Return the start time of this "state change input", which is normally the

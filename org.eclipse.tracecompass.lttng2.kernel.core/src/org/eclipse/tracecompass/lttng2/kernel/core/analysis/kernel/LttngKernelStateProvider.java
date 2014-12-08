@@ -87,7 +87,7 @@ public class LttngKernelStateProvider extends AbstractTmfStateProvider {
      *            The event layout to use for this state provider. Usually
      *            depending on the tracer implementation.
      */
-    public LttngKernelStateProvider(ITmfTrace trace, @NonNull IKernelAnalysisEventLayout layout) {
+    public LttngKernelStateProvider(@NonNull ITmfTrace trace, @NonNull IKernelAnalysisEventLayout layout) {
         super(trace, ITmfEvent.class, "Kernel"); //$NON-NLS-1$
         fLayout = layout;
         fEventNames = buildEventNames(layout);

@@ -15,6 +15,7 @@ package org.eclipse.tracecompass.tmf.core.statesystem;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -40,7 +41,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
 
     private static final int DEFAULT_EVENTS_QUEUE_SIZE = 10000;
 
-    private final ITmfTrace trace;
+    private final @NonNull ITmfTrace trace;
     private final Class<? extends ITmfEvent> eventType;
     private final BlockingQueue<ITmfEvent> eventsQueue;
     private final Thread eventHandlerThread;
@@ -61,7 +62,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
      * @param id
      *            Name given to this state change input. Only used internally.
      */
-    public AbstractTmfStateProvider(ITmfTrace trace,
+    public AbstractTmfStateProvider(@NonNull ITmfTrace trace,
             Class<? extends ITmfEvent> eventType, String id) {
         this.trace = trace;
         this.eventType = eventType;
@@ -107,7 +108,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
     public void dispose() {
         /* Insert a null event in the queue to stop the event handler's thread. */
         try {
-            eventsQueue.put(END_EVENT);
+            eventsQueue.put(fEndEvent);
             eventHandlerThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -148,7 +149,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
          * for sure that the state system processed the preceding real event.
          */
         try {
-            eventsQueue.put(EMPTY_QUEUE_EVENT);
+            eventsQueue.put(fEmptyQueueEvent);
             while (!eventsQueue.isEmpty()) {
                 Thread.sleep(100);
             }
@@ -162,21 +163,21 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
     // ------------------------------------------------------------------------
 
     /** Fake event indicating the build is over, and the provider should close */
-    private static class EndEvent extends TmfEvent {
+    private class EndEvent extends TmfEvent {
         public EndEvent() {
-            super(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+            super(AbstractTmfStateProvider.this.getTrace(), ITmfContext.UNKNOWN_RANK, null, null, null);
         }
     }
 
     /** Fake event indicating we want to clear the current queue */
-    private static class EmptyQueueEvent extends TmfEvent {
+    private class EmptyQueueEvent extends TmfEvent {
         public EmptyQueueEvent() {
-            super(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+            super(AbstractTmfStateProvider.this.getTrace(), ITmfContext.UNKNOWN_RANK, null, null, null);
         }
     }
 
-    private static final EndEvent END_EVENT = new EndEvent();
-    private static final EmptyQueueEvent EMPTY_QUEUE_EVENT = new EmptyQueueEvent();
+    private final EndEvent fEndEvent = new EndEvent();
+    private final EmptyQueueEvent fEmptyQueueEvent = new EmptyQueueEvent();
 
     // ------------------------------------------------------------------------
     // Inner classes
@@ -201,8 +202,8 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
             try {
                 event = eventsQueue.take();
                 /* This is a singleton, we want to do != instead of !x.equals */
-                while (event != END_EVENT) {
-                    if (event == EMPTY_QUEUE_EVENT) {
+                while (event != fEndEvent) {
+                    if (event == fEmptyQueueEvent) {
                         /* Synchronization event, should be ignored */
                         event = eventsQueue.take();
                         continue;

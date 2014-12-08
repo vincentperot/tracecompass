@@ -243,8 +243,8 @@ public class TmfOpenTraceHelper {
 
     private static ITmfTrace openTraceElement(final TmfTraceElement traceElement) {
         final ITmfTrace trace = traceElement.instantiateTrace();
-        final ITmfEvent traceEvent = traceElement.instantiateEvent();
-        if ((trace == null) || (traceEvent == null)) {
+        final Class<? extends ITmfEvent> traceEventClass = traceElement.getEventClass();
+        if ((trace == null) || (traceEventClass == null)) {
             TraceUtils.displayErrorMsg(NLS.bind(Messages.TmfOpenTraceHelper_OpenElement, traceElement.getTypeName()),
                     Messages.TmfOpenTraceHelper_NoTraceType);
             if (trace != null) {
@@ -254,7 +254,7 @@ public class TmfOpenTraceHelper {
         }
 
         try {
-            trace.initTrace(traceElement.getResource(), traceElement.getResource().getLocation().toOSString(), traceEvent.getClass(), traceElement.getElementPath());
+            trace.initTrace(traceElement.getResource(), traceElement.getResource().getLocation().toOSString(), traceEventClass, traceElement.getElementPath());
         } catch (final TmfTraceException e) {
             TraceUtils.displayErrorMsg(NLS.bind(Messages.TmfOpenTraceHelper_OpenElement, traceElement.getTypeName()),
                     Messages.TmfOpenTraceHelper_InitError + ENDL + ENDL + e);

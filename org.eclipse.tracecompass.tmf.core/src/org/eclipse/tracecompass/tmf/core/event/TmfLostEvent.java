@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.tmf.core.event;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -54,7 +55,7 @@ public class TmfLostEvent extends TmfEvent implements ITmfLostEvent {
      *            the number of lost events in the time range
      * @since 2.0
      */
-    public TmfLostEvent(final ITmfTrace trace,
+    public TmfLostEvent(final @NonNull ITmfTrace trace,
             final long rank,
             final ITmfTimestamp timestamp,
             final ITmfEventType type,

@@ -442,7 +442,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
 
         fTimeRange = TmfTimeRange.ETERNITY;
         final ITmfTrace trace = provider.getTrace();
-        if (trace != null && !isCompleteTrace(trace)) {
+        if (!isCompleteTrace(trace)) {
             TmfTimeRange traceTimeRange = trace.getTimeRange();
             if (traceTimeRange != null) {
                 fTimeRange = traceTimeRange;
@@ -485,9 +485,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
                     ITmfEventRequest.ExecutionType.BACKGROUND);
             this.sci = sp;
 
-            // sci.getTrace() will eventually return a @NonNull
-            trace = checkNotNull(sci.getTrace());
-
+            trace = sci.getTrace();
         }
 
         @Override

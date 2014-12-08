@@ -12,6 +12,7 @@
 
 package org.eclipse.tracecompass.tmf.core.callstack;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
@@ -83,7 +84,7 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
      * @param trace
      *            The trace for which we build this state system
      */
-    public CallStackStateProvider(ITmfTrace trace) {
+    public CallStackStateProvider(@NonNull ITmfTrace trace) {
         super(trace, ITmfEvent.class, ID);
     }
 

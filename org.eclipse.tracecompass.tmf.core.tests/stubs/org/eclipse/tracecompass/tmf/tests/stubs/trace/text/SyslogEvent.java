@@ -32,10 +32,11 @@ import org.eclipse.tracecompass.tmf.tests.stubs.trace.text.SyslogEventType.Index
 public class SyslogEvent extends TextTraceEvent implements ITmfCollapsibleEvent, ITmfSourceLookup {
 
     /**
-     * Default constructor
+     * Default constructor. Only for extension points.
      */
+    @Deprecated
     public SyslogEvent() {
-        super(null, null, new SyslogEventType(), null);
+        super();
     }
 
     /**
@@ -61,7 +62,7 @@ public class SyslogEvent extends TextTraceEvent implements ITmfCollapsibleEvent,
      * @param content
      *            the event content (payload)
      */
-    public SyslogEvent(SyslogTrace parentTrace, final ITmfTimestamp timestamp,
+    public SyslogEvent(@NonNull SyslogTrace parentTrace, final ITmfTimestamp timestamp,
             final ITmfEventType type, final TextTraceEventContent content) {
         super(parentTrace, timestamp, type, content);
     }

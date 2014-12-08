@@ -26,6 +26,7 @@ import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.tmf.core.synchronization.SyncAlgorithmFullyIncremental;
 import org.eclipse.tracecompass.tmf.core.event.matching.TmfEventDependency;
 import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransform;
@@ -48,7 +49,9 @@ import org.junit.Test;
 @SuppressWarnings("nls")
 public class SyncTest {
 
-    private TmfTraceStub t1, t2;
+    private @NonNull TmfTraceStub t1 = new TmfTraceStub();
+    private @NonNull TmfTraceStub t2 = new TmfTraceStub();
+
     private Collection<ITmfTrace> fTraces;
 
     /**
@@ -190,7 +193,7 @@ public class SyncTest {
         assertEquals("SyncAlgorithmFullyIncremental [Between t1 and t2 [ alpha 1 beta 2.5 ]]", syncAlgo.toString());
     }
 
-    private static void addSyncMatch(SynchronizationAlgorithm algo, ITmfTrace sender, long sendTs, ITmfTrace receiver, long receiveTs) {
+    private static void addSyncMatch(SynchronizationAlgorithm algo, @NonNull ITmfTrace sender, long sendTs, @NonNull ITmfTrace receiver, long receiveTs) {
         algo.addMatch(
                 new TmfEventDependency(
                         new TmfSyncEventStub(sender, new TmfTimestamp(sendTs)),

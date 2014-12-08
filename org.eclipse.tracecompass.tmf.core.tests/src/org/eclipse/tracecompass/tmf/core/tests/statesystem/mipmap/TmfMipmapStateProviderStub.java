@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.tmf.core.tests.statesystem.mipmap;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.core.statesystem.mipmap.AbstractTmfMipmapStateProvider;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
@@ -29,6 +30,8 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfNanoTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
 
 /**
  * A mipmap state provider for test
@@ -37,12 +40,15 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
  * @since 3.0
  */
 class TmfMipmapStateProviderStub extends AbstractTmfMipmapStateProvider {
+
     /** test attribute name */
-    public final static String TEST_ATTRIBUTE_NAME = "test_attribute"; //$NON-NLS-1$
+    public static final String TEST_ATTRIBUTE_NAME = "test_attribute"; //$NON-NLS-1$
+
+    private static final @NonNull ITmfTrace TRACE = new TmfTraceStub();
+    private static final String MIPMAP_ID = "MIPMAP_ID"; //$NON-NLS-1$
 
     private int resolution;
     private ITmfStateValue.Type type;
-    private final static String MIPMAP_ID = "MIPMAP_ID"; //$NON-NLS-1$
 
     private final String ERROR_ATTRIBUTE_NOT_FOUND = "Error : Impossible to find the attribute"; //$NON-NLS-1$
     private final String ERROR_INVALID_STATE_VALUE = "Error : Invalid state value"; //$NON-NLS-1$
@@ -57,7 +63,7 @@ class TmfMipmapStateProviderStub extends AbstractTmfMipmapStateProvider {
      *            the type of value to use
      */
     public TmfMipmapStateProviderStub(int resolution, ITmfStateValue.Type type) {
-        super(null, TmfEvent.class, MIPMAP_ID);
+        super(new TmfTraceStub(), TmfEvent.class, MIPMAP_ID);
         this.resolution = resolution;
         this.type = type;
     }
@@ -111,7 +117,7 @@ class TmfMipmapStateProviderStub extends AbstractTmfMipmapStateProvider {
         ITmfTimestamp timestamp = new TmfNanoTimestamp(time);
         ITmfEventType eventType = new TmfEventType(MIPMAP_ID, null);
         ITmfEventField content = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, value, null);
-        ITmfEvent event = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, timestamp, eventType, content);
+        ITmfEvent event = new TmfEvent(TRACE, ITmfContext.UNKNOWN_RANK, timestamp, eventType, content);
         return event;
     }
 }

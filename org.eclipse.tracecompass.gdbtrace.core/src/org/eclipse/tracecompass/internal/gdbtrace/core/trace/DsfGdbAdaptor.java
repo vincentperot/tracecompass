@@ -75,6 +75,7 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.contexts.DebugContextEvent;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -117,7 +118,7 @@ import org.eclipse.ui.ide.IDE;
 @SuppressWarnings("restriction")
 public class DsfGdbAdaptor {
 
-    private GdbTrace fGdbTrace;
+    private final @NonNull GdbTrace fGdbTrace;
 
     private int fNumberOfFrames = 0;
     private boolean fIsTimeoutEnabled;
@@ -271,7 +272,7 @@ public class DsfGdbAdaptor {
      * @param tracedExecutable  executable that was used to generate the tracefile
      *  workspace, where the traced executable was taken from.
      */
-    public DsfGdbAdaptor(GdbTrace trace, String gdbExec, String traceFile, String tracedExecutable) {
+    public DsfGdbAdaptor(@NonNull GdbTrace trace, String gdbExec, String traceFile, String tracedExecutable) {
         this.fGdbTrace = trace;
         this.gdb72Executable = gdbExec;
         this.fTraceFilePath = traceFile;

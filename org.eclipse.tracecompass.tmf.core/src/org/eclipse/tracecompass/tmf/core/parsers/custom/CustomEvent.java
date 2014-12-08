@@ -61,17 +61,17 @@ public class CustomEvent extends TmfEvent {
 
     private TmfEventField[] fColumnData;
 
-    /**
-     * Basic constructor.
-     *
-     * @param definition
-     *            The trace definition to which this event belongs
-     */
-    public CustomEvent(CustomTraceDefinition definition) {
-        super(null, ITmfContext.UNKNOWN_RANK, null, null, null);
-        fDefinition = definition;
-        fData = new HashMap<>();
-    }
+//    /**
+//     * Basic constructor.
+//     *
+//     * @param definition
+//     *            The trace definition to which this event belongs
+//     */
+//    public CustomEvent(CustomTraceDefinition definition) {
+//        super(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+//        fDefinition = definition;
+//        fData = new HashMap<>();
+//    }
 
     /**
      * Build a new CustomEvent from an existing TmfEvent.
@@ -104,7 +104,7 @@ public class CustomEvent extends TmfEvent {
      * @param type
      *            Event type
      */
-    public CustomEvent(CustomTraceDefinition definition, ITmfTrace parentTrace,
+    public CustomEvent(CustomTraceDefinition definition, @NonNull ITmfTrace parentTrace,
             ITmfTimestamp timestamp, TmfEventType type) {
         /* Do not use upstream's fields for stuff we override */
         super(parentTrace, ITmfContext.UNKNOWN_RANK, null, null, null);

@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
@@ -92,7 +93,8 @@ public abstract class AbstractTmfMipmapStateProvider extends AbstractTmfStatePro
      *            The name given to this state change input. Only used
      *            internally.
      */
-    public AbstractTmfMipmapStateProvider(ITmfTrace trace, Class<? extends ITmfEvent> eventType, String id) {
+    public AbstractTmfMipmapStateProvider(@NonNull ITmfTrace trace,
+            Class<? extends ITmfEvent> eventType, String id) {
         super(trace, eventType, id);
     }
 

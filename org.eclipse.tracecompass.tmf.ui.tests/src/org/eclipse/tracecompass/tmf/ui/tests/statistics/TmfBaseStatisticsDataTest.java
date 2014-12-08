@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
@@ -32,6 +33,8 @@ import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.tests.stubs.trace.TmfTraceStub;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.Messages;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsTree;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsTreeNode;
@@ -46,6 +49,7 @@ public class TmfBaseStatisticsDataTest {
     // Fields
     // ------------------------------------------------------------------------
 
+    private static final @NonNull ITmfTrace TRACE = new TmfTraceStub();
     private static final String fTestName = "StatisticsDataTest";
 
     private final String fTypeId1 = "Some type1";
@@ -83,13 +87,13 @@ public class TmfBaseStatisticsDataTest {
      */
     public TmfBaseStatisticsDataTest() {
         fContent1 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some content", null);
-        fEvent1 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp1, fType1, fContent1);
+        fEvent1 = new TmfEvent(TRACE, ITmfContext.UNKNOWN_RANK, fTimestamp1, fType1, fContent1);
 
         fContent2 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some other content", null);
-        fEvent2 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp2, fType2, fContent2);
+        fEvent2 = new TmfEvent(TRACE, ITmfContext.UNKNOWN_RANK, fTimestamp2, fType2, fContent2);
 
         fContent3 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some other different content", null);
-        fEvent3 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp3, fType3, fContent3);
+        fEvent3 = new TmfEvent(TRACE, ITmfContext.UNKNOWN_RANK, fTimestamp3, fType3, fContent3);
 
         fStatsTree = new TmfStatisticsTree();
 

@@ -237,36 +237,36 @@ public class TmfEventTest {
 
     @Test
     public void testNonEqualRanks() {
-        final ITmfEvent event1 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
+        final ITmfEvent event1 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
+        ITmfEvent event2 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
         assertTrue("equals", event1.equals(event2));
         assertTrue("equals", event2.equals(event1));
 
-        event2 = new TmfEvent(null, 1, fTimestamp1, fType, fContent1);
+        event2 = new TmfEvent(fTrace, 1, fTimestamp1, fType, fContent1);
         assertFalse("equals", event1.equals(event2));
         assertFalse("equals", event2.equals(event1));
     }
 
     @Test
     public void testNonEqualTimestamps() {
-        final ITmfEvent event1 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
+        final ITmfEvent event1 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
+        ITmfEvent event2 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
         assertTrue("equals", event1.equals(event2));
         assertTrue("equals", event2.equals(event1));
 
-        event2 = new TmfEvent(null, 0, fTimestamp2, fType, fContent1);
+        event2 = new TmfEvent(fTrace, 0, fTimestamp2, fType, fContent1);
         assertFalse("equals", event1.equals(event2));
         assertFalse("equals", event2.equals(event1));
 
-        event2 = new TmfEvent(null, 0, null, fType, fContent1);
+        event2 = new TmfEvent(fTrace, 0, null, fType, fContent1);
         assertFalse("equals", event1.equals(event2));
         assertFalse("equals", event2.equals(event1));
     }
 
     @Test
     public void testNonEqualTypes() {
-        final ITmfEvent event1 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(null, 0, fTimestamp1, fType,  fContent1);
+        final ITmfEvent event1 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
+        ITmfEvent event2 = new TmfEvent(fTrace, 0, fTimestamp1, fType,  fContent1);
         assertTrue("equals", event1.equals(event2));
         assertTrue("equals", event2.equals(event1));
 
@@ -274,27 +274,27 @@ public class TmfEventTest {
         final String[] labels = new String[] { fLabel2, fLabel1 };
         final TmfEventType newType = new TmfEventType(typeId, TmfEventField.makeRoot(labels));
 
-        event2 = new TmfEvent(null, 0, fTimestamp1, newType, fContent1);
+        event2 = new TmfEvent(fTrace, 0, fTimestamp1, newType, fContent1);
         assertFalse("equals", event1.equals(event2));
         assertFalse("equals", event2.equals(event1));
 
-        event2 = new TmfEvent(null, 0, fTimestamp1, null, fContent1);
+        event2 = new TmfEvent(fTrace, 0, fTimestamp1, null, fContent1);
         assertFalse("equals", event1.equals(event2));
         assertFalse("equals", event2.equals(event1));
     }
 
     @Test
     public void testNonEqualContents() {
-        final ITmfEvent event1 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
+        final ITmfEvent event1 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
+        ITmfEvent event2 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
         assertTrue("equals", event1.equals(event2));
         assertTrue("equals", event2.equals(event1));
 
-        event2 = new TmfEvent(null, 0, fTimestamp1, fType, fContent2);
+        event2 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent2);
         assertFalse("equals", event1.equals(event2));
         assertFalse("equals", event2.equals(event1));
 
-        event2 = new TmfEvent(null, 0, fTimestamp1, fType, null);
+        event2 = new TmfEvent(fTrace, 0, fTimestamp1, fType, null);
         assertFalse("equals", event1.equals(event2));
         assertFalse("equals", event2.equals(event1));
     }

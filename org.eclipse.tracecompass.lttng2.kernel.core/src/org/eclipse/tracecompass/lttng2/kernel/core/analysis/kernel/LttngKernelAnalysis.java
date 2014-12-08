@@ -90,7 +90,8 @@ public class LttngKernelAnalysis extends TmfStateSystemAnalysisModule {
 
     @Override
     protected @NonNull ITmfStateProvider createStateProvider() {
-        ITmfTrace trace = getTrace();
+        /* getTrace() should be initialized at this point */
+        ITmfTrace trace = checkNotNull(getTrace());
         IKernelAnalysisEventLayout layout;
 
         if (trace instanceof LttngKernelTrace) {

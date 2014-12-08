@@ -61,7 +61,8 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
      * @param layout
      *            The event layout to use for this state provider.
      */
-    public LttngKernelCpuUsageStateProvider(ITmfTrace trace, @NonNull IKernelAnalysisEventLayout layout) {
+    public LttngKernelCpuUsageStateProvider(@NonNull ITmfTrace trace,
+            @NonNull IKernelAnalysisEventLayout layout) {
         super(trace, ITmfEvent.class, "LTTng Kernel CPU usage"); //$NON-NLS-1$
         fTraceStart = trace.getStartTime().getValue();
         fLayout = layout;

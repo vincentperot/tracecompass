@@ -124,7 +124,7 @@ public class SynchronizeTracesHandler extends AbstractHandler {
 
                 for (int i = 0; i < tl.size(); i++) {
                     ITmfTrace trace = tl.get(i).instantiateTrace();
-                    ITmfEvent traceEvent = tl.get(i).instantiateEvent();
+                    Class<? extends ITmfEvent> traceEventClass = tl.get(i).getEventClass();
                     if (trace == null) {
                         TraceUtils.displayErrorMsg(Messages.SynchronizeTracesHandler_Title, Messages.SynchronizeTracesHandler_WrongType + tl.get(i).getName());
                         for (int j = 0; j < i; j++) {
@@ -133,7 +133,7 @@ public class SynchronizeTracesHandler extends AbstractHandler {
                         return;
                     }
                     try {
-                        trace.initTrace(tl.get(i).getResource(), tl.get(i).getResource().getLocation().toOSString(), traceEvent.getClass());
+                        trace.initTrace(tl.get(i).getResource(), tl.get(i).getResource().getLocation().toOSString(), traceEventClass);
                         TmfTraceManager.refreshSupplementaryFiles(trace);
                     } catch (TmfTraceException e) {
                         TraceUtils.displayErrorMsg(Messages.SynchronizeTracesHandler_Title, Messages.SynchronizeTracesHandler_InitError + CR + CR + e);
@@ -214,10 +214,10 @@ public class SynchronizeTracesHandler extends AbstractHandler {
                                  * and set its sync formula
                                  */
                                 ITmfTrace trace = newtrace.instantiateTrace();
-                                ITmfEvent traceEvent = newtrace.instantiateEvent();
+                                Class<? extends ITmfEvent> traceEventClass = newtrace.getEventClass();
 
                                 try {
-                                    trace.initTrace(newtrace.getResource(), newtrace.getResource().getLocation().toOSString(), traceEvent.getClass());
+                                    trace.initTrace(newtrace.getResource(), newtrace.getResource().getLocation().toOSString(), traceEventClass);
                                 } catch (TmfTraceException e) {
                                     Activator.getDefault().logError(String.format(Messages.SynchronizeTracesHandler_ErrorSynchingForTrace, exp.getName(), traceel.getName()), e);
                                     TraceUtils.displayErrorMsg(Messages.SynchronizeTracesHandler_Title, Messages.SynchronizeTracesHandler_Error + CR + CR + e.getMessage());
