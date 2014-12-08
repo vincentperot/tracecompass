@@ -293,7 +293,6 @@ public class TmfCoalescedEventRequest extends TmfEventRequest {
     // ------------------------------------------------------------------------
 
     @Override
-    // All requests have a unique id
     public int hashCode() {
         return super.hashCode();
     }
@@ -301,11 +300,7 @@ public class TmfCoalescedEventRequest extends TmfEventRequest {
     @Override
     public boolean equals(Object other) {
         if (other instanceof TmfCoalescedEventRequest) {
-            TmfCoalescedEventRequest request = (TmfCoalescedEventRequest) other;
-            return (request.getDataType() == getDataType()) &&
-                    (request.getIndex() == getIndex()) &&
-                    (request.getNbRequested() == getNbRequested()) &&
-                    (request.getRange().equals(fRange));
+            return super.equals(other);
         }
         return false;
     }

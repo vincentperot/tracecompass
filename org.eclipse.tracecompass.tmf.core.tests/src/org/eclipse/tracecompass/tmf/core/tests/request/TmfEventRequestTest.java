@@ -60,8 +60,12 @@ public class TmfEventRequestTest {
         fRequest2 = new TmfEventRequestStub(ITmfEvent.class, range2, 100, 200);
         fRequest3 = new TmfEventRequestStub(ITmfEvent.class, range2, 200, 200);
         fRequest4 = new TmfEventRequestStub(ITmfEvent.class, range2, 200, 300);
+
+        TmfEventRequest.reset();
         fRequest1b = new TmfEventRequestStub(ITmfEvent.class, range1, 100, 200);
+        TmfEventRequest.reset();
         fRequest1c = new TmfEventRequestStub(ITmfEvent.class, range1, 100, 200);
+
         fRequestCount = fRequest1c.getRequestId() + 1;
     }
 

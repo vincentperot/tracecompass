@@ -396,8 +396,8 @@ public abstract class TmfEventRequest implements ITmfEventRequest {
     // ------------------------------------------------------------------------
 
     @Override
-    // All requests have a unique id
     public int hashCode() {
+        // All requests have a unique id
         return getRequestId();
     }
 
@@ -405,10 +405,11 @@ public abstract class TmfEventRequest implements ITmfEventRequest {
     public boolean equals(Object other) {
         if (other instanceof TmfEventRequest) {
             TmfEventRequest request = (TmfEventRequest) other;
-            return request.fDataType == fDataType
-                    && request.fIndex == fIndex
-                    && request.fNbRequested == fNbRequested
-                    && request.fRange.equals(fRange);
+            return request.getRequestId() == getRequestId()
+                    && request.getDataType() == getDataType()
+                    && request.getIndex() == getIndex()
+                    && request.getNbRequested() == getNbRequested()
+                    && request.getRange().equals(getRange());
         }
         return false;
     }

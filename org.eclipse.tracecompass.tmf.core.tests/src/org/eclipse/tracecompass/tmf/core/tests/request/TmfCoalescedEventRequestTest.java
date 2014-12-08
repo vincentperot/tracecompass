@@ -79,7 +79,9 @@ public class TmfCoalescedEventRequestTest {
         fRequest3 = new TmfCoalescedEventRequest(ITmfEvent.class, range2, 0, 200, ExecutionType.FOREGROUND);
         fRequest4 = new TmfCoalescedEventRequest(ITmfEvent.class, range2, 0, 200, ExecutionType.FOREGROUND);
 
+        TmfEventRequest.reset();
         fRequest1b = new TmfCoalescedEventRequest(ITmfEvent.class, range1, 0, 100, ExecutionType.FOREGROUND);
+        TmfEventRequest.reset();
         fRequest1c = new TmfCoalescedEventRequest(ITmfEvent.class, range1, 0, 100, ExecutionType.FOREGROUND);
 
         fRequestCount = fRequest1c.getRequestId() + 1;
