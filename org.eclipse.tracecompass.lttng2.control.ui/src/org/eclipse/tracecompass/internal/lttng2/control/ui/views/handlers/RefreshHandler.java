@@ -80,9 +80,7 @@ public class RefreshHandler extends BaseControlViewHandler {
                         while ((component != null) && component.getClass() != TargetNodeComponent.class) {
                             component = (TraceControlComponent) component.getParent();
                         }
-                        if (component != null) {
-                            node = (TargetNodeComponent) component;
-                        }
+                        node = (TargetNodeComponent) component;
                     }
                 }
             }
