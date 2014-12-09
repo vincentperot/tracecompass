@@ -28,7 +28,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
@@ -264,6 +263,21 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
             }
         }
         super.init(traceName, type);
+
+        /* Initialize the analysis modules */
+        @SuppressWarnings("null")
+        @NonNull
+        Class<? extends TmfTrace> className = this.getClass();
+        Map<String, IAnalysisModuleHelper> modules = TmfAnalysisManager.getAnalysisModules(className);
+        for (IAnalysisModuleHelper helper : modules.values()) {
+            try {
+                IAnalysisModule module = helper.newModule(this);
+                fAnalysisModules.put(module.getId(), module);
+            } catch (TmfAnalysisException e) {
+                Activator.logWarning("Could not initialize analysis module " + e.getMessage()); //$NON-NLS-1$
+            }
+        }
+
         // register as VIP after super.init() because TmfComponent registers to signal manager there
         TmfSignalManager.registerVIP(this);
         if (fIndexer != null) {
@@ -292,28 +306,17 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
     }
 
     /**
-     * Instantiate the applicable analysis modules and executes the analysis
-     * modules that are meant to be automatically executed
+     * Executes the analysis modules that are meant to be automatically executed
      *
      * @return An IStatus indicating whether the analysis could be run
      *         successfully or not
-     * @since 3.0
      */
     protected IStatus executeAnalysis() {
         MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
 
-        @SuppressWarnings("null")
-        @NonNull Class<? extends TmfTrace> className = this.getClass();
-        Map<String, IAnalysisModuleHelper> modules = TmfAnalysisManager.getAnalysisModules(className);
-        for (IAnalysisModuleHelper helper : modules.values()) {
-            try {
-                IAnalysisModule module = helper.newModule(this);
-                fAnalysisModules.put(module.getId(), module);
-                if (module.isAutomatic()) {
-                    status.add(module.schedule());
-                }
-            } catch (TmfAnalysisException e) {
-                status.add(new Status(IStatus.WARNING, Activator.PLUGIN_ID, e.getMessage()));
+        for (IAnalysisModule module : getAnalysisModules()) {
+            if (module.isAutomatic()) {
+                status.add(module.schedule());
             }
         }
         return status;

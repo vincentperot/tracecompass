@@ -38,7 +38,6 @@ import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.tests.TmfCoreTestPlugin;
 import org.eclipse.tracecompass.tmf.core.tests.shared.TmfTestTrace;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -442,14 +441,8 @@ public class TmfTraceTest {
 
     @Test
     public void testGetModules() {
-        /* There should not be any modules at this point */
+        /* Verify modules are populated */
         Iterable<IAnalysisModule> modules = fTrace.getAnalysisModules();
-        assertFalse(modules.iterator().hasNext());
-
-        /* Open the trace, the modules should be populated */
-        fTrace.traceOpened(new TmfTraceOpenedSignal(this, fTrace, null));
-
-        modules = fTrace.getAnalysisModules();
         assertTrue(modules.iterator().hasNext());
 
         /*
