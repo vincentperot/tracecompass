@@ -85,6 +85,7 @@
                     <delete includeemptydirs="false">
                       <fileset dir="${rcpDestination}">
                         <include name="**" />
+                        <exclude name="index.php" />
                       </fileset>
                     </delete>
 
