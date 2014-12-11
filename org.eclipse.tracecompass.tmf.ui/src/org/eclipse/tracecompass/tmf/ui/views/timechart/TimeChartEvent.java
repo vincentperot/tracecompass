@@ -85,6 +85,16 @@ public class TimeChartEvent implements ITimeEvent {
         return fDuration;
     }
 
+    @Override
+    public ITimeEvent splitBefore(long splitTime) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ITimeEvent splitAfter(long splitTime) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Retrieve the rank of the trace event which started this time event.
      *
