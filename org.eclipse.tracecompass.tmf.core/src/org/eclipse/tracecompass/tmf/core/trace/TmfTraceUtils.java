@@ -20,6 +20,7 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 
 /**
@@ -29,7 +30,8 @@ import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
  */
 public final class TmfTraceUtils {
 
-    private TmfTraceUtils() {}
+    private TmfTraceUtils() {
+    }
 
     /**
      * Get an analysis module belonging to this trace, with the specified ID and
@@ -68,7 +70,7 @@ public final class TmfTraceUtils {
     public static @NonNull <T> Iterable<T> getAnalysisModulesOfClass(ITmfTrace trace, Class<T> moduleClass) {
         Iterable<IAnalysisModule> analysisModules = trace.getAnalysisModules();
         Set<T> modules = new HashSet<>();
-        for  (IAnalysisModule module : analysisModules) {
+        for (IAnalysisModule module : analysisModules) {
             if (moduleClass.isAssignableFrom(module.getClass())) {
                 modules.add(moduleClass.cast(module));
             }
@@ -96,5 +98,30 @@ public final class TmfTraceUtils {
             }
         }
         return ret;
+    }
+
+    /**
+     * Return the first aspect that resolve as non null for the event received
+     * in parameter
+     *
+     * @param trace
+     *            The trace for which you want the event aspects
+     * @param aspectClass
+     *            The returned aspects must be of this class (or a subtype)
+     * @param event
+     *            The event for which to get the aspect
+     * @return The event aspect that returns non null for the event or
+     *         {@code null} otherwise
+     */
+    public static <T extends ITmfEventAspect> T getEventAspectOfClassForEvent(
+            ITmfTrace trace, Class<T> aspectClass, @NonNull ITmfEvent event) {
+        Object obj = null;
+        for (T aspect : getEventAspectsOfClass(trace, aspectClass)) {
+            obj = aspect.resolve(event);
+            if (obj != null) {
+                return aspect;
+            }
+        }
+        return null;
     }
 }

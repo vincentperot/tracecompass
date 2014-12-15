@@ -86,14 +86,11 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
         final String eventName = event.getType().getName();
 
         if (eventName.equals(fLayout.eventSchedSwitch())) {
-            Integer cpu = null;
-            Iterable<TmfCpuAspect> aspects = TmfTraceUtils.getEventAspectsOfClass(event.getTrace(), TmfCpuAspect.class);
-            for (TmfCpuAspect aspect : aspects) {
-                cpu = aspect.resolve(event);
-                if (cpu != null) {
-                    break;
-                }
+            TmfCpuAspect aspect = TmfTraceUtils.getEventAspectOfClassForEvent(event.getTrace(), TmfCpuAspect.class, event);
+            if (aspect == null) {
+                return;
             }
+            Integer cpu = aspect.resolve(event);
             if (cpu == null) {
                 /* We couldn't find any CPU information, ignore this event */
                 return;

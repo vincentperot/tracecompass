@@ -235,13 +235,12 @@ public abstract class TmfXmlStateAttribute implements ITmfXmlStateAttribute {
                 }
                 if (name.equals(TmfXmlStrings.CPU)) {
                     /* See if the event advertises a CPU aspect */
-                    Iterable<TmfCpuAspect> cpuAspects = TmfTraceUtils.getEventAspectsOfClass(
-                            event.getTrace(), TmfCpuAspect.class);
-                    for (TmfCpuAspect aspect : cpuAspects) {
-                        Integer cpu = aspect.resolve(event);
+                    TmfCpuAspect cpuAspect = TmfTraceUtils.getEventAspectOfClassForEvent(
+                            event.getTrace(), TmfCpuAspect.class, event);
+                    if (cpuAspect != null) {
+                        Integer cpu = cpuAspect.resolve(event);
                         if (cpu != null) {
                             quark = getQuarkRelativeAndAdd(startQuark, cpu.toString());
-                            break;
                         }
                     }
                 } else {
