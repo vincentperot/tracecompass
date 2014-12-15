@@ -41,6 +41,22 @@ public final class NonNullUtils {
     }
 
     /**
+     * Returns a non null String for a potentially null object. This methods
+     * calls the {@link Object#toString()} if the object is not null or returns
+     * an empty string otherwise.
+     *
+     * @param obj
+     *            A {@link Nullable} object that we want converted as string
+     * @return A non-null String
+     */
+    public static String toString(@Nullable Object obj) {
+        if (obj == null) {
+            return ""; //$NON-NLS-1$
+        }
+        return nullToEmptyString(obj.toString());
+    }
+
+    /**
      * Convert a non-annotated object reference to a {@link NonNull} one.
      *
      * If the reference is actually null, a {@link NullPointerException} is
