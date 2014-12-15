@@ -71,7 +71,7 @@ public class TmfStateSystemAspect implements ITmfEventAspect {
     }
 
     @Override
-    public String resolve(ITmfEvent event) {
+    public @Nullable String resolve(ITmfEvent event) {
         try {
             ITmfStateValue value = fSS.querySingleState(event.getTimestamp().getValue(), fAttribute).getStateValue();
 
@@ -79,7 +79,7 @@ public class TmfStateSystemAspect implements ITmfEventAspect {
             @NonNull String ret = value.toString();
             return ret;
         } catch (AttributeNotFoundException | StateSystemDisposedException e) {
-            return EMPTY_STRING;
+            return null;
         }
     }
 

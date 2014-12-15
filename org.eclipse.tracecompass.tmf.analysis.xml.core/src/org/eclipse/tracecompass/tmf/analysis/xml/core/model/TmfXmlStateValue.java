@@ -268,7 +268,7 @@ public abstract class TmfXmlStateValue implements ITmfXmlStateValue {
             for (TmfCpuAspect aspect : cpuAspects) {
                 /* We will just pick the first valid one we find */
                 Integer cpu = aspect.resolve(event);
-                if (!cpu.equals(TmfCpuAspect.CPU_UNAVAILABLE)) {
+                if (cpu != null) {
                     return TmfStateValue.newValueInt(cpu.intValue());
                 }
             }
