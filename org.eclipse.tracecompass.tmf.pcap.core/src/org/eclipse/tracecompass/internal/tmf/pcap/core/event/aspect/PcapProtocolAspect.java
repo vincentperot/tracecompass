@@ -39,7 +39,7 @@ public class PcapProtocolAspect implements ITmfEventAspect {
     }
 
     @Override
-    public String resolve(ITmfEvent event) {
+    public @Nullable String resolve(ITmfEvent event) {
         if (!(event instanceof PcapEvent)) {
             return EMPTY_STRING;
         }
