@@ -34,6 +34,7 @@ public interface TmfXmlStrings {
     String HEAD = "head";
     String TRACETYPE = "traceType";
     String ID = "id";
+    String SSID = "ssid";
     String LABEL = "label";
     String ANALYSIS = "analysis";
 

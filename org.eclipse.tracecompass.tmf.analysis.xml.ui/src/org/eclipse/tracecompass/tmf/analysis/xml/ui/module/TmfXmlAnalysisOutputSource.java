@@ -31,7 +31,7 @@ import org.eclipse.tracecompass.tmf.analysis.xml.ui.views.timegraph.XmlTimeGraph
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisOutput;
 import org.eclipse.tracecompass.tmf.core.analysis.ITmfNewAnalysisModuleListener;
-import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.statesystem.ITmfAnalysisModuleWithStateSystems;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -105,7 +105,7 @@ public class TmfXmlAnalysisOutputSource implements ITmfNewAnalysisModuleListener
                 doc.getDocumentElement().normalize();
 
                 /* get state provider views if the analysis has state systems */
-                if (module instanceof TmfStateSystemAnalysisModule) {
+                if (module instanceof ITmfAnalysisModuleWithStateSystems) {
                     for (ViewType viewType : ViewType.values()) {
                         NodeList ssViewNodes = doc.getElementsByTagName(viewType.getXmlElem());
                         for (int i = 0; i < ssViewNodes.getLength(); i++) {

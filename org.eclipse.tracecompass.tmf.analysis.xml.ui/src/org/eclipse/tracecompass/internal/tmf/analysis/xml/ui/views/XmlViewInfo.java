@@ -41,6 +41,48 @@ public class XmlViewInfo {
     private @Nullable String fFilePath = null;
 
     /**
+     * Class that manages information about a view header: its analysis id and
+     * state system id.
+     *
+     * @author Naser Ezzati
+     */
+    public static class AnalysisId {
+        private final String analysisID;
+        private @Nullable String analysisSSID;
+
+        /**
+         * Constructor
+         *
+         * @param ID
+         *            The ID of the analysis to be used.
+         * @param SSID
+         *            The state system ID of the analysis to be used.
+         */
+        public AnalysisId(String ID, @Nullable String SSID) {
+            analysisID = ID;
+            analysisSSID = SSID;
+        }
+
+        /**
+         * @return the analysis id.
+         */
+        public String getId() {
+            return this.analysisID;
+        }
+
+        /**
+         * @return the state system id.
+         */
+        public @Nullable String getSSId() {
+            String ssid = this.analysisSSID;
+            if (ssid == null) {
+                return null;
+            }
+            return ssid;
+        }
+    }
+
+    /**
      * Constructor
      *
      * @param viewId
@@ -151,6 +193,31 @@ public class XmlViewInfo {
             List<Element> applicableAnalysis = XmlUtils.getChildElements(head, TmfXmlStrings.ANALYSIS);
             for (Element oneAnalysis : applicableAnalysis) {
                 analysisIds.add(oneAnalysis.getAttribute(TmfXmlStrings.ID));
+            }
+        }
+        return analysisIds;
+    }
+
+    /**
+     * Get the list of analysis IDs this view is for, as listed in the header of
+     * the XML element
+     *
+     * @param viewElement
+     *            The XML view element from which to get the analysis IDs
+     * @return The list of all analysis IDs this view is for
+     */
+    public Set<AnalysisId> getAllViewAnalysisIds(Element viewElement) {
+        List<Element> heads = XmlUtils.getChildElements(viewElement, TmfXmlStrings.HEAD);
+
+        Set<AnalysisId> analysisIds = new HashSet<>();
+        if (!heads.isEmpty()) {
+            Element head = heads.get(0);
+
+            /* Get the application analysis from the view's XML header */
+            List<Element> applicableAnalysis = XmlUtils.getChildElements(head, TmfXmlStrings.ANALYSIS);
+            for (Element oneAnalysis : applicableAnalysis) {
+                AnalysisId analysis = new AnalysisId(oneAnalysis.getAttribute(TmfXmlStrings.ID), oneAnalysis.getAttribute(TmfXmlStrings.SSID));
+                analysisIds.add(analysis);
             }
         }
         return analysisIds;

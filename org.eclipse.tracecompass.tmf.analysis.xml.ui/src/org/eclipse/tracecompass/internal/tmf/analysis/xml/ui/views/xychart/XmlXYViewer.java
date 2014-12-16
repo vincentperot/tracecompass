@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.ui.TmfXmlUiStrings;
 import org.eclipse.tracecompass.internal.tmf.analysis.xml.ui.views.XmlViewInfo;
+import org.eclipse.tracecompass.internal.tmf.analysis.xml.ui.views.XmlViewInfo.AnalysisId;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
@@ -66,6 +67,7 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
 
     private final ITmfXmlModelFactory fFactory = TmfXmlReadOnlyModelFactory.getInstance();
     private final Map<Integer, SeriesData> fSeriesData = new HashMap<>();
+    private final Map<String, String> analysisIDSSID =  new HashMap<>();
 
     private final XmlViewInfo fViewInfo;
 
@@ -330,7 +332,8 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
             return;
         }
 
-        Iterable<String> analysisIds = fViewInfo.getViewAnalysisIds(viewElement);
+        Iterable<AnalysisId> analysisIds = fViewInfo.getAllViewAnalysisIds(viewElement);
+        analysisIDSSID.clear();
 
         List<ITmfAnalysisModuleWithStateSystems> stateSystemModules = new LinkedList<>();
         if (!analysisIds.iterator().hasNext()) {
@@ -341,10 +344,11 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
                 stateSystemModules.add(module);
             }
         } else {
-            for (String moduleId : analysisIds) {
-                ITmfAnalysisModuleWithStateSystems module = TmfTraceUtils.getAnalysisModuleOfClass(trace, ITmfAnalysisModuleWithStateSystems.class, moduleId);
+            for (AnalysisId moduleId : analysisIds) {
+                ITmfAnalysisModuleWithStateSystems module = TmfTraceUtils.getAnalysisModuleOfClass(trace, ITmfAnalysisModuleWithStateSystems.class, moduleId.getId());
                 if (module != null) {
                     stateSystemModules.add(module);
+                    analysisIDSSID.put(moduleId.getId(), moduleId.getSSId());
                 }
             }
         }
@@ -364,11 +368,18 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
             if (module instanceof TmfStateSystemAnalysisModule) {
                 ((TmfStateSystemAnalysisModule) module).waitForInitialization();
             }
+            ITmfStateSystem lastSS = null;
             for (ITmfStateSystem ssq : module.getStateSystems()) {
+                lastSS = ssq;
                 if (ssq != null) {
-                    ss = ssq;
-                    break;
+                    if (ssq.getSSID().equals(analysisIDSSID.get(module.getId()))){
+                        ss = ssq;
+                        break;
+                    }
                 }
+            }
+            if (ss == null) {
+                ss = lastSS;
             }
         }
         if (ss == null) {
