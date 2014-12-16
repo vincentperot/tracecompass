@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.eclipse.tracecompass.internal.tmf.core.synchronization.ITmfTimestampTransformInvertible;
 import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransform;
+import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransformInvertible;
 import org.eclipse.tracecompass.tmf.core.synchronization.TimestampTransformFactory;
 
 /**

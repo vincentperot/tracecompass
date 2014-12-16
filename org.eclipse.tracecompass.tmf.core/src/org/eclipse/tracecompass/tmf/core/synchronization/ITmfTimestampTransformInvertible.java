@@ -10,9 +10,8 @@
  *   Geneviève Bastien - Initial implementation and API
  *******************************************************************************/
 
-package org.eclipse.tracecompass.internal.tmf.core.synchronization;
+package org.eclipse.tracecompass.tmf.core.synchronization;
 
-import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransform;
 
 /**
  * Interface for timestamp transform who also provide an inverse transform.

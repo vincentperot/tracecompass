@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.internal.tmf.core.synchronization;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransform;
+import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransformInvertible;
 import org.eclipse.tracecompass.tmf.core.synchronization.TimestampTransformFactory;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfNanoTimestamp;

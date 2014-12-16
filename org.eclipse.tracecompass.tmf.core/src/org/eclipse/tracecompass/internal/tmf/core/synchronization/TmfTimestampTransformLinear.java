@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 
 import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransform;
+import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransformInvertible;
 import org.eclipse.tracecompass.tmf.core.synchronization.TimestampTransformFactory;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
