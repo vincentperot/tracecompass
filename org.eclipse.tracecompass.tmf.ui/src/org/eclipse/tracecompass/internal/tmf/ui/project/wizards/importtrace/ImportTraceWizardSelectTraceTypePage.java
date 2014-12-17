@@ -133,7 +133,7 @@ public class ImportTraceWizardSelectTraceTypePage extends AbstractImportTraceWiz
             if (children != null) {
                 for (TraceTypeHelper traceType : children) {
                     if (fTreeView.getChecked(traceType)) {
-                        tracesToScan.add(traceType.getCanonicalName());
+                        tracesToScan.add(traceType.getTraceTypeId());
                     }
                 }
             }
