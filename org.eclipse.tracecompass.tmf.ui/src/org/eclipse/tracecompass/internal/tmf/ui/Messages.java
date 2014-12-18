@@ -251,9 +251,12 @@ public class Messages extends NLS {
     public static String FilterView_FileDialogFilterName;
     public static String FilterView_ImportActionToolTipText;
     public static String FilterView_SaveActionToolTipText;
-    public static String FilterViewer_EmptyTreeHintText;
-    public static String FilterViewer_CommonCategory;
     public static String FilterViewer_AlphaButtonText;
+    public static String FilterViewer_AspectLabel;
+    public static String FilterViewer_CommonCategory;
+    public static String FilterViewer_EmptyTreeHintText;
+    public static String FilterViewer_EventField;
+    public static String FilterViewer_FieldHint;
     public static String FilterViewer_FieldLabel;
     public static String FilterViewer_FilterNameHint;
     public static String FilterViewer_IgnoreCaseButtonText;
@@ -264,7 +267,7 @@ public class Messages extends NLS {
     public static String FilterViewer_RegexHint;
     public static String FilterViewer_RegexLabel;
     public static String FilterViewer_ResultLabel;
-    public static String FilterViewer_Subfilter_ToolTip;
+    public static String FilterViewer_Subfield_ToolTip;
     public static String FilterViewer_TimestampButtonText;
     public static String FilterViewer_TypeLabel;
     public static String FilterViewer_ValueHint;
