@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2013 Ericsson
+ * Copyright (c) 2010, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -21,14 +21,16 @@ import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterAndNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterContainsNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterEqualsNode;
-import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterEventTypeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesFieldNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterOrNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterRootNode;
+import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterTraceTypeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterTreeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode.Type;
+import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
+import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -75,11 +77,16 @@ public class TmfFilterContentHandler extends DefaultHandler {
 
             node = new TmfFilterNode(atts.getValue(TmfFilterNode.NAME_ATTR));
 
-        } else if (localName.equals(TmfFilterEventTypeNode.NODE_NAME)) {
+        } else if (localName.equals(TmfFilterTraceTypeNode.NODE_NAME)) {
 
-            node = new TmfFilterEventTypeNode(null);
-            ((TmfFilterEventTypeNode) node).setEventType(atts.getValue(TmfFilterEventTypeNode.TYPE_ATTR));
-            ((TmfFilterEventTypeNode) node).setName(atts.getValue(TmfFilterEventTypeNode.NAME_ATTR));
+            node = new TmfFilterTraceTypeNode(null);
+            String traceTypeId = atts.getValue(TmfFilterTraceTypeNode.TYPE_ATTR);
+            ((TmfFilterTraceTypeNode) node).setTraceTypeId(traceTypeId);
+            TraceTypeHelper helper = TmfTraceType.getTraceType(traceTypeId);
+            if (helper != null) {
+                ((TmfFilterTraceTypeNode) node).setTraceClass(helper.getTraceClass());
+            }
+            ((TmfFilterTraceTypeNode) node).setName(atts.getValue(TmfFilterTraceTypeNode.NAME_ATTR));
 
         } else if (localName.equals(TmfFilterAndNode.NODE_NAME)) {
 
@@ -158,6 +165,24 @@ public class TmfFilterContentHandler extends DefaultHandler {
                 }
             }
             ((TmfFilterCompareNode) node).setValue(atts.getValue(TmfFilterCompareNode.VALUE_ATTR));
+
+        // Backward compatibility with event type filter node
+        } else if (localName.equals("EVENTTYPE")) { //$NON-NLS-1$
+
+            node = new TmfFilterTraceTypeNode(null);
+            String name = atts.getValue("name"); //$NON-NLS-1$
+            if (name != null) {
+                String traceTypeToken[] = name.split(":", 2); //$NON-NLS-1$
+                if (traceTypeToken.length == 2) {
+                    String traceTypeId = TmfTraceType.getTraceTypeId(traceTypeToken[0], traceTypeToken[1]);
+                    TraceTypeHelper helper = TmfTraceType.getTraceType(traceTypeId);
+                    if (helper != null) {
+                        ((TmfFilterTraceTypeNode) node).setTraceTypeId(helper.getTraceTypeId());
+                        ((TmfFilterTraceTypeNode) node).setTraceClass(helper.getTraceClass());
+                    }
+                }
+                ((TmfFilterTraceTypeNode) node).setName(name);
+            }
 
         }
 
