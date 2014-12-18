@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2014 Ericsson, École Polytechnique de Montréal
+ * Copyright (c) 2010, 2015 Ericsson, École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -518,7 +518,7 @@ public class TmfTraceElement extends TmfCommonProjectElement implements IActionF
             if (getTraceType() != null) {
                 TraceTypeHelper helper = TmfTraceType.getTraceType(getTraceType());
                 if (helper != null) {
-                    return helper.getCategoryName() + " : " + helper.getName(); //$NON-NLS-1$
+                    return helper.getLabel();
                 }
             }
             return ""; //$NON-NLS-1$
