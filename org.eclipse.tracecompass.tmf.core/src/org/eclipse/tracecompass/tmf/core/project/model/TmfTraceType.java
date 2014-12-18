@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 Ericsson, École Polytechnique de Montréal
+ * Copyright (c) 2011, 2015 Ericsson, École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -173,20 +173,6 @@ public final class TmfTraceType {
     }
 
     /**
-     * Retrieve the TraceTypeHelper for a given trace type ID
-     *
-     * @param id
-     *            The trace type ID
-     * @return The corresponding TraceTypeHelper, or null if there is none for
-     *         the specified ID
-     * @deprecated Use {@link #getTraceType(String)}
-     */
-    @Deprecated
-    public static TraceTypeHelper getTraceTypeHelper(String id) {
-        return TRACE_TYPES.get(id);
-    }
-
-    /**
      * Get an iterable view of the existing trace type IDs.
      *
      * @return The currently registered trace type IDs
@@ -205,24 +191,24 @@ public final class TmfTraceType {
     }
 
     /**
-     * Returns a list of "category:tracetype , ..."
+     * Returns a list of trace type labels "category : name", ...
      *
      * Returns only trace types, not experiment types
      *
-     * @return returns a list of "category:tracetype , ..."
+     * @return a list of trace type labels
      */
     public static String[] getAvailableTraceTypes() {
         return getAvailableTraceTypes(null);
     }
 
     /**
-     * Returns a list of "category:tracetype , ..." sorted by given comparator.
+     * Returns a list of trace type labels "category : name", ... sorted by given comparator.
      *
      * Returns only trace types, not experiment types
      *
      * @param comparator
      *            Comparator class (type String) or null for alphabetical order.
-     * @return sorted list according to the given comparator
+     * @return a list of trace type labels sorted according to the given comparator
      */
     public static String[] getAvailableTraceTypes(Comparator<String> comparator) {
 
@@ -232,7 +218,7 @@ public final class TmfTraceType {
         for (String key : TRACE_TYPES.keySet()) {
             TraceTypeHelper tt = TRACE_TYPES.get(key);
             if (!tt.isExperimentType()) {
-                traceTypes.add(tt.getCategoryName() + SEPARATOR + tt.getName());
+                traceTypes.add(tt.getLabel());
             }
         }
 
@@ -475,7 +461,7 @@ public final class TmfTraceType {
                 return category.getAttribute(TmfTraceType.NAME_ATTR);
             }
         }
-        return "[no category]"; //$NON-NLS-1$
+        return ""; //$NON-NLS-1$
     }
 
     /**
@@ -578,57 +564,19 @@ public final class TmfTraceType {
     }
 
     /**
-     * Find the id of a trace type by its parameters
+     * Find the id of a trace type by its label "category : name"
      *
-     * @param category
-     *            like "ctf" or "custom text"
-     * @param traceType
-     *            like "kernel"
-     * @return an id like "org.eclipse.linuxtools.blabla...
+     * @param label
+     *            the trace type label
+     * @return the trace type id
      */
-    public static String getTraceTypeId(String category, String traceType) {
+    public static String getTraceTypeId(String label) {
         for (String key : TRACE_TYPES.keySet()) {
-            if (TRACE_TYPES.get(key).getCategoryName().equals(category.trim()) && TRACE_TYPES.get(key).getName().equals(traceType.trim())) {
+            if (TRACE_TYPES.get(key).getLabel().equals(label)) {
                 return key;
             }
         }
         return null;
-    }
-
-    /**
-     * Gets the custom trace type ID from the custom trace name
-     *
-     * @param traceType
-     *            The trace type in human form (category:name)
-     * @return the trace type ID or null if the trace is not a custom one
-     * @deprecated Use {@link #getTraceTypeId(String, String)}
-     */
-    @Deprecated
-    public static String getCustomTraceTypeId(String traceType) {
-        String traceTypeToken[] = traceType.split(":", 2); //$NON-NLS-1$
-        if (traceTypeToken.length == 2) {
-            return getTraceTypeId(traceTypeToken[0], traceTypeToken[1]);
-        }
-        return null;
-    }
-
-    /**
-     * Is the trace a custom (user-defined) trace type. These are the traces
-     * like : text and xml defined by the custom trace wizard.
-     *
-     * @param traceType
-     *            the trace type in human form (category:name)
-     * @return true if the trace is a custom type
-     * @deprecated Use {@link #getTraceTypeId(String, String)} and check prefix
-     */
-    @Deprecated
-    public static boolean isCustomTrace(String traceType) {
-        String traceTypeId = getCustomTraceTypeId(traceType);
-        if (traceTypeId != null) {
-            return traceTypeId.startsWith(CustomTxtTrace.class.getCanonicalName() + SEPARATOR) ||
-                    traceTypeId.startsWith(CustomXmlTrace.class.getCanonicalName() + SEPARATOR);
-        }
-        return false;
     }
 
     /**
