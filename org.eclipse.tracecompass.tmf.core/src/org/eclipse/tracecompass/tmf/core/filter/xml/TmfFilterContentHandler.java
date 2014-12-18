@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2014 Ericsson
+ * Copyright (c) 2010, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -21,14 +21,16 @@ import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterAndNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterContainsNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterEqualsNode;
-import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterEventTypeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesFieldNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterOrNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterRootNode;
+import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterTraceTypeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterTreeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode.Type;
+import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
+import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -41,6 +43,14 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Patrick Tasse
  */
 public class TmfFilterContentHandler extends DefaultHandler {
+
+    // Backward compatibility strings
+    private static final String EVENTTYPE_NODE_NAME = "EVENTTYPE"; //$NON-NLS-1$
+    private static final String NAME_ATTR = "name"; //$NON-NLS-1$
+    private static final String SEP = " : "; //$NON-NLS-1$
+    private static final String NO_CATEGORY = "[no category]"; //$NON-NLS-1$
+    private static final String LTTNG_KERNEL_TRACE = "LTTng Kernel Trace"; //$NON-NLS-1$
+    private static final String LINUX_KERNEL_TRACE = "Linux Kernel Trace"; //$NON-NLS-1$
 
     private ITmfFilterTreeNode fRoot = null;
     private Stack<ITmfFilterTreeNode> fFilterTreeStack = null;
@@ -75,11 +85,16 @@ public class TmfFilterContentHandler extends DefaultHandler {
 
             node = new TmfFilterNode(atts.getValue(TmfFilterNode.NAME_ATTR));
 
-        } else if (localName.equals(TmfFilterEventTypeNode.NODE_NAME)) {
+        } else if (localName.equals(TmfFilterTraceTypeNode.NODE_NAME)) {
 
-            node = new TmfFilterEventTypeNode(null);
-            ((TmfFilterEventTypeNode) node).setEventType(atts.getValue(TmfFilterEventTypeNode.TYPE_ATTR));
-            ((TmfFilterEventTypeNode) node).setName(atts.getValue(TmfFilterEventTypeNode.NAME_ATTR));
+            node = new TmfFilterTraceTypeNode(null);
+            String traceTypeId = atts.getValue(TmfFilterTraceTypeNode.TYPE_ATTR);
+            ((TmfFilterTraceTypeNode) node).setTraceTypeId(traceTypeId);
+            TraceTypeHelper helper = TmfTraceType.getTraceType(traceTypeId);
+            if (helper != null) {
+                ((TmfFilterTraceTypeNode) node).setTraceClass(helper.getTraceClass());
+            }
+            ((TmfFilterTraceTypeNode) node).setName(atts.getValue(TmfFilterTraceTypeNode.NAME_ATTR));
 
         } else if (localName.equals(TmfFilterAndNode.NODE_NAME)) {
 
@@ -158,6 +173,29 @@ public class TmfFilterContentHandler extends DefaultHandler {
                 }
             }
             ((TmfFilterCompareNode) node).setValue(atts.getValue(TmfFilterCompareNode.VALUE_ATTR));
+
+        // Backward compatibility with event type filter node
+        } else if (localName.equals(EVENTTYPE_NODE_NAME)) {
+
+            node = new TmfFilterTraceTypeNode(null);
+            String name = atts.getValue(NAME_ATTR);
+            if (name != null) {
+                name = name.replace(LTTNG_KERNEL_TRACE, LINUX_KERNEL_TRACE);
+                String traceTypeToken[] = name.split(SEP, 2);
+                TraceTypeHelper helper = null;
+                if (traceTypeToken.length == 2) {
+                    String traceTypeId = TmfTraceType.getTraceTypeId(traceTypeToken[0], traceTypeToken[1]);
+                    helper = TmfTraceType.getTraceType(traceTypeId);
+                } else if (traceTypeToken.length == 1) {
+                    String traceTypeId = TmfTraceType.getTraceTypeId(NO_CATEGORY, traceTypeToken[0]);
+                    helper = TmfTraceType.getTraceType(traceTypeId);
+                }
+                if (helper != null) {
+                    ((TmfFilterTraceTypeNode) node).setTraceTypeId(helper.getTraceTypeId());
+                    ((TmfFilterTraceTypeNode) node).setTraceClass(helper.getTraceClass());
+                }
+                ((TmfFilterTraceTypeNode) node).setName(name);
+            }
 
         }
 
