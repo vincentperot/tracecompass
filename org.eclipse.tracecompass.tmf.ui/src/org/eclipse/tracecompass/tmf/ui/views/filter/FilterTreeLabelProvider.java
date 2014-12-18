@@ -21,7 +21,7 @@ import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode.Type;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterContainsNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterEqualsNode;
-import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesFieldNode;
+import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterOrNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterTraceTypeNode;
@@ -89,7 +89,7 @@ public class FilterTreeLabelProvider implements ILabelProvider {
 
             TmfFilterContainsNode node = (TmfFilterContainsNode) element;
             label = (node.isNot() ? "NOT " : "") + //$NON-NLS-1$ //$NON-NLS-2$
-                    (node.getField() != null ? node.getField() + " " : "") + //$NON-NLS-1$ //$NON-NLS-2$
+                    (node.getEventAspect() != null ? node.getEventAspect().getName() + " " : "") + //$NON-NLS-1$ //$NON-NLS-2$
                     node.getNodeName() +
                     (node.getValue() != null && node.getValue().length() > 0 ? " \"" + node.getValue() + "\"" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -97,15 +97,15 @@ public class FilterTreeLabelProvider implements ILabelProvider {
 
             TmfFilterEqualsNode node = (TmfFilterEqualsNode) element;
             label = (node.isNot() ? "NOT " : "") + //$NON-NLS-1$ //$NON-NLS-2$
-                    (node.getField() != null ? node.getField() + " " : "") + //$NON-NLS-1$ //$NON-NLS-2$
+                    (node.getEventAspect() != null ? node.getEventAspect().getName() + " " : "") + //$NON-NLS-1$ //$NON-NLS-2$
                     node.getNodeName() +
                     (node.getValue() != null && node.getValue().length() > 0 ? " \"" + node.getValue() + "\"" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-        } else if (element instanceof TmfFilterMatchesFieldNode) {
+        } else if (element instanceof TmfFilterMatchesNode) {
 
-            TmfFilterMatchesFieldNode node = (TmfFilterMatchesFieldNode) element;
+            TmfFilterMatchesNode node = (TmfFilterMatchesNode) element;
             label = (node.isNot() ? "NOT " : "") + //$NON-NLS-1$ //$NON-NLS-2$
-                    (node.getField() != null ? node.getField() + " " : "") + //$NON-NLS-1$ //$NON-NLS-2$
+                    (node.getEventAspect() != null ? node.getEventAspect().getName() + " " : "") + //$NON-NLS-1$ //$NON-NLS-2$
                     node.getNodeName() +
                     (node.getRegex() != null && node.getRegex().length() > 0 ? " \"" + node.getRegex() + "\"" : ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -113,7 +113,7 @@ public class FilterTreeLabelProvider implements ILabelProvider {
 
             TmfFilterCompareNode node = (TmfFilterCompareNode) element;
             label = (node.isNot() ? "NOT " : "") + //$NON-NLS-1$ //$NON-NLS-2$
-                    (node.getField() != null ? node.getField() + " " : "") + //$NON-NLS-1$ //$NON-NLS-2$
+                    (node.getEventAspect() != null ? node.getEventAspect().getName() + " " : "") + //$NON-NLS-1$ //$NON-NLS-2$
                     (node.getResult() < 0 ? "<" : (node.getResult() > 0 ? ">" : "=")) + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
                     (node.getValue() != null && node.getValue().length() > 0 ?
                             (node.getType() == Type.ALPHA ? " \"" + node.getValue() + "\"" : //$NON-NLS-1$ //$NON-NLS-2$

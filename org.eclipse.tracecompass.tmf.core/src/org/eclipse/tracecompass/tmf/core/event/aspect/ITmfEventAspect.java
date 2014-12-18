@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Ericsson
+ * Copyright (c) 2014, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
@@ -8,14 +8,21 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Added base aspect list
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.core.event.aspect;
+
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
+import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * An aspect is a piece of information that can be extracted, directly or
@@ -36,6 +43,16 @@ public interface ITmfEventAspect {
      */
     String EMPTY_STRING = ""; //$NON-NLS-1$
 
+    /**
+     * List of all common base aspects
+     */
+    public static final List<ITmfEventAspect> BASE_ASPECTS =
+            checkNotNull(ImmutableList.of(
+                    BaseAspects.TIMESTAMP,
+                    BaseAspects.EVENT_TYPE,
+                    BaseAspects.CONTENTS,
+                    BaseAspects.TRACE_NAME
+                    ));
     /**
      * Some basic aspects that all trace types should be able to use, using
      * methods found in {@link ITmfEvent}.
