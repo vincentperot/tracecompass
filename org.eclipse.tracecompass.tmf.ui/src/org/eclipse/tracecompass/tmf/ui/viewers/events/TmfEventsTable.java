@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2014 Ericsson
+ * Copyright (c) 2010, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -123,7 +123,6 @@ import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfSourceLookup;
 import org.eclipse.tracecompass.tmf.core.filter.ITmfFilter;
 import org.eclipse.tracecompass.tmf.core.filter.model.ITmfFilterTreeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterAndNode;
-import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesAspectNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterNode;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
@@ -1383,7 +1382,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                             tableEditor.getEditor().dispose();
                             return false;
                         }
-                        final TmfFilterMatchesAspectNode filter = new TmfFilterMatchesAspectNode(null);
+                        final TmfFilterMatchesNode filter = new TmfFilterMatchesNode(null);
                         ITmfEventAspect aspect = (ITmfEventAspect) column.getData(Key.ASPECT);
                         filter.setEventAspect(aspect);
                         filter.setRegex(regex);
