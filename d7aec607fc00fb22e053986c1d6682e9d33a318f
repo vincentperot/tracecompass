@@ -1,0 +1,8 @@
+Code-Review+1: Hudson CI
+Code-Review+2: Marc-Andre Laperle <marc-andre.laperle@ericsson.com>
+Verified+1: Marc-Andre Laperle <marc-andre.laperle@ericsson.com>
+Submitted-by: Alexandre Montplaisir <alexmonthy@voxpopuli.im>
+Submitted-at: Fri, 19 Dec 2014 18:34:05 -0500
+Reviewed-on: https://git.eclipse.org/r/38383
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
