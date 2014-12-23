@@ -64,6 +64,11 @@ public class CTFStreamInput implements IDefinitionScope {
     private final File fFile;
 
     /**
+     * The file name
+     */
+    private final String fFileName;
+
+    /**
      * The packet index of this input
      */
     private final StreamInputPacketIndex fIndex;
@@ -101,6 +106,7 @@ public class CTFStreamInput implements IDefinitionScope {
         fStream = stream;
         fFile = file;
         fIndex = new StreamInputPacketIndex();
+        fFileName = fFile.getName();
     }
 
     // ------------------------------------------------------------------------
@@ -131,7 +137,7 @@ public class CTFStreamInput implements IDefinitionScope {
      * @return the filename of the streaminput file.
      */
     public String getFilename() {
-        return fFile.getName();
+        return fFileName;
     }
 
     /**
