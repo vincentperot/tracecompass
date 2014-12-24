@@ -25,6 +25,7 @@ import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.core.synchronization.TmfConstantTransform;
 import org.eclipse.tracecompass.internal.tmf.core.synchronization.TmfTimestampTransform;
 import org.eclipse.tracecompass.internal.tmf.core.synchronization.TmfTimestampTransformLinear;
+import org.eclipse.tracecompass.internal.tmf.core.synchronization.TmfTimestampTransformLinearFast;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 
@@ -131,6 +132,17 @@ public final class TimestampTransformFactory {
             return createWithOffset(offset.longValueExact());
         }
         return new TmfTimestampTransformLinear(factor, offset);
+    }
+
+    /**
+     * Create a linear timestamp transform using fast integer math instead of BigDecimal.
+     *
+     * @param factor the slope
+     * @param offset the offset in nanosecond
+     * @return the transform
+     */
+    public static ITmfTimestampTransform createLinearFast(BigDecimal factor, BigDecimal offset) {
+        return new TmfTimestampTransformLinearFast(new TmfTimestampTransformLinear(factor, offset));
     }
 
     /**
