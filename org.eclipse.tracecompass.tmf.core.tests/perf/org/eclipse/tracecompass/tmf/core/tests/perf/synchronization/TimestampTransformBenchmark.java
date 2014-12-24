@@ -12,11 +12,16 @@
 
 package org.eclipse.tracecompass.tmf.core.tests.perf.synchronization;
 
+import java.math.BigDecimal;
+
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+import org.eclipse.tracecompass.internal.tmf.core.synchronization.TmfConstantTransform;
+import org.eclipse.tracecompass.internal.tmf.core.synchronization.TmfTimestampTransform;
+import org.eclipse.tracecompass.internal.tmf.core.synchronization.TmfTimestampTransformLinear;
+import org.eclipse.tracecompass.internal.tmf.core.synchronization.TmfTimestampTransformLinearFast;
 import org.eclipse.tracecompass.tmf.core.synchronization.ITmfTimestampTransform;
-import org.eclipse.tracecompass.tmf.core.synchronization.TimestampTransformFactory;
 import org.junit.Test;
 
 /**
@@ -37,17 +42,21 @@ public class TimestampTransformBenchmark {
      */
     @Test
     public void testTimestampTransformPerformance() {
-        ITmfTimestampTransform transform = TimestampTransformFactory.getDefaultTransform();
+        /*
+         * We call constructors directly instead of TimestampTransformFactory to
+         * create properly each transform type.
+         */
+        ITmfTimestampTransform transform = TmfTimestampTransform.IDENTITY;
         doTimestampTransformRun("Identity transform", transform, 10);
 
-        transform = TimestampTransformFactory.createWithOffset(123456789);
+        transform = new TmfConstantTransform(123456789);
         doTimestampTransformRun("Transform with offset", transform, 10);
 
-        transform = TimestampTransformFactory.createLinear(Math.PI, 1234);
+        transform = new TmfTimestampTransformLinear(Math.PI, 1234);
         doTimestampTransformRun("Linear transform", transform, 5);
 
-        transform = TimestampTransformFactory.createLinear(10000.1234545565635, -4312278758437L);
-        doTimestampTransformRun("Linear transform with larger slope and negative offset", transform, 5);
+        transform = new TmfTimestampTransformLinearFast(BigDecimal.valueOf(Math.PI), BigDecimal.valueOf(1234));
+        doTimestampTransformRun("Linear fast transform", transform, 5);
     }
 
     private static void doTimestampTransformRun(String testName, ITmfTimestampTransform xform, long loopCount) {
