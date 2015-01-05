@@ -15,6 +15,7 @@ package org.eclipse.tracecompass.internal.lttng2.kernel.core.analysis.vm.trace;
 import java.util.Collections;
 import java.util.Set;
 
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
@@ -30,9 +31,8 @@ public class VirtualMachineExperiment extends TmfExperiment {
     /**
      * Default constructor. Needed by the extension point.
      */
-    @SuppressWarnings("null")
     public VirtualMachineExperiment() {
-        this("default", Collections.EMPTY_SET); //$NON-NLS-1$
+        this("default", NonNullUtils.checkNotNull(Collections.EMPTY_SET)); //$NON-NLS-1$
     }
 
     /**
