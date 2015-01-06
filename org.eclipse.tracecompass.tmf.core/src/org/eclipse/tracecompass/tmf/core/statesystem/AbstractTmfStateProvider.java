@@ -38,7 +38,12 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
 
-    private static final int DEFAULT_EVENTS_QUEUE_SIZE = 10000;
+    private static final int DEFAULT_EVENTS_QUEUE_SIZE = 131072;
+
+    /**
+     * The name of the attribute that will flip every n events
+     */
+    public static final String CHECKPOINT_NAME = "Checkpoint"; //$NON-NLS-1$;
 
     private final ITmfTrace trace;
     private final Class<? extends ITmfEvent> eventType;
