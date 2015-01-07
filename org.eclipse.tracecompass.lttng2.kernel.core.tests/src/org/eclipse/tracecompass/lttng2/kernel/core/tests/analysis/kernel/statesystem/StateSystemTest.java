@@ -28,6 +28,7 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeExcept
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.ctf.core.tests.shared.CtfTmfTestTrace;
 import org.junit.Before;
 import org.junit.Rule;
@@ -381,18 +382,28 @@ public abstract class StateSystemTest {
     @Test
     public void testFullQueryThorough() {
         try {
+            int checkpointQuark = fixture.getQuarkAbsolute(AbstractTmfStateProvider.CHECKPOINT_ATTRIBUTE);
+
             List<ITmfStateInterval> state = fixture.queryFullState(interestingTimestamp1);
             assertEquals(TestValues.size, state.size());
 
             for (int i = 0; i < state.size(); i++) {
+                /*
+                 * Ignore the "checkpoint" attribute, the backend can mess with
+                 * it and we should not care.
+                 */
+                if (i == checkpointQuark) {
+                    continue;
+                }
+
                 /* Test each component of the intervals */
-                assertEquals(getStartTimes(i), state.get(i).getStartTime());
-                assertEquals(getEndTimes(i), state.get(i).getEndTime());
-                assertEquals(i, state.get(i).getAttribute());
-                assertEquals(getStateValues(i), state.get(i).getStateValue());
+                assertEquals("item " + i, getStartTimes(i), state.get(i).getStartTime());
+                assertEquals("item " + i, getEndTimes(i), state.get(i).getEndTime());
+                assertEquals("item " + i, i, state.get(i).getAttribute());
+                assertEquals("item " + i, getStateValues(i), state.get(i).getStateValue());
             }
 
-        } catch (StateSystemDisposedException e) {
+        } catch (StateSystemDisposedException | AttributeNotFoundException e) {
             fail();
         }
     }
