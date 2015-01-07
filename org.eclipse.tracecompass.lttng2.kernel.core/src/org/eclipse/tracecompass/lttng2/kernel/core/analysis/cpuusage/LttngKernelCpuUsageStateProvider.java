@@ -157,8 +157,8 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
     }
 
     /* Shortcut for the "current CPU" attribute node */
-    private static int getNodeCPUs(ITmfStateSystemBuilder ssb) {
-        return ssb.getQuarkAbsoluteAndAdd(Attributes.CPUS);
+    private static int getNodeCPUs(ITmfStateSystemBuilder stateSystemBuilder) {
+        return stateSystemBuilder.getQuarkAbsoluteAndAdd(Attributes.CPUS);
     }
 
 }

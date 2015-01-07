@@ -134,7 +134,6 @@ public class BtfStateProvider extends AbstractTmfStateProvider {
     protected void eventHandle(ITmfEvent ev) {
         BtfEvent event = (BtfEvent) ev;
         final ITmfStateSystemBuilder ssb = checkNotNull(getStateSystemBuilder());
-
         final long ts = event.getTimestamp().getValue();
         final String eventType = (String) event.getContent().getField(BtfColumnNames.EVENT.toString()).getValue();
         final String source = event.getSource();
