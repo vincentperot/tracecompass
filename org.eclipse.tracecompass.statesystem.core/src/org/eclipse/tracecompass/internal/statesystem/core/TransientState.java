@@ -223,9 +223,13 @@ public class TransientState {
             fStateValueTypes = new ArrayList<>(size);
 
             for (ITmfStateInterval interval : newStateIntervals) {
-                fOngoingStateInfo.add(interval.getStateValue());
-                fOngoingStateStartTimes.add(interval.getStartTime());
-                fStateValueTypes.add(interval.getStateValue().getType());
+                if (interval != null) {
+                    fOngoingStateInfo.add(interval.getStateValue());
+                    fOngoingStateStartTimes.add(interval.getStartTime());
+                    fStateValueTypes.add(interval.getStateValue().getType());
+                } else {
+                    addEmptyEntry();
+                }
             }
         } finally {
             fRWLock.writeLock().unlock();
