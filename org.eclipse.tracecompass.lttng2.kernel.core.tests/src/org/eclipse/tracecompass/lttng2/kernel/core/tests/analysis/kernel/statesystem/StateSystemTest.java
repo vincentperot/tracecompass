@@ -389,10 +389,10 @@ public abstract class StateSystemTest {
 
             for (int i = 0; i < state.size(); i++) {
                 /* Test each component of the intervals */
-                assertEquals(i, getStartTimes(i), state.get(i).getStartTime());
-                assertEquals(i, getEndTimes(i), state.get(i).getEndTime());
-                assertEquals(i, i, state.get(i).getAttribute());
-                assertEquals("" + i, getStateValues(i), state.get(i).getStateValue());
+                assertEquals("item " + i, getStartTimes(i), state.get(i).getStartTime());
+                assertEquals("item " + i, getEndTimes(i), state.get(i).getEndTime());
+                assertEquals("item " + i, i, state.get(i).getAttribute());
+                assertEquals("item " + i, getStateValues(i), state.get(i).getStateValue());
             }
 
         } catch (StateSystemDisposedException e) {
