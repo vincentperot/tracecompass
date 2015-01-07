@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelStateProvider;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.LttngEventLayout;
-import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
@@ -32,7 +31,6 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * State system tests using a partial history.
@@ -100,58 +98,6 @@ public class PartialStateSystemTest extends StateSystemTest {
     @Override
     protected long getEndTimes(int idx) {
         return interestingTimestamp1;
-    }
-
-    // ------------------------------------------------------------------------
-    // Skip tests using single-queries (unsupported in partial history)
-    // ------------------------------------------------------------------------
-
-    @Override
-    @Test(expected = UnsupportedOperationException.class)
-    public void testSingleQuery1() {
-        super.testSingleQuery1();
-    }
-
-    @Override
-    @Test(expected = UnsupportedOperationException.class)
-    public void testRangeQuery1() {
-        super.testRangeQuery1();
-    }
-
-    @Override
-    @Test(expected = UnsupportedOperationException.class)
-    public void testRangeQuery2() {
-        super.testRangeQuery2();
-    }
-
-    @Override
-    @Test(expected = UnsupportedOperationException.class)
-    public void testRangeQuery3() {
-        super.testRangeQuery3();
-    }
-
-    @Override
-    @Test(expected = UnsupportedOperationException.class)
-    public void testSingleQueryInvalidTime1() throws TimeRangeException {
-        super.testSingleQueryInvalidTime1();
-    }
-
-    @Override
-    @Test(expected = UnsupportedOperationException.class)
-    public void testSingleQueryInvalidTime2() throws TimeRangeException {
-        super.testSingleQueryInvalidTime2();
-    }
-
-    @Override
-    @Test(expected = UnsupportedOperationException.class)
-    public void testRangeQueryInvalidTime1() throws TimeRangeException {
-        super.testRangeQueryInvalidTime1();
-    }
-
-    @Override
-    @Test(expected = UnsupportedOperationException.class)
-    public void testRangeQueryInvalidTime2() throws TimeRangeException {
-        super.testRangeQueryInvalidTime2();
     }
 
     @NonNullByDefault
