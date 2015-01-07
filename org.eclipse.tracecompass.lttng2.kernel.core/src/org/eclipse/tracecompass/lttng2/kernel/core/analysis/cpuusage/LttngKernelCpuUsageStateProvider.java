@@ -109,13 +109,13 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
             Long prevTid = (Long) content.getField(fLayout.fieldPrevTid()).getValue();
 
             try {
-                Integer currentCPUNode = ss.getQuarkRelativeAndAdd(getNodeCPUs(), cpu.toString());
+                Integer currentCPUNode = getStateSystemBuilder().getQuarkRelativeAndAdd(getNodeCPUs(), cpu.toString());
 
                 /*
                  * This quark contains the value of the cumulative time spent on
                  * the source CPU by the currently running thread
                  */
-                Integer cumulativeTimeQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, prevTid.toString());
+                Integer cumulativeTimeQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(currentCPUNode, prevTid.toString());
                 Long startTime = fLastStartTimes.get(cpu);
                 /*
                  * If start time is null, we haven't seen the start of the
@@ -130,7 +130,7 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
                  * time of the thread
                  */
                 if (startTime != null) {
-                    ITmfStateValue value = ss.queryOngoingState(cumulativeTimeQuark);
+                    ITmfStateValue value = getStateSystemBuilder().queryOngoingState(cumulativeTimeQuark);
 
                     /*
                      * Modify cumulative time for this CPU/TID combo: The total
@@ -141,7 +141,7 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
                     long newCumulativeTime = prevCumulativeTime + (ts - startTime);
 
                     value = TmfStateValue.newValueLong(newCumulativeTime);
-                    ss.modifyAttribute(ts, value, cumulativeTimeQuark);
+                    getStateSystemBuilder().modifyAttribute(ts, value, cumulativeTimeQuark);
                     fLastStartTimes.put(cpu, ts);
                 }
             } catch (AttributeNotFoundException e) {
@@ -153,7 +153,7 @@ public class LttngKernelCpuUsageStateProvider extends AbstractTmfStateProvider {
 
     /* Shortcut for the "current CPU" attribute node */
     private int getNodeCPUs() {
-        return ss.getQuarkAbsoluteAndAdd(Attributes.CPUS);
+        return getStateSystemBuilder().getQuarkAbsoluteAndAdd(Attributes.CPUS);
     }
 
 }

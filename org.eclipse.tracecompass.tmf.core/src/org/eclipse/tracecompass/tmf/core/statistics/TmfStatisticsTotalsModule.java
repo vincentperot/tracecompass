@@ -119,8 +119,8 @@ public class TmfStatisticsTotalsModule extends TmfStateSystemAnalysisModule {
 
             try {
                 /* Total number of events */
-                int quark = ss.getQuarkAbsoluteAndAdd(Attributes.TOTAL);
-                ss.incrementAttribute(ts, quark);
+                int quark = getStateSystemBuilder().getQuarkAbsoluteAndAdd(Attributes.TOTAL);
+                getStateSystemBuilder().incrementAttribute(ts, quark);
 
             } catch (StateValueTypeException | TimeRangeException | AttributeNotFoundException e) {
                 e.printStackTrace();

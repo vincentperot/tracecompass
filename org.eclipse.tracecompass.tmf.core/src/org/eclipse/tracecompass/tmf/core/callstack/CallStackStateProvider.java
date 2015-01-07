@@ -98,14 +98,14 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
             if (functionEntryName != null) {
                 long timestamp = event.getTimestamp().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
                 String thread = getThreadName(event);
-                int threadQuark = ss.getQuarkAbsoluteAndAdd(THREADS, thread);
+                int threadQuark = getStateSystemBuilder().getQuarkAbsoluteAndAdd(THREADS, thread);
                 Long threadId = getThreadId(event);
                 if (threadId != null) {
-                    ss.updateOngoingState(TmfStateValue.newValueLong(threadId), threadQuark);
+                    getStateSystemBuilder().updateOngoingState(TmfStateValue.newValueLong(threadId), threadQuark);
                 }
-                int callStackQuark = ss.getQuarkRelativeAndAdd(threadQuark, CALL_STACK);
+                int callStackQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(threadQuark, CALL_STACK);
                 ITmfStateValue value = TmfStateValue.newValueString(functionEntryName);
-                ss.pushAttribute(timestamp, value, callStackQuark);
+                getStateSystemBuilder().pushAttribute(timestamp, value, callStackQuark);
                 return;
             }
 
@@ -114,8 +114,8 @@ public abstract class CallStackStateProvider extends AbstractTmfStateProvider {
             if (functionExitName != null) {
                 long timestamp = event.getTimestamp().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
                 String thread = getThreadName(event);
-                int quark = ss.getQuarkAbsoluteAndAdd(THREADS, thread, CALL_STACK);
-                ITmfStateValue poppedValue = ss.popAttribute(timestamp, quark);
+                int quark = getStateSystemBuilder().getQuarkAbsoluteAndAdd(THREADS, thread, CALL_STACK);
+                ITmfStateValue poppedValue = getStateSystemBuilder().popAttribute(timestamp, quark);
                 String poppedName = (poppedValue == null ? NO_FUNCTION : poppedValue.unboxStr());
 
                 /*

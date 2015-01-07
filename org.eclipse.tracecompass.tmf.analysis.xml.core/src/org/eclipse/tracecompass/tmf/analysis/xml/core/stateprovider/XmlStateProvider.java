@@ -154,7 +154,7 @@ public class XmlStateProvider extends AbstractTmfStateProvider implements IXmlSt
 
     @Override
     public ITmfStateSystem getStateSystem() {
-        return ss;
+        return getStateSystemBuilder();
     }
 
     // ------------------------------------------------------------------------

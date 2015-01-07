@@ -143,7 +143,7 @@ public abstract class AbstractTmfMipmapStateProvider extends AbstractTmfStatePro
      */
     public void modifyMipmapAttribute(long ts, ITmfStateValue value, int baseQuark, int mipmapFeatureBits, int resolution)
             throws TimeRangeException, AttributeNotFoundException, StateValueTypeException {
-        ss.modifyAttribute(ts, value, baseQuark);
+        getStateSystemBuilder().modifyAttribute(ts, value, baseQuark);
         if (value.getType() == Type.LONG || value.getType() == Type.INTEGER || value.getType() == Type.DOUBLE || value.isNull()) {
             Set<ITmfMipmapFeature> features = getFeatureSet(baseQuark, ts, value, mipmapFeatureBits, resolution);
             for (ITmfMipmapFeature mf : features) {
@@ -169,21 +169,21 @@ public abstract class AbstractTmfMipmapStateProvider extends AbstractTmfStatePro
         if (resolution > 1) {
             try {
                 if ((mipmapFeatureBits & MAX) != 0) {
-                    int featureQuark = ss.getQuarkRelativeAndAdd(baseQuark, MAX_STRING);
-                    ss.modifyAttribute(ts, TmfStateValue.newValueInt(0), featureQuark);
-                    MaxMipmapFeature mf = new MaxMipmapFeature(baseQuark, featureQuark, resolution, ss);
+                    int featureQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(baseQuark, MAX_STRING);
+                    getStateSystemBuilder().modifyAttribute(ts, TmfStateValue.newValueInt(0), featureQuark);
+                    MaxMipmapFeature mf = new MaxMipmapFeature(baseQuark, featureQuark, resolution, getStateSystemBuilder());
                     features.add(mf);
                 }
                 if ((mipmapFeatureBits & MIN) != 0) {
-                    int featureQuark = ss.getQuarkRelativeAndAdd(baseQuark, MIN_STRING);
-                    ss.modifyAttribute(ts, TmfStateValue.newValueInt(0), featureQuark);
-                    MinMipmapFeature mf = new MinMipmapFeature(baseQuark, featureQuark, resolution, ss);
+                    int featureQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(baseQuark, MIN_STRING);
+                    getStateSystemBuilder().modifyAttribute(ts, TmfStateValue.newValueInt(0), featureQuark);
+                    MinMipmapFeature mf = new MinMipmapFeature(baseQuark, featureQuark, resolution, getStateSystemBuilder());
                     features.add(mf);
                 }
                 if ((mipmapFeatureBits & AVG) != 0) {
-                    int featureQuark = ss.getQuarkRelativeAndAdd(baseQuark, AVG_STRING);
-                    ss.modifyAttribute(ts, TmfStateValue.newValueInt(0), featureQuark);
-                    AvgMipmapFeature mf = new AvgMipmapFeature(baseQuark, featureQuark, resolution, ss);
+                    int featureQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(baseQuark, AVG_STRING);
+                    getStateSystemBuilder().modifyAttribute(ts, TmfStateValue.newValueInt(0), featureQuark);
+                    AvgMipmapFeature mf = new AvgMipmapFeature(baseQuark, featureQuark, resolution, getStateSystemBuilder());
                     features.add(mf);
                 }
             } catch (TimeRangeException e) {

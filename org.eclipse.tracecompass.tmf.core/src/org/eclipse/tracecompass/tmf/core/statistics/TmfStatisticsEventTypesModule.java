@@ -128,21 +128,21 @@ public class TmfStatisticsEventTypesModule extends TmfStateSystemAnalysisModule 
                 /* Special handling for lost events */
                 if (event instanceof ITmfLostEvent) {
                     ITmfLostEvent le = (ITmfLostEvent) event;
-                    quark = ss.getQuarkAbsoluteAndAdd(Attributes.EVENT_TYPES, eventName);
+                    quark = getStateSystemBuilder().getQuarkAbsoluteAndAdd(Attributes.EVENT_TYPES, eventName);
 
-                    int curVal = ss.queryOngoingState(quark).unboxInt();
+                    int curVal = getStateSystemBuilder().queryOngoingState(quark).unboxInt();
                     if (curVal == -1) {
                         curVal = 0;
                     }
 
                     TmfStateValue value = TmfStateValue.newValueInt((int) (curVal + le.getNbLostEvents()));
-                    ss.modifyAttribute(ts, value, quark);
+                    getStateSystemBuilder().modifyAttribute(ts, value, quark);
                     return;
                 }
 
                 /* Number of events of each type, globally */
-                quark = ss.getQuarkAbsoluteAndAdd(Attributes.EVENT_TYPES, eventName);
-                ss.incrementAttribute(ts, quark);
+                quark = getStateSystemBuilder().getQuarkAbsoluteAndAdd(Attributes.EVENT_TYPES, eventName);
+                getStateSystemBuilder().incrementAttribute(ts, quark);
 
 //                /* Number of events per CPU */
 //                quark = ss.getQuarkRelativeAndAdd(currentCPUNode, Attributes.STATISTICS, Attributes.EVENT_TYPES, eventName);

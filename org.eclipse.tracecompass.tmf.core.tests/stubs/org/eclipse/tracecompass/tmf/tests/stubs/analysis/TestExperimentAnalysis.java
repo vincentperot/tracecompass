@@ -81,8 +81,8 @@ public class TestExperimentAnalysis extends TmfStateSystemAnalysisModule {
         protected void eventHandle(ITmfEvent event) {
             if (!fTraces.contains(event.getTrace())) {
                 try {
-                    int quarkId = ss.getQuarkAbsoluteAndAdd(TRACE_QUARK_NAME);
-                    ss.modifyAttribute(event.getTimestamp().getValue(), TmfStateValue.newValueInt(++fCount), quarkId);
+                    int quarkId = getStateSystemBuilder().getQuarkAbsoluteAndAdd(TRACE_QUARK_NAME);
+                    getStateSystemBuilder().modifyAttribute(event.getTimestamp().getValue(), TmfStateValue.newValueInt(++fCount), quarkId);
                     fTraces.add(event.getTrace());
                 } catch (TimeRangeException | AttributeNotFoundException | StateValueTypeException e) {
 

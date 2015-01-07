@@ -177,16 +177,16 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
                  */
                 int vmQuark = -1;
                 try {
-                    vmQuark = ss.getQuarkRelative(getNodeVirtualMachines(), host.getHostId());
+                    vmQuark = getStateSystemBuilder().getQuarkRelative(getNodeVirtualMachines(), host.getHostId());
                 } catch (AttributeNotFoundException e) {
                     /*
                      * We should enter this catch only once per machine, so it
                      * is not so costly to do compared with adding the trace's
                      * name for each guest event
                      */
-                    vmQuark = ss.getQuarkRelativeAndAdd(getNodeVirtualMachines(), host.getHostId());
+                    vmQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(getNodeVirtualMachines(), host.getHostId());
                     TmfStateValue machineName = TmfStateValue.newValueString(event.getTrace().getName());
-                    ss.modifyAttribute(ts, machineName, vmQuark);
+                    getStateSystemBuilder().modifyAttribute(ts, machineName, vmQuark);
                 }
             }
 
@@ -235,13 +235,13 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
                      * If sched switch is from a guest, just update the status
                      * of the virtual CPU to either idle or running
                      */
-                    int curStatusQuark = ss.getQuarkRelativeAndAdd(getNodeVirtualMachines(), host.getHostId(),
+                    int curStatusQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(getNodeVirtualMachines(), host.getHostId(),
                             cpu.toString(), VmAttributes.STATUS);
                     value = TmfStateValue.newValueInt(VcpuStateValues.VCPU_IDLE);
                     if (nextTid > 0) {
                         value = TmfStateValue.newValueInt(VcpuStateValues.VCPU_RUNNING);
                     }
-                    ss.modifyAttribute(ts, value, curStatusQuark);
+                    getStateSystemBuilder().modifyAttribute(ts, value, curStatusQuark);
                     break;
                 }
 
@@ -257,14 +257,14 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
                 if (vcpu != null) {
                     VirtualMachine vm = vcpu.getVm();
 
-                    int curStatusQuark = ss.getQuarkRelativeAndAdd(getNodeVirtualMachines(), vm.getHostId(),
+                    int curStatusQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(getNodeVirtualMachines(), vm.getHostId(),
                             vcpu.getCpuId().toString(), VmAttributes.STATUS);
 
                     /* Add the preempted flag to the status */
-                    value = ss.queryOngoingState(curStatusQuark);
+                    value = getStateSystemBuilder().queryOngoingState(curStatusQuark);
                     int newVal = Math.max(VcpuStateValues.VCPU_UNKNOWN, value.unboxInt());
                     value = TmfStateValue.newValueInt(newVal | VcpuStateValues.VCPU_PREEMPT);
-                    ss.modifyAttribute(ts, value, curStatusQuark);
+                    getStateSystemBuilder().modifyAttribute(ts, value, curStatusQuark);
                 }
 
                 /* Verify if the next thread corresponds to a virtual CPU */
@@ -277,14 +277,14 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
                  */
                 if (vcpu != null) {
                     VirtualMachine vm = vcpu.getVm();
-                    int curStatusQuark = ss.getQuarkRelativeAndAdd(getNodeVirtualMachines(), vm.getHostId(),
+                    int curStatusQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(getNodeVirtualMachines(), vm.getHostId(),
                             vcpu.getCpuId().toString(), VmAttributes.STATUS);
 
                     /* Remove the preempted flag from the status */
-                    value = ss.queryOngoingState(curStatusQuark);
+                    value = getStateSystemBuilder().queryOngoingState(curStatusQuark);
                     int newVal = Math.max(VcpuStateValues.VCPU_UNKNOWN, value.unboxInt());
                     value = TmfStateValue.newValueInt(newVal & ~VcpuStateValues.VCPU_PREEMPT);
-                    ss.modifyAttribute(ts, value, curStatusQuark);
+                    getStateSystemBuilder().modifyAttribute(ts, value, curStatusQuark);
 
                 }
 
@@ -307,12 +307,12 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
                 if (virtualCpu != null) {
                     /* Add the hypervisor flag to the status */
                     VirtualMachine vm = virtualCpu.getVm();
-                    int curStatusQuark = ss.getQuarkRelativeAndAdd(getNodeVirtualMachines(), vm.getHostId(),
+                    int curStatusQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(getNodeVirtualMachines(), vm.getHostId(),
                             Long.toString(virtualCpu.getCpuId()), VmAttributes.STATUS);
-                    value = ss.queryOngoingState(curStatusQuark);
+                    value = getStateSystemBuilder().queryOngoingState(curStatusQuark);
                     int newVal = Math.max(VcpuStateValues.VCPU_UNKNOWN, value.unboxInt());
                     value = TmfStateValue.newValueInt(newVal | VcpuStateValues.VCPU_VMM);
-                    ss.modifyAttribute(ts, value, curStatusQuark);
+                    getStateSystemBuilder().modifyAttribute(ts, value, curStatusQuark);
                 }
 
                 /*
@@ -323,12 +323,12 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
                 if (virtualCpu != null) {
                     /* Remove the hypervisor flag from the status */
                     VirtualMachine vm = virtualCpu.getVm();
-                    int curStatusQuark = ss.getQuarkRelativeAndAdd(getNodeVirtualMachines(), vm.getHostId(),
+                    int curStatusQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(getNodeVirtualMachines(), vm.getHostId(),
                             Long.toString(virtualCpu.getCpuId()), VmAttributes.STATUS);
-                    value = ss.queryOngoingState(curStatusQuark);
+                    value = getStateSystemBuilder().queryOngoingState(curStatusQuark);
                     int newVal = Math.max(VcpuStateValues.VCPU_UNKNOWN, value.unboxInt());
                     value = TmfStateValue.newValueInt(newVal & ~VcpuStateValues.VCPU_VMM);
-                    ss.modifyAttribute(ts, value, curStatusQuark);
+                    getStateSystemBuilder().modifyAttribute(ts, value, curStatusQuark);
                 }
 
             }
@@ -345,7 +345,7 @@ public class VirtualMachineStateProvider extends AbstractTmfStateProvider {
     // ------------------------------------------------------------------------
 
     private int getNodeVirtualMachines() {
-        return ss.getQuarkAbsoluteAndAdd(VmAttributes.VIRTUAL_MACHINES);
+        return getStateSystemBuilder().getQuarkAbsoluteAndAdd(VmAttributes.VIRTUAL_MACHINES);
     }
 
     private @Nullable HostThread getCurrentHostThread(ITmfEvent event, long ts) {

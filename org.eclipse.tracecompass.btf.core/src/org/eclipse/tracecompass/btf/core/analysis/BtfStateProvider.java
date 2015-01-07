@@ -131,7 +131,7 @@ public class BtfStateProvider extends AbstractTmfStateProvider {
     @Override
     protected void eventHandle(ITmfEvent ev) {
         BtfEvent event = (BtfEvent) ev;
-        final ITmfStateSystemBuilder ssb = this.ss;
+        final ITmfStateSystemBuilder ssb = this.getStateSystemBuilder();
 
         final long ts = event.getTimestamp().getValue();
         final String eventType = (String) event.getContent().getField(BtfColumnNames.EVENT.toString()).getValue();
@@ -189,7 +189,7 @@ public class BtfStateProvider extends AbstractTmfStateProvider {
                     quark = ssb.getQuarkAbsoluteAndAdd(ATTRIBUTE_TASKS, task, core);
                     ssb.modifyAttribute(ts, STATE_SUSPENDED.getValue(), quark);
                     quark = ssb.getQuarkRelativeAndAdd(quark, runnable);
-                    ss.modifyAttribute(ts, STATE_SUSPENDED.getValue(), quark);
+                    getStateSystemBuilder().modifyAttribute(ts, STATE_SUSPENDED.getValue(), quark);
                 }
                 break;
 

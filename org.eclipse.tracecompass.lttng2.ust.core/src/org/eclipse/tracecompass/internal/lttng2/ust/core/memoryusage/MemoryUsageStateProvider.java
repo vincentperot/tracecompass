@@ -170,13 +170,13 @@ public class MemoryUsageStateProvider extends AbstractTmfStateProvider {
             fMemory.put(ptr, size);
         }
         try {
-            int tidQuark = ss.getQuarkAbsoluteAndAdd(tid.toString());
-            int tidMemQuark = ss.getQuarkRelativeAndAdd(tidQuark, UstMemoryStrings.UST_MEMORY_MEMORY_ATTRIBUTE);
+            int tidQuark = getStateSystemBuilder().getQuarkAbsoluteAndAdd(tid.toString());
+            int tidMemQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(tidQuark, UstMemoryStrings.UST_MEMORY_MEMORY_ATTRIBUTE);
 
-            ITmfStateValue prevMem = ss.queryOngoingState(tidMemQuark);
+            ITmfStateValue prevMem = getStateSystemBuilder().queryOngoingState(tidMemQuark);
             /* First time we set this value */
             if (prevMem.isNull()) {
-                int procNameQuark = ss.getQuarkRelativeAndAdd(tidQuark, UstMemoryStrings.UST_MEMORY_PROCNAME_ATTRIBUTE);
+                int procNameQuark = getStateSystemBuilder().getQuarkRelativeAndAdd(tidQuark, UstMemoryStrings.UST_MEMORY_PROCNAME_ATTRIBUTE);
                 String procName = getProcname(event);
                 /*
                  * No tid/procname for the event for the event, added to a
@@ -185,13 +185,13 @@ public class MemoryUsageStateProvider extends AbstractTmfStateProvider {
                 if (tid.equals(MINUS_ONE)) {
                     procName = UstMemoryStrings.OTHERS;
                 }
-                ss.modifyAttribute(ts, TmfStateValue.newValueString(procName), procNameQuark);
+                getStateSystemBuilder().modifyAttribute(ts, TmfStateValue.newValueString(procName), procNameQuark);
                 prevMem = TmfStateValue.newValueLong(0);
             }
 
             long prevMemValue = prevMem.unboxLong();
             prevMemValue += memoryDiff.longValue();
-            ss.modifyAttribute(ts, TmfStateValue.newValueLong(prevMemValue), tidMemQuark);
+            getStateSystemBuilder().modifyAttribute(ts, TmfStateValue.newValueLong(prevMemValue), tidMemQuark);
         } catch (AttributeNotFoundException | TimeRangeException | StateValueTypeException e) {
             throw new IllegalStateException(e);
         }

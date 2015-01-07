@@ -58,9 +58,9 @@ public class TestStateSystemProvider extends AbstractTmfStateProvider {
         /* Just need something to fill the state system */
         if (fString.equals(event.getContent().getValue())) {
             try {
-                int quarkId = ss.getQuarkAbsoluteAndAdd("String");
-                int quark = ss.getQuarkRelativeAndAdd(quarkId, fString);
-                ss.modifyAttribute(event.getTimestamp().getValue(), TmfStateValue.newValueInt(fCount++), quark);
+                int quarkId = getStateSystemBuilder().getQuarkAbsoluteAndAdd("String");
+                int quark = getStateSystemBuilder().getQuarkRelativeAndAdd(quarkId, fString);
+                getStateSystemBuilder().modifyAttribute(event.getTimestamp().getValue(), TmfStateValue.newValueInt(fCount++), quark);
             } catch (TimeRangeException e) {
 
             } catch (AttributeNotFoundException e) {
