@@ -52,8 +52,10 @@ public class StateSystem implements ITmfStateSystemBuilder {
 
     /* References to the inner structures */
     private final AttributeTree attributeTree;
-    private final TransientState transState;
-    private final IStateHistoryBackend backend;
+    /** transient state */
+    private @NonNull TransientState fTransientState;
+    /** backend */
+    private @NonNull IStateHistoryBackend fBackend;
 
     /* Latch tracking if the state history is done building or not */
     private final CountDownLatch finishedLatch = new CountDownLatch(1);
@@ -72,8 +74,8 @@ public class StateSystem implements ITmfStateSystemBuilder {
      */
     public StateSystem(@NonNull String ssid, @NonNull IStateHistoryBackend backend) {
         this.ssid = ssid;
-        this.backend = backend;
-        this.transState = new TransientState(backend);
+        fBackend = backend;
+        fTransientState = new TransientState(backend);
         this.attributeTree = new AttributeTree(this);
     }
 
@@ -93,15 +95,15 @@ public class StateSystem implements ITmfStateSystemBuilder {
     public StateSystem(@NonNull String ssid, @NonNull IStateHistoryBackend backend, boolean newFile)
             throws IOException {
         this.ssid = ssid;
-        this.backend = backend;
-        this.transState = new TransientState(backend);
+        fBackend = backend;
+        fTransientState = new TransientState(backend);
 
         if (newFile) {
             attributeTree = new AttributeTree(this);
         } else {
             /* We're opening an existing file */
             this.attributeTree = new AttributeTree(this, backend.supplyAttributeTreeReader());
-            transState.setInactive();
+            getTransientState().setInactive();
             finishedLatch.countDown(); /* The history is already built */
         }
     }
@@ -139,16 +141,16 @@ public class StateSystem implements ITmfStateSystemBuilder {
     @Override
     public synchronized void dispose() {
         isDisposed = true;
-        if (transState.isActive()) {
-            transState.setInactive();
+        if (getTransientState().isActive()) {
+            getTransientState().setInactive();
             buildCancelled = true;
         }
-        backend.dispose();
+        getBackend().dispose();
     }
 
-    //--------------------------------------------------------------------------
-    //        General methods related to the attribute tree
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // General methods related to the attribute tree
+    // --------------------------------------------------------------------------
 
     /**
      * Get the attribute tree associated with this state system. This should be
@@ -167,7 +169,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
      * the attribute count in the transient state in sync.
      */
     public void addEmptyAttribute() {
-        transState.addEmptyEntry();
+        getTransientState().addEmptyEntry();
     }
 
     @Override
@@ -185,18 +187,18 @@ public class StateSystem implements ITmfStateSystemBuilder {
         return getAttributeTree().getFullAttributeName(attributeQuark);
     }
 
-    //--------------------------------------------------------------------------
-    //        Methods related to the storage backend
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // Methods related to the storage backend
+    // --------------------------------------------------------------------------
 
     @Override
     public long getStartTime() {
-        return backend.getStartTime();
+        return getBackend().getStartTime();
     }
 
     @Override
     public long getCurrentEndTime() {
-        return backend.getEndTime();
+        return getBackend().getEndTime();
     }
 
     @Override
@@ -205,18 +207,18 @@ public class StateSystem implements ITmfStateSystemBuilder {
         long attributeTreeFilePos;
         long realEndTime = endTime;
 
-        if (realEndTime < backend.getEndTime()) {
+        if (realEndTime < getBackend().getEndTime()) {
             /*
              * This can happen (empty nodes pushing the border further, etc.)
              * but shouldn't be too big of a deal.
              */
-            realEndTime = backend.getEndTime();
+            realEndTime = getBackend().getEndTime();
         }
-        transState.closeTransientState(realEndTime);
-        backend.finishedBuilding(realEndTime);
+        getTransientState().closeTransientState(realEndTime);
+        getBackend().finishedBuilding(realEndTime);
 
-        attributeTreeFile = backend.supplyAttributeTreeWriterFile();
-        attributeTreeFilePos = backend.supplyAttributeTreeWriterFilePosition();
+        attributeTreeFile = getBackend().supplyAttributeTreeWriterFile();
+        attributeTreeFilePos = getBackend().supplyAttributeTreeWriterFilePosition();
         if (attributeTreeFile != null) {
             /*
              * If null was returned, we simply won't save the attribute tree,
@@ -227,9 +229,49 @@ public class StateSystem implements ITmfStateSystemBuilder {
         finishedLatch.countDown(); /* Mark the history as finished building */
     }
 
-    //--------------------------------------------------------------------------
-    //        Quark-retrieving methods
-    //--------------------------------------------------------------------------
+    /**
+     * Gets the backend
+     *
+     * @return the backend
+     */
+    @NonNull
+    protected IStateHistoryBackend getBackend() {
+        return fBackend;
+    }
+
+    /**
+     * Sets the state system backend
+     *
+     * @param backend
+     *            the backend
+     */
+    protected void setBackend(@NonNull IStateHistoryBackend backend) {
+        fBackend = backend;
+    }
+
+    /**
+     * Get the transient state
+     *
+     * @return the transient state
+     */
+    @NonNull
+    protected TransientState getTransientState() {
+        return fTransientState;
+    }
+
+    /**
+     * Sets the transient state
+     *
+     * @param transientState
+     *            the transient state to set
+     */
+    protected void setTransientState(@NonNull TransientState transientState) {
+        fTransientState = transientState;
+    }
+
+    // --------------------------------------------------------------------------
+    // Quark-retrieving methods
+    // --------------------------------------------------------------------------
 
     @Override
     public int getQuarkAbsolute(String... attribute)
@@ -362,9 +404,9 @@ public class StateSystem implements ITmfStateSystemBuilder {
         return quarks;
     }
 
-    //--------------------------------------------------------------------------
-    //        Methods related to insertions in the history
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // Methods related to insertions in the history
+    // --------------------------------------------------------------------------
 
     @Override
     public void modifyAttribute(long t, ITmfStateValue value, int attributeQuark)
@@ -377,7 +419,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
              */
             throw new IllegalArgumentException();
         }
-        transState.processStateChange(t, value, attributeQuark);
+        getTransientState().processStateChange(t, value, attributeQuark);
     }
 
     @Override
@@ -400,7 +442,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
             StateValueTypeException {
         int stackDepth;
         int subAttributeQuark;
-        ITmfStateValue previousSV = transState.getOngoingStateValue(attributeQuark);
+        ITmfStateValue previousSV = getTransientState().getOngoingStateValue(attributeQuark);
 
         if (previousSV.isNull()) {
             /*
@@ -506,7 +548,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
         }
         /* Nullify ourselves */
         try {
-            transState.processStateChange(t, TmfStateValue.nullValue(), attributeQuark);
+            getTransientState().processStateChange(t, TmfStateValue.nullValue(), attributeQuark);
         } catch (StateValueTypeException e) {
             /*
              * Will not happen since we're inserting null values only, but poor
@@ -516,26 +558,26 @@ public class StateSystem implements ITmfStateSystemBuilder {
         }
     }
 
-    //--------------------------------------------------------------------------
-    //        "Current" query/update methods
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // "Current" query/update methods
+    // --------------------------------------------------------------------------
 
     @Override
     public ITmfStateValue queryOngoingState(int attributeQuark)
             throws AttributeNotFoundException {
-        return transState.getOngoingStateValue(attributeQuark);
+        return getTransientState().getOngoingStateValue(attributeQuark);
     }
 
     @Override
     public long getOngoingStartTime(int attribute)
             throws AttributeNotFoundException {
-        return transState.getOngoingStartTime(attribute);
+        return getTransientState().getOngoingStartTime(attribute);
     }
 
     @Override
     public void updateOngoingState(ITmfStateValue newValue, int attributeQuark)
             throws AttributeNotFoundException {
-        transState.changeOngoingStateValue(attributeQuark, newValue);
+        getTransientState().changeOngoingStateValue(attributeQuark, newValue);
     }
 
     /**
@@ -547,12 +589,12 @@ public class StateSystem implements ITmfStateSystemBuilder {
      *            The new List of state values to use as ongoing state info
      */
     protected void replaceOngoingState(@NonNull List<ITmfStateInterval> newStateIntervals) {
-        transState.replaceOngoingState(newStateIntervals);
+        getTransientState().replaceOngoingState(newStateIntervals);
     }
 
-    //--------------------------------------------------------------------------
-    //        Regular query methods (sent to the back-end)
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // Regular query methods (sent to the back-end)
+    // --------------------------------------------------------------------------
 
     @Override
     public synchronized List<ITmfStateInterval> queryFullState(long t)
@@ -573,12 +615,12 @@ public class StateSystem implements ITmfStateSystemBuilder {
          * If we are currently building the history, also query the "ongoing"
          * states for stuff that might not yet be written to the history.
          */
-        if (transState.isActive()) {
-            transState.doQuery(stateInfo, t);
+        if (getTransientState().isActive()) {
+            getTransientState().doQuery(stateInfo, t);
         }
 
         /* Query the storage backend */
-        backend.doQuery(stateInfo, t);
+        getBackend().doQuery(stateInfo, t);
 
         /*
          * We should have previously inserted an interval for every attribute.
@@ -599,13 +641,13 @@ public class StateSystem implements ITmfStateSystemBuilder {
             throw new StateSystemDisposedException();
         }
 
-        ITmfStateInterval ret = transState.getIntervalAt(t, attributeQuark);
+        ITmfStateInterval ret = getTransientState().getIntervalAt(t, attributeQuark);
         if (ret == null) {
             /*
              * The transient state did not have the information, let's look into
              * the backend next.
              */
-            ret = backend.doSingularQuery(t, attributeQuark);
+            ret = getBackend().doSingularQuery(t, attributeQuark);
         }
 
         if (ret == null) {
@@ -618,9 +660,9 @@ public class StateSystem implements ITmfStateSystemBuilder {
         return ret;
     }
 
-    //--------------------------------------------------------------------------
-    //        Debug methods
-    //--------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
+    // Debug methods
+    // --------------------------------------------------------------------------
 
     static void logMissingInterval(int attribute, long timestamp) {
         Activator.getDefault().logInfo("No data found in history for attribute " + //$NON-NLS-1$
@@ -636,8 +678,8 @@ public class StateSystem implements ITmfStateSystemBuilder {
      */
     public void debugPrint(@NonNull PrintWriter writer) {
         getAttributeTree().debugPrint(writer);
-        transState.debugPrint(writer);
-        backend.debugPrint(writer);
+        getTransientState().debugPrint(writer);
+        getBackend().debugPrint(writer);
     }
 
 }
