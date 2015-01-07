@@ -16,9 +16,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.statesystem.core.AttributeTree;
 import org.eclipse.tracecompass.internal.statesystem.core.StateSystem;
+import org.eclipse.tracecompass.internal.statesystem.core.TransientState;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.backend.IStateHistoryBackend;
+import org.eclipse.tracecompass.statesystem.core.backend.InMemoryBackend;
 import org.eclipse.tracecompass.statesystem.core.backend.NullBackend;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -32,7 +36,8 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
  *
  * @author Alexandre Montplaisir
  */
-@SuppressWarnings("restriction") /* We're using AttributeTree directly */
+@SuppressWarnings("restriction")
+/* We're using AttributeTree directly */
 public class PartialStateSystem extends StateSystem {
 
     private static final String ERR_MSG = "Partial state system should not modify the attribute tree!"; //$NON-NLS-1$
@@ -46,8 +51,14 @@ public class PartialStateSystem extends StateSystem {
      */
     private StateSystem realStateSystem = null;
 
+    private @NonNull IStateHistoryBackend fBackend;
+
+    private @NonNull TransientState fTransientState;
+
     /**
      * Constructor
+     *
+     * @param backend the backend of the state system
      */
     public PartialStateSystem() {
         /*
@@ -55,6 +66,8 @@ public class PartialStateSystem extends StateSystem {
          * "ongoing" values, so no need to save the changes that are inserted.
          */
         super("partial", new NullBackend()); //$NON-NLS-1$
+        fBackend = super.getBackend();
+        fTransientState = new TransientState(fBackend);
     }
 
     /**
@@ -64,6 +77,8 @@ public class PartialStateSystem extends StateSystem {
      *            The real state system
      */
     public void assignUpstream(StateSystem ss) {
+        setBackend(new InMemoryBackend(ss.getStartTime()));
+        setTransientState(new TransientState(getBackend()));
         realStateSystem = ss;
         ssAssignedLatch.countDown();
     }
@@ -122,8 +137,8 @@ public class PartialStateSystem extends StateSystem {
     }
 
     /*
-     * Override these methods to make sure we don't try to overwrite the
-     * "real" upstream attribute tree.
+     * Override these methods to make sure we don't try to overwrite the "real"
+     * upstream attribute tree.
      */
 
     @Override
@@ -157,6 +172,51 @@ public class PartialStateSystem extends StateSystem {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters, Setters and Predicates
+    // -------------------------------------------------------------------------
+    /**
+     * Gets the backend
+     *
+     * @return the backend
+     */
+    @Override
+    @NonNull
+    protected IStateHistoryBackend getBackend() {
+        return fBackend;
+    }
+
+    /**
+     * Sets the state system backend
+     *
+     * @param backend
+     *            the backend
+     */
+    protected void setBackend(@NonNull IStateHistoryBackend backend) {
+        fBackend = backend;
+    }
+
+    /**
+     * Get the transient state
+     *
+     * @return the transient state
+     */
+    @Override
+    @NonNull
+    protected TransientState getTransientState() {
+        return fTransientState;
+    }
+
+    /**
+     * Sets the transient state
+     *
+     * @param transientState
+     *            the transient state to set
+     */
+    protected void setTransientState(@NonNull TransientState transientState) {
+        fTransientState = transientState;
     }
 
 }
