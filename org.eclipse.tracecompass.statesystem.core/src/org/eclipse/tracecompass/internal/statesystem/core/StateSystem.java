@@ -52,8 +52,10 @@ public class StateSystem implements ITmfStateSystemBuilder {
 
     /* References to the inner structures */
     private final AttributeTree attributeTree;
-    private final TransientState transState;
-    private final IStateHistoryBackend backend;
+    /** transient state */
+    protected TransientState transState;
+    /** backend*/
+    protected IStateHistoryBackend backend;
 
     /* Latch tracking if the state history is done building or not */
     private final CountDownLatch finishedLatch = new CountDownLatch(1);
@@ -143,7 +145,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
             transState.setInactive();
             buildCancelled = true;
         }
-        backend.dispose();
+        getBackend().dispose();
     }
 
     //--------------------------------------------------------------------------
@@ -191,12 +193,12 @@ public class StateSystem implements ITmfStateSystemBuilder {
 
     @Override
     public long getStartTime() {
-        return backend.getStartTime();
+        return getBackend().getStartTime();
     }
 
     @Override
     public long getCurrentEndTime() {
-        return backend.getEndTime();
+        return getBackend().getEndTime();
     }
 
     @Override
@@ -205,18 +207,18 @@ public class StateSystem implements ITmfStateSystemBuilder {
         long attributeTreeFilePos;
         long realEndTime = endTime;
 
-        if (realEndTime < backend.getEndTime()) {
+        if (realEndTime < getBackend().getEndTime()) {
             /*
              * This can happen (empty nodes pushing the border further, etc.)
              * but shouldn't be too big of a deal.
              */
-            realEndTime = backend.getEndTime();
+            realEndTime = getBackend().getEndTime();
         }
         transState.closeTransientState(realEndTime);
-        backend.finishedBuilding(realEndTime);
+        getBackend().finishedBuilding(realEndTime);
 
-        attributeTreeFile = backend.supplyAttributeTreeWriterFile();
-        attributeTreeFilePos = backend.supplyAttributeTreeWriterFilePosition();
+        attributeTreeFile = getBackend().supplyAttributeTreeWriterFile();
+        attributeTreeFilePos = getBackend().supplyAttributeTreeWriterFilePosition();
         if (attributeTreeFile != null) {
             /*
              * If null was returned, we simply won't save the attribute tree,
@@ -578,7 +580,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
         }
 
         /* Query the storage backend */
-        backend.doQuery(stateInfo, t);
+        getBackend().doQuery(stateInfo, t);
 
         /*
          * We should have previously inserted an interval for every attribute.
@@ -605,7 +607,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
              * The transient state did not have the information, let's look into
              * the backend next.
              */
-            ret = backend.doSingularQuery(t, attributeQuark);
+            ret = getBackend().doSingularQuery(t, attributeQuark);
         }
 
         if (ret == null) {
@@ -637,7 +639,14 @@ public class StateSystem implements ITmfStateSystemBuilder {
     public void debugPrint(@NonNull PrintWriter writer) {
         getAttributeTree().debugPrint(writer);
         transState.debugPrint(writer);
-        backend.debugPrint(writer);
+        getBackend().debugPrint(writer);
+    }
+
+    /**
+     * @return the backend
+     */
+    public IStateHistoryBackend getBackend() {
+        return backend;
     }
 
 }

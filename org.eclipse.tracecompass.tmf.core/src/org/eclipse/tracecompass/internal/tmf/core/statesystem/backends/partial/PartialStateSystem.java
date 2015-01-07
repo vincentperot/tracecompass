@@ -18,7 +18,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.tracecompass.internal.statesystem.core.AttributeTree;
 import org.eclipse.tracecompass.internal.statesystem.core.StateSystem;
+import org.eclipse.tracecompass.internal.statesystem.core.TransientState;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.backend.InMemoryBackend;
 import org.eclipse.tracecompass.statesystem.core.backend.NullBackend;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -32,7 +34,8 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
  *
  * @author Alexandre Montplaisir
  */
-@SuppressWarnings("restriction") /* We're using AttributeTree directly */
+@SuppressWarnings("restriction")
+/* We're using AttributeTree directly */
 public class PartialStateSystem extends StateSystem {
 
     private static final String ERR_MSG = "Partial state system should not modify the attribute tree!"; //$NON-NLS-1$
@@ -64,6 +67,8 @@ public class PartialStateSystem extends StateSystem {
      *            The real state system
      */
     public void assignUpstream(StateSystem ss) {
+        backend = new InMemoryBackend(ss.getStartTime());
+        transState = new TransientState(this.getBackend());
         realStateSystem = ss;
         ssAssignedLatch.countDown();
     }
@@ -122,8 +127,8 @@ public class PartialStateSystem extends StateSystem {
     }
 
     /*
-     * Override these methods to make sure we don't try to overwrite the
-     * "real" upstream attribute tree.
+     * Override these methods to make sure we don't try to overwrite the "real"
+     * upstream attribute tree.
      */
 
     @Override
@@ -134,11 +139,7 @@ public class PartialStateSystem extends StateSystem {
     @Override
     public int getQuarkAbsoluteAndAdd(String... attribute) {
         waitUntilReady();
-        try {
-            return realStateSystem.getQuarkAbsolute(attribute);
-        } catch (AttributeNotFoundException e) {
-            throw new RuntimeException(ERR_MSG);
-        }
+        return realStateSystem.getQuarkAbsoluteAndAdd(attribute);
     }
 
     @Override
