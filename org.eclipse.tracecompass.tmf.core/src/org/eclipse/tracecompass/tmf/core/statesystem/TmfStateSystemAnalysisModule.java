@@ -350,8 +350,6 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
         /* Size of the blocking queue to use when building a state history */
         final int QUEUE_SIZE = 10000;
 
-        final long granularity = 50000;
-
         /* 2 */
         IStateHistoryBackend realBackend = null;
         try {
@@ -372,7 +370,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
 
         /* 3 */
         IStateHistoryBackend partialBackend =
-                new PartialHistoryBackend(partialProvider, pss, realBackend, granularity);
+                new PartialHistoryBackend(partialProvider, pss, realBackend);
 
         /* 4 */
         @SuppressWarnings("restriction")
