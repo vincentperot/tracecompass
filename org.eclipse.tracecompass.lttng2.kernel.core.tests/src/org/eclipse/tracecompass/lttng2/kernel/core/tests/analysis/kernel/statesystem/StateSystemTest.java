@@ -162,8 +162,10 @@ public abstract class StateSystemTest {
 
         try {
             int quark = ss.getQuarkAbsolute(Attributes.RESOURCES, Attributes.IRQS, "1");
-            long ts1 = ss.getStartTime(); /* start of the trace */
-            long ts2 = startTime + 20L * NANOSECS_PER_SEC; /* invalid, but ignored */
+            /* start of the trace */
+            long ts1 = ss.getStartTime();
+            /* invalid, but ignored */
+            long ts2 = startTime + 20L * NANOSECS_PER_SEC;
 
             intervals = StateSystemUtils.queryHistoryRange(ss, quark, ts1, ts2);
 
@@ -382,14 +384,21 @@ public abstract class StateSystemTest {
     public void testFullQueryThorough() {
         try {
             List<ITmfStateInterval> state = fixture.queryFullState(interestingTimestamp1);
-            assertEquals(TestValues.size, state.size());
-
+            int stateQuark = getPartialQuark();
+            assertEquals(TestValues.size + (stateQuark == -1 ? 0 : 1), state.size());
+            boolean passedCheckpoint = false;
             for (int i = 0; i < state.size(); i++) {
                 /* Test each component of the intervals */
-                assertEquals(getStartTimes(i), state.get(i).getStartTime());
-                assertEquals(getEndTimes(i), state.get(i).getEndTime());
-                assertEquals(i, state.get(i).getAttribute());
-                assertEquals(getStateValues(i), state.get(i).getStateValue());
+                if (i == stateQuark) {
+                    passedCheckpoint = true;
+                    i++;
+                }
+                int pos = i - (passedCheckpoint ? 1 : 0);
+
+                assertEquals("quark " + i, getStartTimes(pos), state.get(i).getStartTime());
+                assertEquals("quark " + i, getEndTimes(pos), state.get(i).getEndTime());
+                assertEquals("quark " + i, i, state.get(i).getAttribute());
+                assertEquals("quark " + i, getStateValues(pos), state.get(i).getStateValue());
             }
 
         } catch (StateSystemDisposedException e) {
@@ -397,11 +406,22 @@ public abstract class StateSystemTest {
         }
     }
 
+    private static int getPartialQuark() {
+        int stateQuark = -1;
+        try {
+            stateQuark = fixture.getQuarkAbsolute("checkpoint");
+        } catch (AttributeNotFoundException e) {
+            // do nothing
+        }
+        return stateQuark;
+    }
+
     @Test
     public void testFirstIntervalIsConsidered() {
         try {
+            int partialOffset = (getPartialQuark() != -1) ? 1 : 0;
             List<ITmfStateInterval> list = fixture.queryFullState(1331668248014135800L);
-            ITmfStateInterval interval = list.get(233);
+            ITmfStateInterval interval = list.get(233 + partialOffset);
             assertEquals(1331668247516664825L, interval.getStartTime());
 
             int valueInt = interval.getStateValue().unboxInt();
@@ -415,8 +435,8 @@ public abstract class StateSystemTest {
     @Test
     public void testParentAttribute() {
         String[] path = { "CPUs/0/Current_thread",
-                          "CPUs/0",
-                          "CPUs" };
+                "CPUs/0",
+                "CPUs" };
         try {
             int q = fixture.getQuarkAbsolute(Attributes.CPUS, "0", Attributes.CURRENT_THREAD);
             for (int i = 0; i < path.length; i++) {

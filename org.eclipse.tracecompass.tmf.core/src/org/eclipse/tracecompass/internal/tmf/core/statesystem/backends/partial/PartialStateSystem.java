@@ -18,7 +18,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.tracecompass.internal.statesystem.core.AttributeTree;
 import org.eclipse.tracecompass.internal.statesystem.core.StateSystem;
+import org.eclipse.tracecompass.internal.statesystem.core.TransientState;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.backend.InMemoryBackend;
 import org.eclipse.tracecompass.statesystem.core.backend.NullBackend;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -64,6 +66,8 @@ public class PartialStateSystem extends StateSystem {
      *            The real state system
      */
     public void assignUpstream(StateSystem ss) {
+        setBackend(new InMemoryBackend(ss.getStartTime()));
+        setTransientState(new TransientState(getBackend()));
         realStateSystem = ss;
         ssAssignedLatch.countDown();
     }
@@ -122,8 +126,8 @@ public class PartialStateSystem extends StateSystem {
     }
 
     /*
-     * Override these methods to make sure we don't try to overwrite the
-     * "real" upstream attribute tree.
+     * Override these methods to make sure we don't try to overwrite the "real"
+     * upstream attribute tree.
      */
 
     @Override
@@ -139,6 +143,11 @@ public class PartialStateSystem extends StateSystem {
         } catch (AttributeNotFoundException e) {
             throw new RuntimeException(ERR_MSG);
         }
+    }
+
+    int createCheckpoint(String... attribute){
+        waitUntilReady();
+        return realStateSystem.getQuarkAbsoluteAndAdd(attribute);
     }
 
     @Override
