@@ -16,9 +16,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.statesystem.core.AttributeTree;
 import org.eclipse.tracecompass.internal.statesystem.core.StateSystem;
+import org.eclipse.tracecompass.internal.statesystem.core.TransientState;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.backend.IStateHistoryBackend;
+import org.eclipse.tracecompass.statesystem.core.backend.InMemoryBackend;
 import org.eclipse.tracecompass.statesystem.core.backend.NullBackend;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -46,6 +50,10 @@ public class PartialStateSystem extends StateSystem {
      */
     private StateSystem realStateSystem = null;
 
+    private @NonNull IStateHistoryBackend fPartialBackend;
+
+    private @NonNull TransientState fPartialTransientState;
+
     /**
      * Constructor
      */
@@ -55,6 +63,8 @@ public class PartialStateSystem extends StateSystem {
          * "ongoing" values, so no need to save the changes that are inserted.
          */
         super("partial", new NullBackend()); //$NON-NLS-1$
+        fPartialBackend = super.getBackend();
+        fPartialTransientState = new TransientState(fPartialBackend);
     }
 
     /**
@@ -64,6 +74,8 @@ public class PartialStateSystem extends StateSystem {
      *            The real state system
      */
     public void assignUpstream(StateSystem ss) {
+        fPartialBackend = new InMemoryBackend(ss.getStartTime());
+        fPartialTransientState = new TransientState(getBackend());
         realStateSystem = ss;
         ssAssignedLatch.countDown();
     }
@@ -122,8 +134,8 @@ public class PartialStateSystem extends StateSystem {
     }
 
     /*
-     * Override these methods to make sure we don't try to overwrite the
-     * "real" upstream attribute tree.
+     * Override these methods to make sure we don't try to overwrite the "real"
+     * upstream attribute tree.
      */
 
     @Override
@@ -159,4 +171,17 @@ public class PartialStateSystem extends StateSystem {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // Getters, Setters and Predicates
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected @NonNull IStateHistoryBackend getBackend() {
+        return fPartialBackend;
+    }
+
+    @Override
+    protected @NonNull TransientState getTransientState() {
+        return fPartialTransientState;
+    }
 }
