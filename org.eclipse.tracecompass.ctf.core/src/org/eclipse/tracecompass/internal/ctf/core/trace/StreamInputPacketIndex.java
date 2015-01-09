@@ -74,6 +74,22 @@ public class StreamInputPacketIndex {
     // ------------------------------------------------------------------------
 
     /**
+     * Adds a collection of entries to the index
+     *
+     * @param preParsedIndex
+     *            the pre-parsed index file
+     *
+     * @throws CTFReaderException
+     *             If there was a problem reading the entry
+     */
+    public void addAllEntries(Iterable<StreamInputPacketIndexEntry> preParsedIndex)
+            throws CTFReaderException {
+        for (StreamInputPacketIndexEntry sipie : preParsedIndex) {
+            addEntry(sipie);
+        }
+    }
+
+    /**
      * Adds an entry to the index.
      *
      * @param entry
@@ -90,7 +106,10 @@ public class StreamInputPacketIndex {
             throw new CTFReaderException("Packet begin timestamp is after end timestamp"); //$NON-NLS-1$
         }
 
-        /* Validate entries are inserted in monotonic increasing timestamp order. */
+        /*
+         * Validate entries are inserted in monotonic increasing timestamp
+         * order.
+         */
         if (!this.entries.isEmpty()) {
             if (entry.getTimestampBegin() < this.entries.lastElement()
                     .getTimestampBegin()) {
@@ -101,8 +120,9 @@ public class StreamInputPacketIndex {
     }
 
     /**
-     * Returns the first PacketIndexEntry that could include the timestamp,
-     * that is the last packet with a begin timestamp smaller than the given timestamp.
+     * Returns the first PacketIndexEntry that could include the timestamp, that
+     * is the last packet with a begin timestamp smaller than the given
+     * timestamp.
      *
      * @param timestamp
      *            The timestamp to look for.
@@ -148,14 +168,15 @@ public class StreamInputPacketIndex {
 
             if (timestamp <= guessEntry.getTimestampEnd()) {
                 /*
-                 * If the timestamp is lower or equal to the end of the guess packet,
-                 * then the guess packet becomes the new inclusive max.
+                 * If the timestamp is lower or equal to the end of the guess
+                 * packet, then the guess packet becomes the new inclusive max.
                  */
                 max = guessI;
             } else {
                 /*
-                 * If the timestamp is greater than the end of the guess packet, then
-                 * the new inclusive min is the packet after the guess packet.
+                 * If the timestamp is greater than the end of the guess packet,
+                 * then the new inclusive min is the packet after the guess
+                 * packet.
                  */
                 min = guessI + 1;
             }
