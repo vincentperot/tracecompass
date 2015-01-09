@@ -110,7 +110,6 @@ public class StreamInputPacketIndex {
         if (!fEntries.isEmpty() && (entry.getTimestampBegin() < lastElement().getTimestampBegin())) {
             throw new CTFReaderException("Packets begin timestamp decreasing"); //$NON-NLS-1$
         }
-
         fEntries.add(entry);
         return true;
     }
