@@ -12,6 +12,8 @@
 
 package org.eclipse.tracecompass.internal.ctf.core.trace;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,6 +87,47 @@ public class StreamInputPacketIndexEntry {
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
+
+    /**
+     * Streamed stream input packet index entry constructor
+     *
+     * @param dataIn
+     *            the datastream
+     * @throws IOException
+     *             an {@link IOException}, filenotfound or such
+     */
+    public StreamInputPacketIndexEntry(DataInputStream dataIn) throws IOException {
+        this(dataIn, ""); //$NON-NLS-1$
+    }
+
+    /**
+     * Streamed stream input packet index entry constructor
+     *
+     * @param dataIn
+     *            the datastream
+     * @param target
+     *            the target string
+     * @throws IOException
+     *             an {@link IOException}, filenotfound or such
+     */
+    public StreamInputPacketIndexEntry(DataInputStream dataIn, String target) throws IOException {
+        fOffsetBytes = dataIn.readLong();
+        fOffsetBits = fOffsetBytes * Byte.SIZE;
+        fPacketSizeBits = dataIn.readLong();
+        fContentSizeBits = dataIn.readLong();
+        fTimestampBegin = dataIn.readLong();
+        fTimestampEnd = dataIn.readLong();
+        fLostEvents = dataIn.readLong();
+        fAttributes.put("stream_id", dataIn.readLong()); //$NON-NLS-1$
+        fTarget = target;
+        long parsedTarget = -1;
+        try{
+            parsedTarget = Long.parseLong(target);
+        }catch(NumberFormatException e){
+            // swallow it
+        }
+        fTargetID = parsedTarget;
+    }
 
     /**
      * Constructs an index entry.
