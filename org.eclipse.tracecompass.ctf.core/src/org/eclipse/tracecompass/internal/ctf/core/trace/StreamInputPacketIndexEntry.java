@@ -12,6 +12,8 @@
 
 package org.eclipse.tracecompass.internal.ctf.core.trace;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,7 +66,7 @@ public class StreamInputPacketIndexEntry {
     /**
      * Which target is being traced
      */
-    private String fTarget ;
+    private String fTarget;
     private long fTargetID;
 
     /**
@@ -72,10 +74,27 @@ public class StreamInputPacketIndexEntry {
      */
     private final Map<String, Object> fAttributes = new HashMap<>();
 
-
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
+
+    /**
+     * Streamed stream input packet index entry ctor
+     *
+     * @param dataIn
+     *            the datastream
+     * @throws IOException
+     *             an {@link IOException}, filenotfound or such
+     */
+    public StreamInputPacketIndexEntry(DataInputStream dataIn) throws IOException {
+        fOffsetBytes = dataIn.readLong();
+        fPacketSizeBits = dataIn.readLong();
+        fContentSizeBits = dataIn.readLong();
+        fTimestampBegin = dataIn.readLong();
+        fTimestampEnd = dataIn.readLong();
+        fLostEvents = dataIn.readLong();
+        fTargetID = dataIn.readLong();
+    }
 
     /**
      * Constructs an index entry.
@@ -205,7 +224,8 @@ public class StreamInputPacketIndexEntry {
     }
 
     /**
-     * @param lostEvents the lostEvents to set
+     * @param lostEvents
+     *            the lostEvents to set
      */
     public void setLostEvents(long lostEvents) {
         fLostEvents = lostEvents;
@@ -230,7 +250,7 @@ public class StreamInputPacketIndexEntry {
      *            The name of the attribute
      * @return The value that was stored, or null if it wasn't found
      */
-    public Object lookupAttribute(String field){
+    public Object lookupAttribute(String field) {
         return fAttributes.get(field);
     }
 
@@ -255,7 +275,7 @@ public class StreamInputPacketIndexEntry {
     /**
      * @return The ID of the target
      */
-    public long getTargetId(){
+    public long getTargetId() {
         return fTargetID;
     }
 }

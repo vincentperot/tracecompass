@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -48,6 +49,11 @@ import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
 import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFIndexFile;
+import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * A CTF trace on the file system.
@@ -129,6 +135,7 @@ public class CTFTrace implements IDefinitionScope {
 
     /** Handlers for the metadata files */
     private static final FileFilter METADATA_FILE_FILTER = new MetadataFileFilter();
+    private static final FileFilter INDEX_FILE_FILTER = new IndexFileFilter();
     private static final Comparator<File> METADATA_COMPARATOR = new MetadataComparator();
 
     /** Callsite helpers */
@@ -200,9 +207,22 @@ public class CTFTrace implements IDefinitionScope {
         File[] files = path.listFiles(METADATA_FILE_FILTER);
         Arrays.sort(files, METADATA_COMPARATOR);
 
+        File[] indexDir = path.listFiles(INDEX_FILE_FILTER);
+        Multimap<File, StreamInputPacketIndexEntry> entries = HashMultimap.<File, StreamInputPacketIndexEntry> create();
+
+        for (File index : indexDir) {
+            File[] indexFiles = index.listFiles();
+            for (File indexFile : indexFiles) {
+                CTFIndexFile cif = new CTFIndexFile(indexFile);
+                for (StreamInputPacketIndexEntry sipie : cif.getStreamInputPacketIndexEntries()) {
+                    entries.put(index, sipie);
+                }
+            }
+        }
+
         /* Try to open each file */
         for (File streamFile : files) {
-            openStreamInput(streamFile);
+            openStreamInput(streamFile, entries.get(streamFile));
         }
 
         /* Create their index */
@@ -491,12 +511,11 @@ public class CTFTrace implements IDefinitionScope {
      * @param streamFile
      *            A trace file in the trace directory.
      * @param index
-     *            Which index in the class' streamFileChannel array this file
-     *            must use
+     *            pre-parsed indexes
      * @throws CTFReaderException
      *             if there is a file error
      */
-    private CTFStream openStreamInput(File streamFile) throws CTFReaderException {
+    private CTFStream openStreamInput(File streamFile, Collection<StreamInputPacketIndexEntry> index) throws CTFReaderException {
         ByteBuffer byteBuffer;
         BitBuffer streamBitBuffer;
         CTFStream stream;
@@ -554,6 +573,15 @@ public class CTFTrace implements IDefinitionScope {
          * stream.
          */
         stream.addInput(new CTFStreamInput(stream, streamFile));
+
+        /*
+         * add indices
+         */
+        if (index != null) {
+            for (CTFStreamInput si : stream.getStreamInputs()) {
+                si.getIndex().addAllEntries(index);
+            }
+        }
         return stream;
     }
 
@@ -619,7 +647,13 @@ public class CTFTrace implements IDefinitionScope {
      * @since 3.0
      */
     public void addStreamFile(File streamFile) throws CTFReaderException {
-        openStreamInput(streamFile);
+        File indexFile = new File(streamFile.getParentFile(), "index" + File.separator + streamFile.getName() + ".IDX");
+        Set<StreamInputPacketIndexEntry> sipies = new HashSet<>();
+        if (indexFile.exists()) {
+            CTFIndexFile ctfIndex = new CTFIndexFile(indexFile);
+            sipies.addAll(ctfIndex.getStreamInputPacketIndexEntries());
+        }
+        openStreamInput(streamFile, sipies);
     }
 
     /**
@@ -991,4 +1025,13 @@ class MetadataComparator implements Comparator<File>, Serializable {
     public int compare(File o1, File o2) {
         return o1.getName().compareTo(o2.getName());
     }
+}
+
+class IndexFileFilter implements FileFilter {
+
+    @Override
+    public boolean accept(File pathname) {
+        return (pathname.isDirectory() && pathname.getName().equals("index")); //$NON-NLS-1$
+    }
+
 }
