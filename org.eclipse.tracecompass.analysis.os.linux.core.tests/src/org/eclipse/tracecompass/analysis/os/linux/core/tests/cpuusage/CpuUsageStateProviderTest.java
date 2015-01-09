@@ -29,6 +29,7 @@ import org.eclipse.tracecompass.analysis.os.linux.core.cpuusage.KernelCpuUsageAn
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.Attributes;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelAnalysis;
 import org.eclipse.tracecompass.analysis.os.linux.core.tests.Activator;
+import org.eclipse.tracecompass.analysis.os.linux.core.tests.stubs.TmfXmlOsTraceStub;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
@@ -42,7 +43,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
-import org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStub;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +77,7 @@ public class CpuUsageStateProviderTest {
      */
     @Before
     public void setUp() {
-        fTrace = new TmfXmlTraceStub();
+        fTrace = new TmfXmlOsTraceStub();
         IPath filePath = Activator.getAbsoluteFilePath(CPU_USAGE_FILE);
         IStatus status = fTrace.validate(null, filePath.toOSString());
         if (!status.isOK()) {

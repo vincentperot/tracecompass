@@ -12,8 +12,6 @@
 
 package org.eclipse.tracecompass.analysis.os.linux.core.trace;
 
-import java.util.Collection;
-
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -52,7 +50,6 @@ public interface IKernelAnalysisEventLayout {
     String eventSoftIrqExit();
     String eventSoftIrqRaise();
     String eventSchedSwitch();
-    Collection<String> eventsSchedWakeup();
     String eventSchedProcessFork();
     String eventSchedProcessExit();
     String eventSchedProcessFree();

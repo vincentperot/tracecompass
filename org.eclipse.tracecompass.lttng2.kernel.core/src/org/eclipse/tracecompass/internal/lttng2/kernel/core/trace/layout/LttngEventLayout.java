@@ -12,14 +12,8 @@
 
 package org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
-import java.util.Collection;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * This file defines all the known event and field names for LTTng kernel
@@ -41,9 +35,6 @@ public class LttngEventLayout implements IKernelAnalysisEventLayout {
     private static final String SOFTIRQ_EXIT = "softirq_exit";
     private static final String SOFTIRQ_RAISE = "softirq_raise";
     private static final String SCHED_SWITCH = "sched_switch";
-
-    private static final Collection<String> SCHED_WAKEUP_EVENTS =
-            checkNotNull(ImmutableList.of("sched_wakeup", "sched_wakeup_new"));
 
     private static final String SCHED_PROCESS_FORK = "sched_process_fork";
     private static final String SCHED_PROCESS_EXIT = "sched_process_exit";
@@ -116,11 +107,6 @@ public class LttngEventLayout implements IKernelAnalysisEventLayout {
     @Override
     public String eventSchedSwitch() {
         return SCHED_SWITCH;
-    }
-
-    @Override
-    public Collection<String> eventsSchedWakeup() {
-        return SCHED_WAKEUP_EVENTS;
     }
 
     @Override

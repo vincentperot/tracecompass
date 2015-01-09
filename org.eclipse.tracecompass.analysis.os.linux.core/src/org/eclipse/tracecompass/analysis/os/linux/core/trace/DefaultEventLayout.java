@@ -12,13 +12,7 @@
 
 package org.eclipse.tracecompass.analysis.os.linux.core.trace;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
-import java.util.Collection;
-
 import org.eclipse.jdt.annotation.NonNull;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * A kernel event layout to be used by default. This can be useful for
@@ -38,9 +32,6 @@ public class DefaultEventLayout implements IKernelAnalysisEventLayout{
     private static final String SOFTIRQ_EXIT = "softirq_exit"; //$NON-NLS-1$
     private static final String SOFTIRQ_RAISE = "softirq_raise"; //$NON-NLS-1$
     private static final String SCHED_SWITCH = "sched_switch"; //$NON-NLS-1$
-
-    private static final Collection<String> SCHED_WAKEUP_EVENTS =
-            checkNotNull(ImmutableList.of("sched_wakeup", "sched_wakeup_new")); //$NON-NLS-1$ //$NON-NLS-2$
 
     private static final String SCHED_PROCESS_FORK = "sched_process_fork"; //$NON-NLS-1$
     private static final String SCHED_PROCESS_EXIT = "sched_process_exit"; //$NON-NLS-1$
@@ -107,11 +98,6 @@ public class DefaultEventLayout implements IKernelAnalysisEventLayout{
     @Override
     public String eventSchedSwitch() {
         return SCHED_SWITCH;
-    }
-
-    @Override
-    public Collection<String> eventsSchedWakeup() {
-        return SCHED_WAKEUP_EVENTS;
     }
 
     @Override

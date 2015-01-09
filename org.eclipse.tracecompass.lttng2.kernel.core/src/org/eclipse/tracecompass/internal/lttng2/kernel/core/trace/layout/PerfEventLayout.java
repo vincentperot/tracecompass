@@ -12,14 +12,8 @@
 
 package org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
-import java.util.Collection;
-
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Event and field definitions for perf traces in CTF format.
@@ -73,14 +67,6 @@ public class PerfEventLayout implements IKernelAnalysisEventLayout {
     @Override
     public String eventSchedSwitch() {
         return "sched:sched_switch"; //$NON-NLS-1$
-    }
-
-    private static final Collection<String> WAKEUP_EVENTS =
-            checkNotNull(ImmutableList.of("sched:sched_wakeup", "sched:sched_wakeup_new")); //$NON-NLS-1$ //$NON-NLS-2$
-
-    @Override
-    public Collection<String> eventsSchedWakeup() {
-        return WAKEUP_EVENTS;
     }
 
     @Override

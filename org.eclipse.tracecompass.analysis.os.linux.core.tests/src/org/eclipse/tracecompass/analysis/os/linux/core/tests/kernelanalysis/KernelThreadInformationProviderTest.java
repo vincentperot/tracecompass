@@ -32,6 +32,7 @@ import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelAnal
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelThreadInformationProvider;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.StateValues;
 import org.eclipse.tracecompass.analysis.os.linux.core.tests.Activator;
+import org.eclipse.tracecompass.analysis.os.linux.core.tests.stubs.TmfXmlOsTraceStub;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
@@ -43,7 +44,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
-import org.eclipse.tracecompass.tmf.tests.stubs.trace.xml.TmfXmlTraceStub;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class KernelThreadInformationProviderTest {
      */
     @Before
     public void setUp() {
-        fTrace = new TmfXmlTraceStub();
+        fTrace = new TmfXmlOsTraceStub();
         IPath filePath = Activator.getAbsoluteFilePath(LTTNG_KERNEL_FILE);
         IStatus status = fTrace.validate(null, filePath.toOSString());
         if (!status.isOK()) {

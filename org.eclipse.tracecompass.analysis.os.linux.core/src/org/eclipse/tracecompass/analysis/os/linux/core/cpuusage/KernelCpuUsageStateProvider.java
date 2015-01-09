@@ -15,10 +15,14 @@ package org.eclipse.tracecompass.analysis.os.linux.core.cpuusage;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.os.linux.core.concepts.ISchedKernelConceptVisitor;
+import org.eclipse.tracecompass.analysis.os.linux.core.concepts.ISchedKernelConcepts.ISchedSwitchConcept;
+import org.eclipse.tracecompass.analysis.os.linux.core.concepts.ISchedKernelConcepts.ISchedWakeupConcept;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.Attributes;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.Activator;
@@ -29,6 +33,8 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
+import org.eclipse.tracecompass.tmf.core.event.concept.IEventConcept;
+import org.eclipse.tracecompass.tmf.core.event.concept.TmfEventConceptManager;
 import org.eclipse.tracecompass.tmf.core.statesystem.AbstractTmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -47,7 +53,8 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  * @author François Rajotte
  * @since 3.0
  */
-public class KernelCpuUsageStateProvider extends AbstractTmfStateProvider {
+public class KernelCpuUsageStateProvider extends AbstractTmfStateProvider
+        implements ISchedKernelConceptVisitor {
 
     private static final int VERSION = 2;
 
@@ -89,79 +96,93 @@ public class KernelCpuUsageStateProvider extends AbstractTmfStateProvider {
         if (event == null) {
             return;
         }
-        final String eventName = event.getType().getName();
-
-        if (eventName.equals(fLayout.eventSchedSwitch())) {
-            Integer cpu = null;
-            Iterable<TmfCpuAspect> aspects = TmfTraceUtils.getEventAspectsOfClass(event.getTrace(), TmfCpuAspect.class);
-            for (TmfCpuAspect aspect : aspects) {
-                if (!aspect.resolve(event).equals(TmfCpuAspect.CPU_UNAVAILABLE)) {
-                    cpu = aspect.resolve(event);
-                    break;
-                }
-            }
-            if (cpu == null) {
-                /* We couldn't find any CPU information, ignore this event */
-                return;
-            }
-
-            /*
-             * Fields: string prev_comm, int32 prev_tid, int32 prev_prio, int64
-             * prev_state, string next_comm, int32 next_tid, int32 next_prio
-             */
-            ITmfEventField content = event.getContent();
-            long ts = event.getTimestamp().getValue();
-
-            Long prevTid = (Long) content.getField(fLayout.fieldPrevTid()).getValue();
-
-            try {
-                final ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
-
-                Integer currentCPUNode = ss.getQuarkRelativeAndAdd(getNodeCPUs(ss), cpu.toString());
-
-                /*
-                 * This quark contains the value of the cumulative time spent on
-                 * the source CPU by the currently running thread
-                 */
-                Integer cumulativeTimeQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, prevTid.toString());
-                Long startTime = fLastStartTimes.get(cpu);
-                /*
-                 * If start time is null, we haven't seen the start of the
-                 * process, so we assume beginning of the trace
-                 */
-                if (startTime == null) {
-                    startTime = fTraceStart;
-                }
-
-                /*
-                 * We add the time from startTime until now to the cumulative
-                 * time of the thread
-                 */
-                if (startTime != null) {
-                    ITmfStateValue value = ss.queryOngoingState(cumulativeTimeQuark);
-
-                    /*
-                     * Modify cumulative time for this CPU/TID combo: The total
-                     * time changes when the process is scheduled out. Nothing
-                     * happens when the process is scheduled in.
-                     */
-                    long prevCumulativeTime = Math.max(0, value.unboxLong());
-                    long newCumulativeTime = prevCumulativeTime + (ts - startTime);
-
-                    value = TmfStateValue.newValueLong(newCumulativeTime);
-                    ss.modifyAttribute(ts, value, cumulativeTimeQuark);
-                    fLastStartTimes.put(cpu, ts);
-                }
-            } catch (AttributeNotFoundException e) {
-                Activator.getDefault().logError("Attribute not found in LttngKernelCpuStateProvider", e); //$NON-NLS-1$
-            }
-
+        Collection<IEventConcept> conceptsFor = TmfEventConceptManager.getConceptsFor(event.getTrace(), event);
+        for (IEventConcept concept : conceptsFor) {
+            concept.accept(this, event);
         }
     }
 
     /* Shortcut for the "current CPU" attribute node */
     private static int getNodeCPUs(ITmfStateSystemBuilder ssb) {
         return ssb.getQuarkAbsoluteAndAdd(Attributes.CPUS);
+    }
+
+    @Override
+    public void visit(ISchedSwitchConcept concept, ITmfEvent event) {
+        Integer cpu = null;
+        Iterable<TmfCpuAspect> aspects = TmfTraceUtils.getEventAspectsOfClass(event.getTrace(), TmfCpuAspect.class);
+        for (TmfCpuAspect aspect : aspects) {
+            if (!aspect.resolve(event).equals(TmfCpuAspect.CPU_UNAVAILABLE)) {
+                cpu = aspect.resolve(event);
+                break;
+            }
+        }
+        if (cpu == null) {
+            /* We couldn't find any CPU information, ignore this event */
+            return;
+        }
+
+        /*
+         * Fields: string prev_comm, int32 prev_tid, int32 prev_prio, int64
+         * prev_state, string next_comm, int32 next_tid, int32 next_prio
+         */
+        ITmfEventField content = event.getContent();
+        long ts = event.getTimestamp().getValue();
+
+        Long prevTid = (Long) content.getField(fLayout.fieldPrevTid()).getValue();
+
+        try {
+            final ITmfStateSystemBuilder ss = checkNotNull(getStateSystemBuilder());
+
+            Integer currentCPUNode = ss.getQuarkRelativeAndAdd(getNodeCPUs(ss), cpu.toString());
+
+            /*
+             * This quark contains the value of the cumulative time spent on the
+             * source CPU by the currently running thread
+             */
+            Integer cumulativeTimeQuark = ss.getQuarkRelativeAndAdd(currentCPUNode, prevTid.toString());
+            Long startTime = fLastStartTimes.get(cpu);
+            /*
+             * If start time is null, we haven't seen the start of the process,
+             * so we assume beginning of the trace
+             */
+            if (startTime == null) {
+                startTime = fTraceStart;
+            }
+
+            /*
+             * We add the time from startTime until now to the cumulative time
+             * of the thread
+             */
+            if (startTime != null) {
+                ITmfStateValue value = ss.queryOngoingState(cumulativeTimeQuark);
+
+                /*
+                 * Modify cumulative time for this CPU/TID combo: The total time
+                 * changes when the process is scheduled out. Nothing happens
+                 * when the process is scheduled in.
+                 */
+                long prevCumulativeTime = Math.max(0, value.unboxLong());
+                long newCumulativeTime = prevCumulativeTime + (ts - startTime);
+
+                value = TmfStateValue.newValueLong(newCumulativeTime);
+                ss.modifyAttribute(ts, value, cumulativeTimeQuark);
+                fLastStartTimes.put(cpu, ts);
+            }
+        } catch (AttributeNotFoundException e) {
+            Activator.getDefault().logError("Attribute not found in LttngKernelCpuStateProvider", e); //$NON-NLS-1$
+        }
+
+    }
+
+    @Override
+    public void visit(ISchedWakeupConcept concept, ITmfEvent event) {
+        /* Nothing to do */
+    }
+
+    @Override
+    public void visit(IEventConcept concept, ITmfEvent event) {
+        /* Nothing to do */
     }
 
 }

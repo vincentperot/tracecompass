@@ -30,6 +30,7 @@ import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.Lttng26
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.LttngEventLayout;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.PerfEventLayout;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.concept.TmfEventConceptManager;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
@@ -65,6 +66,16 @@ public class LttngKernelTrace extends CtfTmfTrace implements IKernelTrace {
 
     /** The tracer which originated this trace */
     private OriginTracer fOriginTracer = null;
+
+    static {
+        TmfEventConceptManager.registerConcept(LttngKernelTrace.class, new LttngKernelConcepts.LttngSchedSwitchConcept());
+        TmfEventConceptManager.registerConcept(LttngKernelTrace.class, new LttngKernelConcepts.LttngSchedWakeupConcept());
+
+        /* TODO I'd rather not have them all together, but that will do for now */
+
+        TmfEventConceptManager.registerConcept(LttngKernelTrace.class, new PerfKernelConcepts.PerfSchedWakeupConcept());
+        TmfEventConceptManager.registerConcept(LttngKernelTrace.class, new PerfKernelConcepts.PerfSchedSwitchConcept());
+    }
 
     /**
      * Default constructor
