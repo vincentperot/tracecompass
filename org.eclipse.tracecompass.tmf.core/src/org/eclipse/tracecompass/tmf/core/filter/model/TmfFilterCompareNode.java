@@ -122,7 +122,12 @@ public class TmfFilterCompareNode extends TmfFilterAspectNode {
         }
         if (fType == Type.NUM) {
             try {
-                fValueNumber = NumberFormat.getInstance().parse(value).doubleValue();
+                fValueNumber = Long.decode(value);
+                return;
+            } catch (NumberFormatException e) {
+            }
+            try {
+                fValueNumber = NumberFormat.getInstance().parse(value);
             } catch (ParseException e) {
             }
         } else if (fType == Type.TIMESTAMP) {
@@ -141,17 +146,22 @@ public class TmfFilterCompareNode extends TmfFilterAspectNode {
     @Override
     public boolean matches(ITmfEvent event) {
         if (event == null || fEventAspect == null) {
-            return false ^ fNot;
+            return false;
         }
         Object value = fEventAspect.resolve(event);
         if (value == null) {
-            return false ^ fNot;
+            return false;
         }
         if (fType == Type.NUM) {
             if (fValueNumber != null) {
                 if (value instanceof Number) {
                     double valueDouble = ((Number) value).doubleValue();
                     return (Double.compare(valueDouble, fValueNumber.doubleValue()) == fResult) ^ fNot;
+                }
+                try {
+                    double valueDouble = Long.decode(value.toString()).doubleValue();
+                    return (Double.compare(valueDouble, fValueNumber.doubleValue()) == fResult) ^ fNot;
+                } catch (NumberFormatException e) {
                 }
                 try {
                     double valueDouble = NumberFormat.getInstance().parse(value.toString()).doubleValue();
@@ -177,7 +187,7 @@ public class TmfFilterCompareNode extends TmfFilterAspectNode {
                 }
             }
         }
-        return false ^ fNot;
+        return false;
     }
 
     @Override
