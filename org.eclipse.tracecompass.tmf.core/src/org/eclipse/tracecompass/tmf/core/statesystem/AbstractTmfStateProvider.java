@@ -184,8 +184,16 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
         }
     }
 
+    /** Fake event indicating we hit a checkpoint */
+    private static class CheckpointEvent extends TmfEvent {
+        public CheckpointEvent() {
+            super(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+        }
+    }
+
     private static final EndEvent END_EVENT = new EndEvent();
     private static final EmptyQueueEvent EMPTY_QUEUE_EVENT = new EmptyQueueEvent();
+    private static final CheckpointEvent CHECKPOINT_EVENT = new CheckpointEvent();
 
     // ------------------------------------------------------------------------
     // Inner classes
@@ -197,7 +205,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
      */
     private class EventProcessor implements Runnable {
 
-        private @Nullable ITmfEvent currentEvent;
+        private @Nullable ITmfEvent fCurrentEvent;
 
         @Override
         public void run() {
@@ -216,8 +224,15 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
                         event = fEventsQueue.take();
                         continue;
                     }
-
-                    currentEvent = event;
+                    if (event == CHECKPOINT_EVENT) {
+                        ITmfEvent currentEvent = fCurrentEvent;
+                        long timestamp = (currentEvent == null) ? 0 : currentEvent.getTimestamp().getValue();
+                        ITmfStateSystemBuilder stateSystemBuilder = getStateSystemBuilder();
+                        if (stateSystemBuilder != null) {
+                            stateSystemBuilder.checkpointEvent(timestamp);
+                        }
+                    }
+                    fCurrentEvent = event;
 
                     /* Make sure this is an event the sub-class can process */
                     if (fEventType.isInstance(event) && event.getType() != null) {
@@ -235,7 +250,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
         }
 
         private void closeStateSystem() {
-            ITmfEvent event = currentEvent;
+            ITmfEvent event = fCurrentEvent;
             final long endTime = (event == null) ? 0 :
                     event.getTimestamp().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
 

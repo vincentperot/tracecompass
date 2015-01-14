@@ -13,17 +13,22 @@
 package org.eclipse.tracecompass.lttng2.kernel.core.tests.analysis.kernel.statesystem;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelStateProvider;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.LttngEventLayout;
+import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
+import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
+import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
@@ -153,6 +158,61 @@ public class PartialStateSystemTest extends StateSystemTest {
     public void testRangeQueryInvalidTime2() throws TimeRangeException {
         super.testRangeQueryInvalidTime2();
     }
+
+    @Override
+    @Test
+    public void testFullQueryThorough() {
+        try {
+            List<ITmfStateInterval> state = fixture.queryFullState(interestingTimestamp1);
+            int stateQuark = getPartialQuark();
+            assertEquals(TestValues.size + (stateQuark == -1 ? 0 : 1), state.size());
+            boolean passedCheckpoint = false;
+            for (int i = 0; i < state.size(); i++) {
+                /* Test each component of the intervals */
+                if (i == stateQuark) {
+                    passedCheckpoint = true;
+                    i++;
+                }
+                int pos = i - (passedCheckpoint ? 1 : 0);
+
+                assertEquals("quark " + i, getStartTimes(pos), state.get(i).getStartTime());
+                assertEquals("quark " + i, getEndTimes(pos), state.get(i).getEndTime());
+                assertEquals("quark " + i, i, state.get(i).getAttribute());
+                assertEquals("quark " + i, getStateValues(pos), state.get(i).getStateValue());
+            }
+
+        } catch (StateSystemDisposedException e) {
+            fail();
+        }
+    }
+
+    @Override
+    @Test
+    public void testFirstIntervalIsConsidered() {
+        try {
+            int partialOffset = (getPartialQuark() != -1) ? 1 : 0;
+            List<ITmfStateInterval> list = fixture.queryFullState(1331668248014135800L);
+            ITmfStateInterval interval = list.get(233 + partialOffset);
+            assertEquals(1331668247516664825L, interval.getStartTime());
+
+            int valueInt = interval.getStateValue().unboxInt();
+            assertEquals(1, valueInt);
+
+        } catch (StateSystemDisposedException e) {
+            fail();
+        }
+    }
+
+    private static int getPartialQuark() {
+        int stateQuark = -1;
+        try {
+            stateQuark = fixture.getQuarkAbsolute("checkpoint");
+        } catch (AttributeNotFoundException e) {
+            // do nothing
+        }
+        return stateQuark;
+    }
+
 
     @NonNullByDefault
     private static class TestLttngKernelAnalysisModule extends TmfStateSystemAnalysisModule {

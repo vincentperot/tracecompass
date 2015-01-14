@@ -233,4 +233,17 @@ public interface ITmfStateSystemBuilder extends ITmfStateSystem {
      *             know how to handle it.
      */
     void closeHistory(long endTime);
+
+    /**
+     * Sets a checkpoint
+     *
+     * @param timestamp
+     *            the timestamp of a checkpoint
+     * @throws TimeRangeException
+     *             If the timestamp is invalid
+     * @throws StateValueTypeException
+     *             If the target attribute already exists, but its state value
+     *             type is invalid (not an integer)
+     */
+    void checkpointEvent(long timestamp) throws StateValueTypeException, TimeRangeException;
 }

@@ -125,6 +125,10 @@ public class PartialStateSystem extends StateSystem {
         return realStateSystem.getAttributeTree();
     }
 
+    @Override
+    public void checkpointEvent(long timestamp) {
+    }
+
     /*
      * Override these methods to make sure we don't try to overwrite the "real"
      * upstream attribute tree.
