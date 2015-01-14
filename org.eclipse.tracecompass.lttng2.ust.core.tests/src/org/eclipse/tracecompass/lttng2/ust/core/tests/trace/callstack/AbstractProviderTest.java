@@ -154,7 +154,7 @@ public abstract class AbstractProviderTest {
                 ITmfStateSystem ss = module.getStateSystem();
                 assertNotNull(ss);
                 assertTrue(ss.getStartTime() >= ustTrace.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue());
-                assertEquals(0, ss.getNbAttributes());
+                assertEquals(1, ss.getNbAttributes());
             } finally {
                 if (module != null) {
                     module.dispose();
