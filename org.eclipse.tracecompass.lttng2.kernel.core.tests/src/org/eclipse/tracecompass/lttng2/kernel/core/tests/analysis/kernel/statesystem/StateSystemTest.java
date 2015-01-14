@@ -163,7 +163,10 @@ public abstract class StateSystemTest {
         try {
             int quark = ss.getQuarkAbsolute(Attributes.RESOURCES, Attributes.IRQS, "1");
             long ts1 = ss.getStartTime(); /* start of the trace */
-            long ts2 = startTime + 20L * NANOSECS_PER_SEC; /* invalid, but ignored */
+            long ts2 = startTime + 20L * NANOSECS_PER_SEC; /*
+                                                            * invalid, but
+                                                            * ignored
+                                                            */
 
             intervals = StateSystemUtils.queryHistoryRange(ss, quark, ts1, ts2);
 
@@ -386,10 +389,10 @@ public abstract class StateSystemTest {
 
             for (int i = 0; i < state.size(); i++) {
                 /* Test each component of the intervals */
-                assertEquals(getStartTimes(i), state.get(i).getStartTime());
-                assertEquals(getEndTimes(i), state.get(i).getEndTime());
-                assertEquals(i, state.get(i).getAttribute());
-                assertEquals(getStateValues(i), state.get(i).getStateValue());
+                assertEquals(i, getStartTimes(i), state.get(i).getStartTime());
+                assertEquals(i, getEndTimes(i), state.get(i).getEndTime());
+                assertEquals(i, i, state.get(i).getAttribute());
+                assertEquals("" + i, getStateValues(i), state.get(i).getStateValue());
             }
 
         } catch (StateSystemDisposedException e) {
@@ -401,7 +404,7 @@ public abstract class StateSystemTest {
     public void testFirstIntervalIsConsidered() {
         try {
             List<ITmfStateInterval> list = fixture.queryFullState(1331668248014135800L);
-            ITmfStateInterval interval = list.get(233);
+            ITmfStateInterval interval = list.get(234);
             assertEquals(1331668247516664825L, interval.getStartTime());
 
             int valueInt = interval.getStateValue().unboxInt();
@@ -415,8 +418,8 @@ public abstract class StateSystemTest {
     @Test
     public void testParentAttribute() {
         String[] path = { "CPUs/0/Current_thread",
-                          "CPUs/0",
-                          "CPUs" };
+                "CPUs/0",
+                "CPUs" };
         try {
             int q = fixture.getQuarkAbsolute(Attributes.CPUS, "0", Attributes.CURRENT_THREAD);
             for (int i = 0; i < path.length; i++) {
