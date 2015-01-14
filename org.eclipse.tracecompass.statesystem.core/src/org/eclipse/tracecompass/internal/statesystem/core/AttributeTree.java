@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 
 /**
@@ -53,7 +54,7 @@ public final class AttributeTree {
     public AttributeTree(StateSystem ss) {
         this.ss = ss;
         this.attributeList = Collections.synchronizedList(new ArrayList<Attribute>());
-        this.attributeTreeRoot = new Attribute(null, "root", -1); //$NON-NLS-1$
+        this.attributeTreeRoot = new Attribute(null, "root", ITmfStateSystem.ROOT_QUARK); //$NON-NLS-1$
     }
 
     /**
@@ -134,7 +135,7 @@ public final class AttributeTree {
          * the attributes. Simply create attributes the normal way from them.
          */
         for (String[] attrib : list) {
-            this.getQuarkAndAdd(-1, attrib);
+            this.getQuarkAndAdd(ITmfStateSystem.ROOT_QUARK, attrib);
         }
     }
 
@@ -219,7 +220,7 @@ public final class AttributeTree {
      */
     public int getQuarkDontAdd(int startingNodeQuark, String... subPath)
             throws AttributeNotFoundException {
-        assert (startingNodeQuark >= -1);
+        assert (startingNodeQuark >= ITmfStateSystem.ROOT_QUARK);
 
         Attribute prevNode;
 
@@ -229,14 +230,14 @@ public final class AttributeTree {
         }
 
         /* Get the "starting node" */
-        if (startingNodeQuark == -1) {
+        if (startingNodeQuark == ITmfStateSystem.ROOT_QUARK) {
             prevNode = attributeTreeRoot;
         } else {
             prevNode = attributeList.get(startingNodeQuark);
         }
 
         int knownQuark = prevNode.getSubAttributeQuark(subPath);
-        if (knownQuark == -1) {
+        if (knownQuark == ITmfStateSystem.ROOT_QUARK) {
             /*
              * The attribute doesn't exist, but we have been specified to NOT
              * add any new attributes.
@@ -263,23 +264,24 @@ public final class AttributeTree {
      * @return The quark of the attribute represented by the path
      */
     public synchronized int getQuarkAndAdd(int startingNodeQuark, String... subPath) {
-        // FIXME synchronized here is probably quite costly... maybe only locking
+        // FIXME synchronized here is probably quite costly... maybe only
+        // locking
         // the "for" would be enough?
         assert (subPath != null && subPath.length > 0);
-        assert (startingNodeQuark >= -1);
+        assert (startingNodeQuark >= ITmfStateSystem.ROOT_QUARK);
 
         Attribute nextNode = null;
         Attribute prevNode;
 
         /* Get the "starting node" */
-        if (startingNodeQuark == -1) {
+        if (startingNodeQuark == ITmfStateSystem.ROOT_QUARK) {
             prevNode = attributeTreeRoot;
         } else {
             prevNode = attributeList.get(startingNodeQuark);
         }
 
         int knownQuark = prevNode.getSubAttributeQuark(subPath);
-        if (knownQuark == -1) {
+        if (knownQuark == ITmfStateSystem.ROOT_QUARK) {
             /*
              * The attribute was not in the table previously, and we want to add
              * it
@@ -324,12 +326,12 @@ public final class AttributeTree {
         Attribute startingAttribute;
 
         /* Check if the quark is valid */
-        if (attributeQuark < -1 || attributeQuark >= attributeList.size()) {
+        if (attributeQuark < ITmfStateSystem.ROOT_QUARK || attributeQuark >= attributeList.size()) {
             throw new AttributeNotFoundException();
         }
 
         /* Set up the node from which we'll start the search */
-        if (attributeQuark == -1) {
+        if (attributeQuark == ITmfStateSystem.ROOT_QUARK) {
             startingAttribute = attributeTreeRoot;
         } else {
             startingAttribute = attributeList.get(attributeQuark);
@@ -351,7 +353,7 @@ public final class AttributeTree {
      *         attribute
      */
     public int getParentAttributeQuark(int quark) {
-        if (quark == -1) {
+        if (quark == ITmfStateSystem.ROOT_QUARK) {
             return quark;
         }
         return attributeList.get(quark).getParentAttributeQuark();
