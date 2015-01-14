@@ -25,9 +25,10 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
  */
 interface TestValues {
 
-    int size = 863;
+    int size = 864;
 
     long[] startTimes = {
+        1331668247314038062L,
         1331668247314038062L,
         1331668247314038062L,
         1331668248014145796L,
@@ -894,6 +895,7 @@ interface TestValues {
     };
 
     long[] endTimes = {
+        1331668249621549370L,
         1331668259054285979L,
         1331668259054285979L,
         1331668248014620024L,
@@ -1760,6 +1762,7 @@ interface TestValues {
     };
 
     ITmfStateValue[] values = {
+        TmfStateValue.newValueInt(1),
         TmfStateValue.nullValue(),
         TmfStateValue.nullValue(),
         TmfStateValue.newValueInt(1397),

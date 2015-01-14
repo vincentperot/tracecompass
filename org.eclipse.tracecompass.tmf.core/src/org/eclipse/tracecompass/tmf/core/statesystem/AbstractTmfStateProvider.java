@@ -21,6 +21,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
+import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
+import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -41,6 +43,20 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * @since 2.0
  */
 public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
+
+    /**
+     * This state provider will increment the value of this attribute every n
+     * events it receives. n is defined by {@link #CHECKPOINT_GRANULARITY}.
+     *
+     * Each state backend can then use this attribute for indexing or
+     * checkpointing of any sort. Or they can also safely completely ignore it.
+     */
+    public static final String CHECKPOINT_ATTRIBUTE = "checkpoint"; //$NON-NLS-1$
+
+    /**
+     * The number of events between every checkpoint
+     */
+    public static final int CHECKPOINT_GRANULARITY = 50000;
 
     private static final int DEFAULT_EVENTS_QUEUE_SIZE = 10000;
 
@@ -190,6 +206,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
     private class EventProcessor implements Runnable {
 
         private @Nullable ITmfEvent currentEvent;
+        private int eventCount = -1;
 
         @Override
         public void run() {
@@ -213,8 +230,12 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
                         continue;
                     }
                     currentEvent = event;
+                    eventCount++;
+                    verifyCheckpoint();
+
                     eventHandle(event);
                     event = checkNotNull(fEventsQueue.take());
+
                 }
                 /* We've received the last event, clean up */
                 closeStateSystem();
@@ -223,6 +244,30 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
                 /* We've been interrupted abnormally */
                 System.out.println("Event handler interrupted!"); //$NON-NLS-1$
                 e.printStackTrace();
+
+            } catch (AttributeNotFoundException | StateValueTypeException e) {
+                /*
+                 * These exceptions are thrown by verifyCheckpoint(). They
+                 * should never happen, so handle them here to avoid an extra
+                 * try {} elsewhere.
+                 */
+                throw new IllegalStateException(e);
+            }
+        }
+
+        private void verifyCheckpoint() throws StateValueTypeException, AttributeNotFoundException {
+            if (eventCount >= CHECKPOINT_GRANULARITY || eventCount == 0) {
+                /* We need to create a new checkpoint state change */
+                /* These two fields should be set at this point */
+                ITmfEvent event = checkNotNull(currentEvent);
+                ITmfStateSystemBuilder ss = checkNotNull(fSS);
+
+                /* Create the checkpoint attribute in the state system */
+                int checkpointQuark = ss.getQuarkAbsoluteAndAdd(CHECKPOINT_ATTRIBUTE);
+                long ts = event.getTimestamp().getValue();
+                ss.incrementAttribute(ts, checkpointQuark);
+
+                eventCount = 0;
             }
         }
 

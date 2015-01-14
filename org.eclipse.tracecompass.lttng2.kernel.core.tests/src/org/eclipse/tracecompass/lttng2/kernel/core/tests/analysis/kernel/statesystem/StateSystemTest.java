@@ -401,7 +401,7 @@ public abstract class StateSystemTest {
     public void testFirstIntervalIsConsidered() {
         try {
             List<ITmfStateInterval> list = fixture.queryFullState(1331668248014135800L);
-            ITmfStateInterval interval = list.get(233);
+            ITmfStateInterval interval = list.get(234);
             assertEquals(1331668247516664825L, interval.getStartTime());
 
             int valueInt = interval.getStateValue().unboxInt();
