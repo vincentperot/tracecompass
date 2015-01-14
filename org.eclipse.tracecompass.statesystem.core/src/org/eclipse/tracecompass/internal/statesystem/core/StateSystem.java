@@ -660,6 +660,17 @@ public class StateSystem implements ITmfStateSystemBuilder {
         return ret;
     }
 
+    @Override
+    public void checkpointEvent(long timestamp) throws StateValueTypeException, TimeRangeException {
+        int quark = getQuarkAbsoluteAndAdd("checkpoint"); //$NON-NLS-1$
+        try {
+            incrementAttribute(timestamp, quark);
+        } catch (AttributeNotFoundException e) {
+            // we just added, something is wrong
+            Activator.getDefault().logError(e.getMessage(), e);
+        }
+    }
+
     // --------------------------------------------------------------------------
     // Debug methods
     // --------------------------------------------------------------------------
