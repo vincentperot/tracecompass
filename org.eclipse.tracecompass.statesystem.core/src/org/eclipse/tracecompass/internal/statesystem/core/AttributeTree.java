@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 
 /**
@@ -40,9 +41,9 @@ public final class AttributeTree {
     /* "Magic number" for attribute tree files or file sections */
     private static final int ATTRIB_TREE_MAGIC_NUMBER = 0x06EC3671;
 
-    private final StateSystem ss;
-    private final List<Attribute> attributeList;
-    private final Attribute attributeTreeRoot;
+    private final StateSystem fSS;
+    private final List<Attribute> fAttributeList;
+    private final Attribute fAttributeTreeRoot;
 
     /**
      * Standard constructor, create a new empty Attribute Tree
@@ -51,9 +52,9 @@ public final class AttributeTree {
      *            The StateSystem to which this AT is attached
      */
     public AttributeTree(StateSystem ss) {
-        this.ss = ss;
-        this.attributeList = Collections.synchronizedList(new ArrayList<Attribute>());
-        this.attributeTreeRoot = new Attribute(null, "root", -1); //$NON-NLS-1$
+        fSS = ss;
+        fAttributeList = Collections.synchronizedList(new ArrayList<Attribute>());
+        fAttributeTreeRoot = new Attribute(null, "root", ITmfStateSystem.ROOT_QUARK); //$NON-NLS-1$
     }
 
     /**
@@ -134,7 +135,7 @@ public final class AttributeTree {
          * the attributes. Simply create attributes the normal way from them.
          */
         for (String[] attrib : list) {
-            this.getQuarkAndAdd(-1, attrib);
+            this.getQuarkAndAdd(ITmfStateSystem.ROOT_QUARK, attrib);
         }
     }
 
@@ -161,11 +162,11 @@ public final class AttributeTree {
             raf.writeInt(-8000);
 
             /* Write the number of entries */
-            raf.writeInt(this.attributeList.size());
+            raf.writeInt(this.fAttributeList.size());
             total += 12;
 
             /* Write the attributes themselves */
-            for (Attribute entry : this.attributeList) {
+            for (Attribute entry : this.fAttributeList) {
                 curByteArray = entry.getFullAttributeName().getBytes();
                 if (curByteArray.length > Byte.MAX_VALUE) {
                     throw new IOException("Attribute with name \"" //$NON-NLS-1$
@@ -201,7 +202,7 @@ public final class AttributeTree {
      * @return The current number of attributes in the tree
      */
     public int getNbAttributes() {
-        return attributeList.size();
+        return fAttributeList.size();
     }
 
     /**
@@ -219,7 +220,7 @@ public final class AttributeTree {
      */
     public int getQuarkDontAdd(int startingNodeQuark, String... subPath)
             throws AttributeNotFoundException {
-        assert (startingNodeQuark >= -1);
+        assert (startingNodeQuark >= ITmfStateSystem.ROOT_QUARK);
 
         Attribute prevNode;
 
@@ -229,14 +230,14 @@ public final class AttributeTree {
         }
 
         /* Get the "starting node" */
-        if (startingNodeQuark == -1) {
-            prevNode = attributeTreeRoot;
+        if (startingNodeQuark == ITmfStateSystem.ROOT_QUARK) {
+            prevNode = fAttributeTreeRoot;
         } else {
-            prevNode = attributeList.get(startingNodeQuark);
+            prevNode = fAttributeList.get(startingNodeQuark);
         }
 
         int knownQuark = prevNode.getSubAttributeQuark(subPath);
-        if (knownQuark == -1) {
+        if (knownQuark == ITmfStateSystem.ROOT_QUARK) {
             /*
              * The attribute doesn't exist, but we have been specified to NOT
              * add any new attributes.
@@ -266,20 +267,20 @@ public final class AttributeTree {
         // FIXME synchronized here is probably quite costly... maybe only locking
         // the "for" would be enough?
         assert (subPath != null && subPath.length > 0);
-        assert (startingNodeQuark >= -1);
+        assert (startingNodeQuark >= ITmfStateSystem.ROOT_QUARK);
 
         Attribute nextNode = null;
         Attribute prevNode;
 
         /* Get the "starting node" */
-        if (startingNodeQuark == -1) {
-            prevNode = attributeTreeRoot;
+        if (startingNodeQuark == ITmfStateSystem.ROOT_QUARK) {
+            prevNode = fAttributeTreeRoot;
         } else {
-            prevNode = attributeList.get(startingNodeQuark);
+            prevNode = fAttributeList.get(startingNodeQuark);
         }
 
         int knownQuark = prevNode.getSubAttributeQuark(subPath);
-        if (knownQuark == -1) {
+        if (knownQuark == ITmfStateSystem.ROOT_QUARK) {
             /*
              * The attribute was not in the table previously, and we want to add
              * it
@@ -288,14 +289,14 @@ public final class AttributeTree {
                 nextNode = prevNode.getSubAttributeNode(curDirectory);
                 if (nextNode == null) {
                     /* This is where we need to start adding */
-                    nextNode = new Attribute(prevNode, curDirectory, attributeList.size());
+                    nextNode = new Attribute(prevNode, curDirectory, fAttributeList.size());
                     prevNode.addSubAttribute(nextNode);
-                    attributeList.add(nextNode);
-                    ss.addEmptyAttribute();
+                    fAttributeList.add(nextNode);
+                    fSS.addEmptyAttribute();
                 }
                 prevNode = nextNode;
             }
-            return attributeList.size() - 1;
+            return fAttributeList.size() - 1;
         }
         /*
          * The attribute was already existing, return the quark of that
@@ -324,15 +325,15 @@ public final class AttributeTree {
         Attribute startingAttribute;
 
         /* Check if the quark is valid */
-        if (attributeQuark < -1 || attributeQuark >= attributeList.size()) {
+        if (attributeQuark < ITmfStateSystem.ROOT_QUARK || attributeQuark >= fAttributeList.size()) {
             throw new AttributeNotFoundException();
         }
 
         /* Set up the node from which we'll start the search */
-        if (attributeQuark == -1) {
-            startingAttribute = attributeTreeRoot;
+        if (attributeQuark == ITmfStateSystem.ROOT_QUARK) {
+            startingAttribute = fAttributeTreeRoot;
         } else {
-            startingAttribute = attributeList.get(attributeQuark);
+            startingAttribute = fAttributeList.get(attributeQuark);
         }
 
         /* Iterate through the sub-attributes and add them to the list */
@@ -351,10 +352,10 @@ public final class AttributeTree {
      *         attribute
      */
     public int getParentAttributeQuark(int quark) {
-        if (quark == -1) {
+        if (quark == ITmfStateSystem.ROOT_QUARK) {
             return quark;
         }
-        return attributeList.get(quark).getParentAttributeQuark();
+        return fAttributeList.get(quark).getParentAttributeQuark();
     }
 
     private void addSubAttributes(List<Integer> list, Attribute curAttribute,
@@ -375,7 +376,7 @@ public final class AttributeTree {
      * @return The (base) name of the attribute
      */
     public String getAttributeName(int quark) {
-        return attributeList.get(quark).getName();
+        return fAttributeList.get(quark).getName();
     }
 
     /**
@@ -386,10 +387,10 @@ public final class AttributeTree {
      * @return The full path name of the attribute
      */
     public String getFullAttributeName(int quark) {
-        if (quark >= attributeList.size() || quark < 0) {
+        if (quark >= fAttributeList.size() || quark < 0) {
             return null;
         }
-        return attributeList.get(quark).getFullAttributeName();
+        return fAttributeList.get(quark).getFullAttributeName();
     }
 
     /**
@@ -399,7 +400,7 @@ public final class AttributeTree {
      *            The writer where to print the output
      */
     public void debugPrint(PrintWriter writer) {
-        attributeTreeRoot.debugPrint(writer);
+        fAttributeTreeRoot.debugPrint(writer);
     }
 
 }

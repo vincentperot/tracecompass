@@ -33,6 +33,11 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
  */
 public interface ITmfStateSystem {
 
+    /** The quark of the root of the state system */
+    int ROOT_QUARK = -1;
+    /** The default quark value of an unassigned attribute */
+    int UNASSIGNED_QUARK = -2;
+
     /**
      * Get the ID of this state system.
      *
