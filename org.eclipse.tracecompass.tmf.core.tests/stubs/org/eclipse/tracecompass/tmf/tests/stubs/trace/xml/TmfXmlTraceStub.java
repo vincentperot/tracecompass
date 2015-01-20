@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -300,7 +301,7 @@ public class TmfXmlTraceStub extends TmfTrace {
 
         @Override
         public @Nullable Integer resolve(ITmfEvent event) {
-            Integer cpu = Ints.tryParse(fAspect.resolve(event));
+            Integer cpu = Ints.tryParse(NonNullUtils.nullToEmptyString(fAspect.resolve(event)));
             if (cpu == null) {
                 return null;
             }
@@ -322,7 +323,7 @@ public class TmfXmlTraceStub extends TmfTrace {
             if (name == null) {
                 break;
             }
-            ITmfEventAspect aspect = new TmfEventFieldAspect(name, name);
+            ITmfEventAspect aspect = ITmfEventAspect.BaseAspects.CONTENTS.createAspect(name, name);
             if (name.equals(ASPECT_CPU)) {
                 aspect = new XmlStubCpuAspect((TmfEventFieldAspect) aspect);
             }
