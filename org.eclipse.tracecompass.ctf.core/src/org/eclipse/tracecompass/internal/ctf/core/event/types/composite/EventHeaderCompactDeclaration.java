@@ -80,10 +80,6 @@ public final class EventHeaderCompactDeclaration extends Declaration implements 
      */
     private static final String CLOCK = ""; //$NON-NLS-1$
     /**
-     * Maximum size = largest this header can be
-     */
-    private static final int MAX_SIZE = 104;
-    /**
      * Byte aligned
      */
     private static final int ALIGN_ON_1 = 1;
@@ -174,11 +170,6 @@ public final class EventHeaderCompactDeclaration extends Declaration implements 
     @Override
     public long getAlignment() {
         return ALIGN_ON_8;
-    }
-
-    @Override
-    public int getMaximumSize() {
-        return MAX_SIZE;
     }
 
     /**

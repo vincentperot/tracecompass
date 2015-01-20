@@ -147,18 +147,6 @@ public class StructDeclaration extends Declaration {
         return this.fMaxAlign;
     }
 
-    /**
-     * @since 3.0
-     */
-    @Override
-    public int getMaximumSize() {
-        int maxSize = 0;
-        for (IDeclaration field : fFieldMap.values()) {
-            maxSize += field.getMaximumSize();
-        }
-        return Math.min(maxSize, Integer.MAX_VALUE);
-    }
-
     // ------------------------------------------------------------------------
     // Operations
     // ------------------------------------------------------------------------

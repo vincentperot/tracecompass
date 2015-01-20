@@ -77,14 +77,6 @@ public final class EnumDeclaration extends Declaration implements ISimpleDatatyp
         return this.getContainerType().getAlignment();
     }
 
-    /**
-     * @since 3.0
-     */
-    @Override
-    public int getMaximumSize() {
-        return fContainerType.getMaximumSize();
-    }
-
     // ------------------------------------------------------------------------
     // Operations
     // ------------------------------------------------------------------------

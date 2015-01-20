@@ -413,13 +413,4 @@ public class EventHeaderDeclarationTest {
         assertEquals(ID, ((IntegerDefinition) def.getDefinition("id")).getValue());
         assertEquals(TIMESTAMP, ((IntegerDefinition) def.getDefinition("timestamp")).getValue());
     }
-
-    /**
-     * Test maximum sizes, make sure they don't change unannounced
-     */
-    @Test
-    public void testMaxSizes() {
-        assertEquals(112, (EventHeaderLargeDeclaration.getEventHeader(ByteOrder.BIG_ENDIAN)).getMaximumSize());
-        assertEquals(104, (EventHeaderCompactDeclaration.getEventHeader(ByteOrder.BIG_ENDIAN)).getMaximumSize());
-    }
 }

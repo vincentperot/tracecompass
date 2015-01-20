@@ -43,6 +43,9 @@ import com.google.common.collect.Multimap;
  */
 public class SequenceDeclaration extends CompoundDeclaration {
 
+    /** Maximum number of elements supported in sequences */
+    private static final int MAX_SEQUENCE_SIZE = 65536;
+
     // ------------------------------------------------------------------------
     // Attributes
     // ------------------------------------------------------------------------
@@ -114,8 +117,9 @@ public class SequenceDeclaration extends CompoundDeclaration {
         }
 
         long length = lengthDefinition.getValue();
-        if ((length > Integer.MAX_VALUE) || (!input.canRead((int) length * fElemType.getMaximumSize()))) {
-            throw new CTFReaderException("Sequence length too long " + length); //$NON-NLS-1$
+        if (length > MAX_SEQUENCE_SIZE) {
+            throw new CTFReaderException("Sequence length too long " + length + //$NON-NLS-1$
+                    ". Only sequences up to " + MAX_SEQUENCE_SIZE + " elements are supported."); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         if (isString()) {
@@ -143,11 +147,6 @@ public class SequenceDeclaration extends CompoundDeclaration {
     public String toString() {
         /* Only used for debugging */
         return "[declaration] sequence[" + Integer.toHexString(hashCode()) + ']'; //$NON-NLS-1$
-    }
-
-    @Override
-    public int getMaximumSize() {
-        return Integer.MAX_VALUE;
     }
 
     @Override

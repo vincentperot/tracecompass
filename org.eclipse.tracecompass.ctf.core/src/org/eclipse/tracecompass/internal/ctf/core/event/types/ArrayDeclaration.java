@@ -139,12 +139,6 @@ public final class ArrayDeclaration extends CompoundDeclaration {
     }
 
     @Override
-    public int getMaximumSize() {
-        long val = (long) fLength * fElemType.getMaximumSize();
-        return (int) Math.min(Integer.MAX_VALUE, val);
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

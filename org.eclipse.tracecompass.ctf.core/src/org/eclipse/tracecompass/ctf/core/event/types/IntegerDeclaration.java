@@ -374,14 +374,6 @@ public final class IntegerDeclaration extends Declaration implements ISimpleData
         return fClock;
     }
 
-    /**
-     * @since 3.0
-     */
-    @Override
-    public int getMaximumSize() {
-        return fLength;
-    }
-
     // ------------------------------------------------------------------------
     // Operations
     // ------------------------------------------------------------------------

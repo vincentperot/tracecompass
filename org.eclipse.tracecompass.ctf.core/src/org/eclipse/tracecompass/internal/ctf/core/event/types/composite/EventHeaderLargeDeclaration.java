@@ -78,10 +78,6 @@ public final class EventHeaderLargeDeclaration extends Declaration implements IE
     private static final String CLOCK = ""; //$NON-NLS-1$
     private static final String CLOCK_MONOTONIC = "clock_monotonic"; //$NON-NLS-1$
     /**
-     * Maximum size = largest this header can be
-     */
-    private static final int MAX_SIZE = 112;
-    /**
      * Byte aligned
      */
     private static final int ALIGN_ON_8 = 8;
@@ -197,11 +193,6 @@ public final class EventHeaderLargeDeclaration extends Declaration implements IE
     @Override
     public long getAlignment() {
         return ALIGN_ON_8;
-    }
-
-    @Override
-    public int getMaximumSize() {
-        return MAX_SIZE;
     }
 
     /**

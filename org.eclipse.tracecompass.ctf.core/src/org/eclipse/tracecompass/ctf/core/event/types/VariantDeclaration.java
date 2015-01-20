@@ -12,7 +12,6 @@
 
 package org.eclipse.tracecompass.ctf.core.event.types;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -166,19 +165,6 @@ public class VariantDeclaration extends Declaration {
      */
     public EnumDefinition getTagDef() {
         return fTagDef;
-    }
-
-    /**
-     * @since 3.0
-     */
-    @Override
-    public int getMaximumSize() {
-        Collection<IDeclaration> values = fFields.values();
-        int maxSize = 0;
-        for (IDeclaration field : values) {
-            maxSize = Math.max(maxSize, field.getMaximumSize());
-        }
-        return maxSize;
     }
 
     @Override

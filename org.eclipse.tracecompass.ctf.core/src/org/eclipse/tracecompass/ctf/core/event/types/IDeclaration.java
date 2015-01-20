@@ -70,14 +70,6 @@ public interface IDeclaration {
      */
     long getAlignment();
 
-    /**
-     * The MAXIMUM size of this declaration
-     *
-     * @return the maximum size
-     * @since 3.0
-     */
-    int getMaximumSize();
-
     @Override
     int hashCode();
 

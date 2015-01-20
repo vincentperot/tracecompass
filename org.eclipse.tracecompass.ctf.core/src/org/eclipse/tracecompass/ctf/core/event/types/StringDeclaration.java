@@ -108,14 +108,6 @@ public class StringDeclaration extends Declaration {
         return BITS_PER_BYTE;
     }
 
-    /**
-     * @since 3.0
-     */
-    @Override
-    public int getMaximumSize() {
-        return Integer.MAX_VALUE;
-    }
-
     // ------------------------------------------------------------------------
     // Operations
     // ------------------------------------------------------------------------

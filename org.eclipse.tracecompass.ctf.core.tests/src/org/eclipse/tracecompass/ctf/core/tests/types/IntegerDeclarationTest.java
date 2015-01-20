@@ -125,7 +125,6 @@ public class IntegerDeclarationTest {
                                     assertEquals(title, bo, intDec.getByteOrder());
                                 }
                                 assertEquals(title, len, intDec.getLength());
-                                assertEquals(title, len, intDec.getMaximumSize());
                                 assertEquals(title, clock, intDec.getClock());
                                 assertEquals(title, !signed && len == 8, intDec.isUnsignedByte());
                             }

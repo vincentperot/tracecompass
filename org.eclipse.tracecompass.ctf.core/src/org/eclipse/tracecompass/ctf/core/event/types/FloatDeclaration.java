@@ -98,14 +98,6 @@ public final class FloatDeclaration extends Declaration implements ISimpleDataty
         return fAlignement;
     }
 
-    /**
-     * @since 3.0
-     */
-    @Override
-    public int getMaximumSize() {
-        return fMantissa + fExponent + 1;
-    }
-
     // ------------------------------------------------------------------------
     // Operations
     // ------------------------------------------------------------------------
