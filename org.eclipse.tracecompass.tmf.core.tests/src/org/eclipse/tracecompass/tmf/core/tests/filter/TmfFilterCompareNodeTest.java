@@ -21,7 +21,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
-import org.eclipse.tracecompass.tmf.core.event.aspect.TmfEventFieldAspect;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode.Type;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfNanoTimestamp;
@@ -63,7 +62,7 @@ public class TmfFilterCompareNodeTest extends TmfFilterTreeNodeTest {
 
     @Test
     public void testMatchesNum() {
-        fFilter.setEventAspect(new TmfEventFieldAspect(FIELD, FIELD));
+        fFilter.setEventAspect(ITmfEventAspect.BaseAspects.CONTENTS.createAspect(FIELD, FIELD));
         fFilter.setType(Type.NUM);
         fFilter.setValue("5");
 
@@ -90,7 +89,7 @@ public class TmfFilterCompareNodeTest extends TmfFilterTreeNodeTest {
 
     @Test
     public void testMatchesAlpha() {
-        fFilter.setEventAspect(new TmfEventFieldAspect(FIELD, FIELD));
+        fFilter.setEventAspect(ITmfEventAspect.BaseAspects.CONTENTS.createAspect(FIELD, FIELD));
         fFilter.setType(Type.ALPHA);
         fFilter.setValue("5");
 

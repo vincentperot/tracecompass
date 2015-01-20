@@ -19,7 +19,6 @@ import org.eclipse.tracecompass.internal.gdbtrace.core.event.GdbTraceEvent;
 import org.eclipse.tracecompass.internal.gdbtrace.core.event.GdbTraceEventContent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
-import org.eclipse.tracecompass.tmf.core.event.aspect.TmfEventFieldAspect;
 
 import com.google.common.collect.ImmutableList;
 
@@ -34,24 +33,10 @@ public final class GdbEventAspects {
 
     private static final @NonNull Iterable<ITmfEventAspect> GDB_ASPECTS =
             checkNotNull(ImmutableList.of(
-                    new GdbTraceFrameAspect(),
-                    new GdbTracepointAspect(),
+                    ITmfEventAspect.BaseAspects.CONTENTS.createAspect(GdbTraceEventContent.TRACE_FRAME, GdbTraceEventContent.TRACE_FRAME),
+                    ITmfEventAspect.BaseAspects.CONTENTS.createAspect(GdbTraceEventContent.TRACEPOINT, GdbTraceEventContent.TRACEPOINT),
                     new GdbFileAspect()
                     ));
-
-    private static class GdbTraceFrameAspect extends TmfEventFieldAspect {
-        public GdbTraceFrameAspect() {
-            super(GdbTraceEventContent.TRACE_FRAME,
-                    GdbTraceEventContent.TRACE_FRAME);
-        }
-    }
-
-    private static class GdbTracepointAspect extends TmfEventFieldAspect {
-        public GdbTracepointAspect() {
-            super(GdbTraceEventContent.TRACEPOINT,
-                    GdbTraceEventContent.TRACEPOINT);
-        }
-    }
 
     private static class GdbFileAspect implements ITmfEventAspect {
 
