@@ -18,7 +18,6 @@ import org.eclipse.tracecompass.btf.core.event.BtfEvent;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
-import org.eclipse.tracecompass.tmf.core.event.aspect.TmfEventFieldAspect;
 
 import com.google.common.collect.ImmutableList;
 
@@ -35,12 +34,12 @@ public final class BtfEventAspects {
             NonNullUtils.checkNotNull(ImmutableList.of(
                     ITmfEventAspect.BaseAspects.TIMESTAMP,
                     new BtfSourceAspect(),
-                    new BtfSourceInstanceAspect(),
+                    ITmfEventAspect.BaseAspects.CONTENTS.createAspect(BtfColumnNames.SOURCE_INSTANCE.toString(), BtfColumnNames.SOURCE_INSTANCE.toString()),
                     ITmfEventAspect.BaseAspects.EVENT_TYPE,
                     new BtfTargetAspect(),
-                    new BtfTargetInstanceAspect(),
-                    new BtfEventAspect(),
-                    new BtfNotesAspect()
+                    ITmfEventAspect.BaseAspects.CONTENTS.createAspect(BtfColumnNames.TARGET_INSTANCE.toString(), BtfColumnNames.TARGET_INSTANCE.toString()),
+                    ITmfEventAspect.BaseAspects.CONTENTS.createAspect(BtfColumnNames.EVENT.toString(), BtfColumnNames.EVENT.toString()),
+                    ITmfEventAspect.BaseAspects.CONTENTS.createAspect(BtfColumnNames.NOTES.toString(), BtfColumnNames.NOTES.toString())
                     ));
 
     /**
@@ -69,17 +68,6 @@ public final class BtfEventAspects {
     }
 
     /**
-     * The "source instance" aspect, whose value comes from the field of the
-     * same name.
-     */
-    private static class BtfSourceInstanceAspect extends TmfEventFieldAspect {
-        public BtfSourceInstanceAspect() {
-            super(BtfColumnNames.SOURCE_INSTANCE.toString(),
-                    BtfColumnNames.SOURCE_INSTANCE.toString());
-        }
-    }
-
-    /**
      * The "target" aspect, taking its value from
      * {@link ITmfEvent#getReference()}.
      */
@@ -102,38 +90,6 @@ public final class BtfEventAspects {
             }
             String ret = ((BtfEvent) event).getReference();
             return (ret == null ? EMPTY_STRING : ret);
-        }
-    }
-
-    /**
-     * The "target instance" aspect, whose value comes from the field of the
-     * same name.
-     */
-    private static class BtfTargetInstanceAspect extends TmfEventFieldAspect {
-        public BtfTargetInstanceAspect() {
-            super(BtfColumnNames.TARGET_INSTANCE.toString(),
-                    BtfColumnNames.TARGET_INSTANCE.toString());
-        }
-    }
-
-    /**
-     * The "event" aspect, whose value comes from the field of the same name.
-     */
-    private static class BtfEventAspect extends TmfEventFieldAspect {
-        public BtfEventAspect() {
-            super(BtfColumnNames.EVENT.toString(),
-                    BtfColumnNames.EVENT.toString());
-        }
-    }
-
-    /**
-     * The "notes" column, whose value comes from the field of the same name, if
-     * present.
-     */
-    private static class BtfNotesAspect extends TmfEventFieldAspect {
-        public BtfNotesAspect() {
-            super(BtfColumnNames.NOTES.toString(),
-                    BtfColumnNames.NOTES.toString());
         }
     }
 

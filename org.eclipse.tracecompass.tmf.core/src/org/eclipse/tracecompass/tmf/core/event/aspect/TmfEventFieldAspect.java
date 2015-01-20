@@ -21,7 +21,10 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 
 /**
- * Event aspect representing a single field of an event.
+ * Event aspect that resolves to a root event field, or one of its subfields.
+ *
+ * When used, the subfield pattern is slash-prefixed and slash-separated, and
+ * the backslash character is used to escape an uninterpreted slash.
  *
  * @author Alexandre Montplaisir
  */
@@ -31,8 +34,25 @@ public class TmfEventFieldAspect implements ITmfEventAspect {
     private static final char BACKSLASH = '\\';
 
     private final String fAspectName;
-    private final String fFieldName;
+    private final IRootField fRootField;
+    private final @Nullable String fField;
     private final @Nullable String[] fFieldArray;
+
+    /**
+     * Interface for the root field resolver
+     */
+    public interface IRootField {
+        /**
+         * Returns the root event field for this aspect. Implementations must
+         * override to provide a specific event member but should not assume the
+         * event is of any specific type.
+         *
+         * @param event
+         *            The event to process
+         * @return the root event field
+         */
+        public @Nullable ITmfEventField getRootField(ITmfEvent event);
+    }
 
     /**
      * Constructor
@@ -40,18 +60,86 @@ public class TmfEventFieldAspect implements ITmfEventAspect {
      * @param aspectName
      *            The name of the aspect. Should be localized.
      * @param fieldName
-     *            The name of the field to look for in the trace. Should *not*
-     *            be localized!
+     *            The field name or subfield pattern to resolve the event, or
+     *            null to use the root field. Should *not* be localized!
+     * @param rootField
+     *            The root field resolver object
      */
-    public TmfEventFieldAspect(String aspectName, String fieldName) {
+    public TmfEventFieldAspect(String aspectName, @Nullable String fieldName, IRootField rootField) {
         fAspectName = aspectName;
-        fFieldName = fieldName;
-        if (!fieldName.isEmpty() && fieldName.charAt(0) == SLASH) {
-            fFieldArray = getFieldArray(fieldName);
-        } else {
-            fFieldArray = null;
-        }
+        fField = fieldName;
+        fFieldArray = getFieldArray(fieldName);
+        fRootField = rootField;
+    }
 
+    /**
+     * Get the field name or subfield pattern to resolve the event, or null if
+     * the root field is used.
+     *
+     * @return the field name, subfield pattern, or null
+     */
+    public @Nullable String getField() {
+        return fField;
+    }
+
+    /**
+     * Create a new event aspect with the specified field name or subfield
+     * pattern, relative to the root field. The new aspect is final, meaning it
+     * can no longer be narrowed further to another subfield.
+     *
+     * @param aspectName
+     *            The name of the aspect. Should be localized.
+     * @param fieldName
+     *            The field name or subfield pattern to resolve the event.
+     * @return a new aspect instance
+     */
+    public ITmfEventAspect createAspect(final String aspectName, final String fieldName) {
+        return new ITmfEventAspect() {
+
+            private final @Nullable String[] fieldArray = getFieldArray(fieldName);
+
+            @Override
+            public String getName() {
+                return aspectName;
+            }
+
+            @Override
+            public String getHelpText() {
+                return EMPTY_STRING;
+            }
+
+            @Override
+            public @Nullable Object resolve(ITmfEvent event) {
+                ITmfEventField root = fRootField.getRootField(event);
+                if (root == null) {
+                    return null;
+                }
+                ITmfEventField field;
+                if (fieldArray == null) {
+                    field = root.getField(fieldName);
+                } else {
+                    field = root.getSubField(fieldArray);
+                }
+                if (field == null) {
+                    return null;
+                }
+                return field.getValue();
+            }
+        };
+    }
+
+    /**
+     * Create a new instance of the aspect for the specified field name or
+     * subfield pattern, relative to the root field, or null for the root
+     * field.
+     *
+     * @param fieldName
+     *            The field name or subfield pattern to resolve the event, or
+     *            null.
+     * @return a new aspect instance
+     */
+    public TmfEventFieldAspect forField(@Nullable String fieldName) {
+        return new TmfEventFieldAspect(fAspectName, fieldName, fRootField);
     }
 
     @Override
@@ -65,17 +153,23 @@ public class TmfEventFieldAspect implements ITmfEventAspect {
     }
 
     @Override
-    public @Nullable String resolve(ITmfEvent event) {
+    public @Nullable Object resolve(ITmfEvent event) {
+        ITmfEventField root = fRootField.getRootField(event);
+        if (root == null) {
+            return null;
+        }
         ITmfEventField field;
-        if (fFieldArray == null) {
-            field = event.getContent().getField(fFieldName);
+        if (fField == null) {
+            return root;
+        } else if (fFieldArray == null) {
+            field = root.getField(fField);
         } else {
-            field = event.getContent().getSubField(fFieldArray);
+            field = root.getSubField(fFieldArray);
         }
         if (field == null) {
             return null;
         }
-        return field.getFormattedValue();
+        return field.getValue();
     }
 
     // ------------------------------------------------------------------------
@@ -88,7 +182,8 @@ public class TmfEventFieldAspect implements ITmfEventAspect {
         final int prime = 31;
         int result = 1;
         result = prime * result + fAspectName.hashCode();
-        result = prime * result + fFieldName.hashCode();
+        String field = fField;
+        result = prime * result + (field == null ? 0 : field.hashCode());
         return result;
     }
 
@@ -107,13 +202,22 @@ public class TmfEventFieldAspect implements ITmfEventAspect {
         if (!fAspectName.equals(other.fAspectName)) {
             return false;
         }
-        if (!fFieldName.equals(other.fFieldName)) {
+        String field = fField;
+        if (field == null) {
+            if (other.fField != null) {
+                return false;
+            }
+        } else if (!field.equals(other.fField)) {
             return false;
         }
         return true;
     }
 
-    private static String[] getFieldArray(String field) {
+    private static @Nullable String[] getFieldArray(@Nullable String field) {
+
+        if (field == null || field.isEmpty() || field.charAt(0) != SLASH) {
+            return null;
+        }
 
         StringBuilder sb = new StringBuilder();
         List<String> list = new ArrayList<>();
