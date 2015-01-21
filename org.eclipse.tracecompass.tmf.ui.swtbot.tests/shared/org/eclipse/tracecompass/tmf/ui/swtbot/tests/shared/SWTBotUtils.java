@@ -51,7 +51,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.hamcrest.Matcher;
 
-
 /**
  * SWTBot Helper functions
  *
@@ -59,7 +58,8 @@ import org.hamcrest.Matcher;
  */
 public final class SWTBotUtils {
 
-    private SWTBotUtils() {}
+    private SWTBotUtils() {
+    }
 
     private static final String TRACING_PERSPECTIVE_ID = TracingPerspectiveFactory.ID;
 
@@ -364,4 +364,66 @@ public final class SWTBotUtils {
         }
         return nodeName;
     }
+
+    /**
+     * Import and Open a trace
+     *
+     * @param traceProjectName
+     *            the project name
+     * @param tracePath
+     *            the trace name
+     */
+    public static void openTrace(final String traceProjectName, final String tracePath) {
+        final Exception exception[] = new Exception[1];
+        exception[0] = null;
+        UIThreadRunnable.syncExec(new VoidResult() {
+            @Override
+            public void run() {
+                try {
+                    IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(traceProjectName);
+                    TmfTraceFolder destinationFolder = TmfProjectRegistry.getProject(project, true).
+                            getTracesFolder();
+                    TmfOpenTraceHelper.openTraceFromPath(destinationFolder, tracePath, PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.eclipse.linuxtools.lttng2.kernel.tracetype"
+                            );
+                } catch (CoreException e) {
+                    exception[0] = e;
+                }
+            }
+        });
+        if (exception[0] != null) {
+            fail(exception[0].getMessage());
+        }
+
+        SWTBotUtils.delay(1000);
+        SWTBotUtils.waitForJobs();
+    }
+
+    /**
+     * Create a project
+     *
+     * @param bot
+     *            a given workbench bot
+     * @param projectName
+     *            the name of the project
+     * @return a {@link SWTBotTreeItem} of the "Traces" directory
+     */
+    public static SWTBotTreeItem createProject(SWTWorkbenchBot bot, String projectName) {
+        SWTBotUtils.createProject(projectName);
+        SWTBotView projectExplorerBot = bot.viewByTitle("Project Explorer");
+        projectExplorerBot.show();
+        SWTBotTreeItem treeItem = projectExplorerBot.bot().tree().getTreeItem(projectName);
+        treeItem.select();
+        treeItem.expand();
+        SWTBotTreeItem treeNode = null;
+        for (String node : treeItem.getNodes()) {
+            if (node.startsWith("Trace")) {
+                treeNode = treeItem.getNode(node);
+                break;
+            }
+
+        }
+        assertNotNull(treeNode);
+        return treeNode;
+    }
+
 }
