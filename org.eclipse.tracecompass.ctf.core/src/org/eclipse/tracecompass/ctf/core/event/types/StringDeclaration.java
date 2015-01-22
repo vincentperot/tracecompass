@@ -113,7 +113,8 @@ public class StringDeclaration extends Declaration {
      */
     @Override
     public int getMaximumSize() {
-        return Integer.MAX_VALUE;
+        /* Every definition can have a different size, so we do not scope this */
+        return 1;
     }
 
     // ------------------------------------------------------------------------
