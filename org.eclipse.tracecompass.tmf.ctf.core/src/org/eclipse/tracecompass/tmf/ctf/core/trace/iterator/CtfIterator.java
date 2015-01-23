@@ -17,6 +17,7 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.Activator;
+import org.eclipse.tracecompass.internal.tmf.ctf.core.CtfTraceUtils;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.ctf.core.context.CtfLocation;
@@ -62,7 +63,7 @@ public class CtfIterator extends CTFTraceReader
      *             a read error.
      */
     public CtfIterator(CtfTmfTrace trace) throws CTFReaderException {
-        super(trace.getCTFTrace());
+        super(CtfTraceUtils.getCtfTrace(trace));
         fTrace = trace;
         if (hasMoreEvents()) {
             fCurLocation = new CtfLocation(trace.getStartTime());
@@ -89,7 +90,7 @@ public class CtfIterator extends CTFTraceReader
      */
     public CtfIterator(CtfTmfTrace trace, CtfLocationInfo ctfLocationData, long rank)
             throws CTFReaderException {
-        super(trace.getCTFTrace());
+        super(CtfTraceUtils.getCtfTrace(trace));
 
         this.fTrace = trace;
         if (this.hasMoreEvents()) {
@@ -154,7 +155,7 @@ public class CtfIterator extends CTFTraceReader
         final CTFStreamInputReader top = super.getPrio().peek();
         if (top != null) {
             long ts = top.getCurrentEvent().getTimestamp();
-            return fTrace.getCTFTrace().timestampCyclesToNanos(ts);
+            return fTrace.timestampCyclesToNanos(ts);
         }
         return 0;
     }
@@ -178,7 +179,7 @@ public class CtfIterator extends CTFTraceReader
 
         /* Adjust the timestamp depending on the trace's offset */
         long currTimestamp = ctfLocationData.getTimestamp();
-        final long offsetTimestamp = this.getCtfTmfTrace().getCTFTrace().timestampNanoToCycles(currTimestamp);
+        final long offsetTimestamp = this.getCtfTmfTrace().timestampNanoToCycles(currTimestamp);
         try {
             if (offsetTimestamp < 0) {
                 ret = super.seek(0L);
