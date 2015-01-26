@@ -364,4 +364,32 @@ public final class SWTBotUtils {
         }
         return nodeName;
     }
+
+    /**
+     * Create a project
+     *
+     * @param bot
+     *            a given workbench bot
+     * @param projectName
+     *            the name of the project
+     * @return a {@link SWTBotTreeItem} of the "Traces" directory
+     */
+    public static SWTBotTreeItem createProject(SWTWorkbenchBot bot, String projectName) {
+        SWTBotUtils.createProject(projectName);
+        SWTBotView projectExplorerBot = bot.viewByTitle("Project Explorer");
+        projectExplorerBot.show();
+        SWTBotTreeItem treeItem = projectExplorerBot.bot().tree().getTreeItem(projectName);
+        treeItem.select();
+        treeItem.expand();
+        SWTBotTreeItem treeNode = null;
+        for (String node : treeItem.getNodes()) {
+            if (node.matches("Traces\\s\\[(\\d)*\\]")) {
+                treeNode = treeItem.getNode(node);
+                break;
+            }
+
+        }
+        assertNotNull(treeNode);
+        return treeNode;
+    }
 }
