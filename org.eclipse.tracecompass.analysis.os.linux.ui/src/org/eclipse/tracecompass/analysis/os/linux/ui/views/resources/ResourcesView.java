@@ -97,7 +97,7 @@ public class ResourcesView extends AbstractTimeGraphView {
 
     @Override
     protected void buildEventList(ITmfTrace trace, ITmfTrace parentTrace, IProgressMonitor monitor) {
-        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(trace, KernelAnalysis.ID);
+        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(trace, KernelAnalysis.class);
         if (ssq == null) {
             return;
         }
@@ -205,7 +205,7 @@ public class ResourcesView extends AbstractTimeGraphView {
             long startTime, long endTime, long resolution,
             IProgressMonitor monitor) {
         ResourcesEntry resourcesEntry = (ResourcesEntry) entry;
-        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(resourcesEntry.getTrace(), KernelAnalysis.ID);
+        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(resourcesEntry.getTrace(), KernelAnalysis.class);
         if (ssq == null) {
             return null;
         }

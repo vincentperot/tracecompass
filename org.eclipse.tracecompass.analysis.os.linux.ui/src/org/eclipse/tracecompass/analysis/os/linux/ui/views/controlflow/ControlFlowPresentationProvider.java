@@ -131,7 +131,7 @@ public class ControlFlowPresentationProvider extends TimeGraphPresentationProvid
             return retMap;
         }
         ControlFlowEntry entry = (ControlFlowEntry) event.getEntry();
-        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), KernelAnalysis.ID);
+        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(entry.getTrace(), KernelAnalysis.class);
         if (ssq == null) {
             return retMap;
         }
@@ -188,7 +188,7 @@ public class ControlFlowPresentationProvider extends TimeGraphPresentationProvid
             return;
         }
         ControlFlowEntry entry = (ControlFlowEntry) event.getEntry();
-        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), KernelAnalysis.ID);
+        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(entry.getTrace(), KernelAnalysis.class);
         if (ss == null) {
             return;
         }

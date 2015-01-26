@@ -228,7 +228,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
 
     @Override
     protected void buildEventList(final ITmfTrace trace, ITmfTrace parentTrace, IProgressMonitor monitor) {
-        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(trace, KernelAnalysis.ID);
+        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(trace, KernelAnalysis.class);
         if (ssq == null) {
             return;
         }
@@ -378,7 +378,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
 
     private void buildStatusEvents(ITmfTrace trace, ControlFlowEntry entry, @NonNull IProgressMonitor monitor, long start, long end) {
         if (start < entry.getEndTime() && end > entry.getStartTime()) {
-            ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), KernelAnalysis.ID);
+            ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(entry.getTrace(), KernelAnalysis.class);
             if (ssq == null) {
                 return;
             }
@@ -417,10 +417,11 @@ public class ControlFlowView extends AbstractTimeGraphView {
         if (realEnd <= realStart) {
             return null;
         }
-        KernelAnalysis kernelAnalysis = TmfTraceUtils.getAnalysisModuleOfClass(entry.getTrace(), KernelAnalysis.class, KernelAnalysis.ID);
+        KernelAnalysis kernelAnalysis = null;
+        for (KernelAnalysis module : TmfTraceUtils.getAnalysisModulesOfClass(entry.getTrace(), KernelAnalysis.class)) {
+            kernelAnalysis = module;
+        }
         if (kernelAnalysis == null) {
-//        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), KernelAnalysis.ID);
-//        if (ssq == null) {
             return null;
         }
         try {
@@ -471,7 +472,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
             if (trace == null) {
                 continue;
             }
-            ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(trace, KernelAnalysis.ID);
+            ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(trace, KernelAnalysis.class);
             if (ssq == null) {
                 continue;
             }
@@ -527,7 +528,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
             if (trace == null) {
                 continue;
             }
-            ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(trace, KernelAnalysis.ID);
+            ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(trace, KernelAnalysis.class);
             if (ssq == null) {
                 continue;
             }

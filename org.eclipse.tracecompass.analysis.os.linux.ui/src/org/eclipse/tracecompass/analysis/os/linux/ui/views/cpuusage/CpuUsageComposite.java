@@ -267,7 +267,7 @@ public class CpuUsageComposite extends AbstractTmfTreeViewer {
         if (trace == null) {
             return tid;
         }
-        ITmfStateSystem kernelSs = TmfStateSystemAnalysisModule.getStateSystem(trace, KernelAnalysis.ID);
+        ITmfStateSystem kernelSs = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(trace, KernelAnalysis.class);
         if (kernelSs == null) {
             return tid;
         }

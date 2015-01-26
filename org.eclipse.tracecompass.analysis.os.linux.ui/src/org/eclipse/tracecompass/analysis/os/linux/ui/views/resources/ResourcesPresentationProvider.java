@@ -165,7 +165,7 @@ public class ResourcesPresentationProvider extends TimeGraphPresentationProvider
             ResourcesEntry entry = (ResourcesEntry) event.getEntry();
 
             if (tcEvent.hasValue()) {
-                ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), KernelAnalysis.ID);
+                ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystemByModuleClass(entry.getTrace(), KernelAnalysis.class);
                 if (ss == null) {
                     return retMap;
                 }
@@ -304,7 +304,7 @@ public class ResourcesPresentationProvider extends TimeGraphPresentationProvider
             return;
         }
 
-        ITmfStateSystem ss = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), KernelAnalysis.ID);
+        ITmfStateSystem ss =TmfStateSystemAnalysisModule.getStateSystemByModuleClass(entry.getTrace(), KernelAnalysis.class);
         if (ss == null) {
             return;
         }

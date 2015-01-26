@@ -39,9 +39,6 @@ public class KernelAnalysis extends TmfStateSystemAnalysisModule {
      */
     public static final String HISTORY_TREE_FILE_NAME = "stateHistory.ht"; //$NON-NLS-1$
 
-    /** The ID of this analysis module */
-    public static final String ID = "org.eclipse.tracecompass.analysis.os.linux.kernel"; //$NON-NLS-1$
-
     /*
      * TODO: Decide which events should be mandatory for the analysis, once the
      * appropriate error messages and session setup are in place.
