@@ -61,12 +61,12 @@
         </plugins>
     </build>
 
+  <!-- Deploy RCP builds to the downloads area -->
   <profiles>
     <profile>
       <id>deploy-rcp</id>
       <properties>
         <rcpDestination>/home/data/httpd/download.eclipse.org/tracecompass/master/rcp/</rcpDestination>
-        <productDir>target/products</productDir> <!-- Should not be overriden! -->
       </properties>
       <build>
         <plugins>
@@ -91,8 +91,47 @@
 
                     <!-- Copy the new archives to the destination -->
                     <copy includeemptydirs="false" todir="${rcpDestination}">
-                      <fileset dir="${productDir}">
+                      <fileset dir="target/products">
                         <include name="trace-compass-*" />
+                      </fileset>
+                    </copy>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!-- Deploy the update-site specific to the RCP version -->
+    <profile>
+      <id>deploy-rcp-site</id>
+      <properties>
+        <rcpSiteDestination>/home/data/httpd/download.eclipse.org/tracecompass/master/rcp-repository/</rcpSiteDestination>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>deploy</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <delete includeemptydirs="false">
+                      <fileset
+                        dir="${rcpSiteDestination}">
+                        <include name="**" />
+                      </fileset>
+                    </delete>
+                    <copy includeemptydirs="false" todir="${rcpSiteDestination}">
+                      <fileset dir="target/repository">
+                        <include name="**" />
                       </fileset>
                     </copy>
                   </target>
