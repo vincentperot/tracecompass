@@ -41,6 +41,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
+import org.eclipse.tracecompass.internal.tmf.ui.editors.ITmfUIConstants;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
@@ -50,7 +51,6 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.tracecompass.tmf.ui.project.model.Messages;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfExperimentElement;
@@ -88,6 +88,15 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
     /** ID for this class */
     public static final String ID = "org.eclipse.linuxtools.tmf.ui.editors.events"; //$NON-NLS-1$
 
+    /**
+     * Expected editor input type constants for a resource (trace or
+     * experiment). Some constants are there to make it possible to reopen
+     * traces that were opened using Linux Tools and early Trace Compass
+     * versions.
+     */
+    ImmutableSet<String> traceInputTypeConstants = ImmutableSet.of(ITmfUIConstants.TRACE_EDITOR_INPUT_TYPE, "org.eclipse.linuxtools.tmf.core.trace.TmfTrace", "org.eclipse.tracecompass.tmf.core.trace.TmfTrace"); //$NON-NLS-1$//$NON-NLS-2$
+    ImmutableSet<String> experimentInputTypeConstants = ImmutableSet.of(ITmfUIConstants.EXPERIMENT_EDITOR_INPUT_TYPE, "org.eclipse.linuxtools.tmf.core.trace.TmfExperiment", "org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment"); //$NON-NLS-1$ //$NON-NLS-2$
+
     private TmfEventsTable fEventsTable;
     private IFile fFile;
     private ITmfTrace fTrace;
@@ -119,11 +128,11 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
                 throw new PartInitException("Invalid IFileEditorInput: " + fileEditorInput); //$NON-NLS-1$
             }
             try {
-                final String traceTypeId = fFile.getPersistentProperty(TmfCommonConstants.TRACETYPE);
-                if (traceTypeId == null) {
+                final String editorInputType = fFile.getPersistentProperty(ITmfUIConstants.EDITOR_INPUT_TYPE);
+                if (editorInputType == null) {
                     throw new PartInitException(Messages.TmfOpenTraceHelper_NoTraceType);
                 }
-                if (traceTypeId.equals(TmfExperiment.class.getCanonicalName())) {
+                if (experimentInputTypeConstants.contains(editorInputType)) {
                     // Special case: experiment bookmark resource
                     final TmfProjectElement project = TmfProjectRegistry.getProject(fFile.getProject(), true);
                     if (project == null) {
@@ -138,7 +147,7 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
                             return;
                         }
                     }
-                } else if (traceTypeId.equals(TmfTrace.class.getCanonicalName())) {
+                } else if (traceInputTypeConstants.contains(editorInputType)) {
                     // Special case: trace bookmark resource
                     final TmfProjectElement project = TmfProjectRegistry.getProject(fFile.getProject(), true);
                     for (final TmfTraceElement traceElement : project.getTracesFolder().getTraces()) {
