@@ -63,14 +63,14 @@ public class GdbEventsTable extends TmfEventsTable {
     public GdbEventsTable(Composite parent, int cacheSize) {
         super(parent, cacheSize, GdbEventAspects.getAspects());
         // Set the alignment of the first two columns
-        fTable.getColumns()[0].setAlignment(SWT.RIGHT);
-        fTable.getColumns()[1].setAlignment(SWT.RIGHT);
+        getTable().getColumns()[0].setAlignment(SWT.RIGHT);
+        getTable().getColumns()[1].setAlignment(SWT.RIGHT);
 
         // Synchronize currently selected frame in GDB with table selection
         addSelectionChangedListener(new ISelectionChangedListener() {
             @Override
             public void selectionChanged(SelectionChangedEvent e) {
-                TableItem[] selection = fTable.getSelection();
+                TableItem[] selection = getTable().getSelection();
                 if (selection.length > 0) {
                     TableItem selectedTableItem = selection[0];
                     if (selectedTableItem != null) {
