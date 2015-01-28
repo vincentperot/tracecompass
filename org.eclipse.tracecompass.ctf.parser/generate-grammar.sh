@@ -1,6 +1,6 @@
 #!/bin/bash
 #*******************************************************************************
-# Copyright (c) 2012, 2014 Ericsson
+# Copyright (c) 2012, 2015 Ericsson
 #
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,7 @@
 #     Alexandre Montplaisir - Initial version
 #*******************************************************************************
 
-# If you do not have (or do not feel like setting up) Maven, but you have Antlr3
+# If you do not have (or do not feel like setting up) Maven, but you have Antlr 3.5.2
 # installed on your system, you can use this script to generate the Java CTF
 # parser files.
 
