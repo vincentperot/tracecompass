@@ -226,7 +226,7 @@ public class StreamInputPacketIndex {
     public int indexOf(StreamInputPacketIndexEntry element) {
         int indexOf = -1;
         if (element != null) {
-            indexOf = Collections.binarySearch(fEntries, element);
+            indexOf = Collections.binarySearch(fEntries, element, StreamInputPacketIndexEntry.TIME_COMPARATOR);
         }
         return (indexOf < 0) ? -1 : indexOf;
     }
