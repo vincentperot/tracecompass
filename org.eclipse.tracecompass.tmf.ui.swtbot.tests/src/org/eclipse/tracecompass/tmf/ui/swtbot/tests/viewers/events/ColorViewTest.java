@@ -126,6 +126,8 @@ public class ColorViewTest {
      */
     @Test
     public void testYellow() {
+        // TODO: add asserts
+        // TOOD: make yellow cells
         SWTBotView viewBot = fBot.viewById(ColorsView.ID);
         viewBot.setFocus();
         String insert = "Insert new color setting";
