@@ -275,4 +275,67 @@ public class StreamInputPacketIndexEntry implements Comparable<StreamInputPacket
         }
         return 0;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (fContentSizeBits ^ (fContentSizeBits >>> 32));
+        result = prime * result + (int) (fDataOffsetBits ^ (fDataOffsetBits >>> 32));
+        result = prime * result + (int) (fLostEvents ^ (fLostEvents >>> 32));
+        result = prime * result + (int) (fOffsetBytes ^ (fOffsetBytes >>> 32));
+        result = prime * result + (int) (fPacketSizeBits ^ (fPacketSizeBits >>> 32));
+        result = prime * result + ((fTarget == null) ? 0 : fTarget.hashCode());
+        result = prime * result + (int) (fTargetID ^ (fTargetID >>> 32));
+        result = prime * result + (int) (fTimestampBegin ^ (fTimestampBegin >>> 32));
+        result = prime * result + (int) (fTimestampEnd ^ (fTimestampEnd >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        StreamInputPacketIndexEntry other = (StreamInputPacketIndexEntry) obj;
+        if (fContentSizeBits != other.fContentSizeBits) {
+            return false;
+        }
+        if (fDataOffsetBits != other.fDataOffsetBits) {
+            return false;
+        }
+        if (fLostEvents != other.fLostEvents) {
+            return false;
+        }
+        if (fOffsetBytes != other.fOffsetBytes) {
+            return false;
+        }
+        if (fPacketSizeBits != other.fPacketSizeBits) {
+            return false;
+        }
+        if (fTarget == null) {
+            if (other.fTarget != null) {
+                return false;
+            }
+        } else if (!fTarget.equals(other.fTarget)) {
+            return false;
+        }
+        if (fTargetID != other.fTargetID) {
+            return false;
+        }
+        if (fTimestampBegin != other.fTimestampBegin) {
+            return false;
+        }
+        if (fTimestampEnd != other.fTimestampEnd) {
+            return false;
+        }
+        return true;
+    }
+
 }
