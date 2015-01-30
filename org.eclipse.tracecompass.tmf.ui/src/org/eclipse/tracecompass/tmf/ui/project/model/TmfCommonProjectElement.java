@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.tracecompass.internal.tmf.core.ITmfCompatibilityConstants;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
@@ -43,9 +44,7 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
-import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -353,9 +352,9 @@ public abstract class TmfCommonProjectElement extends TmfProjectModelElement {
                 IFolder folderTrace = (IFolder) trace;
                 for (IResource member : folderTrace.members()) {
                     String traceTypeId = TmfTraceType.getTraceTypeId(member);
-                    if (TmfTrace.class.getCanonicalName().equals(traceTypeId)) {
+                    if (ITmfCompatibilityConstants.TRACE_INPUT_TYPE_CONSTANTS.contains(traceTypeId)) {
                         member.delete(true, null);
-                    } else if (TmfExperiment.class.getCanonicalName().equals(traceTypeId)) {
+                    } else if (ITmfCompatibilityConstants.EXPERIMENT_INPUT_TYPE_CONSTANTS.contains(traceTypeId)) {
                         member.delete(true, null);
                     }
                 }

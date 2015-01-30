@@ -39,8 +39,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.tracecompass.internal.tmf.core.ITmfCompatibilityConstants;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
-import org.eclipse.tracecompass.internal.tmf.ui.editors.ITmfEventsEditorConstants;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtEvent;
@@ -342,7 +342,7 @@ public class TmfTraceElement extends TmfCommonProjectElement implements IActionF
     public IFile createBookmarksFile() throws CoreException {
         IFile file = getBookmarksFile();
         if (fResource instanceof IFolder) {
-            return createBookmarksFile(getProject().getTracesFolder().getResource(), ITmfEventsEditorConstants.TRACE_EDITOR_INPUT_TYPE);
+            return createBookmarksFile(getProject().getTracesFolder().getResource(), ITmfCompatibilityConstants.TRACE_EDITOR_INPUT_TYPE);
         }
         return file;
     }

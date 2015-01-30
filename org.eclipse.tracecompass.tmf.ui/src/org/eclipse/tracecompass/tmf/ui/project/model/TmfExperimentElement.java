@@ -37,8 +37,8 @@ import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.tracecompass.internal.tmf.core.ITmfCompatibilityConstants;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
-import org.eclipse.tracecompass.internal.tmf.ui.editors.ITmfEventsEditorConstants;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
@@ -333,7 +333,7 @@ public class TmfExperimentElement extends TmfCommonProjectElement implements IPr
 
     @Override
     public IFile createBookmarksFile() throws CoreException {
-        return createBookmarksFile(getProject().getExperimentsFolder().getResource(), ITmfEventsEditorConstants.EXPERIMENT_EDITOR_INPUT_TYPE);
+        return createBookmarksFile(getProject().getExperimentsFolder().getResource(), ITmfCompatibilityConstants.EXPERIMENT_EDITOR_INPUT_TYPE);
     }
 
     @Override

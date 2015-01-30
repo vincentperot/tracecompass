@@ -40,8 +40,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.tracecompass.internal.tmf.core.ITmfCompatibilityConstants;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
-import org.eclipse.tracecompass.internal.tmf.ui.editors.ITmfEventsEditorConstants;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
@@ -88,15 +88,6 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
     /** ID for this class */
     public static final String ID = "org.eclipse.linuxtools.tmf.ui.editors.events"; //$NON-NLS-1$
 
-    /**
-     * Expected editor input type constants for a resource (trace or
-     * experiment). Some constants are there to make it possible to reopen
-     * traces that were opened using Linux Tools and early Trace Compass
-     * versions.
-     */
-    private static final ImmutableSet<String> TRACE_INPUT_TYPE_CONSTANTS = ImmutableSet.of(ITmfEventsEditorConstants.TRACE_EDITOR_INPUT_TYPE, "org.eclipse.linuxtools.tmf.core.trace.TmfTrace", "org.eclipse.tracecompass.tmf.core.trace.TmfTrace"); //$NON-NLS-1$//$NON-NLS-2$
-    private static final ImmutableSet<String> EXPERIMENT_INPUT_TYPE_CONSTANTS = ImmutableSet.of(ITmfEventsEditorConstants.EXPERIMENT_EDITOR_INPUT_TYPE, "org.eclipse.linuxtools.tmf.core.trace.TmfExperiment", "org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment"); //$NON-NLS-1$ //$NON-NLS-2$
-
     private TmfEventsTable fEventsTable;
     private IFile fFile;
     private ITmfTrace fTrace;
@@ -132,7 +123,7 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
                 if (traceTypeId == null) {
                     throw new PartInitException(Messages.TmfOpenTraceHelper_NoTraceType);
                 }
-                if (EXPERIMENT_INPUT_TYPE_CONSTANTS.contains(traceTypeId)) {
+                if (ITmfCompatibilityConstants.EXPERIMENT_INPUT_TYPE_CONSTANTS.contains(traceTypeId)) {
                     // Special case: experiment bookmark resource
                     final TmfProjectElement project = TmfProjectRegistry.getProject(fFile.getProject(), true);
                     if (project == null) {
@@ -147,7 +138,7 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
                             return;
                         }
                     }
-                } else if (TRACE_INPUT_TYPE_CONSTANTS.contains(traceTypeId)) {
+                } else if (ITmfCompatibilityConstants.TRACE_INPUT_TYPE_CONSTANTS.contains(traceTypeId)) {
                     // Special case: trace bookmark resource
                     final TmfProjectElement project = TmfProjectRegistry.getProject(fFile.getProject(), true);
                     for (final TmfTraceElement traceElement : project.getTracesFolder().getTraces()) {
