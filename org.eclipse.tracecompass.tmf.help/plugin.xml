@@ -6,5 +6,12 @@
       <toc
             file="doc/Developer-Guide-toc.xml"
             primary="true" />
+      <toc
+            file="toc_reference.xml"
+            primary="true">
+      </toc>
+      <index
+            path="index/">
+      </index>
    </extension>
 </plugin>

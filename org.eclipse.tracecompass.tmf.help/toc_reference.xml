@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+<!-- ============================================================================= -->
+<!-- Define topics for the references                                              -->
+<!-- ============================================================================= -->
+<toc label="Reference">
+	<topic label="API Reference" href="reference/api/overview-summary.html">
+		<topic label="org.eclipse.tracecompass.tmf.core.trace" href="reference/api/org/eclipse/tracecompass/tmf/core/trace/package-summary.html"/>
+	</topic>
+	<topic label="Extension Points Reference" href="reference/extension-points/index.html">
+       	<topic label="org.eclipse.linuxtools.tmf.core.tracetype" href="reference/extension-points/org_eclipse_linuxtools_tmf_core_tracetype.html"/>
+	</topic>
+</toc>

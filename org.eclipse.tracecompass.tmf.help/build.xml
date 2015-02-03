@@ -60,4 +60,49 @@
       </delete>
     </target>
 
+	
+	
+	
+	
+	
+	
+	<target name="extra">
+		<antcall target="convertSchemaToHtml" />
+		<antcall target="generateJavadoc" />
+		<antcall target="build.index" />
+	</target>
+
+	<target name="build.index" description="Builds search index for the plug-in" if="eclipse.running">
+		<help.buildHelpIndex manifest="${basedir}/plugin.xml" destination="${basedir}" />
+	</target>
+
+	<target name="convertSchemaToHtml" if="eclipse.running">
+		<property name="dest" value="reference/extension-points" />
+		<record name="${basedir}/convertSchema.txt" action="start"/>
+	    <pde.convertSchemaToHTML manifest="../org.eclipse.tracecompass.tmf.analysis.xml.core/plugin.xml" destination="${dest}" />
+	    <pde.convertSchemaToHTML manifest="../org.eclipse.tracecompass.tmf.core/plugin.xml" destination="${dest}" />
+	    <pde.convertSchemaToHTML manifest="../org.eclipse.tracecompass.tmf.ui/plugin.xml" destination="${dest}" />
+	    <record name="${basedir}/convertSchema.txt" action="stop"/>
+	</target>
+	
+	<target name="getJavadocPath">
+		<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
+		<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
+	</target>
+	
+	<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
+
+		<property name="optionsFile" value="javaDocOptions.txt" />
+	
+		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
+	
+		<!--remove any preexisting api doc content-->
+		<delete dir="reference/api"/>
+		<mkdir dir="reference/api"/>
+	
+		<exec dir="." executable="${javadoc}" output="doc.bin.log">
+			<arg line="@${basedir}/${optionsFile} -J-Xmx500M" />
+		</exec>
+	</target>
+
 </project>
