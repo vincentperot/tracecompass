@@ -15,7 +15,6 @@
 
 package org.eclipse.tracecompass.tmf.core.project.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -221,30 +220,6 @@ public final class TmfTraceType {
     }
 
     /**
-     * Gets the custom trace types (custom text and friends)
-     *
-     * @param type
-     *            the type to get (Text, xml or other...)
-     * @return the list of custom trace types
-     */
-    public static List<String> getCustomTraceTypes(String type) {
-        List<String> traceTypes = new ArrayList<>();
-        if (type.equals(CUSTOM_TXT_CATEGORY)) {
-            for (CustomTxtTraceDefinition def : CustomTxtTraceDefinition.loadAll()) {
-                String traceTypeName = def.definitionName;
-                traceTypes.add(traceTypeName);
-            }
-        }
-        if (type.equals(CUSTOM_XML_CATEGORY)) {
-            for (CustomXmlTraceDefinition def : CustomXmlTraceDefinition.loadAll()) {
-                String traceTypeName = def.definitionName;
-                traceTypes.add(traceTypeName);
-            }
-        }
-        return traceTypes;
-    }
-
-    /**
      * Gets all the custom trace types
      *
      * @return the list of custom trace types
@@ -286,24 +261,6 @@ public final class TmfTraceType {
     /**
      * Add or replace a custom trace type
      *
-     * @param category
-     *            The custom parser category
-     * @param definitionName
-     *            The custom parser definition name to add or replace
-     * @deprecated Use {@link #addCustomTraceType(Class, String, String)}
-     */
-    @Deprecated
-    public static void addCustomTraceType(String category, String definitionName) {
-        if (category.equals(CUSTOM_TXT_CATEGORY)) {
-            addCustomTraceType(CustomTxtTrace.class, category, definitionName);
-        } else if (category.equals(CUSTOM_XML_CATEGORY)) {
-            addCustomTraceType(CustomXmlTrace.class, category, definitionName);
-        }
-    }
-
-    /**
-     * Add or replace a custom trace type
-     *
      * @param traceClass
      *            The custom trace class, either {@link CustomTxtTrace} or
      *            {@link CustomXmlTrace}
@@ -339,24 +296,6 @@ public final class TmfTraceType {
             TRACE_TYPES.put(traceTypeId, tt);
             // Deregister trace as signal handler because it is only used for validation
             TmfSignalManager.deregister(trace);
-        }
-    }
-
-    /**
-     * Remove a custom trace type
-     *
-     * @param category
-     *            The custom parser category
-     * @param definitionName
-     *            The custom parser definition name to add or replace
-     * @deprecated Use {@link #removeCustomTraceType(Class, String, String)}
-     */
-    @Deprecated
-    public static void removeCustomTraceType(String category, String definitionName) {
-        if (category.equals(CUSTOM_TXT_CATEGORY)) {
-            removeCustomTraceType(CustomTxtTrace.class, category, definitionName);
-        } else if (category.equals(CUSTOM_XML_CATEGORY)) {
-            removeCustomTraceType(CustomXmlTrace.class, category, definitionName);
         }
     }
 
@@ -530,27 +469,6 @@ public final class TmfTraceType {
      */
     public static boolean validate(TraceValidationHelper traceToValidate) {
         return validate(traceToValidate.getTraceType(), traceToValidate.getTraceToScan());
-    }
-
-    /**
-     * Validate a list of files with a tracetype
-     *
-     * @param traceTypeName
-     *            the trace category (canonical name)
-     * @param traces
-     *            the list of files to check if they are trace
-     * @return true if all the traces are valid
-     */
-    public static boolean validateTraceFiles(String traceTypeName, List<File> traces) {
-        if (traceTypeName != null && !"".equals(traceTypeName) && //$NON-NLS-1$
-                !traceTypeName.startsWith(TmfTraceType.CUSTOM_TXT_CATEGORY) && !traceTypeName.startsWith(TmfTraceType.CUSTOM_XML_CATEGORY)) {
-            for (File trace : traces) {
-                if (!validate(traceTypeName, trace.getAbsolutePath())) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**
