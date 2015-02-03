@@ -128,29 +128,6 @@ public class CustomXmlTraceDefinition extends CustomTraceDefinition {
     /**
      * Full constructor
      *
-     * @param traceType
-     *            Name of the trace type
-     * @param rootElement
-     *            The top-level XML element
-     * @param outputs
-     *            The list of output columns
-     * @param timeStampOutputFormat
-     *            The timestamp format to use
-     * @deprecated Use
-     *             {@link #CustomXmlTraceDefinition(String, String, CustomXmlInputElement, List, String)}
-     */
-    @Deprecated
-    public CustomXmlTraceDefinition(String traceType, CustomXmlInputElement rootElement,
-            List<OutputColumn> outputs, String timeStampOutputFormat) {
-        this.definitionName = traceType;
-        this.rootInputElement = rootElement;
-        this.outputs = outputs;
-        this.timeStampOutputFormat = timeStampOutputFormat;
-    }
-
-    /**
-     * Full constructor
-     *
      * @param category
      *            Category of the trace type
      * @param traceType
@@ -420,6 +397,7 @@ public class CustomXmlTraceDefinition extends CustomTraceDefinition {
     /**
      * Load the given trace definition.
      *
+<<<<<<< Upstream, based on 3097c4b013b2ea6ae2f6e8c1fa76e5aeaf2a1cbf
      * @param definitionName
      *            Name of the XML trace definition to load
      * @return The loaded trace definition
@@ -433,6 +411,8 @@ public class CustomXmlTraceDefinition extends CustomTraceDefinition {
     /**
      * Load the given trace definition.
      *
+=======
+>>>>>>> 69c9c02 Remove deprecated and unused metheds related to custom traces
      * @param categoryName
      *            Category of the definition to load
      * @param definitionName
@@ -609,18 +589,6 @@ public class CustomXmlTraceDefinition extends CustomTraceDefinition {
             }
         }
         return inputElement;
-    }
-
-    /**
-     * Delete a definition from the currently loaded ones.
-     *
-     * @param definitionName
-     *            The name of the definition to delete
-     * @deprecated Use {@link #delete(String, String)}
-     */
-    @Deprecated
-    public static void delete(String definitionName) {
-        delete(CUSTOM_XML_CATEGORY, definitionName);
     }
 
     /**

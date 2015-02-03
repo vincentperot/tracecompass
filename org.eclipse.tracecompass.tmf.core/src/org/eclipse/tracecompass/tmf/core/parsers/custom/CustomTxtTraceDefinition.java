@@ -122,28 +122,6 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
     /**
      * Full constructor.
      *
-     * @param traceType
-     *            Name of the trace type
-     * @param inputs
-     *            List of inputs
-     * @param outputs
-     *            List of output columns
-     * @param timeStampOutputFormat
-     *            The timestamp format to use
-     * @deprecated Use {@link #CustomTxtTraceDefinition(String, String, List, List, String)}
-     */
-    @Deprecated
-    public CustomTxtTraceDefinition(String traceType, List<InputLine> inputs,
-            List<OutputColumn> outputs, String timeStampOutputFormat) {
-        this.definitionName = traceType;
-        this.inputs = inputs;
-        this.outputs = outputs;
-        this.timeStampOutputFormat = timeStampOutputFormat;
-    }
-
-    /**
-     * Full constructor.
-     *
      * @param category
      *            Category of the trace type
      * @param traceType
@@ -733,6 +711,7 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
     /**
      * Load a single definition.
      *
+<<<<<<< Upstream, based on 3097c4b013b2ea6ae2f6e8c1fa76e5aeaf2a1cbf
      * @param definitionName
      *            Name of the definition to load
      * @return The loaded trace definition
@@ -746,6 +725,8 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
     /**
      * Load a single definition.
      *
+=======
+>>>>>>> 69c9c02 Remove deprecated and unused metheds related to custom traces
      * @param categoryName
      *            Category of the definition to load
      * @param definitionName
@@ -889,18 +870,6 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
             }
         }
         return inputLine;
-    }
-
-    /**
-     * Delete a definition from the currently loaded ones.
-     *
-     * @param definitionName
-     *            The name of the definition to delete
-     * @deprecated Use {@link #delete(String, String)}
-     */
-    @Deprecated
-    public static void delete(String definitionName) {
-        delete(CUSTOM_TXT_CATEGORY, definitionName);
     }
 
     /**
