@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2014 Ericsson
+ * Copyright (c) 2010, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Patrick Tasse - Initial API and implementation
+ *   Bernd Hufmann - Add trace type id handling
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.core.parsers.custom;
@@ -26,6 +27,8 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.core.parsers.custom.CustomEventAspects;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -36,6 +39,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfEventParser;
 import org.eclipse.tracecompass.tmf.core.trace.TmfContext;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
 import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfPersistentlyIndexable;
 import org.eclipse.tracecompass.tmf.core.trace.indexer.ITmfTraceIndexer;
@@ -60,7 +64,7 @@ import org.xml.sax.SAXParseException;
  * @author Patrick Tassé
  * @since 3.0
  */
-public class CustomXmlTrace extends CustomTrace implements ITmfEventParser, ITmfPersistentlyIndexable {
+public class CustomXmlTrace extends TmfTrace implements ITmfEventParser, ITmfPersistentlyIndexable {
 
     private static final TmfLongLocation NULL_LOCATION = new TmfLongLocation(-1L);
     private static final int DEFAULT_CACHE_SIZE = 100;
@@ -71,6 +75,11 @@ public class CustomXmlTrace extends CustomTrace implements ITmfEventParser, ITmf
     private final CustomXmlEventType fEventType;
     private final CustomXmlInputElement fRecordInputElement;
     private BufferedRandomAccessFile fFile;
+    private final String fTraceTypeId;
+
+    private static final String CUSTOM_XML_TRACE_TYPE_PREFIX = "custom.xml.trace"; //$NON-NLS-1$
+    private static final String LINUX_TOOLS_CUSTOM_XML_TRACE_TYPE_PREFIX = "org.eclipse.linuxtools.tmf.core.parsers.custom.CustomXmlTrace"; //$NON-NLS-1$
+    private static final char SEPARATOR = ':';
 
     /**
      * Basic constructor
@@ -79,10 +88,10 @@ public class CustomXmlTrace extends CustomTrace implements ITmfEventParser, ITmf
      *            Trace definition
      */
     public CustomXmlTrace(final CustomXmlTraceDefinition definition) {
-        super(definition);
         fDefinition = definition;
         fEventType = new CustomXmlEventType(fDefinition);
         fRecordInputElement = getRecordInputElement(fDefinition.rootInputElement);
+        fTraceTypeId = buildTraceTypeId(definition.categoryName, definition.definitionName);
         setCacheSize(DEFAULT_CACHE_SIZE);
     }
 
@@ -588,5 +597,53 @@ public class CustomXmlTrace extends CustomTrace implements ITmfEventParser, ITmf
     @Override
     protected ITmfTraceIndexer createIndexer(int interval) {
         return new TmfBTreeTraceIndexer(this, interval);
+    }
+
+    @Override
+    public String getTraceTypeId() {
+        return fTraceTypeId;
+    }
+
+    /**
+     * Build the trace type id for a custom XML trace
+     *
+     * @param category
+     *            the category
+     * @param definitionName
+     *            the definition name
+     * @return the trace type id
+     */
+    public static @NonNull String buildTraceTypeId(String category, String definitionName) {
+        return CUSTOM_XML_TRACE_TYPE_PREFIX + SEPARATOR + category + SEPARATOR + definitionName;
+    }
+
+    /**
+     * Checks whether the given trace type ID is a custom XML trace type ID
+     *
+     * @param traceTypeId
+     *                the trace type ID to check
+     * @return <code>true</code> if it's a custom text trace type ID else <code>false</code>
+     */
+    public static boolean isCustomTraceTypeId(@NonNull String traceTypeId) {
+        return traceTypeId.startsWith(CUSTOM_XML_TRACE_TYPE_PREFIX);
+    }
+
+    /**
+     * Build the trace type id for a XML custom trace from a legacy trace type id.
+     *
+     * @param traceTypeId
+     *            the legacy trace type ID
+     * @return the trace type id in Trace Compass format
+     */
+    public static @NonNull String buildCompatibilityTraceTypeId(@NonNull String traceTypeId) {
+        int index = traceTypeId.lastIndexOf(SEPARATOR);
+        if ((index != -1) && (traceTypeId.startsWith(LINUX_TOOLS_CUSTOM_XML_TRACE_TYPE_PREFIX))) {
+            String definitionName = index < traceTypeId.length() ? traceTypeId.substring(index + 1) : ""; //$NON-NLS-1$
+            if (traceTypeId.contains(CustomXmlTrace.class.getSimpleName() + SEPARATOR) && traceTypeId.indexOf(SEPARATOR) == index) {
+                return buildTraceTypeId(CustomXmlTraceDefinition.CUSTOM_XML_CATEGORY, definitionName);
+            }
+            return NonNullUtils.checkNotNull(traceTypeId.replace(LINUX_TOOLS_CUSTOM_XML_TRACE_TYPE_PREFIX, CUSTOM_XML_TRACE_TYPE_PREFIX));
+        }
+        return traceTypeId;
     }
 }
