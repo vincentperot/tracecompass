@@ -14,10 +14,12 @@ package org.eclipse.tracecompass.tmf.core.tests.analysis;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.List;
+import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisParameterProvider;
@@ -28,7 +30,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysis;
 import org.eclipse.tracecompass.tmf.tests.stubs.analysis.TestAnalysisParameterProvider;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -38,13 +39,7 @@ import org.junit.Test;
  */
 public class AnalysisParameterProviderTest {
 
-    /**
-     * Registers the parameter provider
-     */
-    @Before
-    public void setup() {
-        TmfAnalysisManager.registerParameterProvider(AnalysisManagerTest.MODULE_PARAM, TestAnalysisParameterProvider.class);
-    }
+    private static final @NonNull String MODULE_ID = "org.eclipse.linuxtools.tmf.core.tests.analysis.testParamProvider";
 
     /**
      * Cleanup the trace after testing
@@ -61,26 +56,40 @@ public class AnalysisParameterProviderTest {
     public void testProviderTmfTrace() {
         ITmfTrace trace = TmfTestTrace.A_TEST_10K.getTrace();
         /* Make sure the value is set to null */
-        IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_PARAM);
+        IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(MODULE_ID);
         assertNotNull(helper);
         IAnalysisModule module = null;
+        IAnalysisModule module2 = null;
         try {
             module = helper.newModule(trace);
 
             assertEquals(10, module.getParameter(TestAnalysis.PARAM_TEST));
 
             /* Change the value of the parameter in the provider */
-            List<IAnalysisParameterProvider> providers = TmfAnalysisManager.getParameterProviders(module, trace);
+            Set<IAnalysisParameterProvider> providers = TmfAnalysisManager.getParameterProviders(module, trace);
             assertEquals(1, providers.size());
-            TestAnalysisParameterProvider provider = (TestAnalysisParameterProvider) providers.get(0);
+            TestAnalysisParameterProvider provider = (TestAnalysisParameterProvider) providers.iterator().next();
             provider.setValue(5);
             assertEquals(5, module.getParameter(TestAnalysis.PARAM_TEST));
+
+            /* Make sure the parameter provider is the same instance for another module */
+            module2 = helper.newModule(trace);
+            assertNotNull(module2);
+            assertTrue(module != module2);
+
+            providers = TmfAnalysisManager.getParameterProviders(module2, trace);
+            assertEquals(1, providers.size());
+            TestAnalysisParameterProvider provider2 = (TestAnalysisParameterProvider) providers.iterator().next();
+            assertTrue(provider == provider2);
 
         } catch (TmfAnalysisException e) {
             fail(e.getMessage());
         } finally {
             if (module != null) {
                 module.dispose();
+            }
+            if (module2 != null) {
+                module2.dispose();
             }
         }
     }

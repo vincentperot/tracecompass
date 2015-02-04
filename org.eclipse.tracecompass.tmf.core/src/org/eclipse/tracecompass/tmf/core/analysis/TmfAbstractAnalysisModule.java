@@ -17,6 +17,7 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,7 @@ public abstract class TmfAbstractAnalysisModule extends TmfComponent implements 
     private final Map<String, Object> fParameters = new HashMap<>();
     private final List<String> fParameterNames = new ArrayList<>();
     private final List<IAnalysisOutput> fOutputs = new ArrayList<>();
-    private List<IAnalysisParameterProvider> fParameterProviders = new ArrayList<>();
+    private Set<IAnalysisParameterProvider> fParameterProviders = new HashSet<>();
     private @Nullable Job fJob = null;
 
     private final Object syncObj = new Object();

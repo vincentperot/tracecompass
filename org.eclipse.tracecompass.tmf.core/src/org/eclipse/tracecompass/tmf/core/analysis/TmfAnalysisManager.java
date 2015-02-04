@@ -18,11 +18,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.core.analysis.TmfAnalysisModuleSources;
+import org.eclipse.tracecompass.internal.tmf.core.analysis.TmfAnalysisParameterProviders;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
 import com.google.common.collect.ImmutableMap;
@@ -179,8 +181,10 @@ public class TmfAnalysisManager {
      *            The trace
      * @return A parameter provider if one applies to the trace, null otherwise
      */
-    public static List<IAnalysisParameterProvider> getParameterProviders(IAnalysisModule module, ITmfTrace trace) {
-        List<IAnalysisParameterProvider> providerList = new ArrayList<>();
+    public static Set<IAnalysisParameterProvider> getParameterProviders(IAnalysisModule module, ITmfTrace trace) {
+        /* First, get the parameter providers from the extension point */
+        Set<IAnalysisParameterProvider> providerList = TmfAnalysisParameterProviders.getParameterProvidersFor(module.getId());
+        /* Then add any new parameter provider coming from other sources */
         synchronized (fParameterProviders) {
             if (!fParameterProviders.containsKey(module.getId())) {
                 return providerList;
