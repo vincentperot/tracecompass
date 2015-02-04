@@ -630,7 +630,18 @@ public class CustomXmlTrace extends TmfTrace implements ITmfEventParser, ITmfPer
     }
 
     /**
-     * Build the trace type id for a XML custom trace from a legacy trace type id.
+     * This methods builds a trace type ID from a given ID taking into
+     * consideration any format changes that were done for the IDs of custom
+     * XML traces. For example, such format change took place when moving to
+     * Trace Compass. Trace type IDs that are part of the plug-in extension for
+     * trace types won't be changed.
+     *
+     * This method is useful for IDs that were persisted in the workspace before
+     * the format changes (e.g. in the persistent properties of a trace
+     * resource).
+     *
+     * It ensures backwards compatibility of the workspace for custom XML
+     * traces.
      *
      * @param traceTypeId
      *            the legacy trace type ID
