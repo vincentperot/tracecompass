@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTimeSynchSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
@@ -39,7 +40,7 @@ public class TmfUml2SDSyncLoaderSignalTest {
 
     private static TmfTimeRange range;
     private static TmfTimestamp rangeWindow;
-    private static TmfTimestamp currentTime;
+    private static @NonNull TmfTimestamp currentTime = new Uml2SDTestTimestamp(9789773782043L);
 
     /**
      * Initialization
@@ -52,7 +53,6 @@ public class TmfUml2SDSyncLoaderSignalTest {
         range = new TmfTimeRange(new Uml2SDTestTimestamp(9789689220871L), new Uml2SDTestTimestamp(9789773881426L));
         // Get range window for tests below
         rangeWindow = (TmfTimestamp) range.getEndTime().getDelta(range.getStartTime());
-        currentTime = new Uml2SDTestTimestamp(9789773782043L);
 
         fFacility.getTrace().broadcast(new TmfRangeSynchSignal(fFacility, range));
         fFacility.getTrace().broadcast(new TmfTimeSynchSignal(fFacility, currentTime));
