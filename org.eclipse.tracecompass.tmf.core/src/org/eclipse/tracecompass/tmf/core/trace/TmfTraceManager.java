@@ -109,7 +109,7 @@ public final class TmfTraceManager {
      * @return The begin timestamp of selection
      * @since 2.1
      */
-    public ITmfTimestamp getSelectionBeginTime() {
+    public @NonNull ITmfTimestamp getSelectionBeginTime() {
         return getCurrentTraceContext().getSelectionBegin();
     }
 
@@ -117,7 +117,7 @@ public final class TmfTraceManager {
      * @return The end timestamp of selection
      * @since 2.1
      */
-    public ITmfTimestamp getSelectionEndTime() {
+    public @NonNull ITmfTimestamp getSelectionEndTime() {
         return getCurrentTraceContext().getSelectionEnd();
     }
 
@@ -185,7 +185,7 @@ public final class TmfTraceManager {
         return null;
     }
 
-    private TmfTraceContext getCurrentTraceContext() {
+    private @NonNull TmfTraceContext getCurrentTraceContext() {
         TmfTraceContext curCtx = fTraces.get(fCurrentTrace);
         if (curCtx == null) {
             /* There are no traces opened at the moment. */
@@ -395,7 +395,7 @@ public final class TmfTraceManager {
         for (Map.Entry<ITmfTrace, TmfTraceContext> entry : fTraces.entrySet()) {
             final ITmfTrace trace = entry.getKey();
             if (beginTs.intersects(getValidTimeRange(trace)) || endTs.intersects(getValidTimeRange(trace))) {
-                TmfTraceContext prevCtx = entry.getValue();
+                TmfTraceContext prevCtx = NonNullUtils.checkNotNull(entry.getValue());
                 TmfTraceContext newCtx = new TmfTraceContext(prevCtx, beginTs, endTs);
                 entry.setValue(newCtx);
             }
@@ -415,12 +415,15 @@ public final class TmfTraceManager {
     public synchronized void timeRangeUpdated(final TmfRangeSynchSignal signal) {
         for (Map.Entry<ITmfTrace, TmfTraceContext> entry : fTraces.entrySet()) {
             final ITmfTrace trace = entry.getKey();
-            final TmfTraceContext curCtx = entry.getValue();
+            final TmfTraceContext curCtx = NonNullUtils.checkNotNull(entry.getValue());
 
             final TmfTimeRange validTr = getValidTimeRange(trace);
 
             /* Determine the new time range */
-            TmfTimeRange targetTr = signal.getCurrentRange().getIntersection(validTr);
+            TmfTimeRange targetTr = null;
+            if (validTr != null) {
+                targetTr = signal.getCurrentRange().getIntersection(validTr);
+            }
             TmfTimeRange newTr = (targetTr == null ? curCtx.getWindowRange() : targetTr);
 
             /* Update the values */

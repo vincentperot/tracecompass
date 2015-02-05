@@ -124,8 +124,8 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
     private volatile long fNbEvents = 0;
 
     // The time span of the event stream
-    private ITmfTimestamp fStartTime = TmfTimestamp.BIG_BANG;
-    private ITmfTimestamp fEndTime = TmfTimestamp.BIG_BANG;
+    private @NonNull ITmfTimestamp fStartTime = TmfTimestamp.BIG_BANG;
+    private @NonNull ITmfTimestamp fEndTime = TmfTimestamp.BIG_BANG;
 
     // The trace streaming interval (0 = no streaming)
     private long fStreamingInterval = 0;
@@ -485,6 +485,9 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @since 2.0
      */
     protected void setStartTime(final ITmfTimestamp startTime) {
+        if (startTime == null) {
+            throw new NullPointerException();
+        }
         fStartTime = startTime;
     }
 
@@ -495,6 +498,9 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @since 2.0
      */
     protected void setEndTime(final ITmfTimestamp endTime) {
+        if (endTime == null) {
+            throw new NullPointerException();
+        }
         fEndTime = endTime;
     }
 
@@ -583,7 +589,8 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
         // parseEvent() does not update the context
         final ITmfEvent event = parseEvent(context);
         if (event != null) {
-            updateAttributes(context, event.getTimestamp());
+            ITmfTimestamp timestamp = event.getTimestamp();
+            updateAttributes(context, timestamp);
             context.setLocation(getCurrentLocation());
             context.increaseRank();
         }
@@ -597,7 +604,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @param timestamp the corresponding timestamp
      * @since 2.0
      */
-    protected synchronized void updateAttributes(final ITmfContext context, final ITmfTimestamp timestamp) {
+    protected synchronized void updateAttributes(final ITmfContext context, final @NonNull ITmfTimestamp timestamp) {
         if (fStartTime.equals(TmfTimestamp.BIG_BANG) || (fStartTime.compareTo(timestamp) > 0)) {
             fStartTime = timestamp;
         }
