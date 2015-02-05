@@ -16,8 +16,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisParameterProvider;
@@ -37,6 +39,12 @@ import org.junit.Test;
  * @author Geneviève Bastien
  */
 public class AnalysisParameterProviderTest {
+
+    private static IAnalysisModuleHelper getModuleHelper(@NonNull String moduleId) {
+        Collection<IAnalysisModuleHelper> helpers = TmfAnalysisManager.getAnalysisModule(moduleId);
+        assertEquals(1, helpers.size());
+        return helpers.iterator().next();
+    }
 
     /**
      * Registers the parameter provider
@@ -61,7 +69,7 @@ public class AnalysisParameterProviderTest {
     public void testProviderTmfTrace() {
         ITmfTrace trace = TmfTestTrace.A_TEST_10K.getTrace();
         /* Make sure the value is set to null */
-        IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_PARAM);
+        IAnalysisModuleHelper helper = getModuleHelper(AnalysisManagerTest.MODULE_PARAM);
         assertNotNull(helper);
         IAnalysisModule module = null;
         try {
