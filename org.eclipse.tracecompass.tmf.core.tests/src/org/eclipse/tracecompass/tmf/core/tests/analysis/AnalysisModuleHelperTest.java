@@ -20,11 +20,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModuleHelper;
@@ -61,18 +63,24 @@ public class AnalysisModuleHelperTest {
     private IAnalysisModuleHelper fReqModule;
     private ITmfTrace fTrace;
 
+    private static IAnalysisModuleHelper getModuleHelper(@NonNull String moduleId) {
+        Collection<IAnalysisModuleHelper> helpers = TmfAnalysisManager.getAnalysisModule(moduleId);
+        assertEquals(1, helpers.size());
+        return helpers.iterator().next();
+    }
+
     /**
      * Gets the module helpers for 2 test modules
      */
     @Before
     public void getModules() {
-        fModule = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_PARAM);
+        fModule = getModuleHelper(AnalysisManagerTest.MODULE_PARAM);
         assertNotNull(fModule);
         assertTrue(fModule instanceof TmfAnalysisModuleHelperConfigElement);
-        fModuleOther = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_SECOND);
+        fModuleOther = getModuleHelper(AnalysisManagerTest.MODULE_SECOND);
         assertNotNull(fModuleOther);
         assertTrue(fModuleOther instanceof TmfAnalysisModuleHelperConfigElement);
-        fReqModule = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_REQ);
+        fReqModule = getModuleHelper(AnalysisManagerTest.MODULE_REQ);
         assertNotNull(fReqModule);
         assertTrue(fReqModule instanceof TmfAnalysisModuleHelperConfigElement);
         fTrace = TmfTestTrace.A_TEST_10K2.getTraceAsStub2();
@@ -193,8 +201,7 @@ public class AnalysisModuleHelperTest {
          * This analysis has a parameter, but no default value. we should be
          * able to set the parameter
          */
-        IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_PARAM);
-        assertNotNull(helper);
+        IAnalysisModuleHelper helper = getModuleHelper(AnalysisManagerTest.MODULE_PARAM);
         IAnalysisModule module = null;
         try {
             module = helper.newModule(trace);
@@ -212,8 +219,7 @@ public class AnalysisModuleHelperTest {
         }
 
         /* This module has a parameter with default value */
-        helper = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_PARAM_DEFAULT);
-        assertNotNull(helper);
+        helper = getModuleHelper(AnalysisManagerTest.MODULE_PARAM_DEFAULT);
         try {
             module = helper.newModule(trace);
             assertEquals(3, module.getParameter(TestAnalysis.PARAM_TEST));
@@ -233,8 +239,7 @@ public class AnalysisModuleHelperTest {
          * This module does not have a parameter so setting it should throw an
          * error
          */
-        helper = TmfAnalysisManager.getAnalysisModule(AnalysisManagerTest.MODULE_SECOND);
-        assertNotNull(helper);
+        helper = getModuleHelper(AnalysisManagerTest.MODULE_SECOND);
         Exception exception = null;
         trace = fTrace;
         assertNotNull(trace);

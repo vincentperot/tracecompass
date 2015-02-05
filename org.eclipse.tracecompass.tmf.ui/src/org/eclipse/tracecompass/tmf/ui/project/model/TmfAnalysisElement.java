@@ -14,6 +14,7 @@
 package org.eclipse.tracecompass.tmf.ui.project.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +83,7 @@ public class TmfAnalysisElement extends TmfProjectModelElement implements ITmfSt
             childrenMap.put(output.getName(), output);
         }
 
-        IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(fAnalysisId);
+        IAnalysisModuleHelper helper = getModuleHelper(fAnalysisId);
         if (helper == null) {
             deleteOutputs();
             return;
@@ -194,7 +195,7 @@ public class TmfAnalysisElement extends TmfProjectModelElement implements ITmfSt
             }
         }
 
-        IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(fAnalysisId);
+        IAnalysisModuleHelper helper = getModuleHelper(fAnalysisId);
         if (helper == null) {
             return new String();
         }
@@ -212,7 +213,7 @@ public class TmfAnalysisElement extends TmfProjectModelElement implements ITmfSt
      * @return The analysis icon file name
      */
     public String getIconFile() {
-        IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(fAnalysisId);
+        IAnalysisModuleHelper helper = getModuleHelper(fAnalysisId);
         if (helper == null) {
             return null;
         }
@@ -225,11 +226,19 @@ public class TmfAnalysisElement extends TmfProjectModelElement implements ITmfSt
      * @return The analysis bundle
      */
     public Bundle getBundle() {
-        IAnalysisModuleHelper helper = TmfAnalysisManager.getAnalysisModule(fAnalysisId);
+        IAnalysisModuleHelper helper = getModuleHelper(fAnalysisId);
         if (helper == null) {
             return null;
         }
         return helper.getBundle();
+    }
+
+    private static IAnalysisModuleHelper getModuleHelper(@NonNull String moduleId) {
+        Collection<IAnalysisModuleHelper> helpers = TmfAnalysisManager.getAnalysisModule(moduleId);
+        if (helpers.size() == 0) {
+            return null;
+        }
+        return helpers.iterator().next();
     }
 
     /** Delete all outputs under this analysis element */
