@@ -12,6 +12,7 @@
 
 package org.eclipse.tracecompass.btf.core.event;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
@@ -71,6 +72,12 @@ public class BtfEvent extends TmfEvent {
      */
     public String getEventDescription() {
         return fDescription;
+    }
+
+    @Override
+    public Object getAdapter(Class adapter) {
+        // Force loading the adapters otherwise some plugins might not load
+        return Platform.getAdapterManager().loadAdapter(this, adapter.getName());
     }
 
     /**
