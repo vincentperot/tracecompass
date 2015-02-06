@@ -67,7 +67,7 @@ public class CustomTxtEvent extends CustomEvent {
      *            Event type
      */
     public CustomTxtEvent(CustomTxtTraceDefinition definition,
-            ITmfTrace parentTrace, ITmfTimestamp timestamp, TmfEventType type) {
+            ITmfTrace parentTrace, @NonNull ITmfTimestamp timestamp, TmfEventType type) {
         super(definition, parentTrace, timestamp, type);
     }
 

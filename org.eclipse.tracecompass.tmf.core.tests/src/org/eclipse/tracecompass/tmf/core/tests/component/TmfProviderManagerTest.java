@@ -21,6 +21,7 @@ import org.eclipse.tracecompass.tmf.core.component.TmfEventProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.junit.Test;
 
@@ -77,7 +78,7 @@ public class TmfProviderManagerTest {
 
     private class TmfEvent3 extends TmfEvent {
         private TmfEvent3() {
-            super(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+            super(null, ITmfContext.UNKNOWN_RANK, TmfTimestamp.BIG_BANG, null, null);
         }
     }
 

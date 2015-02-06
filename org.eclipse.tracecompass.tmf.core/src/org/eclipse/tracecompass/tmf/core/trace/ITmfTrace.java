@@ -445,6 +445,6 @@ public interface ITmfTrace extends ITmfEventProvider {
      * @return The new timestamp
      * @since 3.0
      */
-    ITmfTimestamp createTimestamp(long ts);
+    @NonNull ITmfTimestamp createTimestamp(long ts);
 
 }

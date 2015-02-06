@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
@@ -56,9 +57,9 @@ public class TmfBaseStatisticsDataTest {
     private final String   fLabel2 = "label3";
     private final String[] fLabels = new String[] { fLabel0, fLabel1, fLabel2 };
 
-    private final TmfTimestamp fTimestamp1 = new TmfTimestamp(12345, (byte) 2);
-    private final TmfTimestamp fTimestamp2 = new TmfTimestamp(12350, (byte) 2);
-    private final TmfTimestamp fTimestamp3 = new TmfTimestamp(12355, (byte) 2);
+    private final @NonNull TmfTimestamp fTimestamp1 = new TmfTimestamp(12345, (byte) 2);
+    private final @NonNull TmfTimestamp fTimestamp2 = new TmfTimestamp(12350, (byte) 2);
+    private final @NonNull TmfTimestamp fTimestamp3 = new TmfTimestamp(12355, (byte) 2);
 
     private final TmfEventType fType1 = new TmfEventType(fTypeId1, TmfEventField.makeRoot(fLabels));
     private final TmfEventType fType2 = new TmfEventType(fTypeId1, TmfEventField.makeRoot(fLabels));

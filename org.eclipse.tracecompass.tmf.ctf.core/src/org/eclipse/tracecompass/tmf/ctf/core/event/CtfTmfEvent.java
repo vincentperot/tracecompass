@@ -76,7 +76,7 @@ public class CtfTmfEvent extends TmfEvent
     /**
      * Constructor used by {@link CtfTmfEventFactory#createEvent}
      */
-    CtfTmfEvent(CtfTmfTrace trace, long rank, CtfTmfTimestamp timestamp,
+    CtfTmfEvent(CtfTmfTrace trace, long rank, @NonNull CtfTmfTimestamp timestamp,
             String fileName, int cpu, IEventDeclaration declaration, @NonNull EventDefinition eventDefinition) {
         super(trace,
                 rank,
