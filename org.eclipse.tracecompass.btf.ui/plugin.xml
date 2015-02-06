@@ -8,4 +8,10 @@
             tracetype="org.eclipse.linuxtools.btf.trace">
       </type>
    </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.eclipse.tracecompass.internal.btf.ui.Startup">
+      </startup>
+   </extension>
 </plugin>
