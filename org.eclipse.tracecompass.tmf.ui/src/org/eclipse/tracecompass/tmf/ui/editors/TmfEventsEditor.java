@@ -96,6 +96,9 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
     private boolean fTraceSelected;
     private IMarker fPendingGotoMarker;
 
+    public IFile getFile(){
+        return fFile;
+    }
     @Override
     public void doSave(final IProgressMonitor monitor) {
     }
