@@ -42,7 +42,7 @@ public abstract class TextTraceEvent extends TmfEvent {
      *            The event content (payload)
      */
     public TextTraceEvent(TextTrace<? extends TextTraceEvent> parentTrace,
-            final ITmfTimestamp timestamp,
+            final @NonNull ITmfTimestamp timestamp,
             final ITmfEventType type,
             final TextTraceEventContent content) {
         super(parentTrace, ITmfContext.UNKNOWN_RANK, timestamp, type, content);

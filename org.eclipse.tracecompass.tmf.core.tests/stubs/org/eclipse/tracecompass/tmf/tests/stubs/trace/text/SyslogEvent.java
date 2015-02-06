@@ -22,6 +22,7 @@ import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfCallsite;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfSourceLookup;
 import org.eclipse.tracecompass.tmf.core.event.lookup.TmfCallsite;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.text.TextTraceEvent;
 import org.eclipse.tracecompass.tmf.core.trace.text.TextTraceEventContent;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.text.SyslogEventType.Index;
@@ -35,7 +36,7 @@ public class SyslogEvent extends TextTraceEvent implements ITmfCollapsibleEvent,
      * Default constructor
      */
     public SyslogEvent() {
-        super(null, null, new SyslogEventType(), null);
+        super(null, TmfTimestamp.BIG_BANG, new SyslogEventType(), null);
     }
 
     /**
@@ -61,7 +62,7 @@ public class SyslogEvent extends TextTraceEvent implements ITmfCollapsibleEvent,
      * @param content
      *            the event content (payload)
      */
-    public SyslogEvent(SyslogTrace parentTrace, final ITmfTimestamp timestamp,
+    public SyslogEvent(SyslogTrace parentTrace, final @NonNull ITmfTimestamp timestamp,
             final ITmfEventType type, final TextTraceEventContent content) {
         super(parentTrace, timestamp, type, content);
     }

@@ -13,6 +13,7 @@
 package org.eclipse.tracecompass.tmf.ctf.core.event;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.tmf.core.event.ITmfLostEvent;
@@ -62,8 +63,10 @@ public class CtfTmfLostEvent extends CtfTmfEvent implements ITmfLostEvent {
         /*
          * Only the factory should call this method, the case to
          * (CtfTmfTimestamp) should be safe.
+         *
+         * FIXME: Temporary NonNullUtils.checkNotNull: next patch in the series should make this unnecessary
          */
-        super(trace, rank, (CtfTmfTimestamp) timeRange.getStartTime(), fileName, cpu, declaration, def);
+        super(trace, rank, NonNullUtils.checkNotNull((CtfTmfTimestamp) timeRange.getStartTime()), fileName, cpu, declaration, def);
         fTimeRange = timeRange;
         fNbLost = nbLost;
     }
