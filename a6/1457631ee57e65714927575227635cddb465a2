@@ -1,0 +1,8 @@
+Code-Review+1: Hudson CI
+Code-Review+2: Bernd Hufmann <bernd.hufmann@ericsson.com>
+Verified+1: Bernd Hufmann <bernd.hufmann@ericsson.com>
+Submitted-by: Genevieve Bastien <gbastien+lttng@versatic.net>
+Submitted-at: Fri, 06 Feb 2015 16:16:29 -0500
+Reviewed-on: https://git.eclipse.org/r/39897
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
