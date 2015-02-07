@@ -26,6 +26,11 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
  */
 public class KernelTidAspect extends LinuxTidAspect {
 
+    public static final KernelTidAspect INSTANCE = new KernelTidAspect();
+
+    private KernelTidAspect() {
+    }
+
     @Override
     public @Nullable Integer resolve(ITmfEvent event) {
         /* Find the CPU this event is run on */
