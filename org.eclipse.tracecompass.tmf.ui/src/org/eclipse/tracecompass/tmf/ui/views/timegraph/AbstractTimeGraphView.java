@@ -150,6 +150,9 @@ public abstract class AbstractTimeGraphView extends TmfView {
     /** The tree label provider, or null if combo is not used */
     private TreeLabelProvider fLabelProvider = null;
 
+    /** The time graph content provider */
+    private @NonNull ITimeGraphContentProvider fTimeGraphContentProvider = new TimeGraphContentProvider();
+
     /** The relative weight of the sash, ignored if combo is not used */
     private int[] fWeight = { 1, 1 };
 
@@ -617,8 +620,19 @@ public abstract class AbstractTimeGraphView extends TmfView {
     }
 
     /**
-     * Sets the relative weight of each part of the time graph combo.
-     * This should be called from the constructor.
+     * Sets the time graph content provider. This should be called from the constructor
+     *
+     * @param tgcp
+     *            The time graph content provider
+     * @since 1.0
+     */
+    protected void setTimeGraphContentProvider(final @NonNull ITimeGraphContentProvider tgcp) {
+        fTimeGraphContentProvider = tgcp;
+    }
+
+    /**
+     * Sets the relative weight of each part of the time graph combo. This
+     * should be called from the constructor.
      *
      * @param weights
      *            The array (length 2) of relative weights of each part of the combo
@@ -852,21 +866,30 @@ public abstract class AbstractTimeGraphView extends TmfView {
 
     @Override
     public void createPartControl(Composite parent) {
+        ITimeGraphContentProvider tgcp = fTimeGraphContentProvider;
         if (fColumns == null || fLabelProvider == null) {
             fTimeGraphWrapper = new TimeGraphViewerWrapper(parent, SWT.NONE);
             TimeGraphViewer viewer = fTimeGraphWrapper.getTimeGraphViewer();
-            viewer.setTimeGraphContentProvider(new TimeGraphContentProvider());
+            viewer.setTimeGraphContentProvider(tgcp);
         } else {
             TimeGraphComboWrapper wrapper = new TimeGraphComboWrapper(parent, SWT.NONE);
             fTimeGraphWrapper = wrapper;
             TimeGraphCombo combo = wrapper.getTimeGraphCombo();
-            combo.setTreeContentProvider(new TreeContentProvider());
+            /*
+             * The time graph content provider, may also provide content for the
+             * tree
+             */
+            if (tgcp instanceof ITreeContentProvider) {
+                combo.setTreeContentProvider((ITreeContentProvider) tgcp);
+            } else {
+                combo.setTreeContentProvider(new TreeContentProvider());
+            }
             combo.setTreeLabelProvider(fLabelProvider);
             combo.setTreeColumns(fColumns);
             combo.setFilterContentProvider(new TreeContentProvider());
             combo.setFilterLabelProvider(fFilterLabelProvider);
             combo.setFilterColumns(fFilterColumns);
-            combo.setTimeGraphContentProvider(new TimeGraphContentProvider());
+            combo.setTimeGraphContentProvider(tgcp);
         }
 
         fTimeGraphWrapper.setTimeGraphProvider(fPresentation);
