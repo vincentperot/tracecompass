@@ -180,6 +180,7 @@
 
     <module>org.eclipse.tracecompass.analysis.graph.core</module>
     <module>org.eclipse.tracecompass.analysis.graph.core.tests</module>
+    <module>org.eclipse.tracecompass.analysis.graph.ui</module>
 
     <module>org.eclipse.tracecompass.lttng2.control</module>
     <module>org.eclipse.tracecompass.lttng2.control.core</module>
