@@ -1,0 +1,9 @@
+Code-Review+1: Hudson CI
+Code-Review+1: Patrick Tasse <patrick.tasse@gmail.com>
+Verified+1: Patrick Tasse <patrick.tasse@gmail.com>
+Code-Review+2: Bernd Hufmann <bernd.hufmann@ericsson.com>
+Submitted-by: Bernd Hufmann <bernd.hufmann@ericsson.com>
+Submitted-at: Mon, 09 Feb 2015 15:20:58 -0500
+Reviewed-on: https://git.eclipse.org/r/41236
+Project: tracecompass/org.eclipse.tracecompass
+Branch: refs/heads/master
