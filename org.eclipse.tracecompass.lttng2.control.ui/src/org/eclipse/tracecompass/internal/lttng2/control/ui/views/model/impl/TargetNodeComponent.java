@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -285,6 +285,16 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
      */
     public boolean isContextOnEventSupported() {
         return !getControlService().isVersionSupported("2.2.0"); //$NON-NLS-1$
+    }
+
+    /**
+     * Checks if given version is supported by this ILTTngControlService implementation.
+     *
+     * @param version The version to check
+     * @return <code>true</code> if version is supported else <code>false</code>
+     */
+    public boolean isVersionSupported(String version) {
+        return getControlService().isVersionSupported(version);
     }
 
     // ------------------------------------------------------------------------
