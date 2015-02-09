@@ -164,6 +164,8 @@ public final class TmfTraceManager {
         return curCtx;
     }
 
+
+
     // ------------------------------------------------------------------------
     // Public utility methods
     // ------------------------------------------------------------------------
@@ -507,5 +509,13 @@ public final class TmfTraceManager {
             dir.mkdirs();
         }
         return pathName;
+    }
+
+    /**
+     * TODO: FIXME
+     * @return window range. not sure if that's what's needed
+     */
+    public synchronized TmfTimeRange getCurrentRange() {
+        return getCurrentTraceContext().getWindowRange();
     }
 }
