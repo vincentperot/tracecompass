@@ -68,7 +68,7 @@ public class ChannelInfo extends TraceInfo implements IChannelInfo {
     /**
      * The maximum size of trace files
      */
-    private int fMaxSizeTraceFiles;
+    private long fMaxSizeTraceFiles;
     /**
      * The maximum number of trace files
      */
@@ -322,7 +322,7 @@ public class ChannelInfo extends TraceInfo implements IChannelInfo {
     }
 
     @Override
-    public void setMaxSizeTraceFiles(int maxSizeTraceFiles) {
+    public void setMaxSizeTraceFiles(long maxSizeTraceFiles) {
         fMaxSizeTraceFiles = maxSizeTraceFiles;
     }
 
@@ -332,7 +332,7 @@ public class ChannelInfo extends TraceInfo implements IChannelInfo {
     }
 
     @Override
-    public int getMaxSizeTraceFiles() {
+    public long getMaxSizeTraceFiles() {
         return fMaxSizeTraceFiles;
     }
 

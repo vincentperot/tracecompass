@@ -303,6 +303,8 @@ public final class Messages extends NLS {
     public static String TraceControl_SwitchTimerPropertyName;
     public static String TraceControl_ReadTimerPropertyName;
     public static String TraceControl_OutputTypePropertyName;
+    public static String TraceControl_TraceFileCountPropertyName;
+    public static String TraceControl_TraceFileSizePropertyName;
     public static String TraceControl_HostNamePropertyName;
     public static String TraceControl_HostAddressPropertyName;
     public static String TraceControl_SessionPathPropertyName;

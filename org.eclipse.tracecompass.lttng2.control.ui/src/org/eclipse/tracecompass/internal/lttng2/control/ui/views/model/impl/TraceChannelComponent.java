@@ -230,6 +230,19 @@ public class TraceChannelComponent extends TraceControlComponent {
         fChannelInfo.setState(stateName);
     }
 
+    /**
+     * @return maximum size of trace files
+     */
+    public long getMaxSizeTraceFiles() {
+        return fChannelInfo.getMaxSizeTraceFiles();
+    }
+    /**
+     * @return maximum number of trace files
+     */
+    public int getMaxNumberTraceFiles() {
+        return fChannelInfo.getMaxNumberTraceFiles();
+    }
+
     @Override
     public Object getAdapter(Class adapter) {
         if (adapter == IPropertySource.class) {

@@ -192,7 +192,7 @@ public class ChannelInfoTest {
         long subBufferSize = fixture.getSubBufferSize();
         assertEquals(1L, subBufferSize);
 
-        int maxSizeTraceFiles = fixture.getMaxSizeTraceFiles();
+        long maxSizeTraceFiles = fixture.getMaxSizeTraceFiles();
         assertEquals(1024, maxSizeTraceFiles);
 
         int maxNumberTraceFiles = fixture.getMaxNumberTraceFiles();
