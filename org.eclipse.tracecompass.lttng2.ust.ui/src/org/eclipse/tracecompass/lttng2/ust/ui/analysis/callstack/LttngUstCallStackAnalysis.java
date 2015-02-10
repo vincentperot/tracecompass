@@ -30,11 +30,11 @@ import org.eclipse.tracecompass.tmf.ui.views.callstack.AbstractCallStackAnalysis
 public class LttngUstCallStackAnalysis extends AbstractCallStackAnalysis {
 
     @Override
-    public void setTrace(ITmfTrace trace) throws TmfAnalysisException {
+    public boolean setTrace(ITmfTrace trace) throws TmfAnalysisException {
         if (!(trace instanceof LttngUstTrace)) {
-            throw new IllegalArgumentException("Trace should be of type LttngUstTrace"); //$NON-NLS-1$
+            return false;
         }
-        super.setTrace(trace);
+        return super.setTrace(trace);
     }
 
     @Override
