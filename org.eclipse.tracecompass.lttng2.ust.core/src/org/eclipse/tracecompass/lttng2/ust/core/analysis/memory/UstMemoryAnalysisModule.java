@@ -80,11 +80,11 @@ public class UstMemoryAnalysisModule extends TmfStateSystemAnalysisModule {
     }
 
     @Override
-    public void setTrace(ITmfTrace trace) throws TmfAnalysisException {
+    public boolean setTrace(ITmfTrace trace) throws TmfAnalysisException {
         if (!(trace instanceof LttngUstTrace)) {
-            throw new IllegalStateException("UstMemoryAnalysisModule: trace should be of type LttngUstTrace"); //$NON-NLS-1$
+            return false;
         }
-        super.setTrace(trace);
+        return super.setTrace(trace);
     }
 
     @Override
