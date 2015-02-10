@@ -60,7 +60,7 @@ public class TmfStatisticsValues {
      *            The new value to set
      */
     public void setValue(boolean global, long nb) {
-        if (nb > 0) {
+        if (nb >= 0) {
             if (global) {
                 fNbEvents = nb;
             } else {
