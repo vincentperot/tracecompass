@@ -273,7 +273,7 @@ public class LTTngControlServiceMI extends LTTngControlService {
                 break;
             case MIStrings.LIVE_TIMER_INTERVAL:
                 long liveDelay = Long.parseLong(rawInfo.getTextContent());
-                if (liveDelay > 0) {
+                if ((liveDelay > 0 && (liveDelay <= LTTngControlServiceConstants.MAX_LIVE_TIMER_INTERVAL))) {
                     sessionInfo.setLive(true);
                     sessionInfo.setLiveUrl(SessionInfo.DEFAULT_LIVE_NETWORK_URL);
                     sessionInfo.setLivePort(SessionInfo.DEFAULT_LIVE_PORT);
