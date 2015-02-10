@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.tmf.ui.project.model;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -212,9 +213,15 @@ public final class TmfTraceTypeUIUtils {
 
         TraceTypeHelper traceTypeToSet = null;
         if (validCandidates.isEmpty()) {
+            File f = new File(path);
+            if (f.isFile()) {
+                return null;
+            }
             final String errorMsg = NLS.bind(Messages.TmfOpenTraceHelper_NoTraceTypeMatch, path);
             throw new TmfTraceImportException(errorMsg);
-        } else if (validCandidates.size() != 1) {
+        }
+
+        if (validCandidates.size() != 1) {
             List<Pair<Integer, TraceTypeHelper>> candidates = new ArrayList<>(validCandidates);
             List<Pair<Integer, TraceTypeHelper>> reducedCandidates = reduce(candidates);
             for (Pair<Integer, TraceTypeHelper> candidatePair : reducedCandidates) {
@@ -240,7 +247,10 @@ public final class TmfTraceTypeUIUtils {
                 }
             }
         } else {
-            traceTypeToSet = validCandidates.first().getSecond();
+            // Don't select the trace type if it has the lowest confidence
+            if (validCandidates.first().getFirst() > 0) {
+                traceTypeToSet = validCandidates.first().getSecond();
+            }
         }
         return traceTypeToSet;
     }
