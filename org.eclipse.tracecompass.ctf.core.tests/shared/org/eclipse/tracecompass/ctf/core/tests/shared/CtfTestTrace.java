@@ -223,7 +223,7 @@ public enum CtfTestTrace {
     private int fDuration;
 
     private CtfTestTrace(String path, int nbEvent, int time) {
-        fPath = path;
+        fPath = new File(path).getAbsolutePath();
         fNbEvent = nbEvent;
         fDuration = time;
     }

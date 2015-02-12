@@ -22,6 +22,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        CallstackViewTest.class,
         ImportAndReadSmokeTest.class,
         StandardImportAndReadSmokeTest.class
 })
