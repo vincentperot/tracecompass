@@ -406,13 +406,13 @@ public class CTFTrace implements IDefinitionScope {
     }
 
     /**
-     * Method getPath gets the path of the trace directory
+     * Method getPath gets the absolute path of the trace directory
      *
      * @return String the path of the trace directory, in string format.
-     * @see java.io.File#getPath()
+     * @see java.io.File#getAbsolutePath()
      */
     public String getPath() {
-        return (fPath != null) ? fPath.getPath() : ""; //$NON-NLS-1$
+        return (fPath != null) ? fPath.getAbsolutePath() : ""; //$NON-NLS-1$
     }
 
     // ------------------------------------------------------------------------
