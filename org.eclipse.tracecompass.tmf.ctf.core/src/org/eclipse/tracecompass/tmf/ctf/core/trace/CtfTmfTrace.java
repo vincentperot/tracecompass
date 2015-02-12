@@ -361,6 +361,11 @@ public class CtfTmfTrace extends TmfTrace
         return event;
     }
 
+    @Override
+    public String getPath() {
+        return fTrace.getPath();
+    }
+
     /**
      * Ctf traces have a clock with a unique uuid that will be used to identify
      * the host. Traces with the same clock uuid will be known to have been made
