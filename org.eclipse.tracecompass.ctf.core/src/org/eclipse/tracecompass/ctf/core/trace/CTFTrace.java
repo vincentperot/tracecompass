@@ -412,7 +412,7 @@ public class CTFTrace implements IDefinitionScope {
      * @see java.io.File#getPath()
      */
     public String getPath() {
-        return (fPath != null) ? fPath.getPath() : ""; //$NON-NLS-1$
+        return (fPath != null) ? fPath.getAbsolutePath() : ""; //$NON-NLS-1$
     }
 
     // ------------------------------------------------------------------------
