@@ -155,7 +155,7 @@ public class TmfEventMatching implements ITmfEventMatching {
      * also assigns to each trace an event matching definition instance that
      * applies to the trace
      */
-    protected void initMatching() {
+    public void initMatching() {
         // Initialize the matching infrastructure (unmatched event lists)
         fUnmatchedIn.clear();
         fUnmatchedOut.clear();
@@ -206,7 +206,7 @@ public class TmfEventMatching implements ITmfEventMatching {
      * @param trace
      *            The trace to which this event belongs
      */
-    protected void matchEvent(ITmfEvent event, ITmfTrace trace) {
+    public void matchEvent(ITmfEvent event, ITmfTrace trace) {
         ITmfMatchEventDefinition def = null;
         Direction evType = null;
         for (ITmfMatchEventDefinition oneDef : getEventDefinitions(event.getTrace())) {
