@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Add message to exceptions
  *******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core.backend.historytree;
@@ -19,6 +22,7 @@ import java.io.PrintWriter;
 import java.nio.channels.ClosedChannelException;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.statesystem.core.backend.historytree.CoreNode;
 import org.eclipse.tracecompass.internal.statesystem.core.backend.historytree.HTConfig;
 import org.eclipse.tracecompass.internal.statesystem.core.backend.historytree.HTInterval;
@@ -45,6 +49,9 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
      */
     private final HistoryTree sht;
 
+    /** The ID of the state system */
+    private final @NonNull String ssid;
+
     /** Indicates if the history tree construction is done */
     protected volatile boolean isFinishedBuilding = false;
 
@@ -66,14 +73,18 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
      *            framework.
      * @param startTime
      *            The earliest time stamp that will be stored in the history
+     * @param ssid
+     *            The ID of the state system.
      * @throws IOException
      *             Thrown if we can't create the file for some reason
      */
     public HistoryTreeBackend(File newStateFile, int blockSize,
-            int maxChildren, int providerVersion, long startTime) throws IOException {
+            int maxChildren, int providerVersion, long startTime,
+            @NonNull String ssid) throws IOException {
         final HTConfig conf = new HTConfig(newStateFile, blockSize, maxChildren,
                 providerVersion, startTime);
         sht = new HistoryTree(conf);
+        this.ssid = ssid;
     }
 
     /**
@@ -90,12 +101,14 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
      *            framework.
      * @param startTime
      *            The earliest time stamp that will be stored in the history
+     * @param ssid
+     *            The ID of the state system.
      * @throws IOException
      *             Thrown if we can't create the file for some reason
      */
-    public HistoryTreeBackend(File newStateFile, int providerVersion, long startTime)
-            throws IOException {
-        this(newStateFile, 64 * 1024, 50, providerVersion, startTime);
+    public HistoryTreeBackend(File newStateFile, int providerVersion, long startTime,
+            @NonNull String ssid) throws IOException {
+        this(newStateFile, 64 * 1024, 50, providerVersion, startTime, ssid);
     }
 
     /**
@@ -105,15 +118,18 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
      *            Filename/location of the history we want to load
      * @param providerVersion
      *            Expected version of of the state provider plugin.
+     * @param ssid
+     *            The ID of the state system.
      * @throws IOException
      *             If we can't read the file, if it doesn't exist, is not
      *             recognized, or if the version of the file does not match the
      *             expected providerVersion.
      */
-    public HistoryTreeBackend(File existingStateFile, int providerVersion)
-            throws IOException {
+    public HistoryTreeBackend(File existingStateFile, int providerVersion,
+            @NonNull String ssid) throws IOException {
         sht = new HistoryTree(existingStateFile, providerVersion);
         isFinishedBuilding = true;
+        this.ssid = ssid;
     }
 
     /**
@@ -190,7 +206,7 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
             throws TimeRangeException, StateSystemDisposedException {
         if (!checkValidTime(t)) {
             /* We can't possibly have information about this query */
-            throw new TimeRangeException();
+            throw new TimeRangeException(ssid + " Time:" + t + ", Start:" + sht.getTreeStart() + ", End:" + sht.getTreeEnd()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
 
         /* We start by reading the information in the root node */
@@ -235,7 +251,7 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
     private HTInterval getRelevantInterval(long t, int key)
             throws TimeRangeException, StateSystemDisposedException {
         if (!checkValidTime(t)) {
-            throw new TimeRangeException();
+            throw new TimeRangeException(ssid + " Time:" + t + ", Start:" + sht.getTreeStart() + ", End:" + sht.getTreeEnd()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
 
         HTNode currentNode = sht.getRootNode();

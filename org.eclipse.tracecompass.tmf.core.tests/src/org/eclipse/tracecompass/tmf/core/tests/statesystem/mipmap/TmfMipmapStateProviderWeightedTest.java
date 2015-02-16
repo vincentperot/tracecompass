@@ -52,13 +52,13 @@ public class TmfMipmapStateProviderWeightedTest {
     public static void init() {
         /* setup for INTEGER test */
         TmfMipmapStateProviderStub mmpi = new TmfMipmapStateProviderStub(RESOLUTION, Type.INTEGER);
-        IStateHistoryBackend bei = new InMemoryBackend(0);
+        IStateHistoryBackend bei = new InMemoryBackend(0, SSID);
         ITmfStateSystemBuilder ssbi = StateSystemFactory.newStateSystem(SSID, bei);
         mmpi.assignTargetStateSystem(ssbi);
         ssqi = ssbi;
         /* setup for DOUBLE test */
         TmfMipmapStateProviderStub mmpd = new TmfMipmapStateProviderStub(RESOLUTION, Type.DOUBLE);
-        IStateHistoryBackend bed = new InMemoryBackend(0);
+        IStateHistoryBackend bed = new InMemoryBackend(0, SSID);
         ITmfStateSystemBuilder ssbd = StateSystemFactory.newStateSystem(SSID, bed);
         mmpd.assignTargetStateSystem(ssbd);
         ssqd = ssbd;
