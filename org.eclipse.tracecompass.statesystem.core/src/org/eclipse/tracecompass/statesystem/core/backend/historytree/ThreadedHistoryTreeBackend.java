@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Store SSID in backend
  *******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core.backend.historytree;
@@ -62,13 +65,15 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
      * @param queueSize
      *            The size of the interval insertion queue. 2000 - 10000 usually
      *            works well
+     * @param ssid
+     *            The ID of the state system.
      * @throws IOException
      *             If there was a problem opening the history file for writing
      */
     public ThreadedHistoryTreeBackend(File newStateFile, int blockSize,
-            int maxChildren, long startTime, int providerVersion, int queueSize)
-                    throws IOException {
-        super(newStateFile, blockSize, maxChildren, providerVersion, startTime);
+            int maxChildren, long startTime, int providerVersion, int queueSize,
+            @NonNull String ssid) throws IOException {
+        super(newStateFile, blockSize, maxChildren, providerVersion, startTime, ssid);
 
         intervalQueue = new ArrayBlockingQueue<>(queueSize);
         shtThread = new Thread(this, "History Tree Thread"); //$NON-NLS-1$
@@ -91,12 +96,15 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
      * @param queueSize
      *            The size of the interval insertion queue. 2000 - 10000 usually
      *            works well
+     * @param ssid
+     *            The ID of the state system.
      * @throws IOException
      *             If there was a problem opening the history file for writing
      */
     public ThreadedHistoryTreeBackend(File newStateFile, long startTime,
-            int providerVersion, int queueSize) throws IOException {
-        super(newStateFile, providerVersion, startTime);
+            int providerVersion, int queueSize, @NonNull String ssid)
+                    throws IOException {
+        super(newStateFile, providerVersion, startTime, ssid);
 
         intervalQueue = new ArrayBlockingQueue<>(queueSize);
         shtThread = new Thread(this, "History Tree Thread"); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 École Polytechnique de Montréal
+ * Copyright (c) 2014, 2015 École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -52,7 +52,7 @@ public class StateSystemUtilsTest {
     @Before
     public void setupStateSystem() {
         try {
-            IStateHistoryBackend backend = new InMemoryBackend(START_TIME);
+            IStateHistoryBackend backend = new InMemoryBackend(START_TIME, DUMMY_STRING);
             fStateSystem = StateSystemFactory.newStateSystem(DUMMY_STRING, backend);
             int quark = fStateSystem.getQuarkAbsoluteAndAdd(DUMMY_STRING);
 

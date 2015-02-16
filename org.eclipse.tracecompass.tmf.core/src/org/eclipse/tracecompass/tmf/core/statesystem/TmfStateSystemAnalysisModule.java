@@ -9,6 +9,7 @@
  * Contributors:
  *   Geneviève Bastien - Initial API and implementation
  *   Bernd Hufmann - Integrated history builder functionality
+ *   Patrick Tasse - Store SSID in backend
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.core.statesystem;
@@ -254,7 +255,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
            /* Load an existing history */
             final int version = provider.getVersion();
             try {
-                IStateHistoryBackend backend = new HistoryTreeBackend(htFile, version);
+                IStateHistoryBackend backend = new HistoryTreeBackend(htFile, version, id);
                 fHtBackend = backend;
                 fStateSystem = StateSystemFactory.newStateSystem(id, backend, false);
                 fInitialized.countDown();
@@ -273,7 +274,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
 
         try {
             IStateHistoryBackend backend = new ThreadedHistoryTreeBackend(htFile,
-                    provider.getStartTime(), provider.getVersion(), QUEUE_SIZE);
+                    provider.getStartTime(), provider.getVersion(), QUEUE_SIZE, id);
             fHtBackend = backend;
             fStateSystem = StateSystemFactory.newStateSystem(id, backend);
             provider.assignTargetStateSystem(fStateSystem);
@@ -326,7 +327,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
         IStateHistoryBackend realBackend = null;
         try {
             realBackend = new ThreadedHistoryTreeBackend(htPartialFile,
-                    provider.getStartTime(), provider.getVersion(), QUEUE_SIZE);
+                    provider.getStartTime(), provider.getVersion(), QUEUE_SIZE, id);
         } catch (IOException e) {
             throw new TmfTraceException(e.toString(), e);
         }
@@ -342,7 +343,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
 
         /* 3 */
         IStateHistoryBackend partialBackend =
-                new PartialHistoryBackend(partialProvider, pss, realBackend, granularity);
+                new PartialHistoryBackend(partialProvider, pss, realBackend, granularity, id);
 
         /* 4 */
         @SuppressWarnings("restriction")
@@ -381,7 +382,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
      * to 2^31 intervals.
      */
     private void createInMemoryHistory(String id, ITmfStateProvider provider) {
-        IStateHistoryBackend backend = new InMemoryBackend(provider.getStartTime());
+        IStateHistoryBackend backend = new InMemoryBackend(provider.getStartTime(), id);
         fHtBackend = backend;
         fStateSystem = StateSystemFactory.newStateSystem(id, backend);
         provider.assignTargetStateSystem(fStateSystem);
