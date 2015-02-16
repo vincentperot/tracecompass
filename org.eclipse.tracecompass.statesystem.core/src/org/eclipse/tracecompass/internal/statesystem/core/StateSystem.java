@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Add message to exceptions
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -377,21 +380,35 @@ public class StateSystem implements ITmfStateSystemBuilder {
              */
             throw new IllegalArgumentException();
         }
-        transState.processStateChange(t, value, attributeQuark);
+        try {
+            transState.processStateChange(t, value, attributeQuark);
+        } catch (TimeRangeException e) {
+            throw new TimeRangeException(getSSID() + ' ' + e.getMessage(), e);
+        } catch (AttributeNotFoundException e) {
+            throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
+        } catch (StateValueTypeException e) {
+            throw new StateValueTypeException(getSSID() + ' ' + e.getMessage(), e);
+        }
     }
 
     @Override
     public void incrementAttribute(long t, int attributeQuark)
             throws StateValueTypeException, TimeRangeException,
             AttributeNotFoundException {
-        ITmfStateValue stateValue = queryOngoingState(attributeQuark);
-        int prevValue = 0;
-        /* if the attribute was previously null, start counting at 0 */
-        if (!stateValue.isNull()) {
-            prevValue = stateValue.unboxInt();
+        try {
+            ITmfStateValue stateValue = queryOngoingState(attributeQuark);
+            int prevValue = 0;
+            /* if the attribute was previously null, start counting at 0 */
+            if (!stateValue.isNull()) {
+                prevValue = stateValue.unboxInt();
+            }
+            modifyAttribute(t, TmfStateValue.newValueInt(prevValue + 1),
+                    attributeQuark);
+        } catch (TimeRangeException e) {
+            throw new TimeRangeException(getSSID() + ' ' + e.getMessage(), e);
+        } catch (AttributeNotFoundException e) {
+            throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
         }
-        modifyAttribute(t, TmfStateValue.newValueInt(prevValue + 1),
-                attributeQuark);
     }
 
     @Override
@@ -400,7 +417,12 @@ public class StateSystem implements ITmfStateSystemBuilder {
             StateValueTypeException {
         int stackDepth;
         int subAttributeQuark;
-        ITmfStateValue previousSV = transState.getOngoingStateValue(attributeQuark);
+        ITmfStateValue previousSV;
+        try {
+            previousSV = transState.getOngoingStateValue(attributeQuark);
+        } catch (AttributeNotFoundException e) {
+            throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
+        }
 
         if (previousSV.isNull()) {
             /*
@@ -413,7 +435,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
             stackDepth = previousSV.unboxInt();
         } else {
             /* Previous state of this attribute was another type? Not good! */
-            throw new StateValueTypeException();
+            throw new StateValueTypeException(getSSID() + " Type:" + previousSV.getType() + ", Expected:" + Type.INTEGER); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         if (stackDepth >= 100000) {
@@ -421,8 +443,8 @@ public class StateSystem implements ITmfStateSystemBuilder {
              * Limit stackDepth to 100000, to avoid having Attribute Trees grow
              * out of control due to buggy insertions
              */
-            String message = "Stack limit reached, not pushing"; //$NON-NLS-1$
-            throw new AttributeNotFoundException(message);
+            String message = " Stack limit reached, not pushing"; //$NON-NLS-1$
+            throw new AttributeNotFoundException(getSSID() + " Quark:" + attributeQuark + message); //$NON-NLS-1$
         }
 
         stackDepth++;
@@ -437,7 +459,12 @@ public class StateSystem implements ITmfStateSystemBuilder {
             throws AttributeNotFoundException, TimeRangeException,
             StateValueTypeException {
         /* These are the state values of the stack-attribute itself */
-        ITmfStateValue previousSV = queryOngoingState(attributeQuark);
+        ITmfStateValue previousSV;
+        try {
+            previousSV = transState.getOngoingStateValue(attributeQuark);
+        } catch (AttributeNotFoundException e) {
+            throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
+        }
 
         if (previousSV.isNull()) {
             /*
@@ -453,16 +480,14 @@ public class StateSystem implements ITmfStateSystemBuilder {
              * The existing value was not an integer (which is expected for
              * stack tops), this doesn't look like a valid stack attribute.
              */
-            throw new StateValueTypeException();
+            throw new StateValueTypeException(getSSID() + " Type:" + previousSV.getType() + ", Expected:" + Type.INTEGER); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         int stackDepth = previousSV.unboxInt();
 
         if (stackDepth <= 0) {
             /* This on the other hand should not happen... */
-            String message = "A top-level stack attribute cannot " + //$NON-NLS-1$
-                    "have a value of 0 or less."; //$NON-NLS-1$
-            throw new StateValueTypeException(message);
+            throw new StateValueTypeException(getSSID() + " Quark:" + attributeQuark + ", Stack depth:" + stackDepth);  //$NON-NLS-1$//$NON-NLS-2$
         }
 
         /* The attribute should already exist at this point */
@@ -513,6 +538,10 @@ public class StateSystem implements ITmfStateSystemBuilder {
              * compiler has no way of knowing this...
              */
             throw new IllegalStateException(e);
+        } catch (TimeRangeException e) {
+            throw new TimeRangeException(getSSID() + ' ' + e.getMessage(), e);
+        } catch (AttributeNotFoundException e) {
+            throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
         }
     }
 
@@ -523,19 +552,31 @@ public class StateSystem implements ITmfStateSystemBuilder {
     @Override
     public ITmfStateValue queryOngoingState(int attributeQuark)
             throws AttributeNotFoundException {
-        return transState.getOngoingStateValue(attributeQuark);
+        try {
+            return transState.getOngoingStateValue(attributeQuark);
+        } catch (AttributeNotFoundException e) {
+            throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
+        }
     }
 
     @Override
     public long getOngoingStartTime(int attribute)
             throws AttributeNotFoundException {
-        return transState.getOngoingStartTime(attribute);
+        try {
+            return transState.getOngoingStartTime(attribute);
+        } catch (AttributeNotFoundException e) {
+            throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
+        }
     }
 
     @Override
     public void updateOngoingState(ITmfStateValue newValue, int attributeQuark)
             throws AttributeNotFoundException {
-        transState.changeOngoingStateValue(attributeQuark, newValue);
+        try {
+            transState.changeOngoingStateValue(attributeQuark, newValue);
+        } catch (AttributeNotFoundException e) {
+            throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
+        }
     }
 
     /**
@@ -569,16 +610,20 @@ public class StateSystem implements ITmfStateSystemBuilder {
             stateInfo.add(null);
         }
 
-        /*
-         * If we are currently building the history, also query the "ongoing"
-         * states for stuff that might not yet be written to the history.
-         */
-        if (transState.isActive()) {
-            transState.doQuery(stateInfo, t);
-        }
+        try {
+            /*
+             * If we are currently building the history, also query the "ongoing"
+             * states for stuff that might not yet be written to the history.
+             */
+            if (transState.isActive()) {
+                transState.doQuery(stateInfo, t);
+            }
 
-        /* Query the storage backend */
-        backend.doQuery(stateInfo, t);
+            /* Query the storage backend */
+            backend.doQuery(stateInfo, t);
+        } catch (TimeRangeException e) {
+            throw new TimeRangeException(getSSID() + ' ' + e.getMessage(), e);
+        }
 
         /*
          * We should have previously inserted an interval for every attribute.
@@ -605,7 +650,13 @@ public class StateSystem implements ITmfStateSystemBuilder {
              * The transient state did not have the information, let's look into
              * the backend next.
              */
-            ret = backend.doSingularQuery(t, attributeQuark);
+            try {
+                ret = backend.doSingularQuery(t, attributeQuark);
+            } catch (TimeRangeException e) {
+                throw new TimeRangeException(getSSID() + ' ' + e.getMessage(), e);
+            } catch (AttributeNotFoundException e) {
+                throw new AttributeNotFoundException(getSSID() + ' ' + e.getMessage(), e);
+            }
         }
 
         if (ret == null) {
