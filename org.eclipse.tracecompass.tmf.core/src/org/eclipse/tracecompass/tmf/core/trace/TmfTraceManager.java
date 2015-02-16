@@ -33,10 +33,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
-import org.eclipse.tracecompass.tmf.core.filter.ITmfFilter;
 import org.eclipse.tracecompass.tmf.core.signal.TmfEventFilterAppliedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
@@ -106,41 +106,6 @@ public final class TmfTraceManager {
     // ------------------------------------------------------------------------
 
     /**
-     * @return The begin timestamp of selection
-     * @since 2.1
-     */
-    public ITmfTimestamp getSelectionBeginTime() {
-        return getCurrentTraceContext().getSelectionBegin();
-    }
-
-    /**
-     * @return The end timestamp of selection
-     * @since 2.1
-     */
-    public ITmfTimestamp getSelectionEndTime() {
-        return getCurrentTraceContext().getSelectionEnd();
-    }
-
-    /**
-     * Return the current window time range.
-     *
-     * @return the current window time range
-     */
-    public synchronized TmfTimeRange getCurrentRange() {
-        return getCurrentTraceContext().getWindowRange();
-    }
-
-    /**
-     * Gets the filter applied to the current trace
-     *
-     * @return a filter, or <code>null</code>
-     * @since 2.2
-     */
-    public synchronized ITmfFilter getCurrentFilter() {
-        return getCurrentTraceContext().getFilter();
-    }
-
-    /**
      * Get the currently selected trace (normally, the focused editor).
      *
      * @return The active trace
@@ -185,7 +150,13 @@ public final class TmfTraceManager {
         return null;
     }
 
-    private TmfTraceContext getCurrentTraceContext() {
+    /**
+     * Get the {@link TmfTraceContext} of the current active trace. This can be
+     * used to retrieve the current active/selected time ranges and such.
+     *
+     * @return The trace's context.
+     */
+    public synchronized TmfTraceContext getCurrentTraceContext() {
         TmfTraceContext curCtx = fTraces.get(fCurrentTrace);
         if (curCtx == null) {
             /* There are no traces opened at the moment. */
@@ -318,9 +289,10 @@ public final class TmfTraceManager {
         final int SCALE = ITmfTimestamp.NANOSECOND_SCALE;
         long offset = trace.getInitialRangeOffset().normalize(0, SCALE).getValue();
         long endTime = startTs.normalize(0, SCALE).getValue() + offset;
-        final TmfTimeRange startTr = new TmfTimeRange(startTs, new TmfTimestamp(endTime, SCALE));
+        final TmfTimeRange selectionRange = new TmfTimeRange(startTs, startTs);
+        final TmfTimeRange windowRange = new TmfTimeRange(startTs, new TmfTimestamp(endTime, SCALE));
 
-        final TmfTraceContext startCtx = new TmfTraceContext(startTs, startTs, startTr, editorFile);
+        final TmfTraceContext startCtx = new TmfTraceContext(selectionRange, windowRange, editorFile, null);
 
         fTraces.put(trace, startCtx);
 
@@ -357,7 +329,10 @@ public final class TmfTraceManager {
         if (context == null) {
             throw new RuntimeException();
         }
-        fTraces.put(newTrace, new TmfTraceContext(context, signal.getEventFilter()));
+        fTraces.put(newTrace, new TmfTraceContext(context.getSelectionRange(),
+                context.getWindowRange(),
+                context.getEditorFile(),
+                signal.getEventFilter()));
     }
 
     /**
@@ -395,8 +370,17 @@ public final class TmfTraceManager {
         for (Map.Entry<ITmfTrace, TmfTraceContext> entry : fTraces.entrySet()) {
             final ITmfTrace trace = entry.getKey();
             if (beginTs.intersects(getValidTimeRange(trace)) || endTs.intersects(getValidTimeRange(trace))) {
-                TmfTraceContext prevCtx = entry.getValue();
-                TmfTraceContext newCtx = new TmfTraceContext(prevCtx, beginTs, endTs);
+                TmfTraceContext prevCtx = checkNotNull(entry.getValue());
+
+                /*
+                 * We want to update the selection range, but keep everything
+                 * else the same as the previous trace context.
+                 */
+                TmfTimeRange newSelectionRange = new TmfTimeRange(beginTs, endTs);
+                TmfTraceContext newCtx = new TmfTraceContext(newSelectionRange,
+                        prevCtx.getWindowRange(),
+                        prevCtx.getEditorFile(),
+                        prevCtx.getFilter());
                 entry.setValue(newCtx);
             }
         }
@@ -415,16 +399,20 @@ public final class TmfTraceManager {
     public synchronized void timeRangeUpdated(final TmfRangeSynchSignal signal) {
         for (Map.Entry<ITmfTrace, TmfTraceContext> entry : fTraces.entrySet()) {
             final ITmfTrace trace = entry.getKey();
-            final TmfTraceContext curCtx = entry.getValue();
+            final TmfTraceContext prevCtx = checkNotNull(entry.getValue());
 
             final TmfTimeRange validTr = getValidTimeRange(trace);
+            if (validTr == null) {
+                return;
+            }
 
             /* Determine the new time range */
             TmfTimeRange targetTr = signal.getCurrentRange().getIntersection(validTr);
-            TmfTimeRange newTr = (targetTr == null ? curCtx.getWindowRange() : targetTr);
+            TmfTimeRange newWindowTr = (targetTr == null ? prevCtx.getWindowRange() : targetTr);
 
-            /* Update the values */
-            TmfTraceContext newCtx = new TmfTraceContext(curCtx, newTr);
+            /* Keep the values from the old context, except for the window range */
+            TmfTraceContext newCtx = new TmfTraceContext(prevCtx.getSelectionRange(),
+                    newWindowTr, prevCtx.getEditorFile(), prevCtx.getFilter());
             entry.setValue(newCtx);
         }
     }
@@ -445,7 +433,7 @@ public final class TmfTraceManager {
      *            The trace to check for
      * @return The valid time span, or 'null' if the trace is not valid
      */
-    private TmfTimeRange getValidTimeRange(ITmfTrace trace) {
+    private @Nullable TmfTimeRange getValidTimeRange(ITmfTrace trace) {
         if (!fTraces.containsKey(trace)) {
             /* Trace is not part of the currently opened traces */
             return null;

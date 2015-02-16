@@ -18,10 +18,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.tracecompass.tmf.core.component.ITmfComponent;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
-import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
 
@@ -44,12 +40,6 @@ public abstract class TmfView extends ViewPart implements ITmfComponent {
      */
     protected PinTmfViewAction fPinAction;
 
-    /**
-     * Reference to the trace manager
-     * @since 2.0
-     */
-    protected final TmfTraceManager fTraceManager;
-
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
@@ -63,7 +53,6 @@ public abstract class TmfView extends ViewPart implements ITmfComponent {
     public TmfView(String viewName) {
         super();
         fName = viewName;
-        fTraceManager = TmfTraceManager.getInstance();
         TmfSignalManager.register(this);
     }
 
@@ -129,21 +118,4 @@ public abstract class TmfView extends ViewPart implements ITmfComponent {
             toolBarManager.add(fPinAction);
         }
     }
-
-    /**
-     * Get the currently selected trace, or 'null' if the active editor is not a
-     * TMF trace.
-     *
-     * @return The active trace, or 'null' if not a trace
-     * @since 2.0
-     */
-    public ITmfTrace getActiveTrace() {
-        IEditorPart editor = getSite().getPage().getActiveEditor();
-        if (editor instanceof ITmfTraceEditor) {
-            ITmfTrace trace = ((ITmfTraceEditor) editor).getTrace();
-            return trace;
-        }
-        return null;
-    }
-
 }
