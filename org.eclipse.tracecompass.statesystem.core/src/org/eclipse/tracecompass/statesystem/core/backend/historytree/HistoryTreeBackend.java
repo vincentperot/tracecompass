@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Add message to exceptions
  *******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core.backend.historytree;
@@ -190,7 +193,7 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
             throws TimeRangeException, StateSystemDisposedException {
         if (!checkValidTime(t)) {
             /* We can't possibly have information about this query */
-            throw new TimeRangeException();
+            throw new TimeRangeException("Time:" + t + ", Start:" + sht.getTreeStart() + ", End:" + sht.getTreeEnd()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
 
         /* We start by reading the information in the root node */
@@ -235,7 +238,7 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
     private HTInterval getRelevantInterval(long t, int key)
             throws TimeRangeException, StateSystemDisposedException {
         if (!checkValidTime(t)) {
-            throw new TimeRangeException();
+            throw new TimeRangeException("Time:" + t + ", Start:" + sht.getTreeStart() + ", End:" + sht.getTreeEnd()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
 
         HTNode currentNode = sht.getRootNode();
