@@ -12,6 +12,8 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.uml2sd.loader;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -336,7 +338,7 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
                         if ((fNbSeqEvents % MAX_NUM_OF_MSG) == 0) {
                             fLock.lock();
                             try {
-                                fCheckPoints.add(new TmfTimeRange(fFirstTime, fLastTime));
+                                fCheckPoints.add(new TmfTimeRange(checkNotNull(fFirstTime), checkNotNull(fLastTime)));
                                 if (fView != null) {
                                     fView.updateCoolBar();
                                 }
@@ -362,11 +364,14 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
 
                 @Override
                 public void handleSuccess() {
-                    if ((fFirstTime != null) && (fLastTime != null)) {
+                    final ITmfTimestamp firstTime = fFirstTime;
+                    final ITmfTimestamp lastTime = fLastTime;
+
+                    if ((firstTime != null) && (lastTime != null)) {
 
                         fLock.lock();
                         try {
-                            fCheckPoints.add(new TmfTimeRange(fFirstTime, fLastTime));
+                            fCheckPoints.add(new TmfTimeRange(firstTime, lastTime));
                             if (fView != null) {
                                 fView.updateCoolBar();
                             }
@@ -583,7 +588,7 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
             StructuredSelection stSel = (StructuredSelection) sel;
             if (stSel.getFirstElement() instanceof TmfSyncMessage) {
                 TmfSyncMessage syncMsg = ((TmfSyncMessage) stSel.getFirstElement());
-                broadcast(new TmfTimeSynchSignal(this, syncMsg.getStartTime()));
+                broadcast(new TmfTimeSynchSignal(this, checkNotNull(syncMsg.getStartTime())));
             }
         }
     }

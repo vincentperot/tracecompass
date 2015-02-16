@@ -289,19 +289,19 @@ public interface ITmfTrace extends ITmfEventProvider {
      * @return the trace time range
      * @since 2.0
      */
-    TmfTimeRange getTimeRange();
+    @NonNull TmfTimeRange getTimeRange();
 
     /**
      * @return the timestamp of the first trace event
      * @since 2.0
      */
-    ITmfTimestamp getStartTime();
+    @NonNull ITmfTimestamp getStartTime();
 
     /**
      * @return the timestamp of the last trace event
      * @since 2.0
      */
-    ITmfTimestamp getEndTime();
+    @NonNull ITmfTimestamp getEndTime();
 
     /**
      * @return the streaming interval in ms (0 if not a streaming trace)
@@ -445,6 +445,6 @@ public interface ITmfTrace extends ITmfEventProvider {
      * @return The new timestamp
      * @since 3.0
      */
-    ITmfTimestamp createTimestamp(long ts);
+    @NonNull ITmfTimestamp createTimestamp(long ts);
 
 }

@@ -12,6 +12,8 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.uml2sd;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -224,7 +226,7 @@ public class DrawableToolTip implements PaintListener {
      * @since 2.0
      */
     public void showToolTip(ITmfTimestamp value, ITmfTimestamp min, ITmfTimestamp max) {
-        fMinMaxRange = new TmfTimeRange(min, max);
+        fMinMaxRange = new TmfTimeRange(checkNotNull(min), checkNotNull(max));
         fCurrentValue = value;
 
         int w = fToolTipShell.getBounds().width;

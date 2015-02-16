@@ -476,12 +476,12 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                         }
                         if (fSelectedBeginTimestamp != null) {
                             if (fSelectedBeginTimestamp.compareTo(ts) <= 0) {
-                                broadcast(new TmfTimeSynchSignal(TmfEventsTable.this, fSelectedBeginTimestamp, ts));
+                                broadcast(new TmfTimeSynchSignal(TmfEventsTable.this, checkNotNull(fSelectedBeginTimestamp), checkNotNull(ts)));
                                 if (fTable.getSelectionIndices().length == 2) {
                                     updateStatusLine(ts.getDelta(fSelectedBeginTimestamp));
                                 }
                             } else {
-                                broadcast(new TmfTimeSynchSignal(TmfEventsTable.this, ts, fSelectedBeginTimestamp));
+                                broadcast(new TmfTimeSynchSignal(TmfEventsTable.this, checkNotNull(ts), checkNotNull(fSelectedBeginTimestamp)));
                                 updateStatusLine(fSelectedBeginTimestamp.getDelta(ts));
                             }
                         }

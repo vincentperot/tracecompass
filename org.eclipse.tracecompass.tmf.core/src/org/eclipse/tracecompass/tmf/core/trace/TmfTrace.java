@@ -124,8 +124,8 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
     private volatile long fNbEvents = 0;
 
     // The time span of the event stream
-    private ITmfTimestamp fStartTime = TmfTimestamp.BIG_BANG;
-    private ITmfTimestamp fEndTime = TmfTimestamp.BIG_BANG;
+    private @NonNull ITmfTimestamp fStartTime = TmfTimestamp.BIG_BANG;
+    private @NonNull ITmfTimestamp fEndTime = TmfTimestamp.BIG_BANG;
 
     // The trace streaming interval (0 = no streaming)
     private long fStreamingInterval = 0;
@@ -407,7 +407,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @since 2.0
      */
     @Override
-    public TmfTimeRange getTimeRange() {
+    public @NonNull TmfTimeRange getTimeRange() {
         return new TmfTimeRange(fStartTime, fEndTime);
     }
 
@@ -473,7 +473,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @param range the new time range
      * @since 2.0
      */
-    protected void setTimeRange(final TmfTimeRange range) {
+    protected void setTimeRange(final @NonNull TmfTimeRange range) {
         fStartTime = range.getStartTime();
         fEndTime = range.getEndTime();
     }
@@ -484,7 +484,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @param startTime the new first event timestamp
      * @since 2.0
      */
-    protected void setStartTime(final ITmfTimestamp startTime) {
+    protected void setStartTime(final @NonNull ITmfTimestamp startTime) {
         fStartTime = startTime;
     }
 
@@ -494,7 +494,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @param endTime the new last event timestamp
      * @since 2.0
      */
-    protected void setEndTime(final ITmfTimestamp endTime) {
+    protected void setEndTime(final @NonNull ITmfTimestamp endTime) {
         fEndTime = endTime;
     }
 
@@ -597,7 +597,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @param timestamp the corresponding timestamp
      * @since 2.0
      */
-    protected synchronized void updateAttributes(final ITmfContext context, final ITmfTimestamp timestamp) {
+    protected synchronized void updateAttributes(final ITmfContext context, final @NonNull ITmfTimestamp timestamp) {
         if (fStartTime.equals(TmfTimestamp.BIG_BANG) || (fStartTime.compareTo(timestamp) > 0)) {
             fStartTime = timestamp;
         }
@@ -753,7 +753,7 @@ public abstract class TmfTrace extends TmfEventProvider implements ITmfTrace, IT
      * @since 3.0
      */
     @Override
-    public ITmfTimestamp createTimestamp(long ts) {
+    public @NonNull ITmfTimestamp createTimestamp(long ts) {
         return new TmfNanoTimestamp(getTimestampTransform().transform(ts));
     }
 
