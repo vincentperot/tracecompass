@@ -13,18 +13,26 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.timerange;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalThrottler;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -37,13 +45,12 @@ import org.eclipse.tracecompass.tmf.ui.viewers.TmfTimeViewer;
  */
 public abstract class AbstractTimeRangeTable extends TmfTimeViewer {
 
-
     private final class RangeUpdater implements SelectionListener {
         @Override
         public void widgetSelected(SelectionEvent e) {
-            ITmfRegionOfInterest roi =  (ITmfRegionOfInterest) e.item.getData();
+            ITmfRegionOfInterest roi = (ITmfRegionOfInterest) e.item.getData();
             TmfRangeSynchSignal signal = new TmfRangeSynchSignal(this, new TmfTimeRange(roi.getStartTime(), roi.getEndTime()));
-            fTimeRangeSyncThrottler.queue(signal);
+            getTimeRangeSyncThrottler().queue(signal);
         }
 
         @Override
@@ -55,6 +62,9 @@ public abstract class AbstractTimeRangeTable extends TmfTimeViewer {
 
     private final TableViewer fTableViewer;
     private final TmfSignalThrottler fTimeRangeSyncThrottler = new TmfSignalThrottler(this, 200);
+    private final Map<String, ViewerComparator> fComparators = new HashMap<>();
+    private int fDirection;
+
     /**
      * Constructor that initializes the parent of the viewer
      *
@@ -75,11 +85,45 @@ public abstract class AbstractTimeRangeTable extends TmfTimeViewer {
         final Table table = fTableViewer.getTable();
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
-        table.addSelectionListener(new RangeUpdater());
+        addSelectionListener(new RangeUpdater());
+
+        fDirection = SWT.DOWN;
 
         fTableViewer.setUseHashlookup(true);
         refresh();
     }
+
+    /**
+     * Adds the listener to the collection of listeners who will
+     * be notified when the user changes the receiver's selection, by sending
+     * it one of the messages defined in the <code>SelectionListener</code>
+     * interface.
+     * <p>
+     * When <code>widgetSelected</code> is called, the item field of the event object is valid.
+     * If the receiver has the <code>SWT.CHECK</code> style and the check selection changes,
+     * the event object detail field contains the value <code>SWT.CHECK</code>.
+     * <code>widgetDefaultSelected</code> is typically called when an item is double-clicked.
+     * The item field of the event object is valid for default selection, but the detail field is not used.
+     * </p>
+     *
+     * @param listener the listener which should be notified when the user changes the receiver's selection
+     *
+     * @exception IllegalArgumentException <ul>
+     *    <li>ERROR_NULL_ARGUMENT - if the listener is null</li>
+     * </ul>
+     * @exception SWTException <ul>
+     *    <li>ERROR_WIDGET_DISPOSED - if the receiver has been disposed</li>
+     *    <li>ERROR_THREAD_INVALID_ACCESS - if not called from the thread that created the receiver</li>
+     * </ul>
+     *
+     * @see SelectionListener
+     * @see SelectionEvent
+     */
+    protected void addSelectionListener( SelectionListener listener) {
+        fTableViewer.getTable().addSelectionListener(listener);
+    }
+
+
 
     /**
      * The <code>ContentViewer</code> implementation of this <code>Viewer</code>
@@ -123,7 +167,7 @@ public abstract class AbstractTimeRangeTable extends TmfTimeViewer {
                 ITmfTimestamp startTime = roi.getStartTime();
                 return startTime.toString();
             }
-        });
+        }, new StartTimeColumnComparator());
         createColumn(Messages.AbstractTimeRangeTable_endTime, new ColumnLabelProvider() {
             @Override
             public String getText(Object input) {
@@ -131,21 +175,21 @@ public abstract class AbstractTimeRangeTable extends TmfTimeViewer {
                 ITmfTimestamp endTime = roi.getEndTime();
                 return endTime.toString();
             }
-        });
+        }, new EndTimeColumnComparator());
         createColumn(Messages.AbstractTimeRangeTable_duration, new ColumnLabelProvider() {
             @Override
             public String getText(Object input) {
                 ITmfRegionOfInterest roi = (ITmfRegionOfInterest) input;
                 return Long.toString(roi.getDuration());
             }
-        });
+        }, new DurationColumnComparator());
         createColumn(Messages.AbstractTimeRangeTable_content, new ColumnLabelProvider() {
             @Override
             public String getText(Object input) {
                 ITmfRegionOfInterest roi = (ITmfRegionOfInterest) input;
                 return roi.getMessage();
             }
-        });
+        }, new MessageColumnComparator());
     }
 
     /**
@@ -155,12 +199,48 @@ public abstract class AbstractTimeRangeTable extends TmfTimeViewer {
      *            the name of the column
      * @param provider
      *            the provider of the column
+     * @param viewerComparator
+     *            the comparator associated with clicking on the column
      */
-    protected void createColumn(String name, ColumnLabelProvider provider) {
+
+    protected void createColumn(String name, ColumnLabelProvider provider, ViewerComparator viewerComparator) {
         TableViewerColumn col = new TableViewerColumn(fTableViewer, SWT.NONE);
-        col.getColumn().setWidth(DEFAULT_COL_WIDTH);
-        col.getColumn().setText(name);
         col.setLabelProvider(provider);
+        final TableColumn column = col.getColumn();
+        column.setWidth(DEFAULT_COL_WIDTH);
+        column.setText(name);
+        column.setResizable(true);
+        column.setMoveable(true);
+        column.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+
+                Table table = fTableViewer.getTable();
+                table.setSortDirection(getSortDirection());
+                TableColumn prevSortcolumn = table.getSortColumn();
+                if (prevSortcolumn == column) {
+                    flipSortDirection();
+                }
+                table.setSortColumn(column);
+                ViewerComparator comparator = fComparators.get(column.getText());
+                if (fDirection == SWT.DOWN) {
+                    fTableViewer.setComparator(comparator);
+                } else {
+                    fTableViewer.setComparator(new InvertSorter(comparator));
+                }
+                fTableViewer.refresh();
+            }
+        });
+        fComparators.put(name, viewerComparator);
+    }
+
+    private void flipSortDirection() {
+        if (fDirection == SWT.DOWN) {
+            fDirection = SWT.UP;
+        } else {
+            fDirection = SWT.DOWN;
+        }
+
     }
 
     @Override
@@ -181,6 +261,27 @@ public abstract class AbstractTimeRangeTable extends TmfTimeViewer {
      */
     protected void setItemCount(int count) {
         fTableViewer.setItemCount(count);
+    }
+
+    private int getSortDirection() {
+        return fDirection;
+    }
+
+    protected TmfSignalThrottler getTimeRangeSyncThrottler() {
+        return fTimeRangeSyncThrottler;
+    }
+
+    class InvertSorter extends ViewerComparator {
+        private final ViewerComparator fVc;
+
+        public InvertSorter(ViewerComparator vc) {
+            fVc = vc;
+        }
+
+        @Override
+        public int compare(Viewer viewer, Object e1, Object e2) {
+            return -fVc.compare(viewer, e1, e2);
+        }
 
     }
 
