@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Add message to exceptions
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -413,7 +416,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
             stackDepth = previousSV.unboxInt();
         } else {
             /* Previous state of this attribute was another type? Not good! */
-            throw new StateValueTypeException();
+            throw new StateValueTypeException("Type:" + previousSV.getType() + ", Expected:" + Type.INTEGER); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         if (stackDepth >= 100000) {
@@ -453,7 +456,7 @@ public class StateSystem implements ITmfStateSystemBuilder {
              * The existing value was not an integer (which is expected for
              * stack tops), this doesn't look like a valid stack attribute.
              */
-            throw new StateValueTypeException();
+            throw new StateValueTypeException("Type:" + previousSV.getType() + ", Expected:" + Type.INTEGER); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         int stackDepth = previousSV.unboxInt();
