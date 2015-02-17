@@ -97,6 +97,14 @@
             name="%synchronization.view.name"
             restorable="true">
       </view>
+      <view
+            category="org.eclipse.linuxtools.tmf.ui.views.category"
+            class="org.eclipse.tracecompass.tmf.ui.views.timerange.RegionsOfInterestView"
+            icon="icons/elcl16/roi.gif"
+            id="org.eclipse.tracecompass.tmf.views.regionofinterest"
+            name="Regions of Interest"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
