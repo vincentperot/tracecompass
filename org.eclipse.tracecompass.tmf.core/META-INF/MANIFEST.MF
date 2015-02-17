@@ -40,6 +40,7 @@ Export-Package: org.eclipse.tracecompass.internal.tmf.core;x-friends:="org.eclip
  org.eclipse.tracecompass.tmf.core.filter.model,
  org.eclipse.tracecompass.tmf.core.filter.xml,
  org.eclipse.tracecompass.tmf.core.io,
+ org.eclipse.tracecompass.tmf.core.parsers,
  org.eclipse.tracecompass.tmf.core.parsers.custom,
  org.eclipse.tracecompass.tmf.core.project.model,
  org.eclipse.tracecompass.tmf.core.request,
