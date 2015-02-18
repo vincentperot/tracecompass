@@ -38,6 +38,7 @@ public class DefaultEventLayout implements IKernelAnalysisEventLayout{
     private static final String SOFTIRQ_EXIT = "softirq_exit"; //$NON-NLS-1$
     private static final String SOFTIRQ_RAISE = "softirq_raise"; //$NON-NLS-1$
     private static final String SCHED_SWITCH = "sched_switch"; //$NON-NLS-1$
+    private static final String SCHED_PI_SETPRIO = "sched_pi_setprio"; //$NON-NLS-1$
 
     private static final Collection<String> SCHED_WAKEUP_EVENTS =
             checkNotNull(ImmutableList.of("sched_wakeup", "sched_wakeup_new")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -107,6 +108,11 @@ public class DefaultEventLayout implements IKernelAnalysisEventLayout{
     @Override
     public String eventSchedSwitch() {
         return SCHED_SWITCH;
+    }
+
+    @Override
+    public String eventSchedPiSetprio() {
+        return SCHED_PI_SETPRIO;
     }
 
     @Override

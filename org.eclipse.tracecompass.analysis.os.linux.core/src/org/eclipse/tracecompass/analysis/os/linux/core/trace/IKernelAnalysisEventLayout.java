@@ -52,6 +52,7 @@ public interface IKernelAnalysisEventLayout {
     String eventSoftIrqExit();
     String eventSoftIrqRaise();
     String eventSchedSwitch();
+    String eventSchedPiSetprio();
     Collection<String> eventsSchedWakeup();
     String eventSchedProcessFork();
     String eventSchedProcessExit();
