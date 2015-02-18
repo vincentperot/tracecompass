@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Support slash in attribute name
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -190,9 +193,9 @@ public final class Attribute {
      * Return a String array composed of the full (absolute) path representing
      * this attribute
      *
-     * @return
+     * @return The full name of this attribute
      */
-    private String[] getFullAttribute() {
+    public String[] getFullAttribute() {
         LinkedList<String> list = new LinkedList<>();
         Attribute curNode = this;
 

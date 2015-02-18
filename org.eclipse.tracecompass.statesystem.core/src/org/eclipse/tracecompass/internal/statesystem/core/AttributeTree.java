@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Support slash in attribute name
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -39,6 +42,8 @@ public final class AttributeTree {
 
     /* "Magic number" for attribute tree files or file sections */
     private static final int ATTRIB_TREE_MAGIC_NUMBER = 0x06EC3671;
+    /* Substitute character for slash in attribute name */
+    private static final char SUB = 0x1A;
 
     private final StateSystem ss;
     private final List<Attribute> attributeList;
@@ -134,6 +139,9 @@ public final class AttributeTree {
          * the attributes. Simply create attributes the normal way from them.
          */
         for (String[] attrib : list) {
+            for (int i = 0; i < attrib.length; i++) {
+                attrib[i] = attrib[i].replace(SUB, '/');
+            }
             this.getQuarkAndAdd(-1, attrib);
         }
     }
@@ -166,7 +174,16 @@ public final class AttributeTree {
 
             /* Write the attributes themselves */
             for (Attribute entry : this.attributeList) {
-                curByteArray = entry.getFullAttributeName().getBytes();
+                StringBuffer buf = null;
+                for (String attribute : entry.getFullAttribute()) {
+                    if (buf == null) {
+                        buf = new StringBuffer();
+                    } else {
+                        buf.append('/');
+                    }
+                    buf.append(attribute.replace('/', SUB));
+                }
+                curByteArray = buf != null ? buf.toString().getBytes() : "".getBytes(); //$NON-NLS-1$
                 if (curByteArray.length > Byte.MAX_VALUE) {
                     throw new IOException("Attribute with name \"" //$NON-NLS-1$
                             + Arrays.toString(curByteArray) + "\" is too long."); //$NON-NLS-1$
