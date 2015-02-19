@@ -86,6 +86,7 @@ public abstract class AbstractImportAndReadSmokeTest {
 
         /* set up for swtbot */
         SWTBotPreferences.TIMEOUT = 50000; /* 50 second timeout */
+        fLogger.removeAllAppenders();
         fLogger.addAppender(new NullAppender());
         fBot = new SWTWorkbenchBot();
 

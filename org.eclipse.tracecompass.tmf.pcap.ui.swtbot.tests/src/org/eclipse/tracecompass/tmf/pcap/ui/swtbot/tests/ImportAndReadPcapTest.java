@@ -89,6 +89,7 @@ public class ImportAndReadPcapTest {
 
         /* set up for swtbot */
         SWTBotPreferences.TIMEOUT = 300000; /* 300 second timeout */
+        fLogger.removeAllAppenders();
         fLogger.addAppender(new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT));
         fBot = new SWTWorkbenchBot();
 
