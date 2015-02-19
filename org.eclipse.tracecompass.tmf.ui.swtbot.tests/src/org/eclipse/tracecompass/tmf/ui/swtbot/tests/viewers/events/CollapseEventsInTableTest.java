@@ -96,6 +96,7 @@ public class CollapseEventsInTableTest {
 
         /* Set up for swtbot */
         SWTBotPreferences.TIMEOUT = 20000; /* 20 second timeout */
+        fLogger.removeAllAppenders();
         fLogger.addAppender(new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT));
         fBot = new SWTWorkbenchBot();
 

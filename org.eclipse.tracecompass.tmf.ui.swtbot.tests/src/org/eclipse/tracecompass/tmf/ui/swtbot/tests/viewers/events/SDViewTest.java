@@ -82,6 +82,7 @@ public class SDViewTest {
         Thread.currentThread().setName("SWTBot Thread"); // for the debugger
         /* set up for swtbot */
         SWTBotPreferences.TIMEOUT = 20000; /* 20 second timeout */
+        fLogger.removeAllAppenders();
         fLogger.addAppender(new ConsoleAppender(new SimpleLayout()));
         fBot = new SWTWorkbenchBot();
 
