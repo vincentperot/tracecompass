@@ -30,6 +30,7 @@ import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.tracecompass.tmf.core.io.BufferedRandomAccessFile;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -71,6 +72,7 @@ public class TestTraceOffsetting {
         Thread.currentThread().setName("SWTBot Thread"); // for the debugger
         /* set up for swtbot */
         SWTBotPreferences.TIMEOUT = 20000; /* 20 second timeout */
+        fLogger.removeAllAppenders();
         fLogger.addAppender(new ConsoleAppender(new SimpleLayout()));
         fBot = new SWTWorkbenchBot();
 
@@ -95,6 +97,11 @@ public class TestTraceOffsetting {
     @After
     public void cleanup() {
         fLocation.delete();
+    }
+
+    @AfterClass
+    public static void terminate() {
+        fLogger.removeAllAppenders();
     }
 
     /**
