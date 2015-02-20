@@ -169,7 +169,7 @@ public class CtfTmfEvent extends TmfEvent
     }
 
     @Override
-    public CtfTmfTrace getTrace() {
+    public @NonNull CtfTmfTrace getTrace() {
         /*
          * Should be of the right type, since we take a CtfTmfTrace at the
          * constructor

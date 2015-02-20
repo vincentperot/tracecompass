@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 Ericsson
+ * Copyright (c) 2011, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.tmf.core.filter.TmfCollapseFilter;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.component.ITmfEventProvider;
@@ -92,7 +93,7 @@ public class TmfEventsCache {
          * @since 3.2
          */
         @Override
-        public ITmfTrace getTrace() {
+        public @NonNull ITmfTrace getTrace() {
             return event.getTrace();
         }
         /**

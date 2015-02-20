@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 Ericsson
+ * Copyright (c) 2009, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0 which
@@ -110,7 +110,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     // ------------------------------------------------------------------------
 
     @Override
-    public ITmfTrace getTrace() {
+    public @NonNull ITmfTrace getTrace() {
         ITmfTrace trace = fTrace;
         if (trace == null) {
             throw new IllegalStateException("Null traces are only allowed on special kind of events and getTrace() should not be called on them"); //$NON-NLS-1$

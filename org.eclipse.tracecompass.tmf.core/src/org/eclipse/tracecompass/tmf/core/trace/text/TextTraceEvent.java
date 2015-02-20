@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Ericsson
+ * Copyright (c) 2014, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -59,7 +59,7 @@ public abstract class TextTraceEvent extends TmfEvent {
     }
 
     @Override
-    public TextTrace<? extends TextTraceEvent> getTrace() {
+    public @NonNull TextTrace<? extends TextTraceEvent> getTrace() {
         /* Cast should be safe, type is restricted by the constructor */
         return (TextTrace<?>) super.getTrace();
     }
