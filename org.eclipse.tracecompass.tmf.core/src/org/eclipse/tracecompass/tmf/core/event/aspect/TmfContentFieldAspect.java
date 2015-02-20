@@ -30,6 +30,7 @@ public class TmfContentFieldAspect implements ITmfEventAspect {
 
     private final String fAspectName;
     private final String[] fFieldPath;
+    private String fHelpText;
 
     /**
      * Constructor
@@ -43,6 +44,20 @@ public class TmfContentFieldAspect implements ITmfEventAspect {
     public TmfContentFieldAspect(String aspectName, String... fieldPath) {
         fAspectName = aspectName;
         fFieldPath = checkNotNull(Arrays.copyOf(fieldPath, fieldPath.length));
+        fHelpText = EMPTY_STRING;
+    }
+
+    /**
+     * Creates a new instance of this aspect with the specified help text.
+     *
+     * @param helpText
+     *            The help text
+     * @return the new aspect
+     */
+    public TmfContentFieldAspect withHelpText(final String helpText) {
+        TmfContentFieldAspect aspect = new TmfContentFieldAspect(fAspectName, fFieldPath);
+        aspect.fHelpText = helpText;
+        return aspect;
     }
 
     @Override
@@ -52,7 +67,7 @@ public class TmfContentFieldAspect implements ITmfEventAspect {
 
     @Override
     public String getHelpText() {
-        return EMPTY_STRING;
+        return fHelpText;
     }
 
     @Override
@@ -75,6 +90,7 @@ public class TmfContentFieldAspect implements ITmfEventAspect {
         int result = 1;
         result = prime * result + fAspectName.hashCode();
         result = prime * result + Arrays.hashCode(fFieldPath);
+        result = prime * result + fHelpText.hashCode();
         return result;
     }
 
@@ -94,6 +110,9 @@ public class TmfContentFieldAspect implements ITmfEventAspect {
             return false;
         }
         if (!Arrays.equals(fFieldPath, other.fFieldPath)) {
+            return false;
+        }
+        if (!fHelpText.equals(other.fHelpText)) {
             return false;
         }
         return true;
