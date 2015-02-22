@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Change separator character
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -38,7 +41,8 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundExc
 public final class AttributeTree {
 
     /* "Magic number" for attribute tree files or file sections */
-    private static final int ATTRIB_TREE_MAGIC_NUMBER = 0x06EC3671;
+    private static final int ATTRIB_TREE_MAGIC_NUMBER_V1 = 0x06EC3671;
+    private static final int ATTRIB_TREE_MAGIC_NUMBER = 0x06EC3672;
 
     private final StateSystem ss;
     private final List<Attribute> attributeList;
@@ -82,10 +86,13 @@ public final class AttributeTree {
         int res, remain, size;
         int expectedSize = 0;
         int total = 0;
+        String separator = "\0"; //$NON-NLS-1$
 
         /* Read the header of the Attribute Tree file (or file section) */
         res = in.readInt(); /* Magic number */
-        if (res != ATTRIB_TREE_MAGIC_NUMBER) {
+        if (res == ATTRIB_TREE_MAGIC_NUMBER_V1) {
+            separator = "/"; //$NON-NLS-1$
+        } else if (res != ATTRIB_TREE_MAGIC_NUMBER) {
             throw new IOException(errorMessage);
         }
 
@@ -114,7 +121,7 @@ public final class AttributeTree {
              * bleh
              */
             curFullString = new String(curByteArray);
-            curStringArray = curFullString.split("/"); //$NON-NLS-1$
+            curStringArray = curFullString.split(separator);
             list.add(curStringArray);
 
             /* Read the 0'ed confirmation byte */
