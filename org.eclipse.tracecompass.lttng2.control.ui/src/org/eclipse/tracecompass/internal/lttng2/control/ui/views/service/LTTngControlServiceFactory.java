@@ -104,7 +104,7 @@ public class LTTngControlServiceFactory {
 
         // Output logging
         if (ControlPreferences.getInstance().isLoggingEnabled()) {
-            ControlCommandLogger.log(LTTngControlService.formatOutput(result));
+            ControlCommandLogger.log(result.toString());
         }
 
         if (result.getResult() != 0) {
@@ -124,12 +124,12 @@ public class LTTngControlServiceFactory {
 
             // Output logging
             if (ControlPreferences.getInstance().isLoggingEnabled()) {
-                ControlCommandLogger.log(LTTngControlService.formatOutput(result));
+                ControlCommandLogger.log(result.toString());
             }
         }
 
 
-        if ((result != null) && (result.getResult() == 0) && (result.getOutput().length >= 1)) {
+        if ((result.getResult() == 0) && (result.getOutput().length >= 1)) {
             if (machineInterfaceMode) {
                 LTTngControlServiceMI service = new LTTngControlServiceMI(shell, LTTngControlService.class.getResource(LTTngControlServiceConstants.MI_XSD_FILENAME));
                 service.setVersion(result.getOutput());

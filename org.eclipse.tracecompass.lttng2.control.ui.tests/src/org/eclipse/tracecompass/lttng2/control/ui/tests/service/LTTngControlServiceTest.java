@@ -48,7 +48,6 @@ import org.eclipse.tracecompass.internal.lttng2.control.core.model.TraceSessionS
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.impl.BufferType;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.impl.ChannelInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.impl.SessionInfo;
-import org.eclipse.tracecompass.internal.lttng2.control.stubs.service.CommandShellFactory;
 import org.eclipse.tracecompass.internal.lttng2.control.stubs.shells.LTTngToolsFileShell;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.Activator;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.logging.ControlCommandLogger;
@@ -119,8 +118,6 @@ public class LTTngControlServiceTest {
     // ------------------------------------------------------------------------
     // Test data
     // ------------------------------------------------------------------------
-
-    private CommandShellFactory fShellFactory;
     private String fTestfile;
     protected LTTngToolsFileShell fShell;
     protected ILttngControlService fService;
@@ -137,13 +134,11 @@ public class LTTngControlServiceTest {
      */
     @Before
     public void setUp() throws Exception {
-        fShellFactory = CommandShellFactory.getInstance();
-
         URL location = FileLocator.find(FrameworkUtil.getBundle(this.getClass()), new Path(getTestDirectory() + File.separator + getTestStream()), null);
         File testfile = new File(FileLocator.toFileURL(location).toURI());
         fTestfile = testfile.getAbsolutePath();
 
-        fShell = fShellFactory.getFileShell();
+        fShell = new LTTngToolsFileShell();
         fShell.loadScenarioFile(fTestfile);
         fService = getControlService();
         if (fService == null) {

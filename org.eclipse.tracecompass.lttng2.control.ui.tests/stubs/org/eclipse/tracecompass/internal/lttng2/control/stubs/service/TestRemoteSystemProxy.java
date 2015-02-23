@@ -58,19 +58,17 @@ public class TestRemoteSystemProxy extends RemoteSystemProxy {
     }
 
     @Override
-    public ICommandShell createCommandShell() throws ExecutionException {
-        if (fShell == null) {
-            fShell = CommandShellFactory.getInstance().getFileShell();
+    public ICommandShell createCommandShell() {
+        LTTngToolsFileShell shell = fShell;
+        if (shell == null) {
+            shell = new LTTngToolsFileShell();
             if ((fTestFile != null) && (fScenario != null)) {
-                try {
-                    fShell.loadScenarioFile(fTestFile);
-                } catch (Exception e) {
-                    throw new ExecutionException(e.toString());
-                }
-                fShell.setScenario(fScenario);
+                shell.loadScenarioFile(fTestFile);
+                shell.setScenario(fScenario);
             }
+            fShell = shell;
         }
-        return fShell;
+        return shell;
     }
 
     @Override

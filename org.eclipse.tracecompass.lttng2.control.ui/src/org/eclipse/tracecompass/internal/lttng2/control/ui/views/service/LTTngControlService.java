@@ -15,6 +15,8 @@
  **********************************************************************/
 package org.eclipse.tracecompass.internal.lttng2.control.ui.views.service;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -25,6 +27,8 @@ import java.util.regex.Pattern;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IBaseEventInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IChannelInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IDomainInfo;
@@ -350,7 +354,7 @@ public class LTTngControlService implements ILttngControlService {
 
         List<IBaseEventInfo> events = new ArrayList<>();
 
-        if (result.getErrorOutput() != null) {
+        if (result.getErrorOutput().length > 0) {
             // Ignore the following 2 cases:
             // Spawning a session daemon
             // Error: Unable to list kernel events
@@ -363,7 +367,7 @@ public class LTTngControlService implements ILttngControlService {
         }
 
         if (isError(result)) {
-            throw new ExecutionException(Messages.TraceControl_CommandError + " " + toCommandString(command) + "\n" + formatOutput(result)); //$NON-NLS-1$ //$NON-NLS-2$
+            throw new ExecutionException(Messages.TraceControl_CommandError + " " + toCommandString(command) + "\n" + result.toString()); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         // Kernel events:
@@ -396,7 +400,7 @@ public class LTTngControlService implements ILttngControlService {
             return allProviders;
         }
 
-        if (result.getErrorOutput() != null) {
+        if (result.getErrorOutput().length > 0) {
             // Ignore the following 2 cases:
             // Spawning a session daemon
             // Error: Unable to list UST events: Listing UST events failed
@@ -409,7 +413,7 @@ public class LTTngControlService implements ILttngControlService {
         }
 
         if (isError(result)) {
-            throw new ExecutionException(Messages.TraceControl_CommandError + " " + toCommandString(command) + "\n" + formatOutput(result)); //$NON-NLS-1$ //$NON-NLS-2$
+            throw new ExecutionException(Messages.TraceControl_CommandError + " " + toCommandString(command) + "\n" + result.toString()); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         // Note that field print-outs exists for version >= 2.1.0
@@ -522,7 +526,7 @@ public class LTTngControlService implements ILttngControlService {
      *            the session to create
      * @return the basic command for command creation
      */
-    protected List<String> prepareSessionCreationCommand(ISessionInfo sessionInfo) {
+    protected @NonNull List<String> prepareSessionCreationCommand(ISessionInfo sessionInfo) {
         List<String> command = createCommand(LTTngControlServiceConstants.COMMAND_CREATE_SESSION);
         if (!sessionInfo.getName().isEmpty()) {
             command.add(sessionInfo.getName());
@@ -542,7 +546,7 @@ public class LTTngControlService implements ILttngControlService {
 
     private ISessionInfo createStreamedSession(ISessionInfo sessionInfo, IProgressMonitor monitor) throws ExecutionException {
 
-        List<String> command = prepareStreamedSessionCreationCommand(sessionInfo);
+        @NonNull List<String> command = prepareStreamedSessionCreationCommand(sessionInfo);
 
         ICommandResult result = executeCommand(command, monitor);
 
@@ -611,7 +615,7 @@ public class LTTngControlService implements ILttngControlService {
      *            the session to create
      * @return the basic command for command creation
      */
-    protected List<String> prepareStreamedSessionCreationCommand(ISessionInfo sessionInfo) {
+    @NonNull protected List<String> prepareStreamedSessionCreationCommand(ISessionInfo sessionInfo) {
         List<String> command = createCommand(LTTngControlServiceConstants.COMMAND_CREATE_SESSION);
         if (!sessionInfo.getName().isEmpty()) {
             command.add(sessionInfo.getName());
@@ -648,7 +652,7 @@ public class LTTngControlService implements ILttngControlService {
         String[] errorOutput = result.getErrorOutput();
 
         boolean isError = isError(result);
-        if (isError && (errorOutput != null)) {
+        if (isError && (errorOutput.length > 0)) {
             if (ignoredPattern(result.getErrorOutput(), LTTngControlServiceConstants.SESSION_NOT_FOUND_ERROR_PATTERN)) {
                 isError = false;
 
@@ -656,7 +660,7 @@ public class LTTngControlService implements ILttngControlService {
         }
 
         if (isError) {
-            throw new ExecutionException(Messages.TraceControl_CommandError + " " + toCommandString(command) + "\n" + formatOutput(result)); //$NON-NLS-1$ //$NON-NLS-2$
+            throw new ExecutionException(Messages.TraceControl_CommandError + " " + toCommandString(command) + "\n" + result.toString()); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         // Session <sessionName> destroyed
@@ -1045,11 +1049,11 @@ public class LTTngControlService implements ILttngControlService {
                 continue;
             }
             String[] args = commandLine.split("\\s+"); //$NON-NLS-1$
-            List<String> command = Arrays.asList(args);
+            List<String> command = checkNotNull(Arrays.asList(args));
             ICommandResult result = executeCommand(command, monitor);
 
             if (isError(result)) {
-                throw new ExecutionException(Messages.TraceControl_CommandError + " " + toCommandString(command) + "\n" + formatOutput(result)); //$NON-NLS-1$ //$NON-NLS-2$
+                throw new ExecutionException(Messages.TraceControl_CommandError + " " + toCommandString(command) + "\n" + result.toString()); //$NON-NLS-1$ //$NON-NLS-2$
             }
         }
     }
@@ -1084,33 +1088,6 @@ public class LTTngControlService implements ILttngControlService {
         }
 
         return false;
-    }
-
-    /**
-     * Formats the output string as single string.
-     *
-     * @param result
-     *            - output array
-     * @return - the formatted output
-     */
-    public static String formatOutput(ICommandResult result) {
-        if ((result == null) || ((result.getOutput() == null || result.getOutput().length == 0) && (result.getErrorOutput() == null || result.getErrorOutput().length == 0))) {
-            return ""; //$NON-NLS-1$
-        }
-        String[] output = result.getOutput();
-        String[] errorOutput = result.getErrorOutput();
-        StringBuffer ret = new StringBuffer();
-        ret.append("Error Ouptut:\n"); //$NON-NLS-1$
-        for (int i = 0; i < errorOutput.length; i++) {
-           ret.append(errorOutput[i]).append("\n"); //$NON-NLS-1$
-        }
-        ret.append("Return Value: "); //$NON-NLS-1$
-        ret.append(result.getResult());
-        ret.append("\n"); //$NON-NLS-1$
-        for (int i = 0; i < output.length; i++) {
-            ret.append(output[i]).append("\n"); //$NON-NLS-1$
-        }
-        return ret.toString();
     }
 
     /**
@@ -1482,7 +1459,7 @@ public class LTTngControlService implements ILttngControlService {
      *            array of string that makes up a command line
      * @return string buffer with created command line
      */
-    protected List<String> createCommand(String... strings) {
+    protected @NonNull List<String> createCommand(String... strings) {
         List<String> command = new ArrayList<>();
         command.add(LTTngControlServiceConstants.CONTROL_COMMAND);
         List<String> groupOption = getTracingGroupOption();
@@ -1542,8 +1519,8 @@ public class LTTngControlService implements ILttngControlService {
      * @throws ExecutionException
      *             If the command fails
      */
-    protected ICommandResult executeCommand(List<String> command,
-            IProgressMonitor monitor) throws ExecutionException {
+    protected ICommandResult executeCommand(@NonNull List<String> command,
+            @Nullable IProgressMonitor monitor) throws ExecutionException {
         return executeCommand(command, monitor, true);
     }
 
@@ -1561,8 +1538,8 @@ public class LTTngControlService implements ILttngControlService {
      * @throws ExecutionException
      *             in case of error result
      */
-    protected ICommandResult executeCommand(List<String> command,
-            IProgressMonitor monitor, boolean checkForError)
+    protected ICommandResult executeCommand(@NonNull List<String> command,
+            @Nullable IProgressMonitor monitor, boolean checkForError)
             throws ExecutionException {
         if (ControlPreferences.getInstance().isLoggingEnabled()) {
             ControlCommandLogger.log(toCommandString(command));
@@ -1571,12 +1548,12 @@ public class LTTngControlService implements ILttngControlService {
         ICommandResult result = fCommandShell.executeCommand(command, monitor);
 
         if (ControlPreferences.getInstance().isLoggingEnabled()) {
-            ControlCommandLogger.log(formatOutput(result));
+            ControlCommandLogger.log(result.toString());
         }
 
         if (checkForError && isError(result)) {
             throw new ExecutionException(Messages.TraceControl_CommandError
-                    + " " + toCommandString(command) + "\n" + formatOutput(result)); //$NON-NLS-1$ //$NON-NLS-2$
+                    + " " + toCommandString(command) + "\n" + result.toString()); //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         return result;
