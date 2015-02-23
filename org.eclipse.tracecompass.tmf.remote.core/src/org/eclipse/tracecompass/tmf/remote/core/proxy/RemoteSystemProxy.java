@@ -42,7 +42,7 @@ import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
  *
  * @author Bernd Hufmann
  */
-public class RemoteSystemProxy implements IRemoteSystemProxy, IRemoteConnectionChangeListener {
+public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
 
     /** Name of a local connection */
     public static final String LOCAL_CONNECTION_NAME = "Local"; //$NON-NLS-1$
@@ -50,7 +50,7 @@ public class RemoteSystemProxy implements IRemoteSystemProxy, IRemoteConnectionC
     // ------------------------------------------------------------------------
     // Attributes
     // ------------------------------------------------------------------------
-    private final IRemoteConnection fHost;
+    private final @NonNull IRemoteConnection fHost;
     private boolean fExplicitConnect;
 
     // ------------------------------------------------------------------------
@@ -63,26 +63,53 @@ public class RemoteSystemProxy implements IRemoteSystemProxy, IRemoteConnectionC
      * @param host
      *            The host of this proxy
      */
-    public RemoteSystemProxy(IRemoteConnection host) {
+    public RemoteSystemProxy(@NonNull IRemoteConnection host) {
         fHost = host;
         fHost.addConnectionChangeListener(this);
+    }
+
+    /**
+     * Returns the connection instance.
+     *
+     * @return the @link{IRemoteConnection} instance
+     */
+    public @NonNull IRemoteConnection getRemoteConnection() {
+        return fHost;
     }
 
     // ------------------------------------------------------------------------
     // Operations
     // ------------------------------------------------------------------------
 
-    @Override
-    public IRemoteFileService getRemoteFileService() {
+    /**
+     * Finds the remote file system service.
+     *
+     * @return file service subsystem, or <code>null</code> if not found.
+     */
+    public @Nullable IRemoteFileService getRemoteFileService() {
         return fHost.getService(IRemoteFileService.class);
     }
 
-    @Override
-    public IRemoteProcessBuilder getProcessBuilder(String...command) {
+    /**
+     * Returns a remote process builder for remote launching a process.
+     *
+     * @param command
+     *            the command to be executed.
+     * @return the builder, or <code>null</code> if not possible.
+     */
+    public @Nullable IRemoteProcessBuilder getProcessBuilder(String...command) {
         return fHost.getService(IRemoteProcessService.class).getProcessBuilder(command);
     }
 
-    @Override
+    /**
+     * Connects the remote connection.
+     *
+     * @param monitor
+     *            a monitor to report progress.
+     *
+     * @throws ExecutionException
+     *             If the connection fails
+     */
     public void connect(IProgressMonitor monitor) throws ExecutionException {
         try {
             if (!fHost.isOpen()) {
@@ -94,12 +121,16 @@ public class RemoteSystemProxy implements IRemoteSystemProxy, IRemoteConnectionC
         }
     }
 
-    @Override
-    public void disconnect() throws ExecutionException {
+    /**
+     * Disconnects from the remote connection.
+     */
+    public void disconnect() {
         fHost.close();
     }
 
-    @Override
+    /**
+     * Disposes the proxy, may close the connection.
+     */
     public void dispose() {
         fHost.removeConnectionChangeListener(this);
         if (fExplicitConnect) {
@@ -107,24 +138,46 @@ public class RemoteSystemProxy implements IRemoteSystemProxy, IRemoteConnectionC
         }
     }
 
-    @Override
+    /**
+     * Creates a command shell.
+     *
+     * @return the command shell implementation
+     * @throws ExecutionException
+     *             If the command fails
+     */
     public ICommandShell createCommandShell() throws ExecutionException {
         ICommandShell shell = new CommandShell(fHost);
         shell.connect();
         return shell;
     }
 
-    @Override
+    /**
+     * Method to add a communication listener to the connector service defined
+     * for the given connection.
+     *
+     * @param listener
+     *            listener to add
+     */
     public void addConnectionChangeListener(IRemoteConnectionChangeListener listener) {
         fHost.addConnectionChangeListener(listener);
     }
 
-    @Override
+    /**
+     * Method to remove a communication listener from the connector service
+     * defined for the given connection.
+     *
+     * @param listener
+     *            listener to remove
+     */
     public void removeConnectionChangeListener(IRemoteConnectionChangeListener listener) {
         fHost.removeConnectionChangeListener(listener);
     }
 
-    @Override
+    /**
+     * Returns the connection state.
+     *
+     * @return whether the remote host is currently connected.
+     */
     public boolean isConnected() {
         return fHost.isOpen();
     }

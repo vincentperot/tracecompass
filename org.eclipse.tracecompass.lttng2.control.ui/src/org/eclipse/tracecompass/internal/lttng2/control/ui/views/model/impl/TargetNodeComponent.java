@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.remote.core.IRemoteConnection;
 import org.eclipse.remote.core.IRemoteConnectionChangeListener;
@@ -38,7 +39,6 @@ import org.eclipse.tracecompass.internal.lttng2.control.ui.views.model.ITraceCon
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.property.TargetNodePropertySource;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.ILttngControlService;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.LTTngControlServiceFactory;
-import org.eclipse.tracecompass.tmf.remote.core.proxy.IRemoteSystemProxy;
 import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 import org.eclipse.ui.PlatformUI;
@@ -81,13 +81,9 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
      */
     private Image fDisconnectedImage = null;
     /**
-     * The connection implementation.
-     */
-    private IRemoteConnection fHost = null;
-    /**
      * The remote proxy implementation.
      */
-    private IRemoteSystemProxy fRemoteProxy = null;
+    private @NonNull RemoteSystemProxy fRemoteProxy;
     /**
      * The control service for LTTng specific commands.
      */
@@ -103,29 +99,35 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
 
     /**
      * Constructor
-     * @param name - the name of the component
-     * @param parent - the parent of the component
-     * @param host - the host connection implementation
-     * @param proxy - the remote proxy implementation
+     *
+     * @param name
+     *            the name of the component
+     * @param parent
+     *            the parent of the component
+     * @param proxy
+     *            the remote proxy implementation
      */
-    public TargetNodeComponent(String name, ITraceControlComponent parent, IRemoteConnection host, IRemoteSystemProxy proxy) {
+    public TargetNodeComponent(String name, ITraceControlComponent parent, @NonNull RemoteSystemProxy proxy) {
         super(name, parent);
         setImage(TARGET_NODE_CONNECTED_ICON_FILE);
         fDisconnectedImage = Activator.getDefault().loadIcon(TARGET_NODE_DISCONNECTED_ICON_FILE);
-        fHost = host;
         fRemoteProxy = proxy;
         fRemoteProxy.addConnectionChangeListener(this);
-        setToolTip(fHost.getName());
+        setToolTip(fRemoteProxy.getRemoteConnection().getName());
     }
 
     /**
      * Constructor (using default proxy)
-     * @param name - the name of the component
-     * @param parent - the parent of the component
-     * @param host - the host connection implementation
+     *
+     * @param name
+     *            the name of the component
+     * @param parent
+     *            the parent of the component
+     * @param host
+     *            the host connection implementation
      */
-    public TargetNodeComponent(String name, ITraceControlComponent parent, IRemoteConnection host) {
-        this(name, parent, host, new RemoteSystemProxy(host));
+    public TargetNodeComponent(String name, ITraceControlComponent parent, @NonNull IRemoteConnection host) {
+        this(name, parent, new RemoteSystemProxy(host));
     }
 
     @Override
@@ -186,16 +188,9 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
     }
 
     /**
-     * @return the remote connection associated with this node
-     */
-    public IRemoteConnection getRemoteConnection() {
-        return fHost;
-    }
-
-    /**
      * @return remote system proxy implementation
      */
-    public IRemoteSystemProxy getRemoteSystemProxy() {
+    public @NonNull RemoteSystemProxy getRemoteSystemProxy() {
         return fRemoteProxy;
     }
 
