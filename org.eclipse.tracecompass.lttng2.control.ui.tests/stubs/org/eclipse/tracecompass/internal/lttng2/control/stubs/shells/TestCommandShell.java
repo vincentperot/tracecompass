@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.tracecompass.tmf.remote.core.shell.CommandResult;
+import org.eclipse.tracecompass.internal.tmf.remote.core.shell.CommandResult;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandResult;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 
@@ -29,12 +29,7 @@ public class TestCommandShell implements ICommandShell {
     protected boolean fIsConnected = false;
 
     @Override
-    public void connect() throws ExecutionException {
-        fIsConnected = true;
-    }
-
-    @Override
-    public void disconnect() {
+    public void dispose() {
         fIsConnected = false;
     }
 

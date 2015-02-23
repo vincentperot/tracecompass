@@ -9,7 +9,9 @@
  * Contributors:
  *   Markus Schorn - Initial API and implementation
  **********************************************************************/
-package org.eclipse.tracecompass.tmf.remote.core.shell;
+package org.eclipse.tracecompass.internal.tmf.remote.core.shell;
+
+import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,10 +20,6 @@ import java.io.InputStreamReader;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 class InputReader {
-
-    private static final int JOIN_TIMEOUT = 300;
-    private static final int BYTES_PER_KB = 1024;
-
     private final InputStreamReader fReader;
     private final Thread fThread;
     private final StringBuilder fResult;
@@ -33,7 +31,7 @@ class InputReader {
         fThread = new Thread() {
             @Override
             public void run() {
-                final char[] buffer = new char[BYTES_PER_KB];
+                final char[] buffer = new char[1024];
                 int read;
                 try {
                     while (!fDone && (read = fReader.read(buffer)) > 0) {
@@ -47,8 +45,8 @@ class InputReader {
     }
 
     public void waitFor(IProgressMonitor monitor) throws InterruptedException {
-        while (fThread.isAlive() && (monitor == null || !monitor.isCanceled())) {
-            fThread.join(JOIN_TIMEOUT);
+        while (fThread.isAlive() && (!monitor.isCanceled())) {
+            fThread.join(300);
         }
     }
 
@@ -59,7 +57,7 @@ class InputReader {
 
     @Override
     public String toString() {
-        return fResult.toString();
+        return nullToEmptyString(fResult.toString());
     }
 
 }
