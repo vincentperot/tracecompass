@@ -141,7 +141,7 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
         fService = null;
         final ICommandShell shell = fShell;
         if (shell != null) {
-            shell.disconnect();
+            shell.dispose();
             fShell = null;
         }
     }

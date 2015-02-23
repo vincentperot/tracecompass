@@ -32,7 +32,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 
 import org.eclipse.tracecompass.internal.tmf.remote.core.Activator;
-import org.eclipse.tracecompass.tmf.remote.core.shell.CommandShell;
+import org.eclipse.tracecompass.internal.tmf.remote.core.shell.CommandShell;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 
 /**
@@ -142,13 +142,9 @@ public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
      * Creates a command shell.
      *
      * @return the command shell implementation
-     * @throws ExecutionException
-     *             If the command fails
      */
-    public ICommandShell createCommandShell() throws ExecutionException {
-        ICommandShell shell = new CommandShell(fHost);
-        shell.connect();
-        return shell;
+    public @NonNull ICommandShell createCommandShell() {
+        return new CommandShell(fHost);
     }
 
     /**
