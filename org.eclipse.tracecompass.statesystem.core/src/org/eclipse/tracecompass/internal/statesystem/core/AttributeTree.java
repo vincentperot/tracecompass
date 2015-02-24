@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Support slash in full attribute path
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -114,7 +117,12 @@ public final class AttributeTree {
              * bleh
              */
             curFullString = new String(curByteArray);
-            curStringArray = curFullString.split("/"); //$NON-NLS-1$
+            /* Split on '/' not preceded by a '\' */
+            curStringArray = curFullString.split("(?<!\\\\)/"); //$NON-NLS-1$
+            for (int i = 0; i < curStringArray.length; i++) {
+                /* Unescape '/' and '\' in attribute name */
+                curStringArray[i] = curStringArray[i].replace("\\/", "/").replace("\\\\", "\\"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+            }
             list.add(curStringArray);
 
             /* Read the 0'ed confirmation byte */
@@ -380,6 +388,7 @@ public final class AttributeTree {
 
     /**
      * Get the full path name of an attribute specified by a quark.
+     * '/' and '\' in attribute names are escaped by a preceding '\'.
      *
      * @param quark
      *            The quark of the attribute
