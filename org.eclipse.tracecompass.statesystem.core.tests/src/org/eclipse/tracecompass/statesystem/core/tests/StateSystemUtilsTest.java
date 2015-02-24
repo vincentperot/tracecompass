@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 École Polytechnique de Montréal
+ * Copyright (c) 2014, 2015 École Polytechnique de Montréal and others.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -8,10 +8,12 @@
  *
  * Contributors:
  *   Geneviève Bastien - Initial API and implementation
+ *   Patrick Tasse - Add unit tests for stringToPath
  *******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core.tests;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -128,4 +130,87 @@ public class StateSystemUtilsTest {
 
     }
 
+    /**
+     * Test the {@link StateSystemUtils#pathToString(String[])} method.
+     */
+    @Test
+    public void testPathToString() {
+        assertEquals("", StateSystemUtils.pathToString(new String[] { "" }));
+        assertEquals("/", StateSystemUtils.pathToString(new String[] { "", "" }));
+        assertEquals("\\\\", StateSystemUtils.pathToString(new String[] { "\\" }));
+        assertEquals("\\/", StateSystemUtils.pathToString(new String[] { "/" }));
+        assertEquals("a", StateSystemUtils.pathToString(new String[] { "a" }));
+        assertEquals("a/", StateSystemUtils.pathToString(new String[] { "a", "" }));
+        assertEquals("/a", StateSystemUtils.pathToString(new String[] { "", "a" }));
+        assertEquals("a\\\\", StateSystemUtils.pathToString(new String[] { "a\\" }));
+        assertEquals("\\\\a", StateSystemUtils.pathToString(new String[] { "\\a" }));
+        assertEquals("ab/", StateSystemUtils.pathToString(new String[] { "ab", "" }));
+        assertEquals("a/b", StateSystemUtils.pathToString(new String[] { "a", "b" }));
+        assertEquals("/ab", StateSystemUtils.pathToString(new String[] { "", "ab" }));
+        assertEquals("ab\\\\", StateSystemUtils.pathToString(new String[] { "ab\\" }));
+        assertEquals("a\\\\b", StateSystemUtils.pathToString(new String[] { "a\\b" }));
+        assertEquals("\\\\ab", StateSystemUtils.pathToString(new String[] { "\\ab" }));
+        assertEquals("a//", StateSystemUtils.pathToString(new String[] { "a", "", "" }));
+        assertEquals("/a/", StateSystemUtils.pathToString(new String[] { "", "a", "" }));
+        assertEquals("//a", StateSystemUtils.pathToString(new String[] { "", "", "a" }));
+        assertEquals("a\\\\\\\\", StateSystemUtils.pathToString(new String[] { "a\\\\" }));
+        assertEquals("\\\\a\\\\", StateSystemUtils.pathToString(new String[] { "\\a\\" }));
+        assertEquals("\\\\\\\\a", StateSystemUtils.pathToString(new String[] { "\\\\a" }));
+        assertEquals("a\\/", StateSystemUtils.pathToString(new String[] { "a/" }));
+        assertEquals("\\\\a/", StateSystemUtils.pathToString(new String[] { "\\a", "" }));
+        assertEquals("\\/a", StateSystemUtils.pathToString(new String[] { "/a" }));
+        assertEquals("a/\\\\", StateSystemUtils.pathToString(new String[] { "a", "\\" }));
+        assertEquals("/a\\\\", StateSystemUtils.pathToString(new String[] { "", "a\\" }));
+        assertEquals("/\\\\a", StateSystemUtils.pathToString(new String[] { "", "\\a" }));
+        assertEquals("///", StateSystemUtils.pathToString(new String[] { "", "", "", "" }));
+        assertEquals("//\\\\", StateSystemUtils.pathToString(new String[] { "", "", "\\" }));
+        assertEquals("/\\/", StateSystemUtils.pathToString(new String[] { "", "/" }));
+        assertEquals("\\//", StateSystemUtils.pathToString(new String[] { "/", "" }));
+        assertEquals("/\\\\", StateSystemUtils.pathToString(new String[] { "", "\\" }));
+        assertEquals("\\/\\\\", StateSystemUtils.pathToString(new String[] { "/\\" }));
+        assertEquals("\\\\/", StateSystemUtils.pathToString(new String[] { "\\", "" }));
+        assertEquals("\\\\\\\\", StateSystemUtils.pathToString(new String[] { "\\\\" }));
+    }
+
+    /**
+     * Test the {@link StateSystemUtils#stringToPath(String)} method.
+     */
+    @Test
+    public void testStringToPath() {
+        assertArrayEquals(new String[] { "" }, StateSystemUtils.stringToPath(""));
+        assertArrayEquals(new String[] { "", "" }, StateSystemUtils.stringToPath("/"));
+        assertArrayEquals(new String[] { "\\" }, StateSystemUtils.stringToPath("\\"));
+        assertArrayEquals(new String[] { "/" }, StateSystemUtils.stringToPath("\\/"));
+        assertArrayEquals(new String[] { "a" }, StateSystemUtils.stringToPath("a"));
+        assertArrayEquals(new String[] { "a", "" }, StateSystemUtils.stringToPath("a/"));
+        assertArrayEquals(new String[] { "", "a" }, StateSystemUtils.stringToPath("/a"));
+        assertArrayEquals(new String[] { "a\\" }, StateSystemUtils.stringToPath("a\\"));
+        assertArrayEquals(new String[] { "\\a" }, StateSystemUtils.stringToPath("\\a"));
+        assertArrayEquals(new String[] { "ab", "" }, StateSystemUtils.stringToPath("ab/"));
+        assertArrayEquals(new String[] { "a", "b" }, StateSystemUtils.stringToPath("a/b"));
+        assertArrayEquals(new String[] { "", "ab" }, StateSystemUtils.stringToPath("/ab"));
+        assertArrayEquals(new String[] { "ab\\" }, StateSystemUtils.stringToPath("ab\\"));
+        assertArrayEquals(new String[] { "a\\b" }, StateSystemUtils.stringToPath("a\\b"));
+        assertArrayEquals(new String[] { "\\ab" }, StateSystemUtils.stringToPath("\\ab"));
+        assertArrayEquals(new String[] { "a", "", "" }, StateSystemUtils.stringToPath("a//"));
+        assertArrayEquals(new String[] { "", "a", "" }, StateSystemUtils.stringToPath("/a/"));
+        assertArrayEquals(new String[] { "", "", "a" }, StateSystemUtils.stringToPath("//a"));
+        assertArrayEquals(new String[] { "a\\" }, StateSystemUtils.stringToPath("a\\\\"));
+        assertArrayEquals(new String[] { "\\a\\" }, StateSystemUtils.stringToPath("\\a\\"));
+        assertArrayEquals(new String[] { "\\a" }, StateSystemUtils.stringToPath("\\\\a"));
+        assertArrayEquals(new String[] { "a/" }, StateSystemUtils.stringToPath("a\\/"));
+        assertArrayEquals(new String[] { "\\a", "" }, StateSystemUtils.stringToPath("\\a/"));
+        assertArrayEquals(new String[] { "/a" }, StateSystemUtils.stringToPath("\\/a"));
+        assertArrayEquals(new String[] { "a", "\\" }, StateSystemUtils.stringToPath("a/\\"));
+        assertArrayEquals(new String[] { "", "a\\" }, StateSystemUtils.stringToPath("/a\\"));
+        assertArrayEquals(new String[] { "", "\\a" }, StateSystemUtils.stringToPath("/\\a"));
+        assertArrayEquals(new String[] { "", "", "", "" }, StateSystemUtils.stringToPath("///"));
+        assertArrayEquals(new String[] { "", "", "\\" }, StateSystemUtils.stringToPath("//\\"));
+        assertArrayEquals(new String[] { "", "/" }, StateSystemUtils.stringToPath("/\\/"));
+        assertArrayEquals(new String[] { "/", "" }, StateSystemUtils.stringToPath("\\//"));
+        assertArrayEquals(new String[] { "", "\\" }, StateSystemUtils.stringToPath("/\\\\"));
+        assertArrayEquals(new String[] { "/\\" }, StateSystemUtils.stringToPath("\\/\\"));
+        assertArrayEquals(new String[] { "\\", "" }, StateSystemUtils.stringToPath("\\\\/"));
+        assertArrayEquals(new String[] { "\\\\" }, StateSystemUtils.stringToPath("\\\\\\"));
+    }
 }

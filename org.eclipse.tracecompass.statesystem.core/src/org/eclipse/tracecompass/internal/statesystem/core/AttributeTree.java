@@ -10,7 +10,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
- *   Patrick Tasse - Add message to exceptions
+ *   Patrick Tasse - Add message to exceptions, support slash in attribute name
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 
 /**
@@ -119,7 +120,7 @@ public final class AttributeTree {
              * bleh
              */
             curFullString = new String(curByteArray);
-            curStringArray = curFullString.split("/"); //$NON-NLS-1$
+            curStringArray = StateSystemUtils.stringToPath(curFullString);
             list.add(curStringArray);
 
             /* Read the 0'ed confirmation byte */
@@ -171,7 +172,7 @@ public final class AttributeTree {
 
             /* Write the attributes themselves */
             for (Attribute entry : this.attributeList) {
-                curByteArray = entry.getFullAttributeName().getBytes();
+                curByteArray = StateSystemUtils.pathToString(entry.getFullAttribute()).getBytes();
                 if (curByteArray.length > Byte.MAX_VALUE) {
                     throw new IOException("Attribute with name \"" //$NON-NLS-1$
                             + Arrays.toString(curByteArray) + "\" is too long."); //$NON-NLS-1$
@@ -384,14 +385,14 @@ public final class AttributeTree {
     }
 
     /**
-     * Get the full path name of an attribute specified by a quark.
+     * Get the full path array of an attribute specified by a quark.
      *
      * @param quark
      *            The quark of the attribute
-     * @return The full path name of the attribute
+     * @return The full path array of the attribute, or null
      */
-    public @NonNull String getFullAttributeName(int quark) {
-        return attributeList.get(quark).getFullAttributeName();
+    public @NonNull String[] getFullAttributePath(int quark) {
+        return attributeList.get(quark).getFullAttribute();
     }
 
     /**

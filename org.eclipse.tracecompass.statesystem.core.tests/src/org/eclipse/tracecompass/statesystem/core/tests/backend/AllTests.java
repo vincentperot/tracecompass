@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Add HistoryTreeBackendTest
  ******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core.tests.backend;
@@ -20,6 +21,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    HistoryTreeBackendTest.class,
     InMemoryBackendTest.class
 })
 public class AllTests {

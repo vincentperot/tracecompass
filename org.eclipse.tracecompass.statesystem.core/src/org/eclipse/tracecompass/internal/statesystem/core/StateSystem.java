@@ -176,8 +176,8 @@ public class StateSystem implements ITmfStateSystemBuilder {
     }
 
     @Override
-    public String getFullAttributePath(int attributeQuark) {
-        return getAttributeTree().getFullAttributeName(attributeQuark);
+    public String[] getFullAttributePath(int attributeQuark) {
+        return getAttributeTree().getFullAttributePath(attributeQuark);
     }
 
     //--------------------------------------------------------------------------

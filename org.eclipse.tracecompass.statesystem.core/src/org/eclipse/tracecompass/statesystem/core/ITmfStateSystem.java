@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API
+ *   Patrick Tasse - Change return type of getFullAttributePath
  ******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core;
@@ -237,16 +238,16 @@ public interface ITmfStateSystem {
     @NonNull String getAttributeName(int attributeQuark);
 
     /**
-     * This returns the slash-separated path of an attribute by providing its
-     * quark
+     * Returns the full path array of an attribute by providing its quark.
      *
      * @param attributeQuark
      *            The quark of the attribute we want
-     * @return One single string separated with '/', like a filesystem path
+     * @return The full path array
      * @throws IndexOutOfBoundsException
      *             If the attribute quark is out of range
+     * @since 1.0
      */
-    @NonNull String getFullAttributePath(int attributeQuark);
+    @NonNull String[] getFullAttributePath(int attributeQuark);
 
     /**
      * Returns the parent quark of the attribute.
