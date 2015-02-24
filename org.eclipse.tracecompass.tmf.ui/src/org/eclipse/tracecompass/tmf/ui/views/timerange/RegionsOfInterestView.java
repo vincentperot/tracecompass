@@ -54,6 +54,15 @@ public class RegionsOfInterestView extends TmfView {
                 if (offsetRange != null) {
                     if (roi.getDuration() != 0) {
                         updateRange(offsetRange);
+                        int selectedCell = fTable[0].getColumnIndex();
+                        if (selectedCell == 0) {
+                            updateTime(offsetRange.getStartTime());
+                        } else if (selectedCell == 1) {
+                            updateTime(offsetRange.getEndTime());
+                        } else if (selectedCell == 2) {
+                            TmfTimeSynchSignal signal = new TmfTimeSynchSignal(this, offsetRange.getStartTime(), offsetRange.getEndTime());
+                            getTimeRangeSyncThrottler().queue(signal);
+                        }
                     } else {
                         updateTime(offsetRange.getStartTime());
                     }
@@ -66,8 +75,10 @@ public class RegionsOfInterestView extends TmfView {
             }
 
             private void updateRange(TmfTimeRange offsetRange) {
-                TmfRangeSynchSignal signal = new TmfRangeSynchSignal(this, new TmfTimeRange(offsetRange.getStartTime(), offsetRange.getEndTime()));
-                getTimeRangeSyncThrottler().queue(signal);
+                if (!getActiveTrace().getTimeRange().equals(offsetRange)) {
+                    TmfRangeSynchSignal signal = new TmfRangeSynchSignal(this, new TmfTimeRange(offsetRange.getStartTime(), offsetRange.getEndTime()));
+                    getTimeRangeSyncThrottler().queue(signal);
+                }
             }
 
             @Override
@@ -79,6 +90,7 @@ public class RegionsOfInterestView extends TmfView {
         private RegionOfInterestTable(Composite parent) {
             super(parent);
             addSelectionListener(new RegionOfInterestSelectionListener());
+
         }
 
         @Override

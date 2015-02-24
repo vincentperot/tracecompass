@@ -22,12 +22,16 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -53,6 +57,24 @@ import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
  * {@link #addSelectionListener(SelectionListener)}
  */
 public abstract class AbstractTmfColumnTable extends TmfViewer {
+
+    private final class MouseColumnListener implements MouseListener {
+        @Override
+        public void mouseUp(MouseEvent e) {
+            // do nothing
+        }
+
+        @Override
+        public void mouseDown(MouseEvent e) {
+            ViewerCell cell = fTableViewer.getCell(new Point(e.x, e.y));
+            fSelectedColumn = (cell != null) ? cell.getColumnIndex() : -1;
+        }
+
+        @Override
+        public void mouseDoubleClick(MouseEvent e) {
+            // do nothing
+        }
+    }
 
     private final class columnSorter extends SelectionAdapter {
         private final TableColumn fColumn;
@@ -101,6 +123,7 @@ public abstract class AbstractTmfColumnTable extends TmfViewer {
     private final Map<String, ViewerComparator> fComparators = new HashMap<>();
 
     private int fDirection;
+    private int fSelectedColumn;
 
     /**
      * Constructor that initializes the parent of the viewer
@@ -126,6 +149,7 @@ public abstract class AbstractTmfColumnTable extends TmfViewer {
         fDirection = SWT.DOWN;
 
         fTableViewer.setUseHashlookup(true);
+        fTableViewer.getControl().addMouseListener(new MouseColumnListener());
         refresh();
     }
 
@@ -176,7 +200,6 @@ public abstract class AbstractTmfColumnTable extends TmfViewer {
      * @param viewerComparator
      *            the comparator associated with clicking on the column
      */
-
     protected final void createColumn(String name, ColumnLabelProvider provider, ViewerComparator viewerComparator) {
         if (fComparators.containsKey(name)) {
             throw new IllegalArgumentException("Cannot have two columns with the same name"); //$NON-NLS-1$
@@ -213,6 +236,15 @@ public abstract class AbstractTmfColumnTable extends TmfViewer {
     @Override
     public final Control getControl() {
         return fTableViewer.getControl();
+    }
+
+    /**
+     * Get the selected column index
+     *
+     * @return the selected column index or -1
+     */
+    public final int getColumnIndex() {
+        return fSelectedColumn;
     }
 
     /**
