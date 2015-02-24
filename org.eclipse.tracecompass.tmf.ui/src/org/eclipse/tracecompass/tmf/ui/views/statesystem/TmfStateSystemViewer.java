@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 École Polytechnique de Montréal
+ * Copyright (c) 2014, 2015 École Polytechnique de Montréal and others.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -29,6 +29,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
@@ -375,10 +376,10 @@ public class TmfStateSystemViewer extends AbstractTmfTreeViewer {
         private boolean fModified;
         private boolean fOutOfRange = false;
 
-        public StateEntry(String name, int quark, String fullPath, ITmfStateValue value, @NonNull TmfTimestamp start, @NonNull TmfTimestamp end, boolean modified) {
+        public StateEntry(String name, int quark, String[] path, ITmfStateValue value, @NonNull TmfTimestamp start, @NonNull TmfTimestamp end, boolean modified) {
             super(name);
             fQuark = quark;
-            fFullPath = fullPath;
+            fFullPath = (path != null) ? StateSystemUtils.pathToString(path) : null;
             fStart = start;
             fEnd = end;
             fValue = value;

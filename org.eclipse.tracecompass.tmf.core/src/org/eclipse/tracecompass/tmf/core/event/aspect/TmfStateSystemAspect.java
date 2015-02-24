@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Update getName
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.core.event.aspect;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
@@ -62,8 +64,11 @@ public class TmfStateSystemAspect implements ITmfEventAspect {
             return name;
         }
 
-        name = fSS.getFullAttributePath(fAttribute);
-        return (name == null ? EMPTY_STRING : name);
+        String[] path = fSS.getFullAttributePath(fAttribute);
+        if (path == null) {
+            return EMPTY_STRING;
+        }
+        return StateSystemUtils.pathToString(path);
     }
 
     @Override

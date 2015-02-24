@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,15 +8,23 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Remove getFullAttributeName
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
+
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 
 import com.google.common.collect.ImmutableList;
 
@@ -190,9 +198,9 @@ public final class Attribute {
      * Return a String array composed of the full (absolute) path representing
      * this attribute
      *
-     * @return
+     * @return The full path array
      */
-    private String[] getFullAttribute() {
+    public @NonNull String[] getFullAttribute() {
         LinkedList<String> list = new LinkedList<>();
         Attribute curNode = this;
 
@@ -202,30 +210,12 @@ public final class Attribute {
             curNode = curNode.parent;
         }
 
-        return list.toArray(new String[0]);
-    }
-
-    /**
-     * Return the absolute path of this attribute, as a single slash-separated
-     * String.
-     *
-     * @return The full name of this attribute
-     */
-    public String getFullAttributeName() {
-        String[] array = this.getFullAttribute();
-        StringBuffer buf = new StringBuffer();
-
-        for (int i = 0; i < array.length - 1; i++) {
-            buf.append(array[i]);
-            buf.append('/');
-        }
-        buf.append(array[array.length - 1]);
-        return buf.toString();
+        return checkNotNull(list.toArray(new String[0]));
     }
 
     @Override
     public String toString() {
-        return getFullAttributeName() + " (" + quark + ')'; //$NON-NLS-1$
+        return StateSystemUtils.pathToString(getFullAttribute()) + " (" + quark + ')'; //$NON-NLS-1$
     }
 
     private int curDepth;
