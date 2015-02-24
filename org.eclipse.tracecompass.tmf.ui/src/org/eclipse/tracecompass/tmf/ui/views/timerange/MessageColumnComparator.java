@@ -11,21 +11,19 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.tmf.ui.views.timerange;
 
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfRegionOfInterest;
+import org.eclipse.tracecompass.tmf.ui.viewers.table.ViewerCompoundComparator;
 
 /**
  * Content column comparator
  *
  */
-public class MessageColumnComparator extends ViewerComparator {
+public class MessageColumnComparator extends ViewerCompoundComparator {
 
     @Override
-    public int compare(Viewer viewer, Object e1, Object e2) {
+    public int compare(Object e1, Object e2) {
         String msg1 = ((ITmfRegionOfInterest) e1).getMessage();
         String msg2 = ((ITmfRegionOfInterest) e2).getMessage();
         return msg1.compareTo(msg2);
     }
-
 }
