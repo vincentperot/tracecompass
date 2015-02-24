@@ -207,7 +207,7 @@ public final class Attribute {
 
     /**
      * Return the absolute path of this attribute, as a single slash-separated
-     * String.
+     * String. '/' and '\' in attribute names are escaped by a preceding '\'.
      *
      * @return The full name of this attribute
      */
@@ -215,11 +215,14 @@ public final class Attribute {
         String[] array = this.getFullAttribute();
         StringBuffer buf = new StringBuffer();
 
-        for (int i = 0; i < array.length - 1; i++) {
-            buf.append(array[i]);
-            buf.append('/');
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                buf.append('/');
+            }
+            /* Escape '/' and '\' in attribute name */
+            String attribute = array[i].replace("\\", "\\\\").replace("/", "\\/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+            buf.append(attribute);
         }
-        buf.append(array[array.length - 1]);
         return buf.toString();
     }
 
