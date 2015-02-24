@@ -40,7 +40,7 @@ public class TextTraceEventContent implements ITmfEventField {
     // ------------------------------------------------------------------------
 
     /**
-     * Constructor for a root event content
+     * Constructor for a root event content.
      *
      * @param fieldNames
      *            the array of field names
@@ -55,6 +55,18 @@ public class TextTraceEventContent implements ITmfEventField {
             }
             fFields.add(new TextTraceEventContent(fieldName));
         }
+    }
+
+    /**
+     * Constructor for an initial capacity.
+     *
+     * @param initialCapacity
+     *            the initial capacity of the field list
+     */
+    public TextTraceEventContent(int initialCapacity) {
+        fName = ITmfEventField.ROOT_FIELD_ID;
+        fValue = null;
+        fFields = new ArrayList<>(initialCapacity);
     }
 
     /**
@@ -127,7 +139,7 @@ public class TextTraceEventContent implements ITmfEventField {
     // ------------------------------------------------------------------------
 
     /**
-     * Get a field name by index
+     * Get a field name by index.
      *
      * @param index
      *            The index of the field
@@ -141,7 +153,7 @@ public class TextTraceEventContent implements ITmfEventField {
     }
 
     /**
-     * Get a field by index
+     * Get a field by index.
      *
      * @param index
      *            The index of the field
@@ -155,13 +167,13 @@ public class TextTraceEventContent implements ITmfEventField {
     }
 
     /**
-     * Get a subfield value by name
+     * Get a subfield value by name.
      *
      * @param name
      *            a subfield name
      * @return field value object
      */
-    public Object getFieldValue(String name) {
+    public Object getFieldValue(@NonNull String name) {
         for (int i = 0; i < fFields.size(); i++) {
             if (fFields.get(i).getName().equals(name)) {
                 return fFields.get(i).getValue();
@@ -171,7 +183,7 @@ public class TextTraceEventContent implements ITmfEventField {
     }
 
     /**
-     * Get a subfield value by index
+     * Get a subfield value by index.
      *
      * @param index
      *            a subfield index
@@ -185,7 +197,7 @@ public class TextTraceEventContent implements ITmfEventField {
     }
 
     /**
-     * Set the content value
+     * Set the content value.
      *
      * @param value
      *            the content value
@@ -195,23 +207,30 @@ public class TextTraceEventContent implements ITmfEventField {
     }
 
     /**
-     * Set a subfield value by name
+     * Set a subfield value by name. Adds the subfield if it is new.
      *
      * @param name
      *            a subfield name
      * @param value
      *            the subfield value
      */
-    public void setFieldValue(String name, Object value) {
+    public void setFieldValue(@NonNull String name, Object value) {
+        TextTraceEventContent field = null;
         for (int i = 0; i < fFields.size(); i++) {
             if (fFields.get(i).getName().equals(name)) {
-                fFields.get(i).fValue = value;
+                field = fFields.get(i);
+                field.setValue(value);
             }
+        }
+        if (field == null) {
+            field = new TextTraceEventContent(name);
+            field.setValue(value);
+            fFields.add(field);
         }
     }
 
     /**
-     * Set a subfield value by index
+     * Set a subfield value by index.
      *
      * @param index
      *            a subfield index
@@ -222,6 +241,21 @@ public class TextTraceEventContent implements ITmfEventField {
         if (index >= 0 && index < fFields.size()) {
             fFields.get(index).fValue = value;
         }
+    }
+
+    /**
+     * Add a new subfield unconditionally and set its value.
+     * Note: this can create a duplicate subfield.
+     *
+     * @param name
+     *            a subfield name
+     * @param value
+     *            the subfield value
+     */
+    public void addField(@NonNull String name, Object value) {
+        TextTraceEventContent field = new TextTraceEventContent(name);
+        field.setValue(value);
+        fFields.add(field);
     }
 
     // ------------------------------------------------------------------------
