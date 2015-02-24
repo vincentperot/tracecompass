@@ -9,7 +9,7 @@
  * Contributors:
  *   Geneviève Bastien - Initial API and implementation
  *   Alexandre Montplaisir - Initial API and implementation
- *   Patrick Tasse - Add message to exceptions
+ *   Patrick Tasse - Add message to exceptions, add pathToArray
  *******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core;
@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
@@ -279,4 +280,37 @@ public final class StateSystemUtils {
         return null;
     }
 
+    /**
+     * Convert a slash-separated full attribute path to an attribute path array.
+     * '/' and '\' in the input path can be escaped by a preceding '\'. The
+     * attribute names in the returned array are unescaped.
+     *
+     * @param path
+     *            The slash-separated path
+     * @return The full path array
+     * @since 1.0
+     */
+    public static String[] pathToArray(String path) {
+        List<String> attributes = new ArrayList<>();
+        StringBuilder attribute = new StringBuilder();
+        int i = 0;
+        while (i < path.length()) {
+            Character c = path.charAt(i++);
+            if (c == '/') {
+                attributes.add(attribute.toString());
+                attribute.setLength(0);
+            } else {
+                if (c == '\\' && i < path.length()) {
+                    c = path.charAt(i++);
+                    if (c != '\\' && c != '/') {
+                        /* allow '\' before unescaped character */
+                        attribute.append('\\');
+                    }
+                }
+                attribute.append(c);
+            }
+        }
+        attributes.add(attribute.toString());
+        return NonNullUtils.checkNotNull(attributes.toArray(new String[0]));
+    }
 }

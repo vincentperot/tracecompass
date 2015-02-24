@@ -10,7 +10,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
- *   Patrick Tasse - Add message to exceptions
+ *   Patrick Tasse - Add message to exceptions, support slash in full attribute path
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 
 /**
@@ -117,7 +118,7 @@ public final class AttributeTree {
              * bleh
              */
             curFullString = new String(curByteArray);
-            curStringArray = curFullString.split("/"); //$NON-NLS-1$
+            curStringArray = StateSystemUtils.pathToArray(curFullString);
             list.add(curStringArray);
 
             /* Read the 0'ed confirmation byte */
@@ -383,6 +384,7 @@ public final class AttributeTree {
 
     /**
      * Get the full path name of an attribute specified by a quark.
+     * '/' and '\' in attribute names are escaped by a preceding '\'.
      *
      * @param quark
      *            The quark of the attribute
