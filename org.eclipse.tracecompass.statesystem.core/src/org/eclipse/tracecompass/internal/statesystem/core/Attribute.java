@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,6 +8,9 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Support slash in attribute name
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -207,7 +210,7 @@ public final class Attribute {
 
     /**
      * Return the absolute path of this attribute, as a single slash-separated
-     * String.
+     * String. '/' and '\' in attribute names are escaped by a preceding '\'.
      *
      * @return The full name of this attribute
      */
@@ -215,11 +218,14 @@ public final class Attribute {
         String[] array = this.getFullAttribute();
         StringBuffer buf = new StringBuffer();
 
-        for (int i = 0; i < array.length - 1; i++) {
-            buf.append(array[i]);
-            buf.append('/');
+        for (int i = 0; i < array.length; i++) {
+            if (i > 0) {
+                buf.append('/');
+            }
+            /* Escape '/' and '\' in attribute name */
+            String attribute = array[i].replace("\\", "\\\\").replace("/", "\\/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+            buf.append(attribute);
         }
-        buf.append(array[array.length - 1]);
         return buf.toString();
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 École Polytechnique de Montréal
+ * Copyright (c) 2014, 2015 École Polytechnique de Montréal and others.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -8,10 +8,12 @@
  *
  * Contributors:
  *   Geneviève Bastien - Initial API and implementation
+ *   Patrick Tasse - Add unit tests for pathToArray
  *******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core.tests;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -128,4 +130,45 @@ public class StateSystemUtilsTest {
 
     }
 
+    /**
+     * Test the {@link StateSystemUtils#pathToArray(String)} method.
+     */
+    @Test
+    public void testPathToArray() {
+        assertArrayEquals(new String[] { "" }, StateSystemUtils.pathToArray(""));
+        assertArrayEquals(new String[] { "", "" }, StateSystemUtils.pathToArray("/"));
+        assertArrayEquals(new String[] { "\\" }, StateSystemUtils.pathToArray("\\"));
+        assertArrayEquals(new String[] { "/" }, StateSystemUtils.pathToArray("\\/"));
+        assertArrayEquals(new String[] { "a" }, StateSystemUtils.pathToArray("a"));
+        assertArrayEquals(new String[] { "a", "" }, StateSystemUtils.pathToArray("a/"));
+        assertArrayEquals(new String[] { "", "a" }, StateSystemUtils.pathToArray("/a"));
+        assertArrayEquals(new String[] { "a\\" }, StateSystemUtils.pathToArray("a\\"));
+        assertArrayEquals(new String[] { "\\a" }, StateSystemUtils.pathToArray("\\a"));
+        assertArrayEquals(new String[] { "ab", "" }, StateSystemUtils.pathToArray("ab/"));
+        assertArrayEquals(new String[] { "a", "b" }, StateSystemUtils.pathToArray("a/b"));
+        assertArrayEquals(new String[] { "", "ab" }, StateSystemUtils.pathToArray("/ab"));
+        assertArrayEquals(new String[] { "ab\\" }, StateSystemUtils.pathToArray("ab\\"));
+        assertArrayEquals(new String[] { "a\\b" }, StateSystemUtils.pathToArray("a\\b"));
+        assertArrayEquals(new String[] { "\\ab" }, StateSystemUtils.pathToArray("\\ab"));
+        assertArrayEquals(new String[] { "a", "", "" }, StateSystemUtils.pathToArray("a//"));
+        assertArrayEquals(new String[] { "", "a", "" }, StateSystemUtils.pathToArray("/a/"));
+        assertArrayEquals(new String[] { "", "", "a" }, StateSystemUtils.pathToArray("//a"));
+        assertArrayEquals(new String[] { "a\\" }, StateSystemUtils.pathToArray("a\\\\"));
+        assertArrayEquals(new String[] { "\\a\\" }, StateSystemUtils.pathToArray("\\a\\"));
+        assertArrayEquals(new String[] { "\\a" }, StateSystemUtils.pathToArray("\\\\a"));
+        assertArrayEquals(new String[] { "a/" }, StateSystemUtils.pathToArray("a\\/"));
+        assertArrayEquals(new String[] { "\\a", "" }, StateSystemUtils.pathToArray("\\a/"));
+        assertArrayEquals(new String[] { "/a" }, StateSystemUtils.pathToArray("\\/a"));
+        assertArrayEquals(new String[] { "a", "\\" }, StateSystemUtils.pathToArray("a/\\"));
+        assertArrayEquals(new String[] { "", "a\\" }, StateSystemUtils.pathToArray("/a\\"));
+        assertArrayEquals(new String[] { "", "\\a" }, StateSystemUtils.pathToArray("/\\a"));
+        assertArrayEquals(new String[] { "", "", "", "" }, StateSystemUtils.pathToArray("///"));
+        assertArrayEquals(new String[] { "", "", "\\" }, StateSystemUtils.pathToArray("//\\"));
+        assertArrayEquals(new String[] { "", "/" }, StateSystemUtils.pathToArray("/\\/"));
+        assertArrayEquals(new String[] { "/", "" }, StateSystemUtils.pathToArray("\\//"));
+        assertArrayEquals(new String[] { "", "\\" }, StateSystemUtils.pathToArray("/\\\\"));
+        assertArrayEquals(new String[] { "/\\" }, StateSystemUtils.pathToArray("\\/\\"));
+        assertArrayEquals(new String[] { "\\", "" }, StateSystemUtils.pathToArray("\\\\/"));
+        assertArrayEquals(new String[] { "\\\\" }, StateSystemUtils.pathToArray("\\\\\\"));
+    }
 }
