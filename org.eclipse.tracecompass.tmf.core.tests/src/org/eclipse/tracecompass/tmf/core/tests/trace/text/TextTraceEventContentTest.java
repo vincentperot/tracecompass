@@ -24,7 +24,7 @@ import java.util.List;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.trace.text.TextTraceEventContent;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.text.SyslogEventType;
-import org.eclipse.tracecompass.tmf.tests.stubs.trace.text.SyslogEventType.Index;
+import org.eclipse.tracecompass.tmf.tests.stubs.trace.text.SyslogTrace.Field;
 import org.junit.Test;
 
 /**
@@ -37,13 +37,25 @@ public class TextTraceEventContentTest {
     // Members
     // ------------------------------------------------------------------------
 
+    private static final String[] LABELS = new String[] {
+        Field.TIMESTAMP, Field.HOST, Field.LOGGER, Field.FILE, Field.LINE, Field.MESSAGE
+    };
+    private interface Index {
+        int TIMESTAMP = 0;
+        int HOST = 1;
+        int LOGGER = 2;
+        int FILE = 3;
+        int LINE = 4;
+        int MESSAGE = 5;
+    }
     private TextTraceEventContent fEventContent1;
     private TextTraceEventContent fEventContent1Clone;
     private TextTraceEventContent fEventContent2;
     private TextTraceEventContent fEventContent2Clone;
 
+    @SuppressWarnings("null")
     public TextTraceEventContentTest () {
-        fEventContent1 = new TextTraceEventContent(SyslogEventType.LABELS);
+        fEventContent1 = new TextTraceEventContent(LABELS);
         fEventContent1.setValue("CONTENT");
         fEventContent1.setFieldValue(Index.TIMESTAMP, "Jan 1 01:01:01");
         fEventContent1.setFieldValue(Index.HOST, "HostA");
@@ -52,7 +64,7 @@ public class TextTraceEventContentTest {
         fEventContent1.setFieldValue(Index.LINE, "0");
         fEventContent1.setFieldValue(Index.MESSAGE, "MessageA");
 
-        fEventContent1Clone = new TextTraceEventContent(SyslogEventType.LABELS);
+        fEventContent1Clone = new TextTraceEventContent(LABELS);
         fEventContent1Clone.setValue("CONTENT");
         fEventContent1Clone.setFieldValue(Index.TIMESTAMP, "Jan 1 01:01:01");
         fEventContent1Clone.setFieldValue(Index.HOST, "HostA");
@@ -61,25 +73,25 @@ public class TextTraceEventContentTest {
         fEventContent1Clone.setFieldValue(Index.LINE, "0");
         fEventContent1Clone.setFieldValue(Index.MESSAGE, "MessageA");
 
-        fEventContent2 = new TextTraceEventContent(SyslogEventType.LABELS);
-        fEventContent2.setFieldValue(SyslogEventType.LABELS[0], "Jan 1 02:02:02");
-        fEventContent2.setFieldValue(SyslogEventType.LABELS[1], "HostB");
-        fEventContent2.setFieldValue(SyslogEventType.LABELS[2], "LoggerB");
-        fEventContent2.setFieldValue(SyslogEventType.LABELS[3], "SourceFileB");
-        fEventContent2.setFieldValue(SyslogEventType.LABELS[4], "2");
+        fEventContent2 = new TextTraceEventContent(LABELS.length);
+        fEventContent2.setFieldValue(LABELS[0], "Jan 1 02:02:02");
+        fEventContent2.setFieldValue(LABELS[1], "HostB");
+        fEventContent2.setFieldValue(LABELS[2], "LoggerB");
+        fEventContent2.setFieldValue(LABELS[3], "SourceFileB");
+        fEventContent2.setFieldValue(LABELS[4], "2");
         StringBuffer buffer = new StringBuffer();
         buffer.append("Message B");
-        fEventContent2.setFieldValue(SyslogEventType.LABELS[5],   buffer);
+        fEventContent2.setFieldValue(LABELS[5],   buffer);
 
-        fEventContent2Clone = new TextTraceEventContent(SyslogEventType.LABELS);
-        fEventContent2Clone.setFieldValue(SyslogEventType.LABELS[0], "Jan 1 02:02:02");
-        fEventContent2Clone.setFieldValue(SyslogEventType.LABELS[1], "HostB");
-        fEventContent2Clone.setFieldValue(SyslogEventType.LABELS[2], "LoggerB");
-        fEventContent2Clone.setFieldValue(SyslogEventType.LABELS[3], "SourceFileB");
-        fEventContent2Clone.setFieldValue(SyslogEventType.LABELS[4], "2");
+        fEventContent2Clone = new TextTraceEventContent(LABELS);
+        fEventContent2Clone.setFieldValue(LABELS[0], "Jan 1 02:02:02");
+        fEventContent2Clone.setFieldValue(LABELS[1], "HostB");
+        fEventContent2Clone.setFieldValue(LABELS[2], "LoggerB");
+        fEventContent2Clone.setFieldValue(LABELS[3], "SourceFileB");
+        fEventContent2Clone.setFieldValue(LABELS[4], "2");
         buffer = new StringBuffer();
         buffer.append("Message B");
-        fEventContent2Clone.setFieldValue(SyslogEventType.LABELS[5],   buffer);
+        fEventContent2Clone.setFieldValue(LABELS[5],   buffer);
     }
 
     public void testConstructorConstructor() {
@@ -100,12 +112,7 @@ public class TextTraceEventContentTest {
         SyslogEventType eventType = SyslogEventType.INSTANCE;
         assertEquals("getTypeId", "Syslog", eventType.getName());
         assertNotNull ("instance", eventType);
-        assertTrue (eventType.getFieldNames().contains("Timestamp"));
-        assertTrue (eventType.getFieldNames().contains("Host"));
-        assertTrue (eventType.getFieldNames().contains("Logger"));
-        assertTrue (eventType.getFieldNames().contains("File"));
-        assertTrue (eventType.getFieldNames().contains("Line"));
-        assertTrue (eventType.getFieldNames().contains("Message"));
+        assertEquals ("getFieldNames", 0, eventType.getFieldNames().size());
     }
 
     // ------------------------------------------------------------------------
@@ -173,12 +180,12 @@ public class TextTraceEventContentTest {
     @Test
     public void testGetFieldNameWithIndex() {
 
-        assertEquals("getFieldName:TIMESTAMP", SyslogEventType.LABELS[0], fEventContent1.getFieldName(Index.TIMESTAMP));
-        assertEquals("getFieldName:HOST", SyslogEventType.LABELS[1], fEventContent1.getFieldName(Index.HOST));
-        assertEquals("getFieldName:LOGGER", SyslogEventType.LABELS[2], fEventContent1.getFieldName(Index.LOGGER));
-        assertEquals("getFieldName:FILE", SyslogEventType.LABELS[3], fEventContent1.getFieldName(Index.FILE));
-        assertEquals("getFieldName:LINE", SyslogEventType.LABELS[4], fEventContent1.getFieldName(Index.LINE));
-        assertEquals("getFieldName:MESSAGE", SyslogEventType.LABELS[5], fEventContent1.getFieldName(Index.MESSAGE));
+        assertEquals("getFieldName:TIMESTAMP", LABELS[0], fEventContent1.getFieldName(Index.TIMESTAMP));
+        assertEquals("getFieldName:HOST", LABELS[1], fEventContent1.getFieldName(Index.HOST));
+        assertEquals("getFieldName:LOGGER", LABELS[2], fEventContent1.getFieldName(Index.LOGGER));
+        assertEquals("getFieldName:FILE", LABELS[3], fEventContent1.getFieldName(Index.FILE));
+        assertEquals("getFieldName:LINE", LABELS[4], fEventContent1.getFieldName(Index.LINE));
+        assertEquals("getFieldName:MESSAGE", LABELS[5], fEventContent1.getFieldName(Index.MESSAGE));
         assertNull(fEventContent1.getFieldValue(6));
     }
 
@@ -186,44 +193,44 @@ public class TextTraceEventContentTest {
     public void testGetFields() {
         List<TextTraceEventContent> fields = fEventContent1.getFields();
         assertEquals(6, fields.size());
-        assertEquals("getFields:TIMESTAMP", SyslogEventType.LABELS[0], fields.get(Index.TIMESTAMP).getName());
+        assertEquals("getFields:TIMESTAMP", LABELS[0], fields.get(Index.TIMESTAMP).getName());
         assertEquals("getFields:TIMESTAMP", "Jan 1 01:01:01", fields.get(Index.TIMESTAMP).getValue());
-        assertEquals("getFields:HOST", SyslogEventType.LABELS[1], fields.get(Index.HOST).getName());
+        assertEquals("getFields:HOST", LABELS[1], fields.get(Index.HOST).getName());
         assertEquals("getFields:HOST", "HostA", fields.get(Index.HOST).getValue());
-        assertEquals("getFields:LOGGER", SyslogEventType.LABELS[2], fields.get(Index.LOGGER).getName());
+        assertEquals("getFields:LOGGER", LABELS[2], fields.get(Index.LOGGER).getName());
         assertEquals("getFields:LOGGER", "LoggerA", fields.get(Index.LOGGER).getValue());
-        assertEquals("getFields:FILE", SyslogEventType.LABELS[3], fields.get(Index.FILE).getName());
+        assertEquals("getFields:FILE", LABELS[3], fields.get(Index.FILE).getName());
         assertEquals("getFields:FILE", "SourceFileA", fields.get(Index.FILE).getValue());
-        assertEquals("getFields:LINE", SyslogEventType.LABELS[4], fields.get(Index.LINE).getName());
+        assertEquals("getFields:LINE", LABELS[4], fields.get(Index.LINE).getName());
         assertEquals("getFields:LINE", "0", fields.get(Index.LINE).getValue());
-        assertEquals("getFields:MESSAGE", SyslogEventType.LABELS[5], fields.get(Index.MESSAGE).getName());
+        assertEquals("getFields:MESSAGE", LABELS[5], fields.get(Index.MESSAGE).getName());
         assertEquals("getFields:MESSAGE", "MessageA", fields.get(Index.MESSAGE).getValue());
     }
 
     @Test
     public void testGetFieldWithName() {
         ITmfEventField field = fEventContent1.getField("Timestamp");
-        assertEquals("getFieldName:TIMESTAMP", SyslogEventType.LABELS[0], field.getName());
+        assertEquals("getFieldName:TIMESTAMP", LABELS[0], field.getName());
         assertEquals("getFieldName:TIMESTAMP", "Jan 1 01:01:01", field.getValue());
 
-        field = fEventContent1.getField(SyslogEventType.LABELS[1]);
-        assertEquals("getFieldName:HOST", SyslogEventType.LABELS[1], field.getName());
+        field = fEventContent1.getField(LABELS[1]);
+        assertEquals("getFieldName:HOST", LABELS[1], field.getName());
         assertEquals("getFieldName:HOST", "HostA", field.getValue());
 
-        field = fEventContent1.getField(SyslogEventType.LABELS[2]);
-        assertEquals("getFieldName:LOGGER", SyslogEventType.LABELS[2], field.getName());
+        field = fEventContent1.getField(LABELS[2]);
+        assertEquals("getFieldName:LOGGER", LABELS[2], field.getName());
         assertEquals("getFieldName:LOGGER", "LoggerA", field.getValue());
 
-        field = fEventContent1.getField(SyslogEventType.LABELS[3]);
-        assertEquals("getFieldName:FILE", SyslogEventType.LABELS[3], field.getName());
+        field = fEventContent1.getField(LABELS[3]);
+        assertEquals("getFieldName:FILE", LABELS[3], field.getName());
         assertEquals("getFieldName:FILE", "SourceFileA", field.getValue());
 
-        field = fEventContent1.getField(SyslogEventType.LABELS[4]);
-        assertEquals("getFieldName:LINE", SyslogEventType.LABELS[4], field.getName());
+        field = fEventContent1.getField(LABELS[4]);
+        assertEquals("getFieldName:LINE", LABELS[4], field.getName());
         assertEquals("getFieldName:LINE", "0", field.getValue());
 
-        field = fEventContent1.getField(SyslogEventType.LABELS[5]);
-        assertEquals("getFieldName:Message", SyslogEventType.LABELS[5], field.getName());
+        field = fEventContent1.getField(LABELS[5]);
+        assertEquals("getFieldName:Message", LABELS[5], field.getName());
         assertEquals("getFieldName:Message", "MessageA", field.getValue());
 
         field = fEventContent1.getField("BlaBla");
@@ -235,7 +242,7 @@ public class TextTraceEventContentTest {
         String[] path = { "Timestamp" };
 
         ITmfEventField field = fEventContent1.getField(path);
-        assertEquals("getFieldPath:TIMESTAMP", SyslogEventType.LABELS[0], field.getName());
+        assertEquals("getFieldPath:TIMESTAMP", LABELS[0], field.getName());
         assertEquals("getFieldPath:TIMESTAMP", "Jan 1 01:01:01", field.getValue());
 
         String[] path2 = { "Timestamp", "subField" };
