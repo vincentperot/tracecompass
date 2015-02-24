@@ -12,11 +12,11 @@
  **********************************************************************/
 package org.eclipse.tracecompass.internal.lttng2.control.stubs.shells;
 
-import java.util.List;
-
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.tracecompass.internal.tmf.remote.core.shell.CommandInput;
 import org.eclipse.tracecompass.internal.tmf.remote.core.shell.CommandResult;
+import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandInput;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandResult;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 
@@ -34,10 +34,15 @@ public class TestCommandShell implements ICommandShell {
     }
 
     @Override
-    public ICommandResult executeCommand(List<String> command, IProgressMonitor monitor) throws ExecutionException {
+    public ICommandResult executeCommand(ICommandInput command, IProgressMonitor monitor) throws ExecutionException {
         if (fIsConnected) {
             return new CommandResult(0, new String[0], new String[0]);
         }
         return new CommandResult(1, new String[0], new String[0]);
+    }
+
+    @Override
+    public ICommandInput createCommand() {
+        return new CommandInput();
     }
 }

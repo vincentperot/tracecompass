@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IBaseEventInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IChannelInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.ISessionInfo;
@@ -37,12 +38,12 @@ public interface ILttngControlService {
     /**
      * @return the LTTng version object
      */
-    LttngVersion getVersion();
+    @NonNull LttngVersion getVersion();
 
     /**
      * @return the version string
      */
-    String getVersionString();
+    @NonNull String getVersionString();
 
     /**
      * Checks if given version is supported by this ILTTngControlService implementation.
@@ -61,7 +62,7 @@ public interface ILttngControlService {
      * @throws ExecutionException
      *             If the command fails
      */
-    String[] getSessionNames(IProgressMonitor monitor)
+    @NonNull String[] getSessionNames(IProgressMonitor monitor)
             throws ExecutionException;
 
     /**
@@ -75,7 +76,7 @@ public interface ILttngControlService {
      * @throws ExecutionException
      *             If the command fails
      */
-    ISessionInfo getSession(String sessionName, IProgressMonitor monitor)
+    @NonNull ISessionInfo getSession(String sessionName, IProgressMonitor monitor)
             throws ExecutionException;
 
     /**
@@ -88,7 +89,7 @@ public interface ILttngControlService {
      * @throws ExecutionException
      *          if command fails
      */
-    ISnapshotInfo getSnapshotInfo(String sessionName, IProgressMonitor monitor)
+    @NonNull ISnapshotInfo getSnapshotInfo(String sessionName, IProgressMonitor monitor)
             throws ExecutionException;
 
     /**
@@ -100,7 +101,7 @@ public interface ILttngControlService {
      * @throws ExecutionException
      *             If the command fails
      */
-    List<IBaseEventInfo> getKernelProvider(IProgressMonitor monitor)
+    @NonNull List<IBaseEventInfo> getKernelProvider(IProgressMonitor monitor)
             throws ExecutionException;
 
     /**
@@ -110,7 +111,7 @@ public interface ILttngControlService {
      * @throws ExecutionException
      *             If the command fails
      */
-    public List<IUstProviderInfo> getUstProvider() throws ExecutionException;
+    @NonNull public List<IUstProviderInfo> getUstProvider() throws ExecutionException;
 
     /**
      * Retrieves the UST provider information from the node.
@@ -121,7 +122,7 @@ public interface ILttngControlService {
      * @throws ExecutionException
      *             If the command fails
      */
-    List<IUstProviderInfo> getUstProvider(IProgressMonitor monitor)
+    @NonNull List<IUstProviderInfo> getUstProvider(IProgressMonitor monitor)
             throws ExecutionException;
 
     /**
@@ -136,7 +137,7 @@ public interface ILttngControlService {
      * @throws ExecutionException
      *             If the command fails
      */
-    ISessionInfo createSession(ISessionInfo sessionInfo, IProgressMonitor monitor) throws ExecutionException;
+    @NonNull ISessionInfo createSession(ISessionInfo sessionInfo, IProgressMonitor monitor) throws ExecutionException;
 
     /**
      * Destroys a session with given session name.
@@ -336,7 +337,7 @@ public interface ILttngControlService {
      * @throws ExecutionException
      *             If the command fails
      */
-    List<String> getContextList(IProgressMonitor monitor)
+    @NonNull List<String> getContextList(IProgressMonitor monitor)
             throws ExecutionException;
 
     /**

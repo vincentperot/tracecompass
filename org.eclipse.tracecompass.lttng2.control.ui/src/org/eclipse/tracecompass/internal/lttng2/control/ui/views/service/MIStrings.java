@@ -12,16 +12,14 @@
 
 package org.eclipse.tracecompass.internal.lttng2.control.ui.views.service;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * Non-externalized strings for use with the LTTng Control services. This
- * nformation is extracted from mi_lttng.xsd from lttng-tool libmi.
+ * information is extracted from mi_lttng.xsd from lttng-tool libmi.
  *
  * @author Jonathan Rajotte
  */
 @SuppressWarnings("nls")
-@NonNullByDefault
 public interface MIStrings {
 
     /**
