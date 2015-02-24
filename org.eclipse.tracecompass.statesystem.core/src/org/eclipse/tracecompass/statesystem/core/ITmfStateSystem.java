@@ -238,7 +238,7 @@ public interface ITmfStateSystem {
 
     /**
      * This returns the slash-separated path of an attribute by providing its
-     * quark
+     * quark. '/' and '\' in attribute names are escaped by a preceding '\'.
      *
      * @param attributeQuark
      *            The quark of the attribute we want

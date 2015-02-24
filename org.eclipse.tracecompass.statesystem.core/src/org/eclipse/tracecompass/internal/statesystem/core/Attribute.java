@@ -211,27 +211,9 @@ public final class Attribute {
         return checkNotNull(list.toArray(new String[0]));
     }
 
-    /**
-     * Return the absolute path of this attribute, as a single slash-separated
-     * String.
-     *
-     * @return The full name of this attribute
-     */
-    public @NonNull String getFullAttributeName() {
-        String[] array = this.getFullAttribute();
-        StringBuffer buf = new StringBuffer();
-
-        for (int i = 0; i < array.length - 1; i++) {
-            buf.append(array[i]);
-            buf.append('/');
-        }
-        buf.append(array[array.length - 1]);
-        return checkNotNull(buf.toString());
-    }
-
     @Override
     public String toString() {
-        return getFullAttributeName() + " (" + quark + ')'; //$NON-NLS-1$
+        return AttributeTree.pathArrayToString(getFullAttribute()) + " (" + quark + ')'; //$NON-NLS-1$
     }
 
     private int curDepth;
