@@ -23,6 +23,7 @@ import org.eclipse.tracecompass.internal.lttng2.control.core.model.IDomainInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.ISessionInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.ISnapshotInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.LogLevelType;
+import org.eclipse.tracecompass.internal.lttng2.control.core.model.NullSessionInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.TraceLogLevel;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.TraceSessionState;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.impl.SessionInfo;
@@ -284,7 +285,7 @@ public class TraceSessionComponent extends TraceControlComponent {
             throws ExecutionException {
         removeAllChildren();
         ISessionInfo newInfo = getControlService().getSession(getName(), monitor);
-        if (newInfo != null) {
+        if (newInfo != NullSessionInfo.INSTANCE) {
             ISessionInfo oldSessionInfo = fSessionInfo;
             fSessionInfo = newInfo;
             copyLiveInfo(oldSessionInfo);

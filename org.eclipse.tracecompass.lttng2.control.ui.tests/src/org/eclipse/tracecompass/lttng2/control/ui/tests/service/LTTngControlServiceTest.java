@@ -31,6 +31,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IBaseEventInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IChannelInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IDomainInfo;
@@ -119,7 +120,7 @@ public class LTTngControlServiceTest {
     // Test data
     // ------------------------------------------------------------------------
     private String fTestfile;
-    protected LTTngToolsFileShell fShell;
+    @NonNull protected LTTngToolsFileShell fShell = new LTTngToolsFileShell();
     protected ILttngControlService fService;
 
     // ------------------------------------------------------------------------
@@ -138,7 +139,6 @@ public class LTTngControlServiceTest {
         File testfile = new File(FileLocator.toFileURL(location).toURI());
         fTestfile = testfile.getAbsolutePath();
 
-        fShell = new LTTngToolsFileShell();
         fShell.loadScenarioFile(fTestfile);
         fService = getControlService();
         if (fService == null) {
@@ -162,7 +162,7 @@ public class LTTngControlServiceTest {
         return new LTTngControlService(fShell);
     }
 
-    public LTTngToolsFileShell getfShell() {
+    public @NonNull LTTngToolsFileShell getfShell() {
         return fShell;
     }
 
