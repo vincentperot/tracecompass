@@ -18,6 +18,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.ISessionInfo;
+import org.eclipse.tracecompass.internal.lttng2.control.core.model.NullSessionInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.model.ITraceControlComponent;
 
 /**
@@ -134,7 +135,7 @@ public class TraceSessionGroup extends TraceControlComponent {
     public void createSession(ISessionInfo sessionInf, IProgressMonitor monitor) throws ExecutionException {
         ISessionInfo sessionInfo = getControlService().createSession(sessionInf, monitor);
 
-        if (sessionInfo != null) {
+        if (sessionInfo != NullSessionInfo.INSTANCE) {
             TraceSessionComponent session = new TraceSessionComponent(sessionInfo, TraceSessionGroup.this);
             addChild(session);
             session.getConfigurationFromNode(monitor);

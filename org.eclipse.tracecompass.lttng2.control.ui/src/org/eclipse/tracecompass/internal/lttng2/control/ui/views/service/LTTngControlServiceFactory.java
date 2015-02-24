@@ -12,15 +12,17 @@
  **********************************************************************/
 package org.eclipse.tracecompass.internal.lttng2.control.ui.views.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import java.util.regex.Matcher;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.logging.ControlCommandLogger;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.messages.Messages;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.preferences.ControlPreferences;
+import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandInput;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandResult;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 
@@ -38,7 +40,7 @@ public class LTTngControlServiceFactory {
     /**
      * The singleton instance.
      */
-    private static LTTngControlServiceFactory fInstance = null;
+    private static @Nullable LTTngControlServiceFactory fInstance = null;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -56,10 +58,12 @@ public class LTTngControlServiceFactory {
      * @return the LTTngControlServiceFactory singleton instance.
      */
     public static synchronized LTTngControlServiceFactory getInstance() {
-        if (fInstance == null) {
-            fInstance = new LTTngControlServiceFactory();
+        LTTngControlServiceFactory instance = fInstance;
+        if (instance == null) {
+            instance = new LTTngControlServiceFactory();
+            fInstance = instance;
         }
-        return fInstance;
+        return instance;
     }
 
     // ------------------------------------------------------------------------
@@ -78,11 +82,11 @@ public class LTTngControlServiceFactory {
     public ILttngControlService getLttngControlService(ICommandShell shell) throws ExecutionException {
         // get the version
         boolean machineInterfaceMode = true;
-        List<String> command = new ArrayList<>();
+        ICommandInput command = shell.createCommand();
         command.add(LTTngControlServiceConstants.CONTROL_COMMAND);
         command.add(LTTngControlServiceConstants.COMMAND_VERSION);
 
-        List<String> commandMi = new ArrayList<>();
+        ICommandInput commandMi = shell.createCommand();
         commandMi.add(LTTngControlServiceConstants.CONTROL_COMMAND);
         commandMi.add(LTTngControlServiceConstants.CONTROL_COMMAND_MI_OPTION);
         commandMi.add(LTTngControlServiceConstants.CONTROL_COMMAND_MI_XML);
@@ -90,7 +94,7 @@ public class LTTngControlServiceFactory {
 
         // Logging
         if (ControlPreferences.getInstance().isLoggingEnabled()) {
-            ControlCommandLogger.log(LTTngControlService.toCommandString(commandMi));
+            ControlCommandLogger.log(commandMi.toString());
         }
 
         ICommandResult result = null;
@@ -113,7 +117,7 @@ public class LTTngControlServiceFactory {
 
             // Logging
             if (ControlPreferences.getInstance().isLoggingEnabled()) {
-                ControlCommandLogger.log(LTTngControlService.toCommandString(command));
+                ControlCommandLogger.log(command.toString());
             }
 
             try {
@@ -144,7 +148,7 @@ public class LTTngControlServiceFactory {
                     Matcher matcher = LTTngControlServiceConstants.VERSION_2_PATTERN.matcher(version);
                     if (matcher.matches()) {
                         LTTngControlService service = new LTTngControlService(shell);
-                        service.setVersion(version);
+                        service.setVersion(checkNotNull(version));
                         return service;
                     }
                     throw new ExecutionException(Messages.TraceControl_UnsupportedVersionError + ": " + version); //$NON-NLS-1$

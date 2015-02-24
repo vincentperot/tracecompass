@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Wind River Systems, Inc. and others
+ * Copyright (c) 2014, 2015 Wind River Systems, Inc. and others
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -8,36 +8,43 @@
  *
  * Contributors:
  *   Markus Schorn - Initial API and implementation
+ *   Bernd Hufmann - Update for null safety
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.lttng2.control.ui.views.model.impl;
 
-import java.util.Collections;
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IBaseEventInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IChannelInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.ISessionInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.ISnapshotInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.IUstProviderInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.LogLevelType;
+import org.eclipse.tracecompass.internal.lttng2.control.core.model.NullSessionInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.TraceLogLevel;
+import org.eclipse.tracecompass.internal.lttng2.control.core.model.impl.SnapshotInfo;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.ILttngControlService;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.LttngVersion;
-import org.osgi.framework.Version;
 
 class NullControlService implements ILttngControlService {
 
+    private static final @NonNull String EMPTY_STRING = ""; //$NON-NLS-1$
+
     @Override
     public LttngVersion getVersion() {
-        return new LttngVersion(Version.emptyVersion.toString());
+        return LttngVersion.NULL_VERSION;
     }
 
     @Override
     public String getVersionString() {
-        return Version.emptyVersion.toString();
+        return checkNotNull(LttngVersion.NULL_VERSION.toString());
     }
 
     @Override
@@ -52,32 +59,32 @@ class NullControlService implements ILttngControlService {
 
     @Override
     public ISessionInfo getSession(String sessionName, IProgressMonitor monitor) throws ExecutionException {
-        return null;
+        return NullSessionInfo.INSTANCE;
     }
 
     @Override
     public ISnapshotInfo getSnapshotInfo(String sessionName, IProgressMonitor monitor) throws ExecutionException {
-        return null;
+        return new SnapshotInfo(EMPTY_STRING);
     }
 
     @Override
     public List<IBaseEventInfo> getKernelProvider(IProgressMonitor monitor) throws ExecutionException {
-        return Collections.emptyList();
+        return checkNotNull(new ArrayList<IBaseEventInfo>());
     }
 
     @Override
     public List<IUstProviderInfo> getUstProvider() throws ExecutionException {
-        return Collections.emptyList();
+        return checkNotNull(new ArrayList<IUstProviderInfo>());
     }
 
     @Override
     public List<IUstProviderInfo> getUstProvider(IProgressMonitor monitor) throws ExecutionException {
-        return Collections.emptyList();
+        return checkNotNull(new ArrayList<IUstProviderInfo>());
     }
 
     @Override
     public ISessionInfo createSession(ISessionInfo sessionInfo, IProgressMonitor monitor) throws ExecutionException {
-        return null;
+        return NullSessionInfo.INSTANCE;
     }
 
     @Override
@@ -122,7 +129,7 @@ class NullControlService implements ILttngControlService {
 
     @Override
     public List<String> getContextList(IProgressMonitor monitor) throws ExecutionException {
-        return Collections.emptyList();
+        return checkNotNull(new ArrayList<String>());
     }
 
     @Override
