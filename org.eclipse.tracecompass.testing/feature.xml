@@ -20,7 +20,7 @@
    </license>
 
    <url>
-      <update label="Linux Tools Update Site" url="http://download.eclipse.org/linuxtools/update"/>
+      <update label="Trace Compass Update Site" url="http://download.eclipse.org/tracecompass/stable/repository"/>
    </url>
 
    <plugin
