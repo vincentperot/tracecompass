@@ -84,7 +84,7 @@
           <executions>
             <execution>
               <id>sign</id>
-              <phase>install</phase>
+              <phase>package</phase>
               <goals>
                 <goal>sign</goal>
               </goals>
