@@ -176,34 +176,24 @@ public class CTFCallsite implements Comparable<CTFCallsite> {
             return false;
         }
         CTFCallsite other = (CTFCallsite) obj;
-        if (fEventName == null) {
-            if (other.fEventName != null) {
-                return false;
-            }
-        } else if (!fEventName.equals(other.fEventName)) {
+        return callsiteEquals(other);
+    }
+
+    private boolean callsiteEquals(CTFCallsite other) {
+        boolean retVal = true;
+        retVal &= checkEqualsNullableString(fEventName, other.fEventName);
+        retVal &= checkEqualsNullableString(fFileName, other.fFileName);
+        retVal &= checkEqualsNullableString(fFunctionName, other.fFunctionName);
+        retVal &= (fIp == other.fIp);
+        retVal &= (fLineNumber == other.fLineNumber);
+        return retVal;
+    }
+
+    private static boolean checkEqualsNullableString(String left, String right) {
+        if (left == null && right != null) {
             return false;
         }
-        if (fFileName == null) {
-            if (other.fFileName != null) {
-                return false;
-            }
-        } else if (!fFileName.equals(other.fFileName)) {
-            return false;
-        }
-        if (fFunctionName == null) {
-            if (other.fFunctionName != null) {
-                return false;
-            }
-        } else if (!fFunctionName.equals(other.fFunctionName)) {
-            return false;
-        }
-        if (fIp != other.fIp) {
-            return false;
-        }
-        if (fLineNumber != other.fLineNumber) {
-            return false;
-        }
-        return true;
+        return right.equals(left);
     }
 
     @Override
