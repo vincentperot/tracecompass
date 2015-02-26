@@ -353,23 +353,11 @@ public class Metadata {
 
         MetadataPacketHeader header = new MetadataPacketHeader(headerByteBuffer);
 
-        /* Check TSDL magic number */
-        if (!header.isMagicValid()) {
-            throw new CTFReaderException("TSDL magic number does not match"); //$NON-NLS-1$
-        }
+        checkTsdlMagicNumber(header);
 
-        /* Check UUID */
-        if (!trace.uuidIsSet()) {
-            trace.setUUID(header.getUuid());
-        } else if (!trace.getUUID().equals(header.getUuid())) {
-            throw new CTFReaderException("UUID mismatch"); //$NON-NLS-1$
-        }
+        checkUuid(header);
 
-        /* Extract the text from the packet */
-        int payloadSize = ((header.getContentSize() / BITS_PER_BYTE) - METADATA_PACKET_HEADER_SIZE);
-        if (payloadSize < 0) {
-            throw new CTFReaderException("Invalid metadata packet payload size."); //$NON-NLS-1$
-        }
+        int payloadSize = extractTextPayloadSize(header);
         int skipSize = (header.getPacketSize() - header.getContentSize()) / BITS_PER_BYTE;
 
         /* Read the payload + the padding in a ByteBuffer */
@@ -393,6 +381,31 @@ public class Metadata {
         metadataText.append(str);
 
         return header;
+    }
+
+    private static int extractTextPayloadSize(MetadataPacketHeader header) throws CTFReaderException {
+        /* Extract the text from the packet */
+        int payloadSize = ((header.getContentSize() / BITS_PER_BYTE) - METADATA_PACKET_HEADER_SIZE);
+        if (payloadSize < 0) {
+            throw new CTFReaderException("Invalid metadata packet payload size."); //$NON-NLS-1$
+        }
+        return payloadSize;
+    }
+
+    private void checkUuid(MetadataPacketHeader header) throws CTFReaderException {
+        /* Check UUID */
+        if (!trace.uuidIsSet()) {
+            trace.setUUID(header.getUuid());
+        } else if (!trace.getUUID().equals(header.getUuid())) {
+            throw new CTFReaderException("UUID mismatch"); //$NON-NLS-1$
+        }
+    }
+
+    private static void checkTsdlMagicNumber(MetadataPacketHeader header) throws CTFReaderException {
+        /* Check TSDL magic number */
+        if (!header.isMagicValid()) {
+            throw new CTFReaderException("TSDL magic number does not match"); //$NON-NLS-1$
+        }
     }
 
     private static class MetadataPacketHeader {
