@@ -28,25 +28,25 @@ package org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis;
 public interface Attributes {
 
     /* First-level attributes */
-    static final String CPUS = "CPUs";
-    static final String THREADS = "Threads";
-    static final String RESOURCES = "Resources";
+    String CPUS = "CPUs";
+    String THREADS = "Threads";
+    String RESOURCES = "Resources";
 
     /* Sub-attributes of the CPU nodes */
-    static final String CURRENT_THREAD = "Current_thread";
-    static final String STATUS = "Status";
+    String CURRENT_THREAD = "Current_thread";
+    String STATUS = "Status";
 
     /* Sub-attributes of the Thread nodes */
-    static final String PPID = "PPID";
-    //static final String STATUS = "Status"
-    static final String EXEC_NAME = "Exec_name";
-    static final String PRIO = "Prio";
-    static final String SYSTEM_CALL = "System_call";
+    String PPID = "PPID";
+    //String STATUS = "Status"
+    String EXEC_NAME = "Exec_name";
+    String PRIO = "Prio";
+    String SYSTEM_CALL = "System_call";
 
     /* Attributes under "Resources" */
-    static final String IRQS = "IRQs";
-    static final String SOFT_IRQS = "Soft_IRQs";
+    String IRQS = "IRQs";
+    String SOFT_IRQS = "Soft_IRQs";
 
     /* Misc stuff */
-    static final String UNKNOWN = "Unknown";
+    String UNKNOWN = "Unknown";
 }
