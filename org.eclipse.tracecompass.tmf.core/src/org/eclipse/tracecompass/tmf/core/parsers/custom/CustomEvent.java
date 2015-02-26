@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
@@ -258,11 +259,7 @@ public class CustomEvent extends TmfEvent {
             return false;
         }
         CustomEvent other = (CustomEvent) obj;
-        if (fDefinition == null) {
-            if (other.fDefinition != null) {
-                return false;
-            }
-        } else if (!fDefinition.equals(other.fDefinition)) {
+        if (!NonNullUtils.equalsNullable(fDefinition, other.fDefinition)) {
             return false;
         }
 
@@ -270,22 +267,13 @@ public class CustomEvent extends TmfEvent {
             return false;
         }
 
-        if (customEventContent == null) {
-            if (other.customEventContent != null) {
-                return false;
-            }
-        } else if (!customEventContent.equals(other.customEventContent)) {
+        if (!NonNullUtils.equalsNullable(customEventContent, other.customEventContent)) {
             return false;
         }
 
-        if (customEventType == null) {
-            if (other.customEventType != null) {
-                return false;
-            }
-        } else if (!customEventType.equals(other.customEventType)) {
+        if (!NonNullUtils.equalsNullable(customEventType, other.customEventType)) {
             return false;
         }
-
         return true;
     }
 

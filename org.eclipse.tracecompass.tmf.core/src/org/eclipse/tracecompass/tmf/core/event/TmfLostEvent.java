@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.tmf.core.event;
 
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -110,14 +111,8 @@ public class TmfLostEvent extends TmfEvent implements ITmfLostEvent {
         if (fNbLostEvents != other.fNbLostEvents) {
             return false;
         }
-        if (fTimeRange == null) {
-            if (other.fTimeRange != null) {
-                return false;
-            }
-        } else if (!fTimeRange.equals(other.fTimeRange)) {
-            return false;
-        }
-        return true;
+        return NonNullUtils.equalsNullable(fTimeRange, other.fTimeRange);
+
     }
 
     @Override
