@@ -23,7 +23,8 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 public final class NonNullUtils {
 
-    private NonNullUtils() {}
+    private NonNullUtils() {
+    }
 
     /**
      * Returns a non-null {@link String} for a potentially null object. This
@@ -60,5 +61,21 @@ public final class NonNullUtils {
             throw new NullPointerException();
         }
         return obj;
+    }
+
+    /**
+     * Checks equality with two nullable objects
+     *
+     * @param left
+     *            the first object to compare
+     * @param right
+     *            the second object to compare
+     * @return true if left.equals(right) or left == right
+     */
+    public static boolean equalsNonNull(@Nullable final Object left, @Nullable final Object right) {
+        if (left == null) {
+            return right == null;
+        }
+        return left.equals(right);
     }
 }
