@@ -14,6 +14,8 @@
 
 package org.eclipse.tracecompass.internal.tmf.core.trace.experiment;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.equalsNullable;
+
 import java.nio.ByteBuffer;
 
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
@@ -93,14 +95,7 @@ public final class TmfExperimentLocation implements ITmfLocation {
             return false;
         }
         final TmfExperimentLocation other = (TmfExperimentLocation) obj;
-        if (fLocation == null) {
-            if (other.fLocation != null) {
-                return false;
-            }
-        } else if (!fLocation.equals(other.fLocation)) {
-            return false;
-        }
-        return true;
+        return equalsNullable(fLocation, other.fLocation);
     }
 
     @Override
