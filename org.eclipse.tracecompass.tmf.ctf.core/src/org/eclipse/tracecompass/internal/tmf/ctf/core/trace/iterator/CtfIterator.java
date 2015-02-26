@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.internal.tmf.ctf.core.trace.iterator;
 
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
@@ -153,8 +154,8 @@ public class CtfIterator extends CTFTraceReader
     }
 
     /**
-     * Return the current timestamp location pointed to by the iterator.
-     * This is the timestamp for use in CtfLocation, not the event timestamp.
+     * Return the current timestamp location pointed to by the iterator. This is
+     * the timestamp for use in CtfLocation, not the event timestamp.
      *
      * @return long The current timestamp location
      */
@@ -344,23 +345,12 @@ public class CtfIterator extends CTFTraceReader
             return false;
         }
         CtfIterator other = (CtfIterator) obj;
-        if (fTrace == null) {
-            if (other.fTrace != null) {
-                return false;
-            }
-        } else if (!fTrace.equals(other.fTrace)) {
+        if (!NonNullUtils.equalsNullable(fTrace, other.fTrace)) {
             return false;
         }
-        if (fCurLocation == null) {
-            if (other.fCurLocation != null) {
-                return false;
-            }
-        } else if (!fCurLocation.equals(other.fCurLocation)) {
+        if (!NonNullUtils.equalsNullable(fCurLocation, other.fCurLocation)) {
             return false;
         }
-        if (fCurRank != other.fCurRank) {
-            return false;
-        }
-        return true;
+        return fCurRank == other.fCurRank;
     }
 }
