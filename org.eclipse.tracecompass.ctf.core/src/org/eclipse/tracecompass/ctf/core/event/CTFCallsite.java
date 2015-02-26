@@ -13,6 +13,8 @@
 
 package org.eclipse.tracecompass.ctf.core.event;
 
+import org.eclipse.tracecompass.common.core.NonNullUtils;
+
 /**
  * Callsite information to help with cdt integration
  *
@@ -176,25 +178,13 @@ public class CTFCallsite implements Comparable<CTFCallsite> {
             return false;
         }
         CTFCallsite other = (CTFCallsite) obj;
-        if (fEventName == null) {
-            if (other.fEventName != null) {
-                return false;
-            }
-        } else if (!fEventName.equals(other.fEventName)) {
+        if (!NonNullUtils.equalsNonNull(fEventName, other.fEventName)) {
             return false;
         }
-        if (fFileName == null) {
-            if (other.fFileName != null) {
-                return false;
-            }
-        } else if (!fFileName.equals(other.fFileName)) {
+        if (!NonNullUtils.equalsNonNull(fFileName, other.fFileName)) {
             return false;
         }
-        if (fFunctionName == null) {
-            if (other.fFunctionName != null) {
-                return false;
-            }
-        } else if (!fFunctionName.equals(other.fFunctionName)) {
+        if (!NonNullUtils.equalsNonNull(fFunctionName, other.fFunctionName)) {
             return false;
         }
         if (fIp != other.fIp) {
