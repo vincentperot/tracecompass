@@ -46,6 +46,8 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
      * Note that it usually doesn't make sense to use a Threaded HT if you're
      * opening an existing state-file, but you know what you're doing...
      *
+     * @param ssid
+     *            The state system's id
      * @param newStateFile
      *            The name of the history file that will be created. Should end
      *            in ".ht"
@@ -65,10 +67,10 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
      * @throws IOException
      *             If there was a problem opening the history file for writing
      */
-    public ThreadedHistoryTreeBackend(File newStateFile, int blockSize,
+    public ThreadedHistoryTreeBackend(@NonNull String ssid, File newStateFile, int blockSize,
             int maxChildren, long startTime, int providerVersion, int queueSize)
             throws IOException {
-        super(newStateFile, blockSize, maxChildren, providerVersion, startTime);
+        super(ssid, newStateFile, blockSize, maxChildren, providerVersion, startTime);
 
         intervalQueue = new ArrayBlockingQueue<>(queueSize);
         shtThread = new Thread(this, "History Tree Thread"); //$NON-NLS-1$
@@ -79,6 +81,8 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
      * New State History constructor. This version provides default values for
      * blockSize and maxChildren.
      *
+     * @param ssid
+     *            The state system's id
      * @param newStateFile
      *            The name of the history file that will be created. Should end
      *            in ".ht"
@@ -94,9 +98,9 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
      * @throws IOException
      *             If there was a problem opening the history file for writing
      */
-    public ThreadedHistoryTreeBackend(File newStateFile, long startTime,
+    public ThreadedHistoryTreeBackend(@NonNull String ssid, File newStateFile, long startTime,
             int providerVersion, int queueSize) throws IOException {
-        super(newStateFile, providerVersion, startTime);
+        super(ssid, newStateFile, providerVersion, startTime);
 
         intervalQueue = new ArrayBlockingQueue<>(queueSize);
         shtThread = new Thread(this, "History Tree Thread"); //$NON-NLS-1$

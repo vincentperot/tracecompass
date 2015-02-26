@@ -42,7 +42,7 @@ public class InMemoryBackendTest {
      */
     @BeforeClass
     public static void init() {
-        fixture = new InMemoryBackend(0);
+        fixture = new InMemoryBackend("test-ss", 0);
         for (int attribute = 0; attribute < NUMBER_OF_ATTRIBUTES; attribute++) {
             for (int timeStart = 0; timeStart < 1000; timeStart++) {
                 try {
