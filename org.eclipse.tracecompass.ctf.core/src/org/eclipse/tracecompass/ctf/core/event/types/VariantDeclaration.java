@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
@@ -232,34 +233,16 @@ public class VariantDeclaration extends Declaration {
         }
         // do not check the order of the fields
 
-        if (fFields == null) {
-            if (other.fFields != null) {
-                return false;
-            }
-        } else {
-            if( !fFields.equals(other.fFields)) {
-                return false;
-            }
-        }
-        if (fPrevDefinitionScope == null) {
-            if (other.fPrevDefinitionScope != null) {
-                return false;
-            }
-        } else if (!fPrevDefinitionScope.equals(other.fPrevDefinitionScope)) {
+        if(!NonNullUtils.equalsNonNull(fFields, other.fFields)){
             return false;
         }
-        if (fTag == null) {
-            if (other.fTag != null) {
-                return false;
-            }
-        } else if (!fTag.equals(other.fTag)) {
+        if(!NonNullUtils.equalsNonNull(fPrevDefinitionScope, other.fPrevDefinitionScope)){
             return false;
         }
-        if (fTagDef == null) {
-            if (other.fTagDef != null) {
-                return false;
-            }
-        } else if (!fTagDef.equals(other.fTagDef)) {
+        if(!NonNullUtils.equalsNonNull(fTag, other.fTag)){
+            return false;
+        }
+        if(!NonNullUtils.equalsNonNull(fTagDef, other.fTagDef)){
             return false;
         }
         return true;
