@@ -14,6 +14,8 @@ package org.eclipse.tracecompass.tmf.core.event.lookup;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.equalsNullable;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * TMF call site information for source code lookup.
  *
@@ -26,7 +28,7 @@ public class TmfCallsite implements ITmfCallsite {
     // ------------------------------------------------------------------------
 
     /** The file name string. */
-    final private String fFileName;
+    final private @NonNull String fFileName;
 
     /** The function name. */
     final private String fFunctionName;
@@ -64,7 +66,7 @@ public class TmfCallsite implements ITmfCallsite {
      *            - An other call site implementation
      */
     public TmfCallsite(ITmfCallsite other) {
-        if ((other == null) || (other.getFileName() == null)) {
+        if ((other == null) ) {
             throw new IllegalArgumentException();
         }
         fFileName = other.getFileName();
@@ -77,7 +79,7 @@ public class TmfCallsite implements ITmfCallsite {
     // ------------------------------------------------------------------------
 
     @Override
-    public String getFileName() {
+    public @NonNull String getFileName() {
         return fFileName;
     }
 
@@ -99,7 +101,6 @@ public class TmfCallsite implements ITmfCallsite {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        // fFileName cannot be null!
         result = prime * result + fFileName.hashCode();
         result = prime * result + ((fFunctionName == null) ? 0 : fFunctionName.hashCode());
         result = prime * result + (int) (fLineNumber ^ (fLineNumber >>> 32));
@@ -119,7 +120,6 @@ public class TmfCallsite implements ITmfCallsite {
         }
         TmfCallsite other = (TmfCallsite) obj;
 
-        // fFileName cannot be null!
         if (!fFileName.equals(other.fFileName)) {
             return false;
         }

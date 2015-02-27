@@ -12,6 +12,8 @@
 
 package org.eclipse.tracecompass.tmf.core.event.lookup;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 
 /**
  * The generic call site structure in TMF. A call site has:
@@ -30,7 +32,7 @@ public interface ITmfCallsite {
      * Returns the file name of the call site.
      * @return the file name
      */
-    public String getFileName();
+    public @NonNull String getFileName();
 
     /**
      * Returns the function name of the call site.
