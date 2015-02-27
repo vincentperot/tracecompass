@@ -12,6 +12,7 @@
 
 package org.eclipse.tracecompass.tmf.tests.stubs.trace.text;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 
@@ -24,7 +25,7 @@ public class SyslogEventType extends TmfEventType {
     public static final String TYPE_ID = "Syslog"; //$NON-NLS-1$
     /** The labels (field names) used for SA system log events. */
     @SuppressWarnings("nls")
-    public static final String[] LABELS = {"Timestamp", "Host", "Logger", "File", "Line", "Message"};
+    public static final @NonNull String[] LABELS = {"Timestamp", "Host", "Logger", "File", "Line", "Message"};
     /** A default instance of this class */
     public static final SyslogEventType INSTANCE = new SyslogEventType();
 
