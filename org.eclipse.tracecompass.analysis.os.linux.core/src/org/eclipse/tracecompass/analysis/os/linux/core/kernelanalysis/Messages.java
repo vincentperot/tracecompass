@@ -22,8 +22,10 @@ import org.eclipse.osgi.util.NLS;
  */
 @SuppressWarnings("javadoc")
 public class Messages extends NLS {
-    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.lttng2.kernel.core.analysis.messages"; //$NON-NLS-1$
+    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.messages"; //$NON-NLS-1$
 
+    public static @Nullable String AspectName_Prio;
+    public static @Nullable String AspectHelpText_Prio;
     public static @Nullable String LttngKernelAnalysisModule_Help;
 
     static {
@@ -32,5 +34,15 @@ public class Messages extends NLS {
     }
 
     private Messages() {
+    }
+
+    /**
+     * Helper method to expose externalized strings as non-null objects.
+     */
+    static String getMessage(@Nullable String msg) {
+        if (msg == null) {
+            return ""; //$NON-NLS-1$
+        }
+        return msg;
     }
 }
