@@ -85,7 +85,7 @@ public class TmfCallsiteTest {
 
             @Override
             public String getFileName() {
-                return null;
+                return "";
             }
         });
     }
