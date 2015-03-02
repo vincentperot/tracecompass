@@ -51,6 +51,7 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
      * Indicates if the history tree construction is done
      *
      * @return if the history tree construction is done
+     * @since 1.0
      */
     protected boolean isFinishedBuilding() {
         return fFinishedBuilding;
@@ -61,6 +62,7 @@ public class HistoryTreeBackend implements IStateHistoryBackend {
      *
      * @param isFinishedBuilding
      *            is the history tree finished building
+     * @since 1.0
      */
     protected void setFinishedBuilding(boolean isFinishedBuilding) {
         this.fFinishedBuilding = isFinishedBuilding;
