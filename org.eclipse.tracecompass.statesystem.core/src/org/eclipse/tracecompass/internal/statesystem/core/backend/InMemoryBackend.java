@@ -11,7 +11,7 @@
  *   Matthew Khouzam - Modified to use a TreeSet
  ******************************************************************************/
 
-package org.eclipse.tracecompass.statesystem.core.backend;
+package org.eclipse.tracecompass.internal.statesystem.core.backend;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,6 +23,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.statesystem.core.backend.IStateHistoryBackend;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -40,6 +41,7 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
  * intervals.
  *
  * @author Alexandre Montplaisir
+ * @since 1.0
  */
 public class InMemoryBackend implements IStateHistoryBackend {
 

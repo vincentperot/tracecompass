@@ -10,7 +10,7 @@
  *   Alexandre Montplaisir - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.statesystem.core.backend;
+package org.eclipse.tracecompass.internal.statesystem.core.backend;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.statesystem.core.backend.IStateHistoryBackend;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 
@@ -28,6 +29,7 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
  * requests.
  *
  * @author Alexandre Montplaisir
+ * @since 1.0
  */
 public class NullBackend implements IStateHistoryBackend {
 
