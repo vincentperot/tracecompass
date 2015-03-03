@@ -13,7 +13,7 @@
  *   Patrick Tasse - Add message to exceptions
  *******************************************************************************/
 
-package org.eclipse.tracecompass.statesystem.core.backend.historytree;
+package org.eclipse.tracecompass.internal.statesystem.core.backend.historytree;
 
 import java.io.File;
 import java.io.FileInputStream;
