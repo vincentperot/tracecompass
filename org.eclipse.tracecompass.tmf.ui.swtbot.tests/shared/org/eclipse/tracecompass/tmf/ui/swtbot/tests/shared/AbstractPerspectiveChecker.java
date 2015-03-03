@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Matthew Khouzam - Initial API and implementation
+ *   Patrick Tasse - Fix assertion messages
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared;
@@ -91,7 +92,7 @@ public abstract class AbstractPerspectiveChecker {
                 }
 
             });
-            assertEquals("view " + viewID + "is present", 1, view.size());
+            assertEquals("view " + viewID + " is present", 1, view.size());
         }
     }
 
@@ -104,7 +105,7 @@ public abstract class AbstractPerspectiveChecker {
         SWTBotUtils.switchToPerspective(fPerspectiveId);
         SWTBotUtils.waitForJobs();
         for (SWTBotView view : fBot.views()) {
-            assertTrue("view " + view.toString() + "is present", fViewIds.contains(view.getViewReference().getId()));
+            assertTrue("view " + view.toString() + " is present", fViewIds.contains(view.getViewReference().getId()));
         }
     }
 
