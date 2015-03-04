@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2011, 2014 Ericsson
+ * Copyright (c) 2011, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -69,7 +69,7 @@ import org.eclipse.ui.progress.IProgressConstants;
 /**
  * <p>
  * This class is a reference implementation of the
- * <code>org.eclipse.linuxtools.tmf.ui.Uml2SDLoader</code> extension point. It
+ * <code>org.eclipse.tracecompass.tmf.ui.Uml2SDLoader</code> extension point. It
  * provides a Sequence Diagram loader for a user space trace with specific trace
  * content for sending and receiving signals between components. I also includes
  * a default implementation for the <code>ITmfEvent</code> parsing.
@@ -1329,9 +1329,9 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
 
         /**
          * Constructor
-         * @param range @see org.eclipse.linuxtools.tmf.request.TmfEventRequest#TmfEventRequest(...)
-         * @param nbRequested @see org.eclipse.linuxtools.tmf.request.TmfEventRequest#handleData(...)
-         * @param execType @see org.eclipse.linuxtools.tmf.request.TmfEventRequest#handleData(...)
+         * @param range see {@link org.eclipse.tracecompass.tmf.core.request.TmfEventRequest#TmfEventRequest(Class, TmfTimeRange, long, int, org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType) TmfEventRequest}
+         * @param nbRequested see {@link org.eclipse.tracecompass.tmf.core.request.TmfEventRequest#TmfEventRequest(Class, TmfTimeRange, long, int, org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType) TmfEventRequest}
+         * @param execType see {@link org.eclipse.tracecompass.tmf.core.request.TmfEventRequest#TmfEventRequest(Class, TmfTimeRange, long, int, org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType) TmfEventRequest}
          * @param criteria The search criteria
          */
         public SearchEventRequest(TmfTimeRange range, int nbRequested, ExecutionType execType, Criteria criteria) {
@@ -1340,9 +1340,9 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
 
         /**
          * Constructor
-         * @param range @see org.eclipse.linuxtools.tmf.request.TmfEventRequest#TmfEventRequest(...)
-         * @param nbRequested @see org.eclipse.linuxtools.tmf.request.TmfEventRequest#TmfEventRequest(...)
-         * @param execType @see org.eclipse.linuxtools.tmf.request.TmfEventRequest#TmfEventRequest(...)
+         * @param range see {@link org.eclipse.tracecompass.tmf.core.request.TmfEventRequest#TmfEventRequest(Class, TmfTimeRange, long, int, org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType) TmfEventRequest}
+         * @param nbRequested see {@link org.eclipse.tracecompass.tmf.core.request.TmfEventRequest#TmfEventRequest TmfEventRequest}
+         * @param execType see {@link org.eclipse.tracecompass.tmf.core.request.TmfEventRequest#TmfEventRequest TmfEventRequest}
          * @param criteria The search criteria
          * @param monitor progress monitor
          */
