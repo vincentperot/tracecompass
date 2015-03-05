@@ -28,7 +28,6 @@ import org.junit.runner.RunWith;
         org.eclipse.tracecompass.tmf.ctf.core.tests.context.AllTests.class,
         org.eclipse.tracecompass.tmf.ctf.core.tests.event.AllTests.class,
         org.eclipse.tracecompass.tmf.ctf.core.tests.iterator.AllTests.class,
-        org.eclipse.tracecompass.tmf.ctf.core.tests.timestamp.AllTests.class,
         org.eclipse.tracecompass.tmf.ctf.core.tests.trace.AllTests.class,
 
         /* Tests in other packages (that are there because of CTF) */
