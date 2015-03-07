@@ -77,6 +77,12 @@ public interface ITmfTimestamp extends Comparable<ITmfTimestamp> {
      */
     int getScale();
 
+    /**
+     * Get the time in ns
+     * @return the time in ns
+     */
+    long getNanoseconds();
+
     // ------------------------------------------------------------------------
     // Operations
     // ------------------------------------------------------------------------

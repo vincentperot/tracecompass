@@ -20,9 +20,8 @@ import java.nio.ByteBuffer;
 import org.eclipse.jdt.annotation.NonNull;
 
 /**
- * A generic timestamp implementation. The timestamp is represented by the
- * tuple { value, scale, precision }. By default, timestamps are scaled in
- * seconds.
+ * A generic timestamp implementation. The timestamp is represented by the tuple
+ * { value, scale, precision }. By default, timestamps are scaled in seconds.
  *
  * @author Francois Chouinard
  */
@@ -31,18 +30,59 @@ public class TmfTimestamp implements ITmfTimestamp {
     // ------------------------------------------------------------------------
     // Constants
     // ------------------------------------------------------------------------
+    private static final long scalingFactors[] = new long[] {
+            1L,
+            10L,
+            100L,
+            1000L,
+            10000L,
+            100000L,
+            1000000L,
+            10000000L,
+            100000000L,
+            1000000000L,
+            10000000000L,
+            100000000000L,
+            1000000000000L,
+            10000000000000L,
+            100000000000000L,
+            1000000000000000L,
+            10000000000000000L,
+            100000000000000000L,
+            1000000000000000000L,
+    };
 
     /**
      * The beginning of time
      */
     public static final @NonNull ITmfTimestamp BIG_BANG =
-            new TmfTimestamp(Long.MIN_VALUE, Integer.MAX_VALUE);
+            new TmfTimestamp(Long.MIN_VALUE, Integer.MAX_VALUE) {
+                @Override
+                public ITmfTimestamp normalize(long offset, int scale) {
+                    return this;
+                }
+
+                @Override
+                public int compareTo(ITmfTimestamp ts) {
+                    return (ts == this) ? 0 : -1;
+                }
+            };
 
     /**
      * The end of time
      */
     public static final @NonNull ITmfTimestamp BIG_CRUNCH =
-            new TmfTimestamp(Long.MAX_VALUE, Integer.MAX_VALUE);
+            new TmfTimestamp(Long.MAX_VALUE, Integer.MAX_VALUE) {
+                @Override
+                public ITmfTimestamp normalize(long offset, int scale) {
+                    return this;
+                }
+
+                @Override
+                public int compareTo(ITmfTimestamp ts) {
+                    return (ts == this) ? 0 : 1;
+                }
+            };
 
     /**
      * Zero
@@ -57,7 +97,9 @@ public class TmfTimestamp implements ITmfTimestamp {
     /**
      * The timestamp raw value (mantissa)
      */
-    private final long fValue;
+    private transient final long fValue;
+
+    private final long fNanoseconds;
 
     /**
      * The timestamp scale (magnitude)
@@ -96,6 +138,13 @@ public class TmfTimestamp implements ITmfTimestamp {
     public TmfTimestamp(final long value, final int scale) {
         fValue = value;
         fScale = scale;
+        if (fScale == Integer.MAX_VALUE) {
+            fNanoseconds = fValue == Long.MIN_VALUE ? -1L : -2L;
+        } else if (fScale == NANOSECOND_SCALE) {
+            fNanoseconds = fValue;
+        } else {
+            fNanoseconds = normalize(0, NANOSECOND_SCALE).getValue();
+        }
     }
 
     /**
@@ -110,6 +159,11 @@ public class TmfTimestamp implements ITmfTimestamp {
         }
         fValue = timestamp.getValue();
         fScale = timestamp.getScale();
+        if (fScale == Integer.MAX_VALUE) {
+            fNanoseconds = timestamp == BIG_BANG ? -1L : -2L;
+        } else {
+            fNanoseconds = normalize(0, NANOSECOND_SCALE).getValue();
+        }
     }
 
     /**
@@ -121,11 +175,12 @@ public class TmfTimestamp implements ITmfTimestamp {
      *            The value the new timestamp will have
      */
     public TmfTimestamp(ITmfTimestamp timestamp, long newvalue) {
-        if (timestamp == null) {
+        if (timestamp == null || timestamp == BIG_BANG || timestamp == BIG_CRUNCH) {
             throw new IllegalArgumentException();
         }
         fValue = newvalue;
         fScale = timestamp.getScale();
+        fNanoseconds = normalize(0, NANOSECOND_SCALE).getValue();
     }
 
     // ------------------------------------------------------------------------
@@ -152,28 +207,6 @@ public class TmfTimestamp implements ITmfTimestamp {
         return fScale;
     }
 
-    private static final long scalingFactors[] = new long[] {
-        1L,
-        10L,
-        100L,
-        1000L,
-        10000L,
-        100000L,
-        1000000L,
-        10000000L,
-        100000000L,
-        1000000000L,
-        10000000000L,
-        100000000000L,
-        1000000000000L,
-        10000000000000L,
-        100000000000000L,
-        1000000000000000L,
-        10000000000000000L,
-        100000000000000000L,
-        1000000000000000000L,
-    };
-
     @Override
     public ITmfTimestamp normalize(final long offset, final int scale) {
 
@@ -184,7 +217,8 @@ public class TmfTimestamp implements ITmfTimestamp {
             return this;
         }
 
-        // In case of big bang and big crunch just return this (no need to normalize)
+        // In case of big bang and big crunch just return this (no need to
+        // normalize)
         if (this.equals(BIG_BANG) || this.equals(BIG_CRUNCH)) {
             return this;
         }
@@ -236,44 +270,21 @@ public class TmfTimestamp implements ITmfTimestamp {
 
     @Override
     public int compareTo(final ITmfTimestamp ts) {
-        // Check the corner cases (we can't use equals() because it uses compareTo()...)
+        // Check the corner cases (we can't use equals() because it uses
+        // compareTo()...)
         if (ts == null) {
             return 1;
         }
         if (this == ts || (fValue == ts.getValue() && fScale == ts.getScale())) {
             return 0;
         }
-        if ((fValue == BIG_BANG.getValue() && fScale == BIG_BANG.getScale()) || (ts.getValue() == BIG_CRUNCH.getValue() && ts.getScale() == BIG_CRUNCH.getScale())) {
+        if (ts == BIG_CRUNCH) {
             return -1;
         }
-        if ((fValue == BIG_CRUNCH.getValue() && fScale == BIG_CRUNCH.getScale()) || (ts.getValue() == BIG_BANG.getValue() && ts.getScale() == BIG_BANG.getScale())) {
+        if (ts == BIG_BANG) {
             return 1;
         }
-
-        try {
-            final ITmfTimestamp nts = ts.normalize(0, fScale);
-            final long delta = fValue - nts.getValue();
-            return Long.compare(delta, 0);
-        }
-        catch (final ArithmeticException e) {
-            // Scaling error. We can figure it out nonetheless.
-
-            // First, look at the sign of the mantissa
-            final long value = ts.getValue();
-            if (fValue == 0 && value == 0) {
-                return 0;
-            }
-            if (fValue < 0 && value >= 0) {
-                return -1;
-            }
-            if (fValue >= 0 && value < 0) {
-                return 1;
-            }
-
-            // Otherwise, just compare the scales
-            final int scale = ts.getScale();
-            return (fScale > scale) ? (fValue >= 0) ? 1 : -1 : (fValue >= 0) ? -1 : 1;
-        }
+        return Long.compare(fNanoseconds, ts.getNanoseconds());
     }
 
     // ------------------------------------------------------------------------
@@ -284,8 +295,7 @@ public class TmfTimestamp implements ITmfTimestamp {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (int) (fValue ^ (fValue >>> 32));
-        result = prime * result + fScale;
+        result = prime * result + (int) (fNanoseconds ^ (fNanoseconds >>> 32));
         return result;
     }
 
@@ -302,7 +312,7 @@ public class TmfTimestamp implements ITmfTimestamp {
         }
         /* We allow comparing with other types of *I*TmfTimestamp though */
         final ITmfTimestamp ts = (ITmfTimestamp) other;
-        return (compareTo(ts) == 0);
+        return ts.getNanoseconds() == fNanoseconds;
     }
 
     @Override
@@ -315,18 +325,24 @@ public class TmfTimestamp implements ITmfTimestamp {
         try {
             ITmfTimestamp ts = normalize(0, ITmfTimestamp.NANOSECOND_SCALE);
             return format.format(ts.getValue());
-        }
-        catch (ArithmeticException e) {
+        } catch (ArithmeticException e) {
             return format.format(0);
         }
     }
 
     /**
      * Write the time stamp to the ByteBuffer so that it can be saved to disk.
-     * @param bufferOut the buffer to write to
+     *
+     * @param bufferOut
+     *            the buffer to write to
      */
     public void serialize(ByteBuffer bufferOut) {
         bufferOut.putLong(fValue);
         bufferOut.putInt(fScale);
+    }
+
+    @Override
+    public long getNanoseconds() {
+        return fNanoseconds;
     }
 }

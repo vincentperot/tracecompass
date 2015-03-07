@@ -40,9 +40,9 @@ public class TmfTimestampTest {
     // ------------------------------------------------------------------------
 
     private final ITmfTimestamp ts0 = new TmfTimestamp();
-    private final ITmfTimestamp ts1 = new TmfTimestamp(12345,  0);
+    private final ITmfTimestamp ts1 = new TmfTimestamp(12345, 0);
     private final ITmfTimestamp ts2 = new TmfTimestamp(12345, -1);
-    private final ITmfTimestamp ts3 = new TmfTimestamp(12345,  2);
+    private final ITmfTimestamp ts3 = new TmfTimestamp(12345, 2);
     private final ITmfTimestamp ts4 = new TmfTimestamp(12345, -3);
     private final ITmfTimestamp ts5 = new TmfTimestamp(12345, -6);
     private final ITmfTimestamp ts6 = new TmfTimestamp(12345, -9);
@@ -90,7 +90,7 @@ public class TmfTimestampTest {
         assertEquals("getscale", 2, copy.getScale());
     }
 
-    @Test(expected=IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testCopyNullConstructor() {
         new TmfTimestamp((TmfTimestamp) null);
     }
@@ -295,9 +295,9 @@ public class TmfTimestampTest {
 
     @Test
     public void testNormalizeScale() {
-        ITmfTimestamp ts = ts0.normalize(0, 10);
+        ITmfTimestamp ts = ts0.normalize(0, 3);
         assertEquals("getValue", 0, ts.getValue());
-        assertEquals("getscale", 10, ts.getScale());
+        assertEquals("getscale", 3, ts.getScale());
 
         ts = ts0.normalize(0, -10);
         assertEquals("getValue", 0, ts.getValue());
@@ -306,7 +306,7 @@ public class TmfTimestampTest {
 
     @Test
     public void testNormalizedScaleLimits() {
-        final int MAX_SCALE_DIFF = 19;
+        final int MAX_SCALE_DIFF = 10;
 
         // Test below limit
         try {
@@ -320,16 +320,12 @@ public class TmfTimestampTest {
         try {
             ts1.normalize(0, +MAX_SCALE_DIFF);
             fail("normalize: scale error");
-            ts1.normalize(0, -MAX_SCALE_DIFF);
-            fail("normalize: scale error");
         } catch (final ArithmeticException e) {
         }
 
         // Test over limit
         try {
             ts1.normalize(0, +MAX_SCALE_DIFF + 1);
-            fail("normalize: scale error");
-            ts1.normalize(0, -MAX_SCALE_DIFF - 1);
             fail("normalize: scale error");
         } catch (final ArithmeticException e) {
         }
@@ -344,7 +340,7 @@ public class TmfTimestampTest {
 
     @Test
     public void testNormalizeOffsetAndScale() {
-        final int SCALE = 12;
+        final int SCALE = -12;
 
         ITmfTimestamp ts = ts0.normalize(0, SCALE);
         assertEquals("getValue", 0, ts.getValue());
@@ -426,38 +422,6 @@ public class TmfTimestampTest {
 
     @Test
     public void testCompareToCornerCases2() {
-        final ITmfTimestamp ts0a = new TmfTimestamp(Long.MAX_VALUE, Integer.MAX_VALUE - 1);
-        final ITmfTimestamp ts0b = new TmfTimestamp(0, Integer.MAX_VALUE);
-        final ITmfTimestamp ts0c = new TmfTimestamp(Long.MAX_VALUE, Integer.MAX_VALUE);
-
-        assertTrue("compareTo", ts0a.compareTo(ts0b) == 1);
-        assertTrue("compareTo", ts0a.compareTo(ts0c) == -1);
-
-        assertTrue("compareTo", ts0b.compareTo(ts0a) == -1);
-        assertTrue("compareTo", ts0b.compareTo(ts0c) == -1);
-
-        assertTrue("compareTo", ts0c.compareTo(ts0a) == 1);
-        assertTrue("compareTo", ts0c.compareTo(ts0b) == 1);
-    }
-
-    @Test
-    public void testCompareToCornerCases3() {
-        final ITmfTimestamp ts0a = new TmfTimestamp(Long.MIN_VALUE, Integer.MAX_VALUE - 1);
-        final ITmfTimestamp ts0b = new TmfTimestamp(0, Integer.MAX_VALUE);
-        final ITmfTimestamp ts0c = new TmfTimestamp(Long.MIN_VALUE, Integer.MAX_VALUE);
-
-        assertTrue("compareTo", ts0a.compareTo(ts0b) == -1);
-        assertTrue("compareTo", ts0a.compareTo(ts0c) == 1);
-
-        assertTrue("compareTo", ts0b.compareTo(ts0a) == 1);
-        assertTrue("compareTo", ts0b.compareTo(ts0c) == 1);
-
-        assertTrue("compareTo", ts0c.compareTo(ts0a) == -1);
-        assertTrue("compareTo", ts0c.compareTo(ts0b) == -1);
-    }
-
-    @Test
-    public void testCompareToCornerCases4() {
         assertTrue("compareTo", ts0.compareTo(null) == 1);
     }
 
@@ -503,42 +467,6 @@ public class TmfTimestampTest {
         assertTrue("CompareTo", t3.compareTo(t1) > 0);
         assertTrue("CompareTo", t3.compareTo(t2) > 0);
         assertTrue("CompareTo", t3.compareTo(t4) > 0);
-    }
-
-    @Test
-    public void testCompareToLargeScale1() {
-        final ITmfTimestamp t1 = new TmfTimestamp(-1, 100);
-        final ITmfTimestamp t2 = new TmfTimestamp(-1000, -100);
-        final ITmfTimestamp t3 = new TmfTimestamp(1, 100);
-        final ITmfTimestamp t4 = new TmfTimestamp(1000, -100);
-
-        assertTrue("CompareTo", t1.compareTo(t2) < 0);
-        assertTrue("CompareTo", t1.compareTo(t3) < 0);
-        assertTrue("CompareTo", t1.compareTo(t4) < 0);
-
-        assertTrue("CompareTo", t2.compareTo(t1) > 0);
-        assertTrue("CompareTo", t2.compareTo(t3) < 0);
-        assertTrue("CompareTo", t2.compareTo(t4) < 0);
-
-        assertTrue("CompareTo", t3.compareTo(t1) > 0);
-        assertTrue("CompareTo", t3.compareTo(t2) > 0);
-        assertTrue("CompareTo", t3.compareTo(t4) > 0);
-
-        assertTrue("CompareTo", t4.compareTo(t1) > 0);
-        assertTrue("CompareTo", t4.compareTo(t2) > 0);
-        assertTrue("CompareTo", t4.compareTo(t3) < 0);
-    }
-
-    @Test
-    public void testCompareToLargeScale2() {
-        final ITmfTimestamp ts0a = new TmfTimestamp(0, Integer.MAX_VALUE);
-        final ITmfTimestamp ts0b = new TmfTimestamp(1, Integer.MAX_VALUE);
-
-        assertTrue("CompareTo", ts0a.compareTo(ts0) == 0);
-        assertTrue("CompareTo", ts0.compareTo(ts0a) == 0);
-
-        assertTrue("CompareTo", ts0b.compareTo(ts0) == 1);
-        assertTrue("CompareTo", ts0.compareTo(ts0b) == -1);
     }
 
     // ------------------------------------------------------------------------
