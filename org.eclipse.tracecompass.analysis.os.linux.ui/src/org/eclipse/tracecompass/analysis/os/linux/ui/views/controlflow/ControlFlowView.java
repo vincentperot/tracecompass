@@ -9,6 +9,7 @@
  * Contributors:
  *   Patrick Tasse - Initial API and implementation
  *   Geneviève Bastien - Move code to provide base classes for time graph view
+ *   Christian Mansky - Add check active / uncheck inactive buttons
  *******************************************************************************/
 
 package org.eclipse.tracecompass.analysis.os.linux.ui.views.controlflow;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.Attributes;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelAnalysis;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelThreadInformationProvider;
@@ -106,6 +108,17 @@ public class ControlFlowView extends AbstractTimeGraphView {
         setFilterColumns(FILTER_COLUMN_NAMES);
         setFilterLabelProvider(new ControlFlowFilterLabelProvider());
         setEntryComparator(new ControlFlowEntryComparator());
+    }
+
+    @Override
+    public void createPartControl(Composite parent) {
+        super.createPartControl(parent);
+        // add "Check active" Button to TimeGraphFilterDialog
+        super.getTimeGraphCombo().addTimeGraphFilterCheckActiveButton(
+                new ControlFlowCheckActiveProvider("Check Active", "Checks all threads executing within the time frame."));  //$NON-NLS-1$//$NON-NLS-2$)
+        // add "Uncheck inactive" Button to TimeGraphFilterDialog
+        super.getTimeGraphCombo().addTimeGraphFilterUncheckInactiveButton(
+                new ControlFlowCheckActiveProvider("Uncheck Inactive", "Unchecks all threads not executing within the time frame.")); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     @Override
