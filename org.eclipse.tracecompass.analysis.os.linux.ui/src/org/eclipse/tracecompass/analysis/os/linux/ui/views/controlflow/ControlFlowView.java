@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.Attributes;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelAnalysis;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelThreadInformationProvider;
@@ -593,5 +594,16 @@ public class ControlFlowView extends AbstractTimeGraphView {
             }
         }
         return null;
+    }
+
+    @Override
+    public void createPartControl(Composite parent) {
+        super.createPartControl(parent);
+        // add "Check active" Button to TimeGraphFilterDialog
+        super.getTimeGraphCombo().addTimeGraphFilterAdditionalButtonInfo(
+                new ControlFlowCheckActiveButtonProvider(true));
+        // add "Uncheck inactive" Button to TimeGraphFilterDialog
+        super.getTimeGraphCombo().addTimeGraphFilterAdditionalButtonInfo(
+                new ControlFlowCheckActiveButtonProvider(false));
     }
 }

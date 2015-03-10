@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.dialogs.ITimeGraphFilterAdditionalButtonInfo;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.dialogs.TimeGraphFilterDialog;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
@@ -757,6 +758,15 @@ public class TimeGraphCombo extends Composite {
      */
     public void setFilterLabelProvider(ITableLabelProvider labelProvider) {
         fFilterDialog.setLabelProvider(labelProvider);
+    }
+
+    /**
+     * Adds an additional button used by the filter dialog
+     * @param additionalButtonInfo An additional Button specific to a certain view.
+     * @since 1.0
+     */
+    public void addTimeGraphFilterAdditionalButtonInfo(ITimeGraphFilterAdditionalButtonInfo additionalButtonInfo) {
+        fFilterDialog.addTimeGraphFilterAdditionalButtonInfo(additionalButtonInfo);
     }
 
     /**

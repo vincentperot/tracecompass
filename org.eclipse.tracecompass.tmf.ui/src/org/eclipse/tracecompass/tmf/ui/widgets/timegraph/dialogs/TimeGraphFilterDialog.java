@@ -15,6 +15,7 @@
  *      François Rajotte - Support for multiple columns + selection control
  *      Patrick Tasse - Fix Sonar warnings
  *      Generoso Pagano - Add tree filter
+ *      Christian Mansky - Add additional view specific selection buttons
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.ui.widgets.timegraph.dialogs;
@@ -59,6 +60,8 @@ import org.eclipse.ui.dialogs.SelectionStatusDialog;
  * CheckedTreeSelectionDialog It was necessary to develop this similar dialog to
  * allow multiple columns
  *
+ * @version 1.0
+ * @since 2.0
  * @author François Rajotte
  */
 public class TimeGraphFilterDialog extends SelectionStatusDialog {
@@ -66,6 +69,7 @@ public class TimeGraphFilterDialog extends SelectionStatusDialog {
     private static final int BUTTON_UNCHECK_SELECTED_ID = IDialogConstants.CLIENT_ID + 1;
     private static final int BUTTON_CHECK_SUBTREE_ID = IDialogConstants.CLIENT_ID + 2;
     private static final int BUTTON_UNCHECK_SUBTREE_ID = IDialogConstants.CLIENT_ID + 3;
+    private static final int BUTTON_ADDITIONAL_ID = IDialogConstants.CLIENT_ID + 4;
 
     private static final int DEFAULT_WIDTH = 60;
     private static final int DEFAULT_HEIGHT = 18;
@@ -73,6 +77,8 @@ public class TimeGraphFilterDialog extends SelectionStatusDialog {
     private FilteredCheckboxTree fTree;
 
     private IBaseLabelProvider fLabelProvider;
+
+    private List<ITimeGraphFilterAdditionalButtonInfo> fAdditionalFilterButtonInfo;
 
     private ITreeContentProvider fContentProvider;
 
@@ -111,6 +117,7 @@ public class TimeGraphFilterDialog extends SelectionStatusDialog {
         setStatusLineAboveButtons(true);
         setHelpAvailable(false);
         fExpandedElements = null;
+        fAdditionalFilterButtonInfo = new ArrayList<>();
     }
 
     /**
@@ -218,6 +225,15 @@ public class TimeGraphFilterDialog extends SelectionStatusDialog {
      */
     public void setLabelProvider(IBaseLabelProvider labelProvider) {
         fLabelProvider = labelProvider;
+    }
+
+    /**
+     * @param additionalButtonInfo
+     *            Information about an additional view specific Button
+     * @since 1.0
+     */
+    public void addTimeGraphFilterAdditionalButtonInfo(ITimeGraphFilterAdditionalButtonInfo additionalButtonInfo) {
+        fAdditionalFilterButtonInfo.add(additionalButtonInfo);
     }
 
     /**
@@ -364,6 +380,8 @@ public class TimeGraphFilterDialog extends SelectionStatusDialog {
     protected Composite createSelectionButtons(Composite composite) {
         Composite buttonComposite = new Composite(composite, SWT.RIGHT);
         GridLayout layout = new GridLayout();
+        List<Button> additionalButtons = new ArrayList<>();
+        int additionalColumns = 0;
         layout.marginWidth = 0;
         layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
         buttonComposite.setLayout(layout);
@@ -383,6 +401,14 @@ public class TimeGraphFilterDialog extends SelectionStatusDialog {
         Button checkAllButton = createButton(buttonComposite,
                 IDialogConstants.SELECT_ALL_ID, Messages.TmfTimeFilterDialog_CHECK_ALL,
                 false);
+        for (int i = 0; i < fAdditionalFilterButtonInfo.size(); i += 2) {
+            Button b = createButton(buttonComposite,
+                    BUTTON_ADDITIONAL_ID + i, fAdditionalFilterButtonInfo.get(i).getButtonLabel(),
+                    false);
+            b.setToolTipText(fAdditionalFilterButtonInfo.get(i).getToolTip());
+            additionalColumns += 1;
+            additionalButtons.add(i, b);
+        }
 
         Button uncheckSelectedButton = createButton(buttonComposite,
                 BUTTON_UNCHECK_SELECTED_ID, Messages.TmfTimeFilterDialog_UNCHECK_SELECTED,
@@ -393,15 +419,58 @@ public class TimeGraphFilterDialog extends SelectionStatusDialog {
         Button uncheckAllButton = createButton(buttonComposite,
                 IDialogConstants.DESELECT_ALL_ID, Messages.TmfTimeFilterDialog_UNCHECK_ALL,
                 false);
+        for (int i = 1; i < fAdditionalFilterButtonInfo.size(); i += 2) {
+            Button b = createButton(buttonComposite,
+                    BUTTON_ADDITIONAL_ID + i, fAdditionalFilterButtonInfo.get(i).getButtonLabel(),
+                    false);
+            b.setToolTipText(fAdditionalFilterButtonInfo.get(i).getToolTip());
+            additionalButtons.add(i, b);
+        }
 
         /*
          * Apply the layout again after creating the buttons to override
          * createButton messing with the columns
          */
-        layout.numColumns = 3;
+        layout.numColumns = 3 + additionalColumns;
         buttonComposite.setLayout(layout);
 
-        /* Add a listener to each button */
+        /* Add a selection listener to each additional button */
+        for (int i = 0; i < additionalButtons.size(); i++) {
+            final int index = i;
+            Button b = additionalButtons.get(index);
+            b.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    /* Uncheck all elements that are not in this list */
+                    Object[] viewerElements = fContentProvider.getElements(fInput);
+                    for (int j = 0; j < viewerElements.length; j++) {
+                        checkElement(viewerElements[j]);
+                    }
+
+                    updateOKStatus();
+                }
+
+                private void checkElement(Object element) {
+                    if (element instanceof ITimeGraphEntry) {
+                        ITimeGraphEntry entry = (ITimeGraphEntry) element;
+                        boolean toselect = fAdditionalFilterButtonInfo.get(index).checkSelectionStatus(entry);
+                        if (toselect) {
+                            fTree.setChecked(entry, true);
+                        } else { // no need to unselect a just selected item.
+                            boolean tounselect = fAdditionalFilterButtonInfo.get(index).checkUnselectionStatus(entry);
+                            if (tounselect) {
+                                fTree.setChecked(entry, false);
+                            }
+                        }
+
+                        for (ITimeGraphEntry childEntry : entry.getChildren()) {
+                            checkElement(childEntry);
+                        }
+                    }
+                }
+            });
+        }
+
         checkSelectedButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
