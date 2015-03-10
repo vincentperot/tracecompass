@@ -9,6 +9,7 @@
  * Contributors:
  *   Patrick Tasse - Initial API and implementation
  *   Geneviève Bastien - Move code to provide base classes for time graph view
+ *   Christian Mansky - Add check active / uncheck inactive buttons
  *******************************************************************************/
 
 package org.eclipse.tracecompass.analysis.os.linux.ui.views.controlflow;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.Attributes;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelAnalysis;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelThreadInformationProvider;
@@ -249,7 +251,8 @@ public class ControlFlowView extends AbstractTimeGraphView {
                 return;
             }
             long end = ssq.getCurrentEndTime();
-            if (start == end && !complete) { // when complete execute one last time regardless of end time
+            if (start == end && !complete) { // when complete execute one last
+                                             // time regardless of end time
                 continue;
             }
             setEndTime(Math.max(getEndTime(), end + 1));
@@ -265,7 +268,8 @@ public class ControlFlowView extends AbstractTimeGraphView {
                 } catch (NumberFormatException e1) {
                     continue;
                 }
-                if (threadId <= 0) { // ignore the 'unknown' (-1) and swapper (0) threads
+                if (threadId <= 0) { // ignore the 'unknown' (-1) and swapper
+                                     // (0) threads
                     continue;
                 }
 
@@ -419,8 +423,10 @@ public class ControlFlowView extends AbstractTimeGraphView {
         }
         KernelAnalysis kernelAnalysis = TmfTraceUtils.getAnalysisModuleOfClass(entry.getTrace(), KernelAnalysis.class, KernelAnalysis.ID);
         if (kernelAnalysis == null) {
-//        ITmfStateSystem ssq = TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(), KernelAnalysis.ID);
-//        if (ssq == null) {
+            // ITmfStateSystem ssq =
+            // TmfStateSystemAnalysisModule.getStateSystem(entry.getTrace(),
+            // KernelAnalysis.ID);
+            // if (ssq == null) {
             return null;
         }
         try {
@@ -539,7 +545,8 @@ public class ControlFlowView extends AbstractTimeGraphView {
                 }
                 List<Integer> currentThreadQuarks = ssq.getQuarks(Attributes.CPUS, "*", Attributes.CURRENT_THREAD); //$NON-NLS-1$
                 for (int currentThreadQuark : currentThreadQuarks) {
-                    // adjust the query range to include the previous and following intervals
+                    // adjust the query range to include the previous and
+                    // following intervals
                     long qstart = Math.max(ssq.querySingleState(start, currentThreadQuark).getStartTime() - 1, ssq.getStartTime());
                     long qend = Math.min(ssq.querySingleState(end, currentThreadQuark).getEndTime() + 1, ssq.getCurrentEndTime());
                     List<ITmfStateInterval> currentThreadIntervals = StateSystemUtils.queryHistoryRange(ssq, currentThreadQuark, qstart, qend, resolution, monitor);
@@ -552,7 +559,8 @@ public class ControlFlowView extends AbstractTimeGraphView {
                         }
                         long time = currentThreadInterval.getStartTime();
                         if (time != lastEnd) {
-                            // don't create links where there are gaps in intervals due to the resolution
+                            // don't create links where there are gaps in
+                            // intervals due to the resolution
                             prevThread = 0;
                             prevEnd = 0;
                         }
@@ -593,5 +601,16 @@ public class ControlFlowView extends AbstractTimeGraphView {
             }
         }
         return null;
+    }
+
+    @Override
+    public void createPartControl(Composite parent) {
+        super.createPartControl(parent);
+        // add "Check active" Button to TimeGraphFilterDialog
+        super.getTimeGraphCombo().addTimeGraphFilterCheckActiveButton(
+                new ControlFlowCheckActiveProvider("Check Active", "Checks all threads executing within the time frame."));  //$NON-NLS-1$//$NON-NLS-2$)
+        // add "Uncheck inactive" Button to TimeGraphFilterDialog
+        super.getTimeGraphCombo().addTimeGraphFilterUncheckInactiveButton(
+                new ControlFlowCheckActiveProvider("Uncheck Inactive", "Unchecks all threads not executing within the time frame.")); //$NON-NLS-1$ //$NON-NLS-2$
     }
 }
