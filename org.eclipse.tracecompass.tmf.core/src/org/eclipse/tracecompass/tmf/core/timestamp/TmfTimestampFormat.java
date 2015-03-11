@@ -35,29 +35,28 @@ import java.util.TimeZone;
  *
  * <h4>Date and Time Patterns</h4>
  * All date and time pattern letters defined in {@link SimpleDateFormat} are
- * supported with the following exceptions:
- * <blockquote>
+ * supported with the following exceptions: <blockquote>
  * <table border=0 cellspacing=3 cellpadding=0 >
- *     <tr bgcolor="#ccccff">
- *         <th align=left>Format
- *         <th align=left>Description
- *         <th align=left>Value Range
- *         <th align=left>Example
- *     <tr bgcolor="#eeeeff">
- *         <td><code>T</code>
- *         <td>The seconds since the epoch
- *         <td><code>0-9223372036</code>
- *         <td><code>1332170682</code>
- *     <tr>
- *         <td><code>S</code>
- *         <td>Millisecond
- *         <td><code>N/A</code>
- *         <td><code>Not supported</code>
- *     <tr bgcolor="#eeeeff">
- *         <td><code>W</code>
- *         <td>Week in month
- *         <td><code>N/A</code>
- *         <td><code>Not supported</code>
+ * <tr bgcolor="#ccccff">
+ * <th align=left>Format
+ * <th align=left>Description
+ * <th align=left>Value Range
+ * <th align=left>Example
+ * <tr bgcolor="#eeeeff">
+ * <td><code>T</code>
+ * <td>The seconds since the epoch
+ * <td><code>0-9223372036</code>
+ * <td><code>1332170682</code>
+ * <tr>
+ * <td><code>S</code>
+ * <td>Millisecond
+ * <td><code>N/A</code>
+ * <td><code>Not supported</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>W</code>
+ * <td>Week in month
+ * <td><code>N/A</code>
+ * <td><code>Not supported</code>
  * </table>
  * </blockquote>
  * <p>
@@ -73,35 +72,34 @@ import java.util.TimeZone;
  * <h4>Sub-Seconds Patterns</h4>
  * <blockquote>
  * <table border=0 cellspacing=3 cellpadding=0 >
- *     <tr bgcolor="#ccccff">
- *         <th align=left>Format
- *         <th align=left>Description
- *         <th align=left>Value Range
- *         <th align=left>Example
- *     <tr>
- *         <td><code>S</code>
- *         <td>Fraction of second
- *         <td><code>0-999999999</code>
- *         <td><code>123456789</code>
- *     <tr bgcolor="#eeeeff">
- *         <td><code>C</code>
- *         <td>Microseconds in ms
- *         <td><code>0-999</code>
- *         <td><code>456</code>
- *     <tr>
- *         <td><code>N</code>
- *         <td>Nanoseconds in &#181s
- *         <td><code>0-999</code>
- *         <td><code>789</code>
+ * <tr bgcolor="#ccccff">
+ * <th align=left>Format
+ * <th align=left>Description
+ * <th align=left>Value Range
+ * <th align=left>Example
+ * <tr>
+ * <td><code>S</code>
+ * <td>Fraction of second
+ * <td><code>0-999999999</code>
+ * <td><code>123456789</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>C</code>
+ * <td>Microseconds in ms
+ * <td><code>0-999</code>
+ * <td><code>456</code>
+ * <tr>
+ * <td><code>N</code>
+ * <td>Nanoseconds in &#181s
+ * <td><code>0-999</code>
+ * <td><code>789</code>
  * </table>
- * </blockquote>
- * <strong>Note:</strong> The fraction of second pattern can be split, in which
- * case parsing and formatting continues at the next digit. Digits beyond the
- * total number of pattern letters are ignored when parsing and truncated when
- * formatting.
+ * </blockquote> <strong>Note:</strong> The fraction of second pattern can be
+ * split, in which case parsing and formatting continues at the next digit.
+ * Digits beyond the total number of pattern letters are ignored when parsing
+ * and truncated when formatting.
  * <p>
- * <strong>Note:</strong> When parsing, "S", "C" and "N" are interchangeable
- * and are all handled as fraction of second ("S"). The use of "C" and "N" is
+ * <strong>Note:</strong> When parsing, "S", "C" and "N" are interchangeable and
+ * are all handled as fraction of second ("S"). The use of "C" and "N" is
  * discouraged but is supported for backward compatibility.
  * <p>
  *
@@ -125,36 +123,37 @@ import java.util.TimeZone;
  * characters in the sub-second pattern are matched against the input string.
  *
  * <h4>Examples</h4>
- * The following examples show how timestamp patterns are interpreted in
- * the U.S. locale. The given timestamp is 1332170682539677389L, the number
- * of nanoseconds since 1970/01/01.
+ * The following examples show how timestamp patterns are interpreted in the
+ * U.S. locale. The given timestamp is 1332170682539677389L, the number of
+ * nanoseconds since 1970/01/01.
  *
  * <blockquote>
  * <table border=0 cellspacing=3 cellpadding=0>
- *     <tr bgcolor="#ccccff">
- *         <th align=left>Date and Time Pattern
- *         <th align=left>Result
- *     <tr>
- *         <td><code>"yyyy-MM-dd HH:mm:ss.SSS.SSS.SSS"</code>
- *         <td><code>2012-03-19 11:24:42.539.677.389</code>
- *     <tr bgcolor="#eeeeff">
- *         <td><code>"yyyy-MM-dd HH:mm:ss.SSS.SSS"</code>
- *         <td><code>2012-03-19 11:24:42.539.677</code>
- *     <tr>
- *         <td><code>"yyyy-D HH:mm:ss.SSS.SSS"</code>
- *         <td><code>2012-79 11:24:42.539.677</code>
- *     <tr bgcolor="#eeeeff">
- *         <td><code>"ss,SSSS"</code>
- *         <td><code>42,5397</code>
- *     <tr>
- *         <td><code>"T.SSS SSS SSS"</code>
- *         <td><code>1332170682.539 677 389</code>
- *     <tr bgcolor="#eeeeff">
- *         <td><code>"T"</code>
- *         <td><code>1332170682</code>
+ * <tr bgcolor="#ccccff">
+ * <th align=left>Date and Time Pattern
+ * <th align=left>Result
+ * <tr>
+ * <td><code>"yyyy-MM-dd HH:mm:ss.SSS.SSS.SSS"</code>
+ * <td><code>2012-03-19 11:24:42.539.677.389</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>"yyyy-MM-dd HH:mm:ss.SSS.SSS"</code>
+ * <td><code>2012-03-19 11:24:42.539.677</code>
+ * <tr>
+ * <td><code>"yyyy-D HH:mm:ss.SSS.SSS"</code>
+ * <td><code>2012-79 11:24:42.539.677</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>"ss,SSSS"</code>
+ * <td><code>42,5397</code>
+ * <tr>
+ * <td><code>"T.SSS SSS SSS"</code>
+ * <td><code>1332170682.539 677 389</code>
+ * <tr bgcolor="#eeeeff">
+ * <td><code>"T"</code>
+ * <td><code>1332170682</code>
  * </table>
  * </blockquote>
  * <p>
+ *
  * @author Francois Chouinard
  */
 public class TmfTimestampFormat extends SimpleDateFormat {
@@ -210,10 +209,9 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     private final Locale fLocale;
 
     /**
-     * The supplementary pattern letters. Can be redefined by sub-classes
-     * to either override existing letters or augment the letter set.
-     * If so, the format() method must provide the (re-)implementation of the
-     * pattern.
+     * The supplementary pattern letters. Can be redefined by sub-classes to
+     * either override existing letters or augment the letter set. If so, the
+     * format() method must provide the (re-)implementation of the pattern.
      */
     protected String fSupplPatternLetters = "TSCN"; //$NON-NLS-1$
     /**
@@ -226,15 +224,14 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     protected String fDelimiterChars = " .,-_:;/'\""; //$NON-NLS-1$
 
     /*
-     * The bracketing symbols used to mitigate the risk of a format string
-     * that contains escaped sequences that would conflict with our format
-     * extension.
+     * The bracketing symbols used to mitigate the risk of a format string that
+     * contains escaped sequences that would conflict with our format extension.
      */
     /** The open bracket symbol */
-    protected String fOpenBracket   = "[&"; //$NON-NLS-1$
+    protected String fOpenBracket = "[&"; //$NON-NLS-1$
 
     /** The closing bracket symbol */
-    protected String fCloseBracket  = "&]"; //$NON-NLS-1$
+    protected String fCloseBracket = "&]"; //$NON-NLS-1$
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -250,7 +247,8 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     /**
      * The normal constructor
      *
-     * @param pattern the format pattern
+     * @param pattern
+     *            the format pattern
      */
     public TmfTimestampFormat(String pattern) {
         fLocale = Locale.getDefault();
@@ -260,8 +258,10 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     /**
      * The full constructor
      *
-     * @param pattern the format pattern
-     * @param timeZone the time zone
+     * @param pattern
+     *            the format pattern
+     * @param timeZone
+     *            the time zone
      */
     public TmfTimestampFormat(String pattern, TimeZone timeZone) {
         fLocale = Locale.getDefault();
@@ -272,9 +272,12 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     /**
      * The fuller constructor
      *
-     * @param pattern the format pattern
-     * @param timeZone the time zone
-     * @param locale the locale
+     * @param pattern
+     *            the format pattern
+     * @param timeZone
+     *            the time zone
+     * @param locale
+     *            the locale
      */
     public TmfTimestampFormat(String pattern, TimeZone timeZone, Locale locale) {
         super("", locale); //$NON-NLS-1$
@@ -287,7 +290,8 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     /**
      * The copy constructor
      *
-     * @param other the other format pattern
+     * @param other
+     *            the other format pattern
      */
     public TmfTimestampFormat(TmfTimestampFormat other) {
         this(other.fPattern, other.getTimeZone(), other.fLocale);
@@ -297,6 +301,10 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     // Getters/setters
     // ------------------------------------------------------------------------
 
+    /**
+     * Update the default time format pattern and the default interval format to
+     * the time preferences
+     */
     public static void updateDefaultFormats() {
         fDefaultTimeFormat = new TmfTimestampFormat(
                 TmfTimePreferences.getTimePattern(),
@@ -359,17 +367,20 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     /**
      * Format the timestamp according to its pattern.
      *
-     * @param value the timestamp value to format (in ns)
+     * @param value
+     *            the timestamp value to format (in ns)
      * @return the formatted timestamp
      */
     public synchronized String format(long value) {
 
         // Split the timestamp value into its sub-components
-        long date = value / 1000000; // milliseconds since January 1, 1970, 00:00:00 GMT
-        long sec = value / 1000000000;    // seconds since January 1, 1970, 00:00:00 GMT
-        long ms  = Math.abs((value % 1000000000) / 1000000); // milliseconds
-        long cs  = Math.abs((value % 1000000)    / 1000);    // microseconds
-        long ns  = Math.abs(value % 1000);                   // nanoseconds
+        long date = value / 1000000; // milliseconds since January 1, 1970,
+                                     // 00:00:00 GMT
+        long sec = value / 1000000000; // seconds since January 1, 1970,
+                                       // 00:00:00 GMT
+        long ms = Math.abs((value % 1000000000) / 1000000); // milliseconds
+        long cs = Math.abs((value % 1000000) / 1000); // microseconds
+        long ns = Math.abs(value % 1000); // nanoseconds
 
         // Adjust for negative value when formatted as a date
         if (value < 0 && ms + cs + ns > 0 && !super.toPattern().contains(fOpenBracket + "T")) { //$NON-NLS-1$
@@ -394,27 +405,27 @@ public class TmfTimestampFormat extends SimpleDateFormat {
 
             // Format the proper value as per the pattern
             switch (pattern.charAt(0)) {
-                case 'T':
-                    if (value < 0 && sec == 0) {
-                        result.insert(0, '-');
-                    }
-                    val = sec;
-                    bufLength = Math.min(length, 10);
-                    break;
-                case 'S':
-                    val = 1000000 * ms + 1000 * cs + ns;
-                    bufLength = 9;
-                    break;
-                case 'C':
-                    val = cs;
-                    bufLength = Math.min(length, 3);
-                    break;
-                case 'N':
-                    val = ns;
-                    bufLength = Math.min(length, 3);
-                    break;
-                default:
-                    break;
+            case 'T':
+                if (value < 0 && sec == 0) {
+                    result.insert(0, '-');
+                }
+                val = sec;
+                bufLength = Math.min(length, 10);
+                break;
+            case 'S':
+                val = 1000000 * ms + 1000 * cs + ns;
+                bufLength = 9;
+                break;
+            case 'C':
+                val = cs;
+                bufLength = Math.min(length, 3);
+                break;
+            case 'N':
+                val = ns;
+                bufLength = Math.min(length, 3);
+                break;
+            default:
+                break;
             }
 
             // Prepare the format buffer
@@ -441,10 +452,13 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     /**
      * Parse a string according to the format pattern
      *
-     * @param source the source string
-     * @param ref the reference (base) time (in ns)
+     * @param source
+     *            the source string
+     * @param ref
+     *            the reference (base) time (in ns)
      * @return the parsed value (in ns)
-     * @throws ParseException if the string has an invalid format
+     * @throws ParseException
+     *             if the string has an invalid format
      */
     public synchronized long parseValue(final String source, final long ref) throws ParseException {
 
@@ -453,7 +467,7 @@ public class TmfTimestampFormat extends SimpleDateFormat {
             return 0;
         }
 
-        long seconds  = 0;
+        long seconds = 0;
         boolean isNegative = source.charAt(0) == '-';
         boolean isDateTimeFormat = true;
 
@@ -546,9 +560,11 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     /**
      * Parse a string according to the format pattern
      *
-     * @param source the source string
+     * @param source
+     *            the source string
      * @return the parsed value (in ns)
-     * @throws ParseException if the string has an invalid format
+     * @throws ParseException
+     *             if the string has an invalid format
      */
     public long parseValue(final String source) throws ParseException {
         long result = parseValue(source, Long.MIN_VALUE);
@@ -600,9 +616,9 @@ public class TmfTimestampFormat extends SimpleDateFormat {
     }
 
     /**
-     * Finds the first index of a decimal separator in the source string.
-     * Skips the number of decimal separators in the format pattern.
-     * Returns the source string length if decimal separator is not found.
+     * Finds the first index of a decimal separator in the source string. Skips
+     * the number of decimal separators in the format pattern. Returns the
+     * source string length if decimal separator is not found.
      */
     private int indexOfSourceDecimalSeparator(String source) {
         String separator = fDecimalSeparator == '\'' ? "''" : String.valueOf(fDecimalSeparator); //$NON-NLS-1$
@@ -734,12 +750,14 @@ public class TmfTimestampFormat extends SimpleDateFormat {
             if (!inQuote && (fSupplPatternLetters.indexOf(c) != -1)) {
                 if (pattern.charAt(0) == fDecimalSeparator) {
                     if (fSubSecPatternChars.indexOf(c) == -1) {
-                        // do not quote non-sub-second pattern letters in sub-second pattern
+                        // do not quote non-sub-second pattern letters in
+                        // sub-second pattern
                         continue;
                     }
                 } else {
                     if (fSubSecPatternChars.indexOf(c) != -1) {
-                        // do not quote sub-second pattern letters in date and time pattern
+                        // do not quote sub-second pattern letters in date and
+                        // time pattern
                         continue;
                     }
                 }
