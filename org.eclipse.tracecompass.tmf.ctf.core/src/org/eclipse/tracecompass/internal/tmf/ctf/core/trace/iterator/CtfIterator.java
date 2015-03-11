@@ -140,6 +140,7 @@ public class CtfIterator extends CTFTraceReader
      *
      * @return CtfTmfEvent The current event
      */
+    @SuppressWarnings("resource")
     public synchronized CtfTmfEvent getCurrentEvent() {
         final CTFStreamInputReader top = super.getPrio().peek();
         if (top != null) {
@@ -159,6 +160,7 @@ public class CtfIterator extends CTFTraceReader
      *
      * @return long The current timestamp location
      */
+    @SuppressWarnings("resource")
     public synchronized long getCurrentTimestamp() {
         final CTFStreamInputReader top = super.getPrio().peek();
         if (top != null) {

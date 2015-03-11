@@ -83,6 +83,7 @@ public class CtfIteratorManager {
      *            the context to look up
      * @return the iterator referring to the context
      */
+    @SuppressWarnings("resource")
     public CtfIterator getIterator(final CtfTmfContext context) {
         /*
          * if the element is in the map, we don't need to do anything else.

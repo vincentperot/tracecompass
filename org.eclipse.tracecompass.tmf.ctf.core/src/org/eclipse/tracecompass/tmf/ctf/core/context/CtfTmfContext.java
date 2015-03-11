@@ -118,6 +118,7 @@ public class CtfTmfContext implements ITmfContext {
      *
      * @return success or not
      */
+    @SuppressWarnings("resource")
     public synchronized boolean advance() {
         final CtfLocationInfo curLocationData = fCurLocation.getLocationInfo();
         CtfIterator iterator = getIterator();

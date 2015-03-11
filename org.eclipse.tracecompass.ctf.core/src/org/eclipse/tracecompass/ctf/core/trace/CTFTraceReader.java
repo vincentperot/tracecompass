@@ -223,6 +223,7 @@ public class CTFTraceReader implements AutoCloseable {
      * @throws CTFReaderException
      *             An error occured
      */
+    @SuppressWarnings("resource")
     public void update() throws CTFReaderException {
         Set<CTFStreamInputReader> readers = new HashSet<>();
         for (CTFStream stream : fTrace.getStreams()) {
@@ -316,6 +317,7 @@ public class CTFTraceReader implements AutoCloseable {
      * @return An event definition, or null of the trace reader reached the end
      *         of the trace.
      */
+    @SuppressWarnings("resource")
     public EventDefinition getCurrentEventDef() {
         CTFStreamInputReader top = getTopStream();
         return (top != null) ? top.getCurrentEvent() : null;
@@ -328,6 +330,7 @@ public class CTFTraceReader implements AutoCloseable {
      * @throws CTFReaderException
      *             if an error occurs
      */
+    @SuppressWarnings("resource")
     public boolean advance() throws CTFReaderException {
         /*
          * Remove the reader from the top of the priority queue.
@@ -466,6 +469,7 @@ public class CTFTraceReader implements AutoCloseable {
         }
 
         for (int j = 0; j < fEventCountPerTraceFile.length; j++) {
+            @SuppressWarnings("resource")
             CTFStreamInputReader se = fStreamInputReaders.get(j);
 
             long len = (width * fEventCountPerTraceFile[se.getName()])

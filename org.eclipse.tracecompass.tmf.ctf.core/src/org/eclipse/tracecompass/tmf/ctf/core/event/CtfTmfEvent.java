@@ -210,6 +210,7 @@ public class CtfTmfEvent extends TmfEvent
      *
      * @return the call site information, or null if there is none
      */
+    @SuppressWarnings("resource")
     @Override
     public CtfTmfCallsite getCallsite() {
         CtfTmfCallsite callsite = null;
