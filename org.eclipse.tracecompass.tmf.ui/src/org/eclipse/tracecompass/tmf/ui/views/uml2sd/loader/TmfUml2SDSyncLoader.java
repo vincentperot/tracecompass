@@ -33,10 +33,10 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
-import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfVisibleRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTimeSynchSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
@@ -456,7 +456,7 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
      * @param signal The Time synch signal.
      */
     @TmfSignalHandler
-    public void synchToTime(TmfTimeSynchSignal signal) {
+    public void synchToTime(TmfSelectionRangeUpdatedSignal signal) {
         fLock.lock();
         try {
             if ((signal.getSource() != this) && (fFrame != null) && (fCheckPoints.size() > 0)) {
@@ -477,7 +477,7 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
      * @param signal The time range sync signal
      */
     @TmfSignalHandler
-    public void synchToTimeRange(TmfRangeSynchSignal signal) {
+    public void synchToTimeRange(TmfVisibleRangeUpdatedSignal signal) {
         fLock.lock();
         try {
             if ((signal.getSource() != this) && (fFrame != null) && !fIsSignalSent && (fCheckPoints.size() > 0)) {
@@ -588,7 +588,7 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
                 if (startTime == null) {
                     startTime = TmfTimestamp.BIG_BANG;
                 }
-                broadcast(new TmfTimeSynchSignal(this, startTime));
+                broadcast(new TmfSelectionRangeUpdatedSignal(this, startTime));
             }
         }
     }
@@ -1106,7 +1106,7 @@ public class TmfUml2SDSyncLoader extends TmfComponent implements IUml2SDLoader, 
 
         if (notifyAll) {
             TmfTimeRange timeRange = getSignalTimeRange(window.getStartTime());
-            broadcast(new TmfRangeSynchSignal(this, timeRange));
+            broadcast(new TmfVisibleRangeUpdatedSignal(this, timeRange));
         }
     }
 

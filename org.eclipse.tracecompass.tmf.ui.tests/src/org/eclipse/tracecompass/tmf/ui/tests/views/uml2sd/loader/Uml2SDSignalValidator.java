@@ -14,10 +14,10 @@ package org.eclipse.tracecompass.tmf.ui.tests.views.uml2sd.loader;
 
 import org.eclipse.tracecompass.tmf.core.component.TmfComponent;
 import org.eclipse.tracecompass.tmf.core.signal.TmfEndSynchSignal;
-import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfVisibleRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfStartSynchSignal;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTimeSynchSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
@@ -59,7 +59,7 @@ public class Uml2SDSignalValidator extends TmfComponent implements IUml2SdSignal
      * @param signal the signal to handle.
      */
     @TmfSignalHandler
-    public void synchToTime(TmfTimeSynchSignal signal) {
+    public void synchToTime(TmfSelectionRangeUpdatedSignal signal) {
         // Set results so that it can be validated in the test case
         setSignalReceived(true);
         setSourceError(getSource() != signal.getSource());
@@ -71,7 +71,7 @@ public class Uml2SDSignalValidator extends TmfComponent implements IUml2SdSignal
      * @param signal the signal to handle.
      */
     @TmfSignalHandler
-    public void synchToTimeRange(TmfRangeSynchSignal signal) {
+    public void synchToTimeRange(TmfVisibleRangeUpdatedSignal signal) {
         // Set results so that it can be validated in the test case
         setSignalReceived(true);
         if (getSource() != null) {

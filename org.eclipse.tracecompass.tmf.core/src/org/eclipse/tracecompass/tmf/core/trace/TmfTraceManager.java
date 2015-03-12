@@ -38,10 +38,10 @@ import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.signal.TmfEventFilterAppliedSignal;
-import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfVisibleRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTimeSynchSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
@@ -359,7 +359,7 @@ public final class TmfTraceManager {
      *            The incoming signal
      */
     @TmfSignalHandler
-    public synchronized void timeUpdated(final TmfTimeSynchSignal signal) {
+    public synchronized void timeUpdated(final TmfSelectionRangeUpdatedSignal signal) {
         final ITmfTimestamp beginTs = signal.getBeginTime();
         final ITmfTimestamp endTs = signal.getEndTime();
 
@@ -392,7 +392,7 @@ public final class TmfTraceManager {
      *            The incoming signal
      */
     @TmfSignalHandler
-    public synchronized void timeRangeUpdated(final TmfRangeSynchSignal signal) {
+    public synchronized void timeRangeUpdated(final TmfVisibleRangeUpdatedSignal signal) {
         for (Map.Entry<ITmfTrace, TmfTraceContext> entry : fTraces.entrySet()) {
             final ITmfTrace trace = entry.getKey();
             final TmfTraceContext prevCtx = checkNotNull(entry.getValue());

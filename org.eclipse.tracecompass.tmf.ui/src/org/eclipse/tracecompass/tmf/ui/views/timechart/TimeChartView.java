@@ -31,9 +31,9 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.signal.TmfEventFilterAppliedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfEventSearchAppliedSignal;
-import org.eclipse.tracecompass.tmf.core.signal.TmfRangeSynchSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfVisibleRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTimeSynchSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
@@ -520,7 +520,7 @@ public class TimeChartView extends TmfView implements ITimeGraphRangeListener, I
         final ITmfTimestamp startTimestamp = new TmfTimestamp(event.getStartTime(), ITmfTimestamp.NANOSECOND_SCALE);
         final ITmfTimestamp endTimestamp = new TmfTimestamp(event.getEndTime(), ITmfTimestamp.NANOSECOND_SCALE);
         TmfTimeRange range = new TmfTimeRange(startTimestamp, endTimestamp);
-        broadcast(new TmfRangeSynchSignal(this, range));
+        broadcast(new TmfVisibleRangeUpdatedSignal(this, range));
     }
 
     @Override
@@ -538,7 +538,7 @@ public class TimeChartView extends TmfView implements ITimeGraphRangeListener, I
 
     @Override
     public void timeSelected(TimeGraphTimeEvent event) {
-        broadcast(new TmfTimeSynchSignal(this, new TmfTimestamp(event.getBeginTime(), TIMESTAMP_SCALE), new TmfTimestamp(event.getEndTime(), TIMESTAMP_SCALE)));
+        broadcast(new TmfSelectionRangeUpdatedSignal(this, new TmfTimestamp(event.getBeginTime(), TIMESTAMP_SCALE), new TmfTimestamp(event.getEndTime(), TIMESTAMP_SCALE)));
     }
 
     @Override
@@ -672,7 +672,7 @@ public class TimeChartView extends TmfView implements ITimeGraphRangeListener, I
      *            The incoming signal
      */
     @TmfSignalHandler
-    public void currentTimeUpdated(TmfTimeSynchSignal signal) {
+    public void currentTimeUpdated(TmfSelectionRangeUpdatedSignal signal) {
         final long beginTime = signal.getBeginTime().normalize(0, TIMESTAMP_SCALE).getValue();
         final long endTime = signal.getEndTime().normalize(0, TIMESTAMP_SCALE).getValue();
         Display.getDefault().asyncExec(new Runnable() {
@@ -699,7 +699,7 @@ public class TimeChartView extends TmfView implements ITimeGraphRangeListener, I
      *            The incoming signal
      */
     @TmfSignalHandler
-    public void synchToRange(final TmfRangeSynchSignal signal) {
+    public void synchToRange(final TmfVisibleRangeUpdatedSignal signal) {
         if (signal.getSource() == this) {
             return;
         }
