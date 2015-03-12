@@ -13,6 +13,8 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.colors;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.filter.ITmfFilter;
 
 /**
  * Static class for managing color settings.
@@ -51,9 +54,9 @@ public class ColorSettingsManager {
 
     // The default color setting
     private static final ColorSetting DEFAULT_COLOR_SETTING = new ColorSetting(
-            Display.getDefault().getSystemColor(SWT.COLOR_LIST_FOREGROUND).getRGB(),
-            Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND).getRGB(),
-            Display.getDefault().getSystemColor(SWT.COLOR_LIST_FOREGROUND).getRGB(),
+            null,
+            null,
+            checkNotNull(Display.getDefault().getSystemColor(SWT.COLOR_LIST_FOREGROUND).getRGB()),
             null);
 
     /**
@@ -119,7 +122,8 @@ public class ColorSettingsManager {
     public static ColorSetting getColorSetting(ITmfEvent event) {
         for (int i = 0; i < fColorSettings.length; i++) {
             ColorSetting colorSetting = fColorSettings[i];
-            if (colorSetting.getFilter() != null && colorSetting.getFilter().matches(event)) {
+            ITmfFilter filter = colorSetting.getFilter();
+            if (filter != null && filter.matches(event)) {
                 return colorSetting;
             }
         }
@@ -135,7 +139,8 @@ public class ColorSettingsManager {
     public static int getColorSettingPriority(ITmfEvent event) {
         for (int i = 0; i < fColorSettings.length; i++) {
             ColorSetting colorSetting = fColorSettings[i];
-            if (colorSetting.getFilter() != null && colorSetting.getFilter().matches(event)) {
+            ITmfFilter filter = colorSetting.getFilter();
+            if (filter != null && filter.matches(event)) {
                 return i;
             }
         }
