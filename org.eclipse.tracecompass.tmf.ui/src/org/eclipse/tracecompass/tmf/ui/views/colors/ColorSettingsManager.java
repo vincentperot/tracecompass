@@ -49,8 +49,11 @@ public class ColorSettingsManager {
                     .append("org.eclipse.linuxtools.tmf.ui") //$NON-NLS-1$
                     .append(COLOR_SETTINGS_FILE_NAME);
 
-    // The default color setting
-    private static final ColorSetting DEFAULT_COLOR_SETTING = new ColorSetting(
+    /**
+     * The default color setting
+     * @since 1.0
+     */
+    public static final ColorSetting DEFAULT_COLOR_SETTING = new ColorSetting(
             Display.getDefault().getSystemColor(SWT.COLOR_LIST_FOREGROUND).getRGB(),
             Display.getDefault().getSystemColor(SWT.COLOR_LIST_BACKGROUND).getRGB(),
             Display.getDefault().getSystemColor(SWT.COLOR_LIST_FOREGROUND).getRGB(),
