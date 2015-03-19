@@ -25,7 +25,6 @@ import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.backend.IStateHistoryBackend;
 import org.eclipse.tracecompass.statesystem.core.backend.StateHistoryBackendFactory;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
-import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
@@ -45,22 +44,14 @@ public class StateSystemUtilsTest {
 
     private ITmfStateSystemBuilder fStateSystem;
 
+
     /**
      * Build a small test state system in memory
      */
     @Before
     public void setupStateSystem() {
-        try {
-            IStateHistoryBackend backend = StateHistoryBackendFactory.createInMemoryBackend(DUMMY_STRING, START_TIME);
-            fStateSystem = StateSystemFactory.newStateSystem(backend);
-            int quark = fStateSystem.getQuarkAbsoluteAndAdd(DUMMY_STRING);
-
-            fStateSystem.modifyAttribute(1200L, TmfStateValue.newValueInt(10), quark);
-            fStateSystem.modifyAttribute(1500L, TmfStateValue.newValueInt(20), quark);
-            fStateSystem.closeHistory(2000L);
-        } catch (StateValueTypeException | AttributeNotFoundException e) {
-            fail(e.getMessage());
-        }
+        IStateHistoryBackend backend = StateHistoryBackendFactory.createInMemoryBackend(DUMMY_STRING, START_TIME);
+        fStateSystem = StateSystemFactory.newStateSystem(backend);
     }
 
     /**
@@ -69,7 +60,40 @@ public class StateSystemUtilsTest {
     @After
     public void tearDown() {
         fStateSystem.dispose();
+        fStateSystem = null;
     }
+
+    // ------------------------------------------------------------------------
+    // Attribute name escaping methods
+    // ------------------------------------------------------------------------
+
+    /**
+     * Try creating an attribute name with unescaped protected characters
+     * (should throw an exception).
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnescapedProtectedCharacters() {
+        fStateSystem.getQuarkAbsoluteAndAdd("This", "is/a", "test");
+    }
+
+    /**
+     * Create an attribute with escaped protected characters. Make sure the
+     * escaped and unescaped forms are what we expect.
+     */
+    @Test
+    public void testEscapedProtectedCharacters() {
+        String expectedEscaped = "This/is\\/a/test";
+        String expectedUnescaped = "This/is/a/test";
+        int quark = fStateSystem.getQuarkAbsoluteAndAdd(StateSystemUtils.addEscaping("This", "is/a", "test"));
+        String escapedName = fStateSystem.getFullAttributePath(quark);
+        String unescapedName = StateSystemUtils.removeEscaping(escapedName);
+        assertEquals(expectedEscaped, escapedName);
+        assertEquals(expectedUnescaped, unescapedName);
+    }
+
+    // ------------------------------------------------------------------------
+    // Query tests
+    // ------------------------------------------------------------------------
 
     /**
      * Test the {@link StateSystemUtils#queryUntilNonNullValue} method.
@@ -79,8 +103,13 @@ public class StateSystemUtilsTest {
         ITmfStateSystem ss = fStateSystem;
         assertNotNull(ss);
 
-        int quark;
         try {
+            /* Setup the state system with some values */
+            int quark = fStateSystem.getQuarkAbsoluteAndAdd(DUMMY_STRING);
+            fStateSystem.modifyAttribute(1200L, TmfStateValue.newValueInt(10), quark);
+            fStateSystem.modifyAttribute(1500L, TmfStateValue.newValueInt(20), quark);
+            fStateSystem.closeHistory(2000L);
+
             quark = ss.getQuarkAbsolute(DUMMY_STRING);
 
             /* Should return null if requested range is not within range */
