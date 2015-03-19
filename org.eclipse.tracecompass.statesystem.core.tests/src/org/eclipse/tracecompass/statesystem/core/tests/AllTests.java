@@ -23,6 +23,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         StateSystemPushPopTest.class,
         StateSystemUtilsTest.class,
+        org.eclipse.tracecompass.statesystem.core.tests.attribute.AllTests.class,
         org.eclipse.tracecompass.statesystem.core.tests.backend.AllTests.class,
         org.eclipse.tracecompass.statesystem.core.tests.statevalue.AllTests.class
 })

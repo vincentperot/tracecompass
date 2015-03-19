@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2012, 2015 Ericsson, EfficiOS Inc.
  * Copyright (c) 2010, 2011 École Polytechnique de Montréal
  * Copyright (c) 2010, 2011 Alexandre Montplaisir <alexandre.montplaisir@gmail.com>
  *
@@ -8,16 +8,23 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *     Alexandre Montplaisir - Initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -27,10 +34,24 @@ import com.google.common.collect.ImmutableList;
  * It is abstract, as different implementations can provide different ways to
  * access sub-attributes
  *
- * @author alexmont
- *
+ * @author Alexandre Montplaisir
  */
 public final class Attribute {
+
+    private static final Collection<String> PROTECTED_CHARACTERS = ImmutableList.of("/", ":"); //$NON-NLS-1$ //$NON-NLS-2$
+
+    private static final Pattern ESCAPED_CHARS_PATTERN;
+    static {
+        List<String> escapedCharacters = new ArrayList<>();
+        for (String str : PROTECTED_CHARACTERS) {
+            /*
+             * The protected characters are also "protected" inside regexes, so
+             * we need two slashes to escape those in the regex too.
+             */
+            escapedCharacters.add("\\\\" + str); //$NON-NLS-1$
+        }
+        ESCAPED_CHARS_PATTERN = Pattern.compile(Joiner.on("|").join(escapedCharacters)); //$NON-NLS-1$
+    }
 
     private final Attribute parent;
     private final String name;
@@ -51,6 +72,14 @@ public final class Attribute {
      *            The integer representation of this attribute
      */
     public Attribute(Attribute parent, String name, int quark) {
+        /* Check if the requested name contains unescaped protected characters */
+        String cleanedName = ESCAPED_CHARS_PATTERN.matcher(name).replaceAll(""); //$NON-NLS-1$
+        for (String character : PROTECTED_CHARACTERS) {
+            if (cleanedName.contains(character)) {
+                throw new IllegalArgumentException("Attribute name contains unescaped protected character: " + character); //$NON-NLS-1$
+            }
+        }
+
         this.parent = parent;
         this.quark = quark;
         this.name = name;
