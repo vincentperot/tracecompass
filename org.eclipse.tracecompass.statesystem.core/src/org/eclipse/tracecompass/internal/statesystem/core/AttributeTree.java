@@ -389,9 +389,6 @@ public final class AttributeTree {
      * @return The full path name of the attribute
      */
     public String getFullAttributeName(int quark) {
-        if (quark >= attributeList.size() || quark < 0) {
-            return null;
-        }
         return attributeList.get(quark).getFullAttributeName();
     }
 

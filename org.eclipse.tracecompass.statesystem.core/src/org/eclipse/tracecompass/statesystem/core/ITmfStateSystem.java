@@ -240,7 +240,7 @@ public interface ITmfStateSystem {
      *            The quark of the attribute we want
      * @return One single string separated with '/', like a filesystem path
      */
-    String getFullAttributePath(int attributeQuark);
+    @NonNull String getFullAttributePath(int attributeQuark);
 
     /**
      * Returns the parent quark of the attribute.
