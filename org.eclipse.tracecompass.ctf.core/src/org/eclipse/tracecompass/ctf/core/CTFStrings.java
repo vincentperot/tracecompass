@@ -37,4 +37,46 @@ public interface CTFStrings {
      * Name of the field in lost events indicating the time range
      */
     String LOST_EVENTS_DURATION = "duration";
+
+    /**
+     * Packet Header: are there any lost events in this packet (LTTng Specific)
+     * @since 1.0
+     */
+    String EVENTS_DISCARDED = "events_discarded";
+
+    /**
+     * Packet Header: What is the CPU ID of this packet (LTTng Specific)
+     * @since 1.0
+     */
+    String CPU_ID = "cpu_id";
+
+    /**
+     * Packet Header: What is the device of this packet
+     * @since 1.0
+     */
+    String DEVICE = "device";
+
+    /**
+     * Packet Header: What is the last time stamp of this packet
+     * @since 1.0
+     */
+    String TIMESTAMP_END = "timestamp_end";
+
+    /**
+     * Packet Header: What is the first time stamp of this packet
+     * @since 1.0
+     */
+    String TIMESTAMP_BEGIN = "timestamp_begin";
+
+    /**
+     * Packet Header: how many bits in this packet
+     * @since 1.0
+     */
+    String PACKET_SIZE = "packet_size";
+
+    /**
+     * Packet Header: how much data is in this packet
+     * @since 1.0
+     */
+    String CONTENT_SIZE = "content_size";
 }
