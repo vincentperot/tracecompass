@@ -86,26 +86,20 @@ public class ColorSettingsXML {
                 if (foreground != null) {
                     Element fgElement = document.createElement(FG_TAG);
                     colorSettingElement.appendChild(fgElement);
-                    fgElement.setAttribute(R_ATTR, Integer.toString(foreground.red));
-                    fgElement.setAttribute(G_ATTR, Integer.toString(foreground.green));
-                    fgElement.setAttribute(B_ATTR, Integer.toString(foreground.blue));
+                    setElementColor(fgElement, foreground);
                 }
 
                 RGB background = colorSetting.getBackgroundRGB();
                 if (background != null) {
                     Element bgElement = document.createElement(BG_TAG);
                     colorSettingElement.appendChild(bgElement);
-                    bgElement.setAttribute(R_ATTR, Integer.toString(background.red));
-                    bgElement.setAttribute(G_ATTR, Integer.toString(background.green));
-                    bgElement.setAttribute(B_ATTR, Integer.toString(background.blue));
+                    setElementColor(bgElement, background);
                 }
 
                 Element tickColorElement = document.createElement(TICK_TAG);
                 colorSettingElement.appendChild(tickColorElement);
                 RGB tickColor = colorSetting.getTickColorRGB();
-                tickColorElement.setAttribute(R_ATTR, Integer.toString(tickColor.red));
-                tickColorElement.setAttribute(G_ATTR, Integer.toString(tickColor.green));
-                tickColorElement.setAttribute(B_ATTR, Integer.toString(tickColor.blue));
+                setElementColor(tickColorElement, tickColor);
 
                 ITmfFilterTreeNode filter = colorSetting.getFilter();
                 if (filter != null) {
@@ -121,13 +115,15 @@ public class ColorSettingsXML {
             DOMSource source = new DOMSource(document);
             StreamResult result = new StreamResult(new File(pathName));
             transformer.transform(source, result);
-        } catch (ParserConfigurationException e) {
-            Activator.getDefault().logError("Error saving color xml file: " + pathName, e); //$NON-NLS-1$
-        } catch (TransformerConfigurationException e) {
-            Activator.getDefault().logError("Error saving color xml file: " + pathName, e); //$NON-NLS-1$
-        } catch (TransformerException e) {
+        } catch (ParserConfigurationException | TransformerException e) {
             Activator.getDefault().logError("Error saving color xml file: " + pathName, e); //$NON-NLS-1$
         }
+    }
+
+    private static void setElementColor(Element tickColorElement, RGB tickColor) {
+        tickColorElement.setAttribute(R_ATTR, Integer.toString(tickColor.red));
+        tickColorElement.setAttribute(G_ATTR, Integer.toString(tickColor.green));
+        tickColorElement.setAttribute(B_ATTR, Integer.toString(tickColor.blue));
     }
 
     /**
@@ -151,11 +147,7 @@ public class ColorSettingsXML {
             saxReader.setContentHandler(handler);
             saxReader.parse(pathName);
             return handler.colorSettings.toArray(new ColorSetting[0]);
-        } catch (ParserConfigurationException e) {
-            Activator.getDefault().logError("Error loading color xml file: " + pathName, e); //$NON-NLS-1$
-        } catch (SAXException e) {
-            Activator.getDefault().logError("Error loading color xml file: " + pathName, e); //$NON-NLS-1$
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             Activator.getDefault().logError("Error loading color xml file: " + pathName, e); //$NON-NLS-1$
         }
         // In case of error, dispose the partial list of color settings
