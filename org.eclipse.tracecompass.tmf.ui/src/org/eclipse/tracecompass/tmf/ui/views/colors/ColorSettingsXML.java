@@ -108,8 +108,8 @@ public class ColorSettingsXML {
                 tickColorElement.setAttribute(G_ATTR, Integer.toString(tickColor.green));
                 tickColorElement.setAttribute(B_ATTR, Integer.toString(tickColor.blue));
 
-                ITmfFilter filter = colorSetting.getFilter();
-                if (filter instanceof ITmfFilterTreeNode) {
+                ITmfFilterTreeNode filter = colorSetting.getFilter();
+                if (filter != null) {
                     Element filterElement = document.createElement(FILTER_TAG);
                     colorSettingElement.appendChild(filterElement);
                     TmfFilterXMLWriter.buildXMLTree(document, (ITmfFilterTreeNode) filter, filterElement);
