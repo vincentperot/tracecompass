@@ -164,9 +164,6 @@ public class KernelCpuUsageAnalysis extends TmfStateSystemAnalysisModule {
 
                 for (int tidNode : tidNodes) {
                     String curTidName = cpuSs.getAttributeName(tidNode);
-                    if (curTidName == null) {
-                        continue;
-                    }
                     int tid = Integer.parseInt(curTidName);
 
                     countAtEnd = endState.get(tidNode).getStateValue().unboxLong();

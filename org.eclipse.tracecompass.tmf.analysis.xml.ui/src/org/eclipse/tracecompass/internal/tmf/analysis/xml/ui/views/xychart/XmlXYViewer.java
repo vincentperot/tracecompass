@@ -277,9 +277,6 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
                             seriesName = ss.getAttributeName(quark);
                         }
                     }
-                    if (seriesName == null) {
-                        throw new IllegalStateException();
-                    }
                     fSeriesData.put(quark, new SeriesData(xvalues.length, display.getAttributeQuark(quark), seriesName, entry.getType()));
                 }
                 double yvalue = 0.0;

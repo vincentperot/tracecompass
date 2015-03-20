@@ -230,7 +230,7 @@ public interface ITmfStateSystem {
      *            The quark for which we want the name
      * @return The name of the quark
      */
-    String getAttributeName(int attributeQuark);
+    @NonNull String getAttributeName(int attributeQuark);
 
     /**
      * This returns the slash-separated path of an attribute by providing its
@@ -240,7 +240,7 @@ public interface ITmfStateSystem {
      *            The quark of the attribute we want
      * @return One single string separated with '/', like a filesystem path
      */
-    String getFullAttributePath(int attributeQuark);
+    @NonNull String getFullAttributePath(int attributeQuark);
 
     /**
      * Returns the parent quark of the attribute.
