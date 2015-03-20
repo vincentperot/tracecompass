@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
@@ -166,7 +167,7 @@ public class TmfStateStatistics implements ITmfStatistics {
             String curEventName;
             long eventCount;
             for (int typeQuark : quarks) {
-                curEventName = typesStats.getAttributeName(typeQuark);
+                curEventName = StateSystemUtils.removeEscaping(typesStats.getAttributeName(typeQuark));
                 eventCount = endState.get(typeQuark).getStateValue().unboxInt();
                 map.put(curEventName, eventCount);
             }
@@ -231,7 +232,7 @@ public class TmfStateStatistics implements ITmfStatistics {
             if (startTime == typesStats.getStartTime()) {
                 /* Only use the values picked up at the end time */
                 for (int typeQuark : quarks) {
-                    String curEventName = typesStats.getAttributeName(typeQuark);
+                    String curEventName = StateSystemUtils.removeEscaping(typesStats.getAttributeName(typeQuark));
                     long eventCount = endState.get(typeQuark).getStateValue().unboxInt();
                     if (eventCount == -1) {
                         eventCount = 0;
@@ -245,7 +246,7 @@ public class TmfStateStatistics implements ITmfStatistics {
                  */
                 List<ITmfStateInterval> startState = typesStats.queryFullState(startTime - 1);
                 for (int typeQuark : quarks) {
-                    String curEventName = typesStats.getAttributeName(typeQuark);
+                    String curEventName = StateSystemUtils.removeEscaping(typesStats.getAttributeName(typeQuark));
                     long countAtStart = startState.get(typeQuark).getStateValue().unboxInt();
                     long countAtEnd = endState.get(typeQuark).getStateValue().unboxInt();
 

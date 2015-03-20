@@ -46,7 +46,7 @@ public final class Attribute {
      * Characters that are forbidden in attribute names, unless they are escaped
      * by a backslash (\).
      */
-    public static final Collection<String> PROTECTED_CHARACTERS = ImmutableList.of("/"); //$NON-NLS-1$
+    public static final Collection<String> PROTECTED_CHARACTERS = ImmutableList.of("/", ":"); //$NON-NLS-1$ //$NON-NLS-2$
 
     private static final Pattern ESCAPED_CHARS_PATTERN;
     static {

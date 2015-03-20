@@ -27,9 +27,19 @@ public class AttributeTest {
      * This should throw an exception.
      */
     @Test(expected = IllegalArgumentException.class)
-    public void testProtectedCharacters() {
+    public void testProtectedCharacters1() {
         String attribName = "This/is/a/test";
         new Attribute(null, attribName, 1); // should throw exception
+    }
+
+    /**
+     * Attempt to create an attribute with unescaped protected characters in it.
+     * This should throw an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testProtectedCharacters2() {
+        String attribName = "This:is-a-test";
+        new Attribute(null, attribName, 2); // should throw exception
     }
 
     /**

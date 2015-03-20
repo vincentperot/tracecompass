@@ -16,6 +16,7 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
@@ -94,7 +95,7 @@ public class TmfStatisticsEventTypesModule extends TmfStateSystemAnalysisModule 
          * Version number of this input handler. Please bump this if you modify the
          * contents of the generated state history in some way.
          */
-        private static final int VERSION = 2;
+        private static final int VERSION = 3;
 
         /**
          * Constructor
@@ -125,7 +126,12 @@ public class TmfStatisticsEventTypesModule extends TmfStateSystemAnalysisModule 
              * timestamp values to nanoseconds. */
             final long ts = event.getTimestamp().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
 
-            final String eventName = event.getType().getName();
+            String eventName = event.getType().getName();
+            if (eventName == null) {
+                /* We won't be able to print this event, ignore it */
+                return;
+            }
+            eventName = StateSystemUtils.addEscaping(eventName);
 
             try {
                 /* Special handling for lost events */
