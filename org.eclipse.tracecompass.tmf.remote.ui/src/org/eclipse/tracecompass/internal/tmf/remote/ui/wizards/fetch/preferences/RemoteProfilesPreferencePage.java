@@ -30,6 +30,7 @@ import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.URIUtil;
@@ -301,6 +302,34 @@ public class RemoteProfilesPreferencePage extends PreferencePage implements IWor
         return readProfiles(REMOTE_PROFILES_XML_FILE_PATH, monitor);
     }
 
+    /**
+     * Transfers profiles from a legacy state location if no profiles in the current
+     * state location doesn't exist.
+     *
+     * @param path
+     *            a path legacy profiles
+     * @param monitor
+     *            a progress monitor
+     */
+    public static void transferProfiles(IPath path, IProgressMonitor monitor) {
+        File defaultFile = new File(REMOTE_PROFILES_XML_FILE_PATH);
+        /*
+         * If there is no file at the expected location, check the legacy
+         * location instead.
+         */
+        if (!defaultFile.exists()) {
+            File legacyFileCore = path.toFile();
+            if (legacyFileCore.exists()) {
+                List<RemoteImportProfileElement> legacyProfiles = readProfiles(path.toString(), monitor);
+                try {
+                    writeAllProfiles(legacyProfiles, REMOTE_PROFILES_XML_FILE_PATH);
+                } catch (IOException | ParserConfigurationException | TransformerException e) {
+                    Activator.getDefault().logError("Error transferring profiles", e); //$NON-NLS-1$
+                }
+            }
+        }
+    }
+
     private static List<RemoteImportProfileElement> readProfiles(String path, IProgressMonitor monitor) {
         final ExtractRemoteProfilesOperation op = new ExtractRemoteProfilesOperation(path);
         op.run(monitor);
@@ -321,16 +350,22 @@ public class RemoteProfilesPreferencePage extends PreferencePage implements IWor
 
     private boolean writeProfiles(List<RemoteImportProfileElement> profiles, String path) {
         try {
-            String contents = RemoteImportProfilesWriter.writeProfilesToXML(profiles.toArray(new TracePackageElement[0]));
-            File file = new File(path);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                writer.write(contents);
-                return true;
-            }
+            writeAllProfiles(profiles, path);
+            return true;
         } catch (IOException | ParserConfigurationException | TransformerException e) {
             MessageDialog.openError(getShell(), RemoteMessages.RemoteProfilesPreferencePage_ErrorWritingProfile, e.getMessage());
         }
         return false;
+    }
+
+    private static void writeAllProfiles(List<RemoteImportProfileElement> profiles, String path)
+            throws IOException, ParserConfigurationException, TransformerException {
+
+            String contents = RemoteImportProfilesWriter.writeProfilesToXML(profiles.toArray(new TracePackageElement[0]));
+            File file = new File(path);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                writer.write(contents);
+            }
     }
 
     private void createGlobalActions() {
