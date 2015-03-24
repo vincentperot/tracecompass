@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -84,7 +85,7 @@ public class TracePackageExportOperation extends AbstractTracePackageOperation {
      */
     public TracePackageExportOperation(TracePackageTraceElement[] traceExportElements, boolean useCompression, boolean useTar, String fileName) {
         super(fileName);
-        fTraceExportElements = traceExportElements;
+        fTraceExportElements = (traceExportElements == null ? null : Arrays.copyOf(traceExportElements, traceExportElements.length));
         fUseCompression = useCompression;
         fUseTar = useTar;
         fResources = new HashSet<>();

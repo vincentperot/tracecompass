@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class TracePackageImportOperation extends AbstractTracePackageOperation i
      */
     public TracePackageImportOperation(String fileName, TracePackageElement[] importTraceElements, TmfTraceFolder tmfTraceFolder) {
         super(fileName);
-        fImportTraceElements = importTraceElements;
+        fImportTraceElements = (importTraceElements == null ? null : Arrays.copyOf(importTraceElements, importTraceElements.length));
         fTmfTraceFolder = tmfTraceFolder;
     }
 
