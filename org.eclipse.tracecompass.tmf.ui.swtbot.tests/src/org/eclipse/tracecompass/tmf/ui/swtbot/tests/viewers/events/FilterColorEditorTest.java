@@ -16,15 +16,14 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
-import java.awt.AWTException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
@@ -36,13 +35,9 @@ import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.bindings.keys.ParseException;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
-import org.eclipse.swtbot.swt.finder.finders.UIThreadRunnable;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
-import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTable;
 import org.eclipse.tracecompass.tmf.core.tests.TmfCoreTestPlugin;
@@ -58,6 +53,11 @@ import org.junit.runner.RunWith;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class FilterColorEditorTest {
 
+    private static final RGB YELLOW = new RGB(255, 255, 0);
+    private static final RGB WHITE = new RGB(255, 255, 255);
+    private static final RGB BLACK = new RGB(0, 0, 0);
+    private static final int ROW = 8;
+    private static final int COLUMN = 2;
     private static final String TRACE_PROJECT_NAME = "test";
     private static final String COLUMN_TRACE = "syslog_collapse";
     private static final String COLUMN_TRACE_PATH = "testfiles/" + COLUMN_TRACE;
@@ -91,6 +91,8 @@ public class FilterColorEditorTest {
 
         /* Set up for swtbot */
         SWTBotPreferences.TIMEOUT = 20000; /* 20 second timeout */
+        SWTBotPreferences.KEYBOARD_LAYOUT = "EN_US";
+
         fLogger.removeAllAppenders();
         fLogger.addAppender(new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT));
         fBot = new SWTWorkbenchBot();
@@ -124,56 +126,43 @@ public class FilterColorEditorTest {
         SWTBotUtils.openTrace(TRACE_PROJECT_NAME, fTestFile.getAbsolutePath(), COLUMN_TRACE_TYPE);
         SWTBotEditor editorBot = SWTBotUtils.activateEditor(fBot, fTestFile.getName());
 
-        SWTBotTable tableBot = editorBot.bot().table();
+        final SWTBotTable tableBot = editorBot.bot().table();
 
-        // Maximize editor area
         maximizeTable(tableBot);
 
+        final Rectangle cellBounds = SWTBotUtils.getCellBounds(tableBot.widget, ROW, COLUMN);
+
+        Map<RGB, Integer> colorBefore = SWTBotUtils.getColorsOfArea(cellBounds);
+        // Maximize editor area
+        tableBot.click(0, COLUMN);
+        fBot.text().typeText("HostF\n", 100);
         tableBot.select(4);
-        Collection<RGB> color = getColorsOfArea(getCellBounds(tableBot.widget, 4,1));
-        assertTrue(color.contains(new RGB(0, 0, 0)));
-        assertTrue(color.contains(new RGB(255, 255, 255)));
+        Map<RGB, Integer> colorAfter = SWTBotUtils.getColorsOfArea(cellBounds);
+
+        assertTrue(colorBefore.containsKey(BLACK));
+        assertTrue(colorBefore.containsKey(WHITE));
+
+        assertTrue(colorAfter.containsKey(BLACK));
+        assertTrue(colorAfter.containsKey(WHITE));
+        assertTrue(colorAfter.containsKey(YELLOW));
+        Map<RGB, Integer> diff = new HashMap<>();
+        /*
+         * make the histogram difference This will allow us to verify what has
+         * changed in the two images. Hopefully the sum will be zero
+         */
+        for (Entry<RGB, Integer> entry : colorAfter.entrySet()) {
+            RGB key = entry.getKey();
+            if (colorBefore.containsKey(key)) {
+                diff.put(key, entry.getValue() - colorBefore.get(key));
+            } else {
+                diff.put(key, entry.getValue());
+            }
+        }
+        /*
+         * Check that the white became yellow
+         */
+        assertTrue(diff.get(WHITE).equals(-diff.get(YELLOW)));
         SWTBotUtils.deleteProject(TRACE_PROJECT_NAME, fBot);
-    }
-
-    private static Rectangle getCellBounds(final Table t, final int row, final int col) {
-        return UIThreadRunnable.syncExec(new Result<Rectangle>() {
-            @Override
-            public Rectangle run() {
-                TableItem r = t.getItem(row);
-                return r.getBounds(col);
-            }
-        });
-    }
-
-    private static Collection<RGB> getColorsOfArea(final Rectangle rect) {
-
-        Collection<RGB> color = UIThreadRunnable.syncExec(new Result<Collection<RGB>>() {
-            @Override
-            public Collection<RGB> run() {
-                java.awt.Robot rb;
-                HashMap<RGB, Integer> colorMap = new HashMap<>();
-                try {
-                    rb = new java.awt.Robot();
-                    java.awt.image.BufferedImage bi = rb.createScreenCapture(new java.awt.Rectangle(rect.x, rect.y, rect.width, rect.height));
-
-                    for (int y = 0; y < rect.height; y++) {
-                        for (int x = 0; x < rect.width; x++) {
-                            int c = bi.getRGB(x, y);
-                            RGB temp = new RGB((c >> 16) & 0xff, (c >> 8) & 0xff, (c) & 0xff);
-                            Integer val = colorMap.containsKey(temp) ? colorMap.get(temp) + 1 : 1;
-                            colorMap.put(temp, val);
-                        }
-                    }
-                    return colorMap.keySet();
-
-                } catch (AWTException e) {
-                }
-
-                return Collections.emptySet();
-            }
-        });
-        return color;
     }
 
     private static void maximizeTable(SWTBotTable tableBot) {
