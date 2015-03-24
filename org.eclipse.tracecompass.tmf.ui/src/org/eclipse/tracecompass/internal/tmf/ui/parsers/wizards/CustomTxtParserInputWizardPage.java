@@ -289,7 +289,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 InputLine inputLine = new InputLine(Cardinality.ZERO_OR_MORE, "", null); //$NON-NLS-1$
-                if (((List<?>) treeViewer.getInput()).size() == 0) {
+                if (((List<?>) treeViewer.getInput()).isEmpty()) {
                     definition.inputs.add(inputLine);
                 } else if (treeViewer.getSelection().isEmpty()) {
                     return;
@@ -629,9 +629,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                         sb.append(line + "\n"); //$NON-NLS-1$
                     }
                     return sb.toString();
-                } catch (CoreException e) {
-                    return ""; //$NON-NLS-1$
-                } catch (IOException e) {
+                } catch (CoreException | IOException e) {
                     return ""; //$NON-NLS-1$
                 } finally {
                     if (reader != null) {
@@ -763,30 +761,18 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                             } else {
                                                 countMap.put(currentInput, countMap.get(currentInput) + 1);
                                             }
-                                            Iterator<InputLine> iter = countMap.keySet().iterator();
-                                            while (iter.hasNext()) {
-                                                InputLine inputLine = iter.next();
-                                                if (inputLine.level > currentInput.level) {
-                                                    iter.remove();
-                                                }
-                                            }
+                                            removeAllAboveCurrentInputLevel(countMap, currentInput);
                                             if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
                                                 currentInput = currentInput.childrenInputs.get(0);
                                                 countMap.put(currentInput, 0);
                                             } else {
                                                 if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
-                                                    if (currentInput.getNextInputs(countMap).size() > 0) {
+                                                    if (!currentInput.getNextInputs(countMap).isEmpty()) {
                                                         currentInput = currentInput.getNextInputs(countMap).get(0);
-                                                        if (countMap.get(currentInput) == null) {
+                                                        if (!countMap.containsKey(currentInput)) {
                                                             countMap.put(currentInput, 0);
                                                         }
-                                                        iter = countMap.keySet().iterator();
-                                                        while (iter.hasNext()) {
-                                                            InputLine inputLine = iter.next();
-                                                            if (inputLine.level > currentInput.level) {
-                                                                iter.remove();
-                                                            }
-                                                        }
+                                                        removeAllAboveCurrentInputLevel(countMap, currentInput);
                                                     } else {
                                                         currentInput = null;
                                                     }
@@ -813,18 +799,12 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                             countMap.put(currentInput, 0);
                                         } else {
                                             if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
-                                                if (currentInput.getNextInputs(countMap).size() > 0) {
+                                                if (!currentInput.getNextInputs(countMap).isEmpty()) {
                                                     currentInput = currentInput.getNextInputs(countMap).get(0);
-                                                    if (countMap.get(currentInput) == null) {
+                                                    if (countMap.containsKey(currentInput)) {
                                                         countMap.put(currentInput, 0);
                                                     }
-                                                    Iterator<InputLine> iter = countMap.keySet().iterator();
-                                                    while (iter.hasNext()) {
-                                                        InputLine inputLine = iter.next();
-                                                        if (inputLine.level > currentInput.level) {
-                                                            iter.remove();
-                                                        }
-                                                    }
+                                                    removeAllAboveCurrentInputLevel(countMap, currentInput);
                                                 } else {
                                                     currentInput = null;
                                                 }
@@ -870,6 +850,16 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                     timestampPreviewText.setText("*parse exception* [Illegal Argument: " + e.getMessage() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
                 }
 
+            }
+        }
+    }
+
+    private static void removeAllAboveCurrentInputLevel(HashMap<InputLine, Integer> countMap, InputLine currentInput) {
+        Iterator<InputLine> iter = countMap.keySet().iterator();
+        while (iter.hasNext()) {
+            InputLine inputLine = iter.next();
+            if (inputLine.level > currentInput.level) {
+                iter.remove();
             }
         }
     }
@@ -928,14 +918,12 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                     }
                 }
             } else {
-                if (selectedLine != null && selectedLine.inputLine.equals(line) && rootLineMatches == 1) {
-                    if (selectedLine.inputs.get(i).previewText.getText().equals(Messages.CustomTxtParserInputWizardPage_noMatchingLine)) {
-                        selectedLine.inputs.get(i).previewText.setText(Messages.CustomTxtParserInputWizardPage_noMatchingGroup);
-                    }
+                if (selectedLine != null && selectedLine.inputLine.equals(line) && rootLineMatches == 1 && selectedLine.inputs.get(i).previewText.getText().equals(Messages.CustomTxtParserInputWizardPage_noMatchingLine)) {
+                    selectedLine.inputs.get(i).previewText.setText(Messages.CustomTxtParserInputWizardPage_noMatchingGroup);
                 }
             }
         }
-        // highlight the matching groups that have no corresponponding input
+        // highlight the matching groups that have no corresponding input
         for (int i = line.columns.size(); i < matcher.groupCount(); i++) {
             if (matcher.group(i + 1) != null) {
                 if (line.parentInput == null) {
@@ -1172,13 +1160,14 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                 }
             });
 
-            if (inputLine.cardinality.equals(Cardinality.ZERO_OR_MORE)) {
+            Cardinality cardinality = inputLine.cardinality;
+            if (cardinality.equals(Cardinality.ZERO_OR_MORE)) {
                 cardinalityCombo.select(0);
-            } else if (inputLine.cardinality.equals(Cardinality.ONE_OR_MORE)) {
+            } else if (cardinality.equals(Cardinality.ONE_OR_MORE)) {
                 cardinalityCombo.select(1);
-            } else if (inputLine.cardinality.equals(Cardinality.ZERO_OR_ONE)) {
+            } else if (cardinality.equals(Cardinality.ZERO_OR_ONE)) {
                 cardinalityCombo.select(2);
-            } else if (inputLine.cardinality.equals(Cardinality.ONE)) {
+            } else if (cardinality.equals(Cardinality.ONE)) {
                 cardinalityCombo.select(3);
             } else {
                 cardinalityCombo.select(4);
