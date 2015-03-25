@@ -10,7 +10,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
- *   Patrick Tasse - Add message to exceptions
+ *   Patrick Tasse - Add message to exceptions, add path conversion methods
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -119,7 +119,7 @@ public final class AttributeTree {
              * bleh
              */
             curFullString = new String(curByteArray);
-            curStringArray = curFullString.split("/"); //$NON-NLS-1$
+            curStringArray = pathStringToArray(curFullString);
             list.add(curStringArray);
 
             /* Read the 0'ed confirmation byte */
@@ -171,7 +171,7 @@ public final class AttributeTree {
 
             /* Write the attributes themselves */
             for (Attribute entry : this.attributeList) {
-                curByteArray = entry.getFullAttributeName().getBytes();
+                curByteArray = pathArrayToString(entry.getFullAttribute()).getBytes();
                 if (curByteArray.length > Byte.MAX_VALUE) {
                     throw new IOException("Attribute with name \"" //$NON-NLS-1$
                             + Arrays.toString(curByteArray) + "\" is too long."); //$NON-NLS-1$
@@ -404,6 +404,66 @@ public final class AttributeTree {
      */
     public @NonNull String[] getFullAttributePathArray(int quark) {
         return attributeList.get(quark).getFullAttribute();
+    }
+
+    /**
+     * Convert a full path array to a slash-separated path string. '/' and '\'
+     * in attribute names are escaped by a preceding '\' in the returned string.
+     *
+     * @param path
+     *            The full path array
+     * @return The slash-separated escaped path string
+     * @since 1.0
+     * @see #pathStringToArray(String)
+     */
+    public static @NonNull String pathArrayToString(@NonNull String... path) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < path.length; i++) {
+            if (i > 0) {
+                builder.append('/');
+            }
+            if (path[i] != null) {
+                /* Escape '/' and '\' in attribute name */
+                String attribute = path[i].replace("\\", "\\\\").replace("/", "\\/"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+                builder.append(attribute);
+            }
+        }
+        return checkNotNull(builder.toString());
+    }
+
+    /**
+     * Convert a slash-separated path string to a full path array. '/' and '\'
+     * in the input string can be escaped by a preceding '\'. The attribute
+     * names in the returned path array are unescaped.
+     *
+     * @param string
+     *            The slash-separated escaped path string
+     * @return The full path array
+     * @since 1.0
+     * @see #pathArrayToString(String...)
+     */
+    public static @NonNull String[] pathStringToArray(@NonNull String string) {
+        List<String> attributes = new ArrayList<>();
+        StringBuilder attribute = new StringBuilder();
+        int i = 0;
+        while (i < string.length()) {
+            Character c = string.charAt(i++);
+            if (c == '/') {
+                attributes.add(attribute.toString());
+                attribute.setLength(0);
+            } else {
+                if (c == '\\' && i < string.length()) {
+                    c = string.charAt(i++);
+                    if (c != '\\' && c != '/') {
+                        /* allow '\' before unescaped character */
+                        attribute.append('\\');
+                    }
+                }
+                attribute.append(c);
+            }
+        }
+        attributes.add(attribute.toString());
+        return checkNotNull(attributes.toArray(new String[0]));
     }
 
     /**
