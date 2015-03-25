@@ -27,7 +27,7 @@ public class EventHeaderScope extends LexicalScope {
     /**
      * Event header id string
      */
-    public static final LexicalScope EVENT_HEADER_ID = new LexicalScope(EVENT_HEADER, "id"); //$NON-NLS-1$
+    public static final LexicalScope EVENT_HEADER_ID = new LeafScope(EVENT_HEADER, "id"); //$NON-NLS-1$
 
     /**
      * Event header v as in variant string

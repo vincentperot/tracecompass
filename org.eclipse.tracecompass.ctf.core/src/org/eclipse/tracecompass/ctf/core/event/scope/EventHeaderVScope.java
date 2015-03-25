@@ -27,11 +27,11 @@ public class EventHeaderVScope extends LexicalScope {
     /**
      * Packet header v id string
      */
-    public static final LexicalScope PACKET_HEADER_V_ID = new LexicalScope(PACKET_HEADER, "id"); //$NON-NLS-1$
+    public static final LexicalScope PACKET_HEADER_V_ID = new LeafScope(PACKET_HEADER, "id"); //$NON-NLS-1$
     /**
      * Packet header v timestamp string
      */
-    public static final LexicalScope PACKET_HEADER_V_TIMESTAMP = new LexicalScope(PACKET_HEADER, "timestamp"); //$NON-NLS-1$
+    public static final LexicalScope PACKET_HEADER_V_TIMESTAMP = new LeafScope(PACKET_HEADER, "timestamp"); //$NON-NLS-1$
 
     /**
      * The scope constructor

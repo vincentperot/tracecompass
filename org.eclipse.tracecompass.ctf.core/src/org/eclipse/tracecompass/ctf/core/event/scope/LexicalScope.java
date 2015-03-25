@@ -119,20 +119,6 @@ public class LexicalScope implements Comparable<LexicalScope> {
      */
     public static final LexicalScope CONTEXT = new LexicalScope(ROOT, "context"); //$NON-NLS-1$
 
-    /**
-     * Sorted list of parent paths
-     */
-    public static final LexicalScope[] PARENT_PATHS = {
-            ROOT,
-            CONTEXT,
-            FIELDS,
-            PACKET_HEADER,
-            STREAM_EVENT_CONTEXT,
-            STREAM_EVENT_HEADER,
-            STREAM_PACKET_CONTEXT,
-            TRACE_PACKET_HEADER
-    };
-
     private int hash = 0;
     private final String fName;
     private final String fPath;
