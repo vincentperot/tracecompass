@@ -141,41 +141,13 @@ public class StreamInputPacketIndexEntry {
         Long cpuId = (Long) this.lookupAttribute("cpu_id"); //$NON-NLS-1$
         Long lostEvents = (Long) this.lookupAttribute("events_discarded"); //$NON-NLS-1$
 
-        /* Read the content size in bits */
-        if (contentSize != null) {
-            fContentSizeBits = (contentSize.longValue());
-        } else if (packetSize != null) {
-            fContentSizeBits = (packetSize.longValue());
-        } else {
-            fContentSizeBits = (fileSizeBytes * Byte.SIZE);
-        }
+        fContentSizeBits = computeContentSize(fileSizeBytes, contentSize, packetSize);
 
-        /* Read the packet size in bits */
-        if (packetSize != null) {
-            fPacketSizeBits = (packetSize.longValue());
-        } else if (this.getContentSizeBits() != 0) {
-            fPacketSizeBits = (getContentSizeBits());
-        } else {
-            fPacketSizeBits = (fileSizeBytes * Byte.SIZE);
-        }
+        fPacketSizeBits = computePacketSize(fileSizeBytes, packetSize);
 
-        /* Read the begin timestamp */
-        if (tsBegin != null) {
-            fTimestampBegin = (tsBegin.longValue());
-        } else {
-            fTimestampBegin = Long.MIN_VALUE;
-        }
+        fTimestampBegin = computeTsBegin(tsBegin);
 
-        /* Read the end timestamp */
-        if (tsEnd != null) {
-            // check if tsEnd == unsigned long max value
-            if (tsEnd == -1) {
-                tsEnd = Long.MAX_VALUE;
-            }
-            fTimestampEnd = (tsEnd.longValue());
-        } else {
-            fTimestampEnd = Long.MAX_VALUE;
-        }
+        fTimestampEnd = computeTsEnd(tsEnd);
 
         if (device != null) {
             fTarget = device;
@@ -188,14 +160,58 @@ public class StreamInputPacketIndexEntry {
             fTargetID = UNKNOWN;
         }
 
-        if (lostEvents != null) {
-            fLostEvents = (lostEvents - lostSoFar);
-        } else {
-            fLostEvents = 0;
-        }
+        fLostEvents = computeLostEvents(lostSoFar, lostEvents);
 
         fOffsetBits = dataOffsetBits;
         fOffsetBytes = dataOffsetBits / Byte.SIZE;
+    }
+
+    private static long computeContentSize(long fileSizeBytes, Long contentSize, Long packetSize) {
+        /* Read the content size in bits */
+        if (contentSize != null) {
+            return (contentSize.longValue());
+        } else if (packetSize != null) {
+            return (packetSize.longValue());
+        }
+        return (fileSizeBytes * Byte.SIZE);
+    }
+
+    private long computePacketSize(long fileSizeBytes, Long packetSize) {
+        /* Read the packet size in bits */
+        if (packetSize != null) {
+            return packetSize.longValue();
+        } else if (fContentSizeBits != 0) {
+            return fContentSizeBits;
+        }
+        return (fileSizeBytes * Byte.SIZE);
+    }
+
+    private static long computeTsBegin(Long tsBegin) {
+        /* Read the begin timestamp */
+        if (tsBegin != null) {
+            return tsBegin.longValue();
+        }
+        return Long.MIN_VALUE;
+    }
+
+    private static long computeTsEnd(Long tsEnd) {
+
+        /* Read the end timestamp */
+        if (tsEnd != null) {
+            // check if tsEnd == unsigned long max value
+            if (tsEnd == -1) {
+                return Long.MAX_VALUE;
+            }
+            return tsEnd.longValue();
+        }
+        return Long.MAX_VALUE;
+    }
+
+    private static long computeLostEvents(long lostSoFar, Long lostEvents) {
+        if (lostEvents != null) {
+            return (lostEvents - lostSoFar);
+        }
+        return 0;
     }
 
     // ------------------------------------------------------------------------
@@ -306,6 +322,7 @@ public class StreamInputPacketIndexEntry {
 
     /**
      * Get the offset of the packet in bytes
+     *
      * @return The offset of the packet in bytes
      */
     public long getOffsetBytes() {
