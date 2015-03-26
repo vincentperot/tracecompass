@@ -75,6 +75,11 @@ public class FilterColorEditorTest {
     /** The Log4j logger instance. */
     private static final Logger fLogger = Logger.getRootLogger();
     private SWTBotTable fTableBot;
+    // remove me
+    private boolean pass = false;
+    private ImageHelper fAfter;
+    private ImageHelper fAfterFilter;
+    private ImageHelper fBefore;
 
     /**
      * Test Class setup
@@ -142,6 +147,21 @@ public class FilterColorEditorTest {
      */
     @After
     public void cleanup() {
+        try {
+            if (!pass) {
+                if (fBefore != null) {
+                    fBefore.writePng(new File("before" + fBefore.hashCode() + ".png"));
+                }
+                if (fAfter != null) {
+                    fAfter.writePng(new File("after" + fBefore.hashCode() + ".png"));
+                }
+                if (fAfterFilter != null) {
+                    fAfterFilter.writePng(new File("afterFilter" + fBefore.hashCode() + ".png"));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         SWTBotUtils.deleteProject(TRACE_PROJECT_NAME, fBot);
         SWTBotUtils.waitForJobs();
     }
@@ -153,14 +173,14 @@ public class FilterColorEditorTest {
     public void testMultiHighlightMessage() {
         final Rectangle cellBounds = SWTBotUtils.getCellBounds(fTableBot.widget, ROW, 6);
 
-        ImageHelper before = ImageHelper.getScreenGrab(cellBounds);
-        Map<RGB, Integer> colorBefore = before.getHistogram();
+        fBefore = ImageHelper.getScreenGrab(cellBounds);
+        Map<RGB, Integer> colorBefore = fBefore.getHistogram();
         // Maximize editor area
         fTableBot.click(0, 6);
         fBot.text().typeText("e\n", 100);
         fTableBot.select(4);
-        ImageHelper after = ImageHelper.getScreenGrab(cellBounds);
-        Map<RGB, Integer> colorAfter = after.getHistogram();
+        fAfter = ImageHelper.getScreenGrab(cellBounds);
+        Map<RGB, Integer> colorAfter = fAfter.getHistogram();
 
         assertTrue(colorBefore.containsKey(BLACK));
         assertTrue(colorBefore.containsKey(WHITE));
@@ -173,7 +193,7 @@ public class FilterColorEditorTest {
         int start = -1;
         int end;
         List<Point> intervals = new ArrayList<>();
-        List<RGB> pixelRow = after.getPixelRow(1);
+        List<RGB> pixelRow = fAfter.getPixelRow(1);
         for (int i = 1; i < pixelRow.size(); i++) {
             RGB prevPixel = pixelRow.get(i - 1);
             RGB pixel = pixelRow.get(i);
@@ -192,6 +212,7 @@ public class FilterColorEditorTest {
 
         // may be unstable
         assertEquals(intervals.get(1).y - intervals.get(1).x, intervals.get(0).y - intervals.get(0).x);
+        pass = true;
     }
 
     /**
@@ -201,12 +222,14 @@ public class FilterColorEditorTest {
     public void testHighlight() {
         final Rectangle cellBounds = SWTBotUtils.getCellBounds(fTableBot.widget, ROW, COLUMN);
 
-        Map<RGB, Integer> colorBefore = ImageHelper.getScreenGrab(cellBounds).getHistogram();
+        fBefore = ImageHelper.getScreenGrab(cellBounds);
+        Map<RGB, Integer> colorBefore = fBefore.getHistogram();
         // Maximize editor area
         fTableBot.click(0, COLUMN);
         fBot.text().typeText("HostF\n", 100);
         fTableBot.select(4);
-        Map<RGB, Integer> colorAfter = ImageHelper.getScreenGrab(cellBounds).getHistogram();
+        fAfter = ImageHelper.getScreenGrab(cellBounds);
+        Map<RGB, Integer> colorAfter = fAfter.getHistogram();
 
         assertTrue(colorBefore.containsKey(BLACK));
         assertTrue(colorBefore.containsKey(WHITE));
@@ -232,6 +255,7 @@ public class FilterColorEditorTest {
          * Check that the white became yellow
          */
         assertTrue(diff.get(WHITE).equals(-diff.get(YELLOW)));
+        pass = true;
     }
 
     /**
@@ -240,19 +264,19 @@ public class FilterColorEditorTest {
     @Test
     public void testSwitchToFilter() {
         final Rectangle cellBounds = SWTBotUtils.getCellBounds(fTableBot.widget, ROW, 1);
-        ImageHelper before = ImageHelper.getScreenGrab(cellBounds);
+        fBefore = ImageHelper.getScreenGrab(cellBounds);
         fTableBot.click(0, 1);
         fBot.text().typeText("00\n", 100);
         fTableBot.select(4);
-        ImageHelper after = ImageHelper.getScreenGrab(cellBounds);
+        fAfter = ImageHelper.getScreenGrab(cellBounds);
 
         fTableBot.click(0, 0);
-        ImageHelper afterFilter = ImageHelper.getScreenGrab(cellBounds);
+        fAfterFilter = ImageHelper.getScreenGrab(cellBounds);
 
         fTableBot.click(0, 0);
-        List<RGB> beforeLine = before.getPixelRow(1);
-        List<RGB> afterLine = after.getPixelRow(1);
-        List<RGB> afterFilterLine = afterFilter.getPixelRow(1);
+        List<RGB> beforeLine = fBefore.getPixelRow(1);
+        List<RGB> afterLine = fAfter.getPixelRow(1);
+        List<RGB> afterFilterLine = fAfterFilter.getPixelRow(1);
         assertEquals(beforeLine.size(), afterLine.size());
         assertEquals(beforeLine.size(), afterFilterLine.size());
         for (int i = 0; i < beforeLine.size(); i++) {
@@ -270,6 +294,7 @@ public class FilterColorEditorTest {
         }
         assertEquals(beforeLine, afterFilterLine);
         assertNotEquals(afterLine, beforeLine);
+        pass = true;
     }
 
     private static void maximizeTable(SWTBotTable tableBot) {
