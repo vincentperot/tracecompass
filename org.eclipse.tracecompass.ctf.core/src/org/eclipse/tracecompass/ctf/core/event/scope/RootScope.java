@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Matthew Khouzam
  */
 @NonNullByDefault
-public class RootScope extends LexicalScope {
+public final class RootScope extends LexicalScope {
 
     /**
      * The scope constructor
@@ -33,7 +33,7 @@ public class RootScope extends LexicalScope {
 
     @Override
     @Nullable
-    public LexicalScope getChild(String name) {
+    public ILexicalScope getChild(String name) {
         /*
          * This happens ~40 % of the time
          */
