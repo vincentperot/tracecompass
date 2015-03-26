@@ -105,11 +105,6 @@ public class LexicalScope implements Comparable<LexicalScope> {
     public static final LexicalScope STREAM_EVENT_HEADER = new LexicalScope(STREAM_EVENT, "header"); //$NON-NLS-1$
 
     /**
-     * Event header
-     */
-    public static final LexicalScope EVENT_HEADER = new EventHeaderScope(EVENT, "header"); //$NON-NLS-1$
-
-    /**
      * Fields in an event
      */
     public static final LexicalScope FIELDS = new FieldsScope(ROOT, "fields"); //$NON-NLS-1$
@@ -119,19 +114,6 @@ public class LexicalScope implements Comparable<LexicalScope> {
      */
     public static final LexicalScope CONTEXT = new LexicalScope(ROOT, "context"); //$NON-NLS-1$
 
-    /**
-     * Sorted list of parent paths
-     */
-    public static final LexicalScope[] PARENT_PATHS = {
-            ROOT,
-            CONTEXT,
-            FIELDS,
-            PACKET_HEADER,
-            STREAM_EVENT_CONTEXT,
-            STREAM_EVENT_HEADER,
-            STREAM_PACKET_CONTEXT,
-            TRACE_PACKET_HEADER
-    };
 
     private int hash = 0;
     private final String fName;

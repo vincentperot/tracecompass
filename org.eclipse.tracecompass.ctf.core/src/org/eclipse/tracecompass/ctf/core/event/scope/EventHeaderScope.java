@@ -25,6 +25,12 @@ import org.eclipse.jdt.annotation.Nullable;
 public class EventHeaderScope extends LexicalScope {
 
     /**
+     * Event header
+     * @since 1.0
+     */
+    public static final LexicalScope EVENT_HEADER = new EventHeaderScope(LexicalScope.EVENT, "header"); //$NON-NLS-1$
+
+    /**
      * Event header id string
      */
     public static final LexicalScope EVENT_HEADER_ID = new LexicalScope(EVENT_HEADER, "id"); //$NON-NLS-1$

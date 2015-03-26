@@ -37,8 +37,8 @@ public class RootScope extends LexicalScope {
         /*
          * This happens ~40 % of the time
          */
-        if (name.equals(EVENT_HEADER.toString())) {
-            return EVENT_HEADER;
+        if (name.equals(EventHeaderScope.EVENT_HEADER.toString())) {
+            return EventHeaderScope.EVENT_HEADER;
         }
         /*
          * This happens ~30 % of the time
