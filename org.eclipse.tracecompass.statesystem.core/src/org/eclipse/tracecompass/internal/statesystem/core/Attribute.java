@@ -213,7 +213,7 @@ public final class Attribute {
 
     @Override
     public String toString() {
-        return AttributeTree.pathArrayToString(getFullAttribute()) + " (" + quark + ')'; //$NON-NLS-1$
+        return AttributeUtils.pathArrayToString(getFullAttribute()) + " (" + quark + ')'; //$NON-NLS-1$
     }
 
     private int curDepth;

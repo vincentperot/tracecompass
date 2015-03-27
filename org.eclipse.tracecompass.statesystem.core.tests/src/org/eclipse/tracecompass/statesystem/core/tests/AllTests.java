@@ -22,6 +22,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         AttributeTreeTest.class,
+        AttributeUtilsTest.class,
         StateSystemPushPopTest.class,
         StateSystemUtilsTest.class,
         org.eclipse.tracecompass.statesystem.core.tests.backend.AllTests.class,

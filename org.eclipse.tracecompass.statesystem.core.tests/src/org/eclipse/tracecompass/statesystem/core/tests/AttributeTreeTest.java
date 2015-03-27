@@ -12,8 +12,6 @@
 
 package org.eclipse.tracecompass.statesystem.core.tests;
 
-import static org.eclipse.tracecompass.internal.statesystem.core.AttributeTree.pathArrayToString;
-import static org.eclipse.tracecompass.internal.statesystem.core.AttributeTree.pathStringToArray;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -80,93 +78,6 @@ public class AttributeTreeTest {
         "\\\\\\" // '\\\'
     };
     private static final String STATUS = "Status";
-
-    /**
-     * Test the {@link AttributeTree#pathArrayToString(String[])} method.
-     */
-    @Test
-    public void testPathToString() {
-        assertEquals("", pathArrayToString(new String[] { null }));
-        assertEquals("", pathArrayToString(new String[] { "" }));
-        assertEquals("\0", pathArrayToString(new String[] { "\0" }));
-        assertEquals("/", pathArrayToString(new String[] { "", "" }));
-        assertEquals("\\\\", pathArrayToString(new String[] { "\\" }));
-        assertEquals("\\/", pathArrayToString(new String[] { "/" }));
-        assertEquals("a", pathArrayToString(new String[] { "a" }));
-        assertEquals("a/", pathArrayToString(new String[] { "a", "" }));
-        assertEquals("/a", pathArrayToString(new String[] { "", "a" }));
-        assertEquals("a\\\\", pathArrayToString(new String[] { "a\\" }));
-        assertEquals("\\\\a", pathArrayToString(new String[] { "\\a" }));
-        assertEquals("ab/", pathArrayToString(new String[] { "ab", "" }));
-        assertEquals("a/b", pathArrayToString(new String[] { "a", "b" }));
-        assertEquals("/ab", pathArrayToString(new String[] { "", "ab" }));
-        assertEquals("ab\\\\", pathArrayToString(new String[] { "ab\\" }));
-        assertEquals("a\\\\b", pathArrayToString(new String[] { "a\\b" }));
-        assertEquals("\\\\ab", pathArrayToString(new String[] { "\\ab" }));
-        assertEquals("a//", pathArrayToString(new String[] { "a", "", "" }));
-        assertEquals("/a/", pathArrayToString(new String[] { "", "a", "" }));
-        assertEquals("//a", pathArrayToString(new String[] { "", "", "a" }));
-        assertEquals("a\\\\\\\\", pathArrayToString(new String[] { "a\\\\" }));
-        assertEquals("\\\\a\\\\", pathArrayToString(new String[] { "\\a\\" }));
-        assertEquals("\\\\\\\\a", pathArrayToString(new String[] { "\\\\a" }));
-        assertEquals("a\\/", pathArrayToString(new String[] { "a/" }));
-        assertEquals("\\\\a/", pathArrayToString(new String[] { "\\a", "" }));
-        assertEquals("\\/a", pathArrayToString(new String[] { "/a" }));
-        assertEquals("a/\\\\", pathArrayToString(new String[] { "a", "\\" }));
-        assertEquals("/a\\\\", pathArrayToString(new String[] { "", "a\\" }));
-        assertEquals("/\\\\a", pathArrayToString(new String[] { "", "\\a" }));
-        assertEquals("///", pathArrayToString(new String[] { "", "", "", "" }));
-        assertEquals("//\\\\", pathArrayToString(new String[] { "", "", "\\" }));
-        assertEquals("/\\/", pathArrayToString(new String[] { "", "/" }));
-        assertEquals("\\//", pathArrayToString(new String[] { "/", "" }));
-        assertEquals("/\\\\", pathArrayToString(new String[] { "", "\\" }));
-        assertEquals("\\/\\\\", pathArrayToString(new String[] { "/\\" }));
-        assertEquals("\\\\/", pathArrayToString(new String[] { "\\", "" }));
-        assertEquals("\\\\\\\\", pathArrayToString(new String[] { "\\\\" }));
-    }
-
-    /**
-     * Test the {@link AttributeTree#pathStringToArray(String)} method.
-     */
-    @Test
-    public void testStringToPath() {
-        assertArrayEquals(new String[] { "" }, pathStringToArray(""));
-        assertArrayEquals(new String[] { "\0" }, pathStringToArray("\0"));
-        assertArrayEquals(new String[] { "", "" }, pathStringToArray("/"));
-        assertArrayEquals(new String[] { "\\" }, pathStringToArray("\\"));
-        assertArrayEquals(new String[] { "/" }, pathStringToArray("\\/"));
-        assertArrayEquals(new String[] { "a" }, pathStringToArray("a"));
-        assertArrayEquals(new String[] { "a", "" }, pathStringToArray("a/"));
-        assertArrayEquals(new String[] { "", "a" }, pathStringToArray("/a"));
-        assertArrayEquals(new String[] { "a\\" }, pathStringToArray("a\\"));
-        assertArrayEquals(new String[] { "\\a" }, pathStringToArray("\\a"));
-        assertArrayEquals(new String[] { "ab", "" }, pathStringToArray("ab/"));
-        assertArrayEquals(new String[] { "a", "b" }, pathStringToArray("a/b"));
-        assertArrayEquals(new String[] { "", "ab" }, pathStringToArray("/ab"));
-        assertArrayEquals(new String[] { "ab\\" }, pathStringToArray("ab\\"));
-        assertArrayEquals(new String[] { "a\\b" }, pathStringToArray("a\\b"));
-        assertArrayEquals(new String[] { "\\ab" }, pathStringToArray("\\ab"));
-        assertArrayEquals(new String[] { "a", "", "" }, pathStringToArray("a//"));
-        assertArrayEquals(new String[] { "", "a", "" }, pathStringToArray("/a/"));
-        assertArrayEquals(new String[] { "", "", "a" }, pathStringToArray("//a"));
-        assertArrayEquals(new String[] { "a\\" }, pathStringToArray("a\\\\"));
-        assertArrayEquals(new String[] { "\\a\\" }, pathStringToArray("\\a\\"));
-        assertArrayEquals(new String[] { "\\a" }, pathStringToArray("\\\\a"));
-        assertArrayEquals(new String[] { "a/" }, pathStringToArray("a\\/"));
-        assertArrayEquals(new String[] { "\\a", "" }, pathStringToArray("\\a/"));
-        assertArrayEquals(new String[] { "/a" }, pathStringToArray("\\/a"));
-        assertArrayEquals(new String[] { "a", "\\" }, pathStringToArray("a/\\"));
-        assertArrayEquals(new String[] { "", "a\\" }, pathStringToArray("/a\\"));
-        assertArrayEquals(new String[] { "", "\\a" }, pathStringToArray("/\\a"));
-        assertArrayEquals(new String[] { "", "", "", "" }, pathStringToArray("///"));
-        assertArrayEquals(new String[] { "", "", "\\" }, pathStringToArray("//\\"));
-        assertArrayEquals(new String[] { "", "/" }, pathStringToArray("/\\/"));
-        assertArrayEquals(new String[] { "/", "" }, pathStringToArray("\\//"));
-        assertArrayEquals(new String[] { "", "\\" }, pathStringToArray("/\\\\"));
-        assertArrayEquals(new String[] { "/\\" }, pathStringToArray("\\/\\"));
-        assertArrayEquals(new String[] { "\\", "" }, pathStringToArray("\\\\/"));
-        assertArrayEquals(new String[] { "\\\\" }, pathStringToArray("\\\\\\"));
-    }
 
     /**
      * Test attribute tree file storage.
