@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -47,6 +46,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import com.google.common.collect.Multiset;
 
 /**
  * Trace definition for custom text traces.
@@ -306,8 +307,9 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
          * @param countMap
          *            The map of line "sets".
          * @return The next list of lines.
+         * @since 1.0
          */
-        public List<InputLine> getNextInputs(Map<InputLine, Integer> countMap) {
+        public List<InputLine> getNextInputs(Multiset<InputLine> countMap) {
             List<InputLine> nextInputs = new ArrayList<>();
             InputLine next = nextInput;
             while (next != null) {
@@ -318,7 +320,7 @@ public class CustomTxtTraceDefinition extends CustomTraceDefinition {
                 next = next.nextInput;
             }
             if (parentInput != null && parentInput.level > 0) {
-                int parentCount = countMap.get(parentInput);
+                int parentCount = countMap.count(parentInput);
                 if (parentCount < parentInput.getMaxCount()) {
                     nextInputs.add(parentInput);
                 }

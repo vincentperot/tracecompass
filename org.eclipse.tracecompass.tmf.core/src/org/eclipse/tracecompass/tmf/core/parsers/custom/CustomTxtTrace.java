@@ -17,10 +17,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 
 import org.eclipse.core.resources.IProject;
@@ -47,6 +44,9 @@ import org.eclipse.tracecompass.tmf.core.trace.indexer.checkpoint.ITmfCheckpoint
 import org.eclipse.tracecompass.tmf.core.trace.indexer.checkpoint.TmfCheckpoint;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
 import org.eclipse.tracecompass.tmf.core.trace.location.TmfLongLocation;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 /**
  * Base class for custom plain text traces.
@@ -255,11 +255,10 @@ public class CustomTxtTrace extends TmfTrace implements ITmfPersistentlyIndexabl
 
         CustomTxtEvent event = parseFirstLine(context);
 
-        final HashMap<InputLine, Integer> countMap = new HashMap<>();
+        final Multiset<InputLine> countMap = HashMultiset.create();
         InputLine currentInput = null;
         if (context.inputLine.childrenInputs != null && context.inputLine.childrenInputs.size() > 0) {
             currentInput = context.inputLine.childrenInputs.get(0);
-            countMap.put(currentInput, 0);
         }
 
         try {
@@ -283,7 +282,7 @@ public class CustomTxtTrace extends TmfTrace implements ITmfPersistentlyIndexabl
                         }
                     }
                 } else {
-                    if (countMap.get(currentInput) >= currentInput.getMinCount()) {
+                    if (countMap.count(currentInput) >= currentInput.getMinCount()) {
                         final List<InputLine> nextInputs = currentInput.getNextInputs(countMap);
                         if (nextInputs.size() == 0 || nextInputs.get(nextInputs.size() - 1).getMinCount() == 0) {
                             for (final InputLine input : getFirstLines()) {
@@ -303,34 +302,15 @@ public class CustomTxtTrace extends TmfTrace implements ITmfPersistentlyIndexabl
                             if (matcher.matches()) {
                                 event.processGroups(input, matcher);
                                 currentInput = input;
-                                if (countMap.get(currentInput) == null) {
-                                    countMap.put(currentInput, 1);
-                                } else {
-                                    countMap.put(currentInput, countMap.get(currentInput) + 1);
-                                }
-                                Iterator<InputLine> iter = countMap.keySet().iterator();
-                                while (iter.hasNext()) {
-                                    final InputLine inputLine = iter.next();
-                                    if (inputLine.level > currentInput.level) {
-                                        iter.remove();
-                                    }
-                                }
+                                countMap.add(currentInput);
+                                trimCountMap(countMap, currentInput);
                                 if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
                                     currentInput = currentInput.childrenInputs.get(0);
-                                    countMap.put(currentInput, 0);
-                                } else if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
+                                    countMap.setCount(currentInput, 0);
+                                } else if (countMap.count(currentInput) >= currentInput.getMaxCount()) {
                                     if (currentInput.getNextInputs(countMap).size() > 0) {
                                         currentInput = currentInput.getNextInputs(countMap).get(0);
-                                        if (countMap.get(currentInput) == null) {
-                                            countMap.put(currentInput, 0);
-                                        }
-                                        iter = countMap.keySet().iterator();
-                                        while (iter.hasNext()) {
-                                            final InputLine inputLine = iter.next();
-                                            if (inputLine.level > currentInput.level) {
-                                                iter.remove();
-                                            }
-                                        }
+                                        trimCountMap(countMap, currentInput);
                                     } else {
                                         currentInput = null;
                                     }
@@ -344,23 +324,14 @@ public class CustomTxtTrace extends TmfTrace implements ITmfPersistentlyIndexabl
                         final Matcher matcher = currentInput.getPattern().matcher(line);
                         if (matcher.matches()) {
                             event.processGroups(currentInput, matcher);
-                            countMap.put(currentInput, countMap.get(currentInput) + 1);
+                            countMap.add(currentInput);
                             if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
                                 currentInput = currentInput.childrenInputs.get(0);
-                                countMap.put(currentInput, 0);
-                            } else if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
+                                countMap.setCount(currentInput, 0);
+                            } else if (countMap.count(currentInput) >= currentInput.getMaxCount()) {
                                 if (currentInput.getNextInputs(countMap).size() > 0) {
                                     currentInput = currentInput.getNextInputs(countMap).get(0);
-                                    if (countMap.get(currentInput) == null) {
-                                        countMap.put(currentInput, 0);
-                                    }
-                                    final Iterator<InputLine> iter = countMap.keySet().iterator();
-                                    while (iter.hasNext()) {
-                                        final InputLine inputLine = iter.next();
-                                        if (inputLine.level > currentInput.level) {
-                                            iter.remove();
-                                        }
-                                    }
+                                    trimCountMap(countMap, currentInput);
                                 } else {
                                     currentInput = null;
                                 }
@@ -375,13 +346,21 @@ public class CustomTxtTrace extends TmfTrace implements ITmfPersistentlyIndexabl
         } catch (final IOException e) {
             Activator.logError("Error seeking event. File: " + getPath(), e); //$NON-NLS-1$
         }
-        for (final Entry<InputLine, Integer> entry : countMap.entrySet()) {
-            if (entry.getValue() < entry.getKey().getMinCount()) {
+        for (final InputLine entry : countMap.elementSet()) {
+            if (countMap.count(entry) < entry.getMinCount()) {
                 event = null;
             }
         }
         context.setLocation(NULL_LOCATION);
         return event;
+    }
+
+    private static void trimCountMap(final Multiset<InputLine> countMap, InputLine threshold) {
+        for (InputLine inputLine : countMap.elementSet()) {
+            if (inputLine.level > threshold.level) {
+                countMap.setCount(inputLine, 0);
+            }
+        }
     }
 
     /**
@@ -497,8 +476,9 @@ public class CustomTxtTrace extends TmfTrace implements ITmfPersistentlyIndexabl
      * Checks whether the given trace type ID is a custom text trace type ID
      *
      * @param traceTypeId
-     *                the trace type ID to check
-     * @return <code>true</code> if it's a custom text trace type ID else <code>false</code>
+     *            the trace type ID to check
+     * @return <code>true</code> if it's a custom text trace type ID else
+     *         <code>false</code>
      */
     public static boolean isCustomTraceTypeId(@NonNull String traceTypeId) {
         return traceTypeId.startsWith(CUSTOM_TXT_TRACE_TYPE_PREFIX);
@@ -528,7 +508,8 @@ public class CustomTxtTrace extends TmfTrace implements ITmfPersistentlyIndexabl
             return CUSTOM_TXT_TRACE_TYPE_PREFIX + traceTypeId.substring(EARLY_TRACE_COMPASS_CUSTOM_TXT_TRACE_TYPE_PREFIX.length());
         }
 
-        // Handle Linux Tools custom text trace type IDs (with and without category)
+        // Handle Linux Tools custom text trace type IDs (with and without
+        // category)
         int index = traceTypeId.lastIndexOf(SEPARATOR);
         if ((index != -1) && (traceTypeId.startsWith(LINUX_TOOLS_CUSTOM_TXT_TRACE_TYPE_PREFIX))) {
             String definitionName = index < traceTypeId.length() ? traceTypeId.substring(index + 1) : ""; //$NON-NLS-1$
