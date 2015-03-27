@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -88,6 +87,9 @@ import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
 import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampFormat;
 import org.osgi.framework.Bundle;
+
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 
 /**
  * Input wizard page for custom text parsers.
@@ -461,6 +463,14 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
         updatePreviews();
     }
 
+    private static void trimCountMap(final Multiset<InputLine> countMap, InputLine threshold) {
+        for (InputLine inputLine : countMap.elementSet()) {
+            if (inputLine.level > threshold.level) {
+                countMap.setCount(inputLine, 0);
+            }
+        }
+    }
+
     private static class InputLineTreeNodeContentProvider implements ITreeContentProvider {
 
         @Override
@@ -709,11 +719,10 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                             firstEntryTimeStamp = data.get(CustomTraceDefinition.TAG_TIMESTAMP);
                             firstEntryTimeStampInputFormat = timeStampFormat;
                         }
-                        HashMap<InputLine, Integer> countMap = new HashMap<>();
+                        Multiset<InputLine> countMap = HashMultiset.create();
                         InputLine currentInput = null;
                         if (rootInputLine.childrenInputs != null && rootInputLine.childrenInputs.size() > 0) {
                             currentInput = rootInputLine.childrenInputs.get(0);
-                            countMap.put(currentInput, 0);
                         }
                         rawPos += length + 1; // +1 for \n
                         while (scanner.hasNext()) {
@@ -733,7 +742,7 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                     }
                                 }
                             } else {
-                                if (countMap.get(currentInput) >= currentInput.getMinCount()) {
+                                if (countMap.count(currentInput) >= currentInput.getMinCount()) {
                                     List<InputLine> nextInputs = currentInput.getNextInputs(countMap);
                                     if (nextInputs.size() == 0 || nextInputs.get(nextInputs.size() - 1).getMinCount() == 0) {
                                         for (InputLine input : definition.inputs) {
@@ -758,35 +767,16 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                                     COLOR_BLACK, COLOR_LIGHT_YELLOW, SWT.ITALIC));
                                             currentInput = input;
                                             updatePreviewLine(currentInput, matcher, data, rawPos, rootLineMatches);
-                                            if (countMap.get(currentInput) == null) {
-                                                countMap.put(currentInput, 1);
-                                            } else {
-                                                countMap.put(currentInput, countMap.get(currentInput) + 1);
-                                            }
-                                            Iterator<InputLine> iter = countMap.keySet().iterator();
-                                            while (iter.hasNext()) {
-                                                InputLine inputLine = iter.next();
-                                                if (inputLine.level > currentInput.level) {
-                                                    iter.remove();
-                                                }
-                                            }
+                                            countMap.add(currentInput);
+                                            trimCountMap(countMap, currentInput);
                                             if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
                                                 currentInput = currentInput.childrenInputs.get(0);
-                                                countMap.put(currentInput, 0);
+                                                countMap.remove(currentInput);
                                             } else {
-                                                if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
+                                                if (countMap.count(currentInput) >= currentInput.getMaxCount()) {
                                                     if (currentInput.getNextInputs(countMap).size() > 0) {
                                                         currentInput = currentInput.getNextInputs(countMap).get(0);
-                                                        if (countMap.get(currentInput) == null) {
-                                                            countMap.put(currentInput, 0);
-                                                        }
-                                                        iter = countMap.keySet().iterator();
-                                                        while (iter.hasNext()) {
-                                                            InputLine inputLine = iter.next();
-                                                            if (inputLine.level > currentInput.level) {
-                                                                iter.remove();
-                                                            }
-                                                        }
+                                                        trimCountMap(countMap, currentInput);
                                                     } else {
                                                         currentInput = null;
                                                     }
@@ -807,24 +797,15 @@ public class CustomTxtParserInputWizardPage extends WizardPage {
                                         inputText.setStyleRange(new StyleRange(rawPos, length,
                                                 COLOR_BLACK, COLOR_LIGHT_YELLOW, SWT.ITALIC));
                                         updatePreviewLine(currentInput, matcher, data, rawPos, rootLineMatches);
-                                        countMap.put(currentInput, countMap.get(currentInput) + 1);
+                                        countMap.add(currentInput);
                                         if (currentInput.childrenInputs != null && currentInput.childrenInputs.size() > 0) {
                                             currentInput = currentInput.childrenInputs.get(0);
-                                            countMap.put(currentInput, 0);
+                                            countMap.remove(currentInput);
                                         } else {
-                                            if (countMap.get(currentInput) >= currentInput.getMaxCount()) {
+                                            if (countMap.count(currentInput) >= currentInput.getMaxCount()) {
                                                 if (currentInput.getNextInputs(countMap).size() > 0) {
                                                     currentInput = currentInput.getNextInputs(countMap).get(0);
-                                                    if (countMap.get(currentInput) == null) {
-                                                        countMap.put(currentInput, 0);
-                                                    }
-                                                    Iterator<InputLine> iter = countMap.keySet().iterator();
-                                                    while (iter.hasNext()) {
-                                                        InputLine inputLine = iter.next();
-                                                        if (inputLine.level > currentInput.level) {
-                                                            iter.remove();
-                                                        }
-                                                    }
+                                                    trimCountMap(countMap, currentInput);
                                                 } else {
                                                     currentInput = null;
                                                 }
