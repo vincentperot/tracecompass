@@ -20,8 +20,8 @@ import java.io.IOException;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.bindings.keys.KeyStroke;
-import org.eclipse.swt.SWT;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotShell;
@@ -105,13 +105,15 @@ public class TestTraceOffsetting {
     @Test
     public void testOffsetting() {
         SWTBotUtils.createProject(PROJET_NAME);
+        SWTBotTreeItem traceFolderItem = SWTBotUtils.selectTracesFolder(fBot, PROJET_NAME);
         SWTBotUtils.openTrace(PROJET_NAME, fLocation.getAbsolutePath(), "org.eclipse.linuxtools.tmf.core.tests.xmlstub");
-        SWTBotTreeItem treeItem = SWTBotUtils.selectTracesFolder(fBot, PROJET_NAME);
+        SWTBotUtils.openEditor(fBot, PROJET_NAME, new Path(fLocation.getName()));
         SWTBotTable eventsTableBot = fBot.activeEditor().bot().table();
         String timestamp = eventsTableBot.cell(1, 1);
         assertEquals("19:00:00.000 000 000", timestamp);
-        treeItem.select();
-        treeItem.getItems()[0].contextMenu("Apply Time Offset...").click();
+        SWTBotTreeItem traceItem = SWTBotUtils.getTraceProjectItem(fBot, traceFolderItem, fLocation.getName());
+        traceItem.select();
+        traceItem.contextMenu("Apply Time Offset...").click();
         SWTBotUtils.waitForJobs();
         // set offset to 99 ns
         SWTBotShell shell = fBot.shell("Apply time offset");
@@ -120,21 +122,19 @@ public class TestTraceOffsetting {
         final SWTBotTreeItem swtBotTreeItem = allItems[0];
         swtBotTreeItem.select();
         swtBotTreeItem.click(1);
-        KeyStroke[] keyStrokes = new KeyStroke[1];
-        keyStrokes[0] = KeyStroke.getInstance('9');
-        swtBotTreeItem.pressShortcut(keyStrokes);
-        keyStrokes[0] = KeyStroke.getInstance('9');
-        swtBotTreeItem.pressShortcut(keyStrokes);
-        keyStrokes[0] = KeyStroke.getInstance(SWT.CR);
-        swtBotTreeItem.pressShortcut(keyStrokes);
+        swtBotTreeItem.pressShortcut(KeyStroke.getInstance('9'));
+        swtBotTreeItem.pressShortcut(KeyStroke.getInstance('9'));
+        swtBotTreeItem.pressShortcut(KeyStroke.getInstance('\n'));
         SWTBotUtils.waitForJobs();
         fBot.button("OK").click();
         // re-open trace
         SWTBotUtils.openTrace(PROJET_NAME, fLocation.getAbsolutePath(), "org.eclipse.linuxtools.tmf.core.tests.xmlstub");
         SWTBotUtils.waitForJobs();
 
+        SWTBotUtils.openEditor(fBot, PROJET_NAME, new Path(fLocation.getName()));
+        eventsTableBot = fBot.activeEditor().bot().table();
         timestamp = eventsTableBot.cell(1, 1);
-        assertEquals("19:00:00.000 000 000", timestamp);
+        assertEquals("19:00:00.000 000 099", timestamp);
         SWTBotUtils.deleteProject(PROJET_NAME, fBot);
     }
 
