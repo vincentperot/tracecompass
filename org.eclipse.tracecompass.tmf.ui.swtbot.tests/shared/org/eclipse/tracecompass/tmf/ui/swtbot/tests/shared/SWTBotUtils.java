@@ -32,6 +32,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.matchers.WidgetMatcherFactory;
 import org.eclipse.swtbot.eclipse.finder.widgets.SWTBotEditor;
@@ -139,7 +140,7 @@ public final class SWTBotUtils {
         final SWTBotView projectViewBot = bot.viewById(IPageLayout.ID_PROJECT_EXPLORER);
         projectViewBot.setFocus();
 
-        SWTBotTree treeBot = projectViewBot.bot().tree();
+        SWTBotTree treeBot = new SWTBotTree(bot.widget(new FromView<Tree>(projectViewBot)));
         SWTBotTreeItem treeItem = treeBot.getTreeItem(projectName);
         SWTBotMenu contextMenu = treeItem.contextMenu("Delete");
         contextMenu.click();
@@ -320,7 +321,7 @@ public final class SWTBotUtils {
         final SWTBotView projectExplorerBot = bot.viewById(IPageLayout.ID_PROJECT_EXPLORER);
         projectExplorerBot.setFocus();
 
-        final SWTBotTree tree = bot.tree();
+        final SWTBotTree tree = new SWTBotTree(bot.widget(new FromView<Tree>(projectExplorerBot)));
         final SWTBotTreeItem treeItem = tree.getTreeItem(projectName);
         treeItem.expand();
 
@@ -339,27 +340,26 @@ public final class SWTBotUtils {
             currentNode = newNode;
         }
 
-        SWTBotUtils.delay(1000);
         SWTBotUtils.waitForJobs();
         final String expectedTitle = elementPath.toString();
 
-        final IEditorPart iep[] = new IEditorPart[1];
-        UIThreadRunnable.syncExec(new VoidResult() {
-            @Override
-            public void run() {
-                IEditorReference[] ieds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
-                assertNotNull(ieds);
-                iep[0] = null;
-                for (IEditorReference ied : ieds) {
-                    if (ied.getTitle().equals(expectedTitle)) {
-                        iep[0] = ied.getEditor(true);
-                        break;
+        IEditorPart iep =
+                UIThreadRunnable.syncExec(new Result<IEditorPart>() {
+                    @Override
+                    public IEditorPart run() {
+                        IEditorReference[] ieds = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getEditorReferences();
+                        assertNotNull(ieds);
+
+                        for (IEditorReference ied : ieds) {
+                            if (ied.getTitle().equals(expectedTitle)) {
+                                return ied.getEditor(true);
+                            }
+                        }
+                        return null;
                     }
-                }
-            }
-        });
-        assertNotNull(iep[0]);
-        return (TmfEventsEditor) iep[0];
+                });
+        assertNotNull(iep);
+        return (TmfEventsEditor) iep;
     }
 
     private static String getFullNodeName(final SWTBotTreeItem treeItem, String prefix) {
@@ -372,6 +372,8 @@ public final class SWTBotUtils {
         }
         return nodeName;
     }
+
+
 
     /**
      * Select the traces folder
@@ -386,7 +388,8 @@ public final class SWTBotUtils {
     public static SWTBotTreeItem selectTracesFolder(SWTWorkbenchBot bot, String projectName) {
         SWTBotView projectExplorerBot = bot.viewByTitle("Project Explorer");
         projectExplorerBot.show();
-        SWTBotTreeItem treeItem = projectExplorerBot.bot().tree().getTreeItem(projectName);
+        FromView<Tree> treeFromProjectView = new FromView<>(projectExplorerBot);
+        SWTBotTreeItem treeItem = new SWTBotTree(bot.widget(treeFromProjectView)).getTreeItem(projectName);
         treeItem.select();
         treeItem.expand();
         SWTBotTreeItem treeNode = null;
