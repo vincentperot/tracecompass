@@ -80,8 +80,8 @@ public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
     public void connect(IProgressMonitor monitor) throws ExecutionException {
         try {
             if (!fHost.isOpen()) {
-                fExplicitConnect = true;
                 fHost.open(monitor);
+                fExplicitConnect = true;
             }
         } catch (RemoteConnectionException e) {
             throw new ExecutionException("Cannot connect " + fHost.getName(), e); //$NON-NLS-1$
@@ -89,10 +89,12 @@ public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
     }
 
     /**
-     * Disconnects from the remote connection.
+     * Disconnects from the remote connection, may close the connection.
      */
     public void disconnect() {
-        fHost.close();
+    	if (fExplicitConnect) {
+            fHost.close();
+        }
     }
 
     /**
@@ -100,9 +102,7 @@ public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
      */
     public void dispose() {
         fHost.removeConnectionChangeListener(this);
-        if (fExplicitConnect) {
-            fHost.close();
-        }
+        disconnect();
     }
 
     /**
