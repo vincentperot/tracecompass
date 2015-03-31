@@ -41,7 +41,7 @@ import org.eclipse.tracecompass.internal.lttng2.control.ui.views.model.ITraceCon
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.property.TargetNodePropertySource;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.ILttngControlService;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.LTTngControlServiceFactory;
-import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
+import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionHandler;
 import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionFactory;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 import org.eclipse.ui.PlatformUI;
@@ -86,7 +86,7 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
     /**
      * The remote proxy implementation.
      */
-    private @NonNull RemoteSystemProxy fRemoteProxy;
+    private @NonNull TmfRemoteConnectionHandler fRemoteProxy;
     /**
      * The control service for LTTng specific commands.
      */
@@ -110,7 +110,7 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
      * @param proxy
      *            the remote proxy implementation
      */
-    public TargetNodeComponent(String name, ITraceControlComponent parent, @NonNull RemoteSystemProxy proxy) {
+    public TargetNodeComponent(String name, ITraceControlComponent parent, @NonNull TmfRemoteConnectionHandler proxy) {
         super(name, parent);
         setImage(TARGET_NODE_CONNECTED_ICON_FILE);
         fDisconnectedImage = Activator.getDefault().loadIcon(TARGET_NODE_DISCONNECTED_ICON_FILE);
@@ -130,7 +130,7 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
      *            the host connection implementation
      */
     public TargetNodeComponent(String name, ITraceControlComponent parent, @NonNull IRemoteConnection host) {
-        this(name, parent, new RemoteSystemProxy(host));
+        this(name, parent, new TmfRemoteConnectionHandler(host));
     }
 
     @Override
@@ -193,7 +193,7 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
     /**
      * @return remote system proxy implementation
      */
-    public @NonNull RemoteSystemProxy getRemoteSystemProxy() {
+    public @NonNull TmfRemoteConnectionHandler getRemoteSystemProxy() {
         return fRemoteProxy;
     }
 

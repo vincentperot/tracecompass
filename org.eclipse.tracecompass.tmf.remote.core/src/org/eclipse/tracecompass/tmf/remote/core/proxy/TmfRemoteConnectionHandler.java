@@ -23,14 +23,12 @@ import org.eclipse.remote.core.RemoteConnectionChangeEvent;
 import org.eclipse.remote.core.exception.RemoteConnectionException;
 
 /**
- * <p>
- * RemoteSystemProxy implementation.
- * </p>
+ * Class for handling of a remote connection.
  *
  * @author Bernd Hufmann
  */
 @NonNullByDefault
-public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
+public class TmfRemoteConnectionHandler implements IRemoteConnectionChangeListener {
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -41,14 +39,13 @@ public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
-
     /**
      * Constructor
      *
      * @param host
      *            The host of this proxy
      */
-    public RemoteSystemProxy(IRemoteConnection host) {
+    public TmfRemoteConnectionHandler(IRemoteConnection host) {
         fHost = host;
         fHost.addConnectionChangeListener(this);
     }
@@ -87,10 +84,12 @@ public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
     }
 
     /**
-     * Disconnects from the remote connection.
+     * Disconnects from the remote connection, may close the connection.
      */
     public void disconnect() {
-        fHost.close();
+        if (fExplicitConnect) {
+            fHost.close();
+        }
     }
 
     /**
@@ -98,9 +97,7 @@ public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
      */
     public void dispose() {
         fHost.removeConnectionChangeListener(this);
-        if (fExplicitConnect) {
-            fHost.close();
-        }
+        disconnect();
     }
 
     /**

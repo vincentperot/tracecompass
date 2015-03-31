@@ -19,11 +19,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.remote.core.IRemoteConnection;
 import org.eclipse.tracecompass.internal.lttng2.control.stubs.shells.LTTngToolsFileShell;
-import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
+import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionHandler;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 
 @SuppressWarnings("javadoc")
-public class TestRemoteSystemProxy extends RemoteSystemProxy {
+public class TestRemoteSystemProxy extends TmfRemoteConnectionHandler {
 
     public TestRemoteSystemProxy(IRemoteConnection host) {
         super(checkNotNull(host));

@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.remote.core.IRemoteConnection;
 import org.eclipse.remote.core.exception.RemoteConnectionException;
 import org.eclipse.tracecompass.internal.tmf.remote.core.shell.CommandShell;
-import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
+import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionHandler;
 import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionFactory;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandInput;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandResult;
@@ -44,7 +44,7 @@ public class CommandShellTest {
     private static final @NonNull String[] CMD_UNKNOWN_COMMAND_LINUX = { "blablablabla" };
 
     private static final IRemoteConnection LOCAL_CONNECTION = TmfRemoteConnectionFactory.getLocalConnection();
-    private static final RemoteSystemProxy LOCAL_PROXY = new RemoteSystemProxy(checkNotNull(LOCAL_CONNECTION));
+    private static final TmfRemoteConnectionHandler LOCAL_PROXY = new TmfRemoteConnectionHandler(checkNotNull(LOCAL_CONNECTION));
 
     /**
      * Test suite for the {@link CommandShell#executeCommand} method

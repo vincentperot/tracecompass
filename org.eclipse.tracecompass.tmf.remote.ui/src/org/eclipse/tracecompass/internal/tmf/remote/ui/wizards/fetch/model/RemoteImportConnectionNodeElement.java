@@ -28,7 +28,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.tracecompass.internal.tmf.remote.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.remote.ui.messages.RemoteMessages;
 import org.eclipse.tracecompass.internal.tmf.ui.project.wizards.tracepkg.TracePackageElement;
-import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
+import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionHandler;
 import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionFactory;
 
 /**
@@ -42,7 +42,7 @@ public class RemoteImportConnectionNodeElement extends TracePackageElement {
 
     private String fName;
     private String fURI;
-    private RemoteSystemProxy fRemoteProxy;
+    private TmfRemoteConnectionHandler fRemoteProxy;
 
     /**
      * Constructs an instance of RemoteImportConnectionNodeElement.
@@ -117,7 +117,7 @@ public class RemoteImportConnectionNodeElement extends TracePackageElement {
      */
     public IStatus connect(@NonNull IProgressMonitor monitor) {
         // Use local variables to avoid null annotation warning
-        RemoteSystemProxy proxy = fRemoteProxy;
+        TmfRemoteConnectionHandler proxy = fRemoteProxy;
         String name = fName;
         if (name == null) {
             return new Status(IStatus.ERROR, Activator.PLUGIN_ID, RemoteMessages.RemoteImportConnectionNodeElement_NodeNameNullError);
@@ -129,7 +129,7 @@ public class RemoteImportConnectionNodeElement extends TracePackageElement {
                 if (hostUri == null) {
                     return new Status(IStatus.ERROR, Activator.PLUGIN_ID, RemoteMessages.RemoteImportConnectionNodeElement_UriNullError);
                 }
-                proxy = new RemoteSystemProxy(TmfRemoteConnectionFactory.createConnection(hostUri, name));
+                proxy = new TmfRemoteConnectionHandler(TmfRemoteConnectionFactory.createConnection(hostUri, name));
                 fRemoteProxy = proxy;
             } catch (URISyntaxException e) {
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, MessageFormat.format(RemoteMessages.RemoteImportConnectionNodeElement_InvalidUriString, fURI), e);
@@ -159,7 +159,7 @@ public class RemoteImportConnectionNodeElement extends TracePackageElement {
      *
      * @return the remote system proxy or null
      */
-    public RemoteSystemProxy getRemoteSystemProxy() {
+    public TmfRemoteConnectionHandler getRemoteSystemProxy() {
         return fRemoteProxy;
     }
 }

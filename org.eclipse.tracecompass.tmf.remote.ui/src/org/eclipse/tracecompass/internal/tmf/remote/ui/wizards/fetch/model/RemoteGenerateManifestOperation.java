@@ -38,7 +38,7 @@ import org.eclipse.tracecompass.internal.tmf.ui.project.wizards.tracepkg.TracePa
 import org.eclipse.tracecompass.internal.tmf.ui.project.wizards.tracepkg.TracePackageTraceElement;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceCoreUtils;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceType;
-import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
+import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionHandler;
 
 /**
  * An operation that generates the manifest based on a profile and the content
@@ -81,7 +81,7 @@ public class RemoteGenerateManifestOperation extends AbstractGenerateManifestOpe
 
             List<RemoteImportConnectionNodeElement> connectionNodes = fProfile.getConnectionNodeElements();
             for (RemoteImportConnectionNodeElement connectionNode : connectionNodes) {
-                RemoteSystemProxy proxy = connectionNode.getRemoteSystemProxy();
+                TmfRemoteConnectionHandler proxy = connectionNode.getRemoteSystemProxy();
                 // create new element to decouple from input element
                 RemoteImportConnectionNodeElement outputConnectionNode =
                         new RemoteImportConnectionNodeElement(null, connectionNode.getName(), connectionNode.getURI());
