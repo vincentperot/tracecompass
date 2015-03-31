@@ -33,6 +33,8 @@ public final class Messages extends NLS {
     public static String RemoteConnection_ConnectionError;
     public static String RemoteConnection_DuplicateConnectionError;
 
+    public static String RemoteConnection_ProcessServiceNotAvailableError;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

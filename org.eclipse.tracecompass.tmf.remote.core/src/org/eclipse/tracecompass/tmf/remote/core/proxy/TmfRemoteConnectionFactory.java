@@ -23,11 +23,14 @@ import org.eclipse.remote.core.IRemoteConnection;
 import org.eclipse.remote.core.IRemoteConnectionHostService;
 import org.eclipse.remote.core.IRemoteConnectionType;
 import org.eclipse.remote.core.IRemoteConnectionWorkingCopy;
+import org.eclipse.remote.core.IRemoteProcessService;
 import org.eclipse.remote.core.IRemoteServicesManager;
 import org.eclipse.remote.core.exception.RemoteConnectionException;
 import org.eclipse.remote.internal.jsch.core.JSchConnection;
 import org.eclipse.tracecompass.internal.tmf.remote.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.remote.core.messages.Messages;
+import org.eclipse.tracecompass.internal.tmf.remote.core.shell.CommandShell;
+import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -103,6 +106,24 @@ public class TmfRemoteConnectionFactory {
         }
 
         return connection;
+    }
+
+    /**
+     * Creates a command shell for a given connection. The caller is responsible
+     * to dispose the command shell.
+     *
+     * @param host
+     *            a remote connection
+     *
+     * @return the command shell implementation
+     * @throws RemoteConnectionException
+     *              if host doesn't have a IRemoteProcessService
+     */
+    public static ICommandShell createCommandShell(IRemoteConnection host) throws RemoteConnectionException {
+        if (host.hasService(IRemoteProcessService.class)) {
+            return new CommandShell(host);
+        }
+        throw new RemoteConnectionException(MessageFormat.format(Messages.RemoteConnection_ProcessServiceNotAvailableError, host.getConnectionType().getName()));
     }
 
     // ------------------------------------------------------------------------

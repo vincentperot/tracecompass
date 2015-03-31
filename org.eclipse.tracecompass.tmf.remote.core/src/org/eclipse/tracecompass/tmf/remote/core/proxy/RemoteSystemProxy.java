@@ -21,8 +21,6 @@ import org.eclipse.remote.core.IRemoteConnection;
 import org.eclipse.remote.core.IRemoteConnectionChangeListener;
 import org.eclipse.remote.core.RemoteConnectionChangeEvent;
 import org.eclipse.remote.core.exception.RemoteConnectionException;
-import org.eclipse.tracecompass.internal.tmf.remote.core.shell.CommandShell;
-import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 
 /**
  * <p>
@@ -103,15 +101,6 @@ public class RemoteSystemProxy implements IRemoteConnectionChangeListener {
         if (fExplicitConnect) {
             fHost.close();
         }
-    }
-
-    /**
-     * Creates a command shell.
-     *
-     * @return the command shell implementation
-     */
-    public ICommandShell createCommandShell() {
-        return new CommandShell(fHost);
     }
 
     /**

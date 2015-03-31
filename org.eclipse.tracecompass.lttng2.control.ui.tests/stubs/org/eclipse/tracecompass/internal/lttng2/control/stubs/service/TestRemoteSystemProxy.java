@@ -16,6 +16,7 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.remote.core.IRemoteConnection;
 import org.eclipse.tracecompass.internal.lttng2.control.stubs.shells.LTTngToolsFileShell;
 import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
@@ -45,8 +46,7 @@ public class TestRemoteSystemProxy extends RemoteSystemProxy {
     public void dispose() {
     }
 
-    @Override
-    public ICommandShell createCommandShell() {
+    @NonNull public ICommandShell createCommandShell() {
         LTTngToolsFileShell shell = fShell;
         if (shell == null) {
             shell = new LTTngToolsFileShell();

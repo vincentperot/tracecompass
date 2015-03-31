@@ -23,6 +23,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.remote.core.IRemoteConnection;
+import org.eclipse.remote.core.exception.RemoteConnectionException;
 import org.eclipse.tracecompass.internal.tmf.remote.core.shell.CommandShell;
 import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
 import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionFactory;
@@ -49,12 +50,14 @@ public class CommandShellTest {
      * Test suite for the {@link CommandShell#executeCommand} method
      * @throws ExecutionException
      *            in case of an error
+     * @throws RemoteConnectionException
+     *            in case of an error during creation of a shell
      */
     @Test
-    public void testExecuteSuccess() throws ExecutionException {
+    public void testExecuteSuccess() throws ExecutionException, RemoteConnectionException {
         assumeTrue(IS_LINUX);
         LOCAL_PROXY.connect(new NullProgressMonitor());
-        ICommandShell shell = LOCAL_PROXY.createCommandShell();
+        ICommandShell shell = TmfRemoteConnectionFactory.createCommandShell(LOCAL_PROXY.getRemoteConnection());
 
         ICommandInput command = shell.createCommand();
         command.addAll(checkNotNull(Arrays.asList(CMD_INPUT_LINUX)));
@@ -66,13 +69,15 @@ public class CommandShellTest {
      * Test suite for the {@link CommandShell#executeCommand} method (non-null result value)
      * @throws ExecutionException
      *            in case of an error
+     * @throws RemoteConnectionException
+     *            in case of an error during creation of a shell
      */
     @Test
-    public void testExecuteError() throws ExecutionException {
+    public void testExecuteError() throws ExecutionException, RemoteConnectionException {
         assumeTrue(IS_LINUX);
 
         LOCAL_PROXY.connect(new NullProgressMonitor());
-        ICommandShell shell = LOCAL_PROXY.createCommandShell();
+        ICommandShell shell = TmfRemoteConnectionFactory.createCommandShell(LOCAL_PROXY.getRemoteConnection());
 
         ICommandInput command = shell.createCommand();
         command.addAll(checkNotNull(Arrays.asList(CMD_ERROR_INPUT_LINUX)));
@@ -84,14 +89,16 @@ public class CommandShellTest {
      * Test suite for the {@link CommandShell#executeCommand} method (with exception)
      * @throws ExecutionException
      *            in case of an error
+     * @throws RemoteConnectionException
+     *            in case of an error during creation of a shell
      */
     @Test (expected=ExecutionException.class)
-    public void testExecuteException() throws ExecutionException {
+    public void testExecuteException() throws ExecutionException, RemoteConnectionException {
         if (!IS_LINUX) {
             throw new ExecutionException("");
         }
         LOCAL_PROXY.connect(new NullProgressMonitor());
-        ICommandShell shell = LOCAL_PROXY.createCommandShell();
+        ICommandShell shell = TmfRemoteConnectionFactory.createCommandShell(LOCAL_PROXY.getRemoteConnection());
 
         ICommandInput command = shell.createCommand();
         command.addAll(checkNotNull(Arrays.asList(CMD_UNKNOWN_COMMAND_LINUX)));

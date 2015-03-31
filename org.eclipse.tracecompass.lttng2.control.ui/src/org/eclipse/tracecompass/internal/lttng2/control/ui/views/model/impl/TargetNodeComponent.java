@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.remote.core.IRemoteConnection;
 import org.eclipse.remote.core.IRemoteConnectionChangeListener;
 import org.eclipse.remote.core.RemoteConnectionChangeEvent;
+import org.eclipse.remote.core.exception.RemoteConnectionException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.lttng2.control.core.model.TargetNodeState;
@@ -41,6 +42,7 @@ import org.eclipse.tracecompass.internal.lttng2.control.ui.views.property.Target
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.ILttngControlService;
 import org.eclipse.tracecompass.internal.lttng2.control.ui.views.service.LTTngControlServiceFactory;
 import org.eclipse.tracecompass.tmf.remote.core.proxy.RemoteSystemProxy;
+import org.eclipse.tracecompass.tmf.remote.core.proxy.TmfRemoteConnectionFactory;
 import org.eclipse.tracecompass.tmf.remote.core.shell.ICommandShell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -424,12 +426,15 @@ public class TargetNodeComponent extends TraceControlComponent implements IRemot
     private ILttngControlService createControlService() throws ExecutionException {
         if (fService == null) {
             try {
-                ICommandShell shell = fRemoteProxy.createCommandShell();
+                ICommandShell shell = TmfRemoteConnectionFactory.createCommandShell(fRemoteProxy.getRemoteConnection());
                 fShell = shell;
                 fService = LTTngControlServiceFactory.getLttngControlService(shell);
             } catch (ExecutionException e) {
                 disposeControlService();
                 throw e;
+            } catch (RemoteConnectionException e) {
+                disposeControlService();
+                throw new ExecutionException(e.toString(), e);
             }
         }
         return fService;
