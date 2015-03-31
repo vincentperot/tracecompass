@@ -584,6 +584,8 @@ An event range can be selected by holding the '''Shift''' key while clicking ano
 
 The table columns can be reordered by the user by dragging the column headers. This column order is persisted and applies to all traces of the same trace type.
 
+The table font can be customized by the user by a setting in '''Window''' > '''Preferences''' > '''General''' > '''Appearance''' > '''Colors and Fonts''' > '''Tracing'''.
+
 The Events editor can be closed, disposing a trace. When this is done, all the views displaying the information will be updated with the trace data of the next event editor tab. If all the editor tabs are closed, then the views will display their empty states.
 
 === Searching and Filtering ===
