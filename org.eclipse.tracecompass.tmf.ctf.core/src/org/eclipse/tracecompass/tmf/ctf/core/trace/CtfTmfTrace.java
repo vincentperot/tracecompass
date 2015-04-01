@@ -95,6 +95,7 @@ public class CtfTmfTrace extends TmfTrace
 
     /**
      * Event aspects available for all CTF traces
+     *
      * @since 1.0
      */
     protected static final @NonNull Collection<ITmfEventAspect> CTF_ASPECTS =
@@ -383,13 +384,17 @@ public class CtfTmfTrace extends TmfTrace
     /**
      * Get the first callsite that matches the event name
      *
-     * @param eventName The event name to look for
+     * @param eventName
+     *            The event name to look for
      * @return The best callsite candidate
      */
     public @Nullable CtfTmfCallsite getCallsite(String eventName) {
-        CTFCallsite callsite = fTrace.getCallsite(eventName);
-        if (callsite != null) {
-            return new CtfTmfCallsite(callsite);
+        CTFTrace trace = fTrace;
+        if (trace != null) {
+            CTFCallsite callsite = trace.getCallsite(eventName);
+            if (callsite != null) {
+                return new CtfTmfCallsite(callsite);
+            }
         }
         return null;
     }
