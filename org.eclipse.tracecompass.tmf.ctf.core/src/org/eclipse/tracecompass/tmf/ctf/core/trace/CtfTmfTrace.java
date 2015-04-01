@@ -95,6 +95,7 @@ public class CtfTmfTrace extends TmfTrace
 
     /**
      * Event aspects available for all CTF traces
+     *
      * @since 1.0
      */
     protected static final @NonNull Collection<ITmfEventAspect> CTF_ASPECTS =
@@ -152,7 +153,7 @@ public class CtfTmfTrace extends TmfTrace
         super.initTrace(resource, path, eventType);
 
         try {
-            this.fTrace = new CTFTrace(path);
+            fTrace = new CTFTrace(path);
             CtfTmfContext ctx;
             /* Set the start and (current) end times for this trace */
             ctx = (CtfTmfContext) seekEvent(0L);
@@ -340,7 +341,8 @@ public class CtfTmfTrace extends TmfTrace
      */
     @Override
     public synchronized CtfTmfEvent getNext(final ITmfContext context) {
-        if (fTrace == null) {
+        final CTFTrace trace = fTrace;
+        if (trace == null) {
             return null;
         }
         CtfTmfEvent event = null;
@@ -357,7 +359,6 @@ public class CtfTmfTrace extends TmfTrace
                 ctfContext.increaseRank();
             }
         }
-
         return event;
     }
 
@@ -383,13 +384,17 @@ public class CtfTmfTrace extends TmfTrace
     /**
      * Get the first callsite that matches the event name
      *
-     * @param eventName The event name to look for
+     * @param eventName
+     *            The event name to look for
      * @return The best callsite candidate
      */
     public @Nullable CtfTmfCallsite getCallsite(String eventName) {
-        CTFCallsite callsite = fTrace.getCallsite(eventName);
-        if (callsite != null) {
-            return new CtfTmfCallsite(callsite);
+        CTFTrace trace = fTrace;
+        if (trace != null) {
+            CTFCallsite callsite = trace.getCallsite(eventName);
+            if (callsite != null) {
+                return new CtfTmfCallsite(callsite);
+            }
         }
         return null;
     }
@@ -405,9 +410,12 @@ public class CtfTmfTrace extends TmfTrace
      * @return The closest matching callsite
      */
     public @Nullable CtfTmfCallsite getCallsite(String eventName, long ip) {
-        CTFCallsite calliste = fTrace.getCallsite(eventName, ip);
-        if (calliste != null) {
-            return new CtfTmfCallsite(calliste);
+        final CTFTrace trace = fTrace;
+        if (trace != null) {
+            CTFCallsite calliste = trace.getCallsite(eventName, ip);
+            if (calliste != null) {
+                return new CtfTmfCallsite(calliste);
+            }
         }
         return null;
     }
@@ -419,7 +427,11 @@ public class CtfTmfTrace extends TmfTrace
      * @return The CTF environment
      */
     public Map<String, String> getEnvironment() {
-        return fTrace.getEnvironment();
+        CTFTrace trace = fTrace;
+        if( trace == null) {
+            return null;
+        }
+        return trace.getEnvironment();
     }
 
     // -------------------------------------------
@@ -444,8 +456,9 @@ public class CtfTmfTrace extends TmfTrace
      * @return the clock offset in ns
      */
     public long getOffset() {
-        if (fTrace != null) {
-            return fTrace.getOffset();
+        CTFTrace trace = fTrace;
+        if (trace != null) {
+            return trace.getOffset();
         }
         return 0;
     }
@@ -459,7 +472,11 @@ public class CtfTmfTrace extends TmfTrace
      * @return The timestamp in nanoseconds
      */
     public long timestampCyclesToNanos(long cycles) {
-        return fTrace.timestampCyclesToNanos(cycles);
+        CTFTrace trace = fTrace;
+        if( trace == null) {
+            return -1;
+        }
+        return trace.timestampCyclesToNanos(cycles);
     }
 
     /**
@@ -471,7 +488,11 @@ public class CtfTmfTrace extends TmfTrace
      * @return The timestamp in cycles
      */
     public long timestampNanoToCycles(long nanos) {
-        return fTrace.timestampNanoToCycles(nanos);
+        CTFTrace trace = fTrace;
+        if( trace == null) {
+            return -1;
+        }
+        return trace.timestampNanoToCycles(nanos);
     }
 
     /**
