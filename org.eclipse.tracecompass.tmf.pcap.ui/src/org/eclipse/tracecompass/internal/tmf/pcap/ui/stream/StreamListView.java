@@ -16,6 +16,7 @@ package org.eclipse.tracecompass.internal.tmf.pcap.ui.stream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.SWT;
@@ -245,9 +246,9 @@ public class StreamListView extends TmfView {
                 if (tableMap == null) {
                     return;
                 }
-                for (TmfPcapProtocol protocol : tableMap.keySet()) {
-                    if (!(tableMap.get(protocol).isDisposed())) {
-                        tableMap.get(protocol).removeAll();
+                for (Entry<TmfPcapProtocol, Table> protocol : tableMap.entrySet()) {
+                    if (!protocol.getValue().isDisposed()) {
+                        protocol.getValue().removeAll();
                     }
                 }
             }
@@ -280,19 +281,21 @@ public class StreamListView extends TmfView {
                 if (tables == null) {
                     return;
                 }
-                for (TmfPcapProtocol protocol : tables.keySet()) {
-                    if (protocol == null) {
+                for (Entry<TmfPcapProtocol, Table> protocol : tables.entrySet()) {
+                    TmfPcapProtocol protocolKey = protocol.getKey();
+                    if (protocolKey == null) {
                         throw new IllegalStateException();
                     }
-                    TmfPacketStreamBuilder builder = analysis.getBuilder(protocol);
-                    if (builder != null && !(tables.get(protocol).isDisposed())) {
+                    TmfPacketStreamBuilder builder = analysis.getBuilder(protocolKey);
+                    Table protocolTable = protocol.getValue();
+                    if (builder != null && !(protocolTable.isDisposed())) {
                         for (TmfPacketStream stream : builder.getStreams()) {
 
                             TableItem item;
-                            if (stream.getID() < tables.get(protocol).getItemCount()) {
-                                item = tables.get(protocol).getItem(stream.getID());
+                            if (stream.getID() < protocolTable.getItemCount()) {
+                                item = protocolTable.getItem(stream.getID());
                             } else {
-                                item = new TableItem(tables.get(protocol), SWT.NONE);
+                                item = new TableItem(protocolTable, SWT.NONE);
                             }
                             item.setText(0, String.valueOf(stream.getID()));
                             item.setText(1, stream.getFirstEndpoint().toString());
