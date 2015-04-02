@@ -25,7 +25,6 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +32,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
 import org.eclipse.tracecompass.ctf.core.event.CTFClock;
@@ -49,6 +49,8 @@ import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
 import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
+
+import com.google.common.collect.ImmutableMap;
 
 /**
  * A CTF trace on the file system.
@@ -121,7 +123,8 @@ public class CTFTrace implements IDefinitionScope {
     /**
      * Collection of environment variables set by the tracer
      */
-    private final Map<String, String> fEnvironment = new HashMap<>();
+    private final ImmutableMap.Builder<String, String> fEnvironment = new ImmutableMap.Builder<>();
+    private transient @Nullable Map<String, String> fEnvironmentMap = null;
 
     /**
      * Collection of all the clocks in a system.
@@ -615,7 +618,7 @@ public class CTFTrace implements IDefinitionScope {
      *         (key, value)
      */
     public Map<String, String> getEnvironment() {
-        return Collections.unmodifiableMap(fEnvironment);
+        return fEnvironmentMap;
     }
 
     /**
@@ -628,6 +631,7 @@ public class CTFTrace implements IDefinitionScope {
      */
     public void addEnvironmentVar(String varName, String varValue) {
         fEnvironment.put(varName, varValue);
+        fEnvironmentMap = fEnvironment.build();
     }
 
     /**
