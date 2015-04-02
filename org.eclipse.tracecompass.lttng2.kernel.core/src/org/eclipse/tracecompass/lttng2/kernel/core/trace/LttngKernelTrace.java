@@ -13,7 +13,6 @@
 
 package org.eclipse.tracecompass.lttng2.kernel.core.trace;
 
-import java.nio.BufferOverflowException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -22,11 +21,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.ThreadPriorityAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.KernelTidAspect;
+import org.eclipse.tracecompass.analysis.os.linux.core.kernelanalysis.ThreadPriorityAspect;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
+import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.Activator;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.Lttng26EventLayout;
 import org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout.LttngEventLayout;
@@ -35,8 +35,8 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.trace.TraceValidationStatus;
-import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
+import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTraceValidationStatus;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -136,27 +136,17 @@ public class LttngKernelTrace extends CtfTmfTrace implements IKernelTrace {
      */
     @Override
     public IStatus validate(final IProject project, final String path) {
-        /*
-         * Make sure the trace is openable as a CTF trace. We do this here
-         * instead of calling super.validate() to keep the reference to "temp".
-         */
-        try (CtfTmfTrace temp = new CtfTmfTrace();) {
-            temp.initTrace((IResource) null, path, CtfTmfEvent.class);
-
+        IStatus status = super.validate(project, path);
+        if (status instanceof CtfTraceValidationStatus) {
+            CTFTrace trace = ((CtfTraceValidationStatus) status).getTrace();
             /* Make sure the domain is "kernel" in the trace's env vars */
-            String dom = temp.getEnvironment().get("domain"); //$NON-NLS-1$
-            if (dom != null && dom.equals("\"kernel\"")) { //$NON-NLS-1$
-                return new TraceValidationStatus(CONFIDENCE, Activator.PLUGIN_ID);
+            String dom = trace.getEnvironment().get("domain"); //$NON-NLS-1$
+            if (dom == null || !dom.equals("\"kernel\"")) { //$NON-NLS-1$
+                return new Status(IStatus.ERROR, Activator.PLUGIN_ID, Messages.LttngKernelTrace_DomainError);
             }
-            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, Messages.LttngKernelTrace_DomainError);
-
-        } catch (TmfTraceException e) {
-            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.toString(), e);
-        } catch (NullPointerException e) {
-            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.toString(), e);
-        } catch (final BufferOverflowException e) {
-            return new Status(IStatus.ERROR, Activator.PLUGIN_ID, Messages.LttngKernelTrace_TraceReadError + ": " + Messages.LttngKernelTrace_MalformedTrace); //$NON-NLS-1$
+            return new TraceValidationStatus(CONFIDENCE, Activator.PLUGIN_ID);
         }
+        return status;
     }
 
     @Override
