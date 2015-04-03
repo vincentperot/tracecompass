@@ -170,11 +170,7 @@ public class UnknownPacket extends Packet {
         final int prime = 31;
         int result = 1;
         final Packet child = fChildPacket;
-        if (child != null) {
-            result = prime * result + ((fChildPacket == null) ? 0 : child.hashCode());
-        } else {
-            result = prime * result;
-        }
+        result = child != null ? prime * result +  child.hashCode() : prime * result;
         result = prime * result + fPayload.hashCode();
         return result;
     }
