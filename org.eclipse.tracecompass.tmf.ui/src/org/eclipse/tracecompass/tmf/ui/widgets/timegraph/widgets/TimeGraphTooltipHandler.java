@@ -14,8 +14,8 @@
 
 package org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets;
 
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -83,7 +83,7 @@ public class TimeGraphTooltipHandler {
 
     private void createTooltipShell(Shell parent) {
         final Display display = parent.getDisplay();
-        if (fTipShell != null && ! fTipShell.isDisposed()) {
+        if (fTipShell != null && !fTipShell.isDisposed()) {
             fTipShell.dispose();
         }
         fTipShell = new Shell(parent, SWT.ON_TOP | SWT.TOOL);
@@ -110,7 +110,7 @@ public class TimeGraphTooltipHandler {
         control.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDown(MouseEvent e) {
-                if (fTipShell != null && ! fTipShell.isDisposed()) {
+                if (fTipShell != null && !fTipShell.isDisposed()) {
                     fTipShell.dispose();
                 }
             }
@@ -119,7 +119,7 @@ public class TimeGraphTooltipHandler {
         control.addMouseMoveListener(new MouseMoveListener() {
             @Override
             public void mouseMove(MouseEvent e) {
-                if (fTipShell != null && ! fTipShell.isDisposed()) {
+                if (fTipShell != null && !fTipShell.isDisposed()) {
                     fTipShell.dispose();
                 }
             }
@@ -128,9 +128,9 @@ public class TimeGraphTooltipHandler {
         control.addMouseTrackListener(new MouseTrackAdapter() {
             @Override
             public void mouseExit(MouseEvent e) {
-                if (fTipShell != null && ! fTipShell.isDisposed()) {
+                if (fTipShell != null && !fTipShell.isDisposed()) {
                     Point pt = control.toDisplay(e.x, e.y);
-                    if (! fTipShell.getBounds().contains(pt)) {
+                    if (!fTipShell.getBounds().contains(pt)) {
                         fTipShell.dispose();
                     }
                 }
@@ -163,11 +163,14 @@ public class TimeGraphTooltipHandler {
                     ITimeEvent currEvent = Utils.findEvent(entry, currPixelTime, 0);
                     ITimeEvent nextEvent = Utils.findEvent(entry, currPixelTime, 1);
 
-                    // if there is no current event at the start of the current pixel range,
-                    // or if the current event starts before the current pixel range,
-                    // use the next event as long as it starts within the current pixel range
+                    // if there is no current event at the start of the current
+                    // pixel range,
+                    // or if the current event starts before the current pixel
+                    // range,
+                    // use the next event as long as it starts within the
+                    // current pixel range
                     if ((currEvent == null || currEvent.getTime() < currPixelTime) &&
-                        (nextEvent != null && nextEvent.getTime() < nextPixelTime)) {
+                            (nextEvent != null && nextEvent.getTime() < nextPixelTime)) {
                         currEvent = nextEvent;
                         currPixelTime = nextEvent.getTime();
                     }
@@ -193,12 +196,12 @@ public class TimeGraphTooltipHandler {
                         addItem(Messages.TmfTimeTipHandler_TRACE_STATE, state);
                     }
 
-                    // This block receives a list of <String, String> values to be added to the tip table
+                    // This block receives a list of <String, String> values to
+                    // be added to the tip table
                     Map<String, String> eventAddOns = fTimeGraphProvider.getEventHoverToolTipInfo(currEvent, currPixelTime);
                     if (eventAddOns != null) {
-                        for (Iterator<String> iter = eventAddOns.keySet().iterator(); iter.hasNext();) {
-                            String message = iter.next();
-                            addItem(message, eventAddOns.get(message));
+                        for (Entry<String, String> eventAddOn : eventAddOns.entrySet()) {
+                            addItem(eventAddOn.getKey(), eventAddOn.getValue());
                         }
                     }
                     if (fTimeGraphProvider.displayTimesInTooltip()) {
@@ -266,12 +269,12 @@ public class TimeGraphTooltipHandler {
                 addItem(Messages.TmfTimeTipHandler_LINK_SOURCE, linkEvent.getEntry().getName());
                 addItem(Messages.TmfTimeTipHandler_LINK_TARGET, linkEvent.getDestinationEntry().getName());
 
-                // This block receives a list of <String, String> values to be added to the tip table
+                // This block receives a list of <String, String> values to be
+                // added to the tip table
                 Map<String, String> eventAddOns = fTimeGraphProvider.getEventHoverToolTipInfo(linkEvent);
                 if (eventAddOns != null) {
-                    for (Iterator<String> iter = eventAddOns.keySet().iterator(); iter.hasNext();) {
-                        String message = iter.next();
-                        addItem(message, eventAddOns.get(message));
+                    for (Entry<String, String> eventAddOn : eventAddOns.entrySet()) {
+                        addItem(eventAddOn.getKey(), eventAddOn.getValue());
                     }
                 }
                 if (fTimeGraphProvider.displayTimesInTooltip()) {
