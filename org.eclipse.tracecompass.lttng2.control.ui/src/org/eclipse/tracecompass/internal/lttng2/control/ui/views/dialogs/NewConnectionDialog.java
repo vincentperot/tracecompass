@@ -11,9 +11,6 @@
  *   Markus Schorn - Bug 448058: Use org.eclipse.remote in favor of RSE
  **********************************************************************/
 package org.eclipse.tracecompass.internal.lttng2.control.ui.views.dialogs;
-
-import static java.text.MessageFormat.format;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -71,8 +68,8 @@ public class NewConnectionDialog extends Dialog implements INewConnectionDialog 
     // Constants
     // ------------------------------------------------------------------------
     private static final String TARGET_NEW_CONNECTION_ICON_FILE = "icons/elcl16/target_add.gif"; //$NON-NLS-1$
-    private static final String PROVIDERS_ICON_FILE = "icons/obj16/providers.gif"; //$NON-NLS-1$
-    private static final String CONNECTION_ICON_FILE = "icons/obj16/target_connected.gif"; //$NON-NLS-1$
+    static final String PROVIDERS_ICON_FILE = "icons/obj16/providers.gif"; //$NON-NLS-1$
+    static final String CONNECTION_ICON_FILE = "icons/obj16/target_connected.gif"; //$NON-NLS-1$
 
     private final class ConnectionTreeLabelProvider extends LabelProvider {
         @Override
@@ -151,6 +148,7 @@ public class NewConnectionDialog extends Dialog implements INewConnectionDialog 
         }
 
     }
+
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -393,7 +391,7 @@ public class NewConnectionDialog extends Dialog implements INewConnectionDialog 
         StringBuffer label = new StringBuffer();
         label.append(rc.getName());
         if (rc.hasService(IRemoteConnectionHostService.class)) {
-            label.append(format(" [{0}]", rc.getService(IRemoteConnectionHostService.class).getHostname())); //$NON-NLS-1$
+            label.append(String.format(" [{0}]", rc.getService(IRemoteConnectionHostService.class).getHostname())); //$NON-NLS-1$
         }
         return label.toString();
     }
