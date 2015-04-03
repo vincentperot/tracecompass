@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.commands.common.EventManager;
@@ -1154,10 +1155,10 @@ class ResourceTreeAndListGroup extends EventManager implements
         checkedStateStore = new HashMap();
 
         //Update the store before the hierarchy to prevent updating parents before all of the children are done
-        Iterator keyIterator = items.keySet().iterator();
-        while (keyIterator.hasNext()) {
-            Object key = keyIterator.next();
-            List selections = (List) items.get(key);
+        for( Object entryIter : items.entrySet()){
+            Entry entry= (Entry) entryIter;
+            Object key = entry.getKey();
+            List selections = (List) entry.getValue();
             //Replace the items in the checked state store with those from the supplied items
             checkedStateStore.put(key, selections);
             selectedNodes.add(key);

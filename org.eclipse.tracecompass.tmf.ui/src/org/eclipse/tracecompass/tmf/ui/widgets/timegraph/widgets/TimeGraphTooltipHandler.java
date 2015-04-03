@@ -14,8 +14,8 @@
 
 package org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets;
 
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -196,9 +196,8 @@ public class TimeGraphTooltipHandler {
                     // This block receives a list of <String, String> values to be added to the tip table
                     Map<String, String> eventAddOns = fTimeGraphProvider.getEventHoverToolTipInfo(currEvent, currPixelTime);
                     if (eventAddOns != null) {
-                        for (Iterator<String> iter = eventAddOns.keySet().iterator(); iter.hasNext();) {
-                            String message = iter.next();
-                            addItem(message, eventAddOns.get(message));
+                        for (Entry<String, String> eventAddOn : eventAddOns.entrySet()) {
+                            addItem(eventAddOn.getKey(), eventAddOn.getValue());
                         }
                     }
                     if (fTimeGraphProvider.displayTimesInTooltip()) {
@@ -269,9 +268,8 @@ public class TimeGraphTooltipHandler {
                 // This block receives a list of <String, String> values to be added to the tip table
                 Map<String, String> eventAddOns = fTimeGraphProvider.getEventHoverToolTipInfo(linkEvent);
                 if (eventAddOns != null) {
-                    for (Iterator<String> iter = eventAddOns.keySet().iterator(); iter.hasNext();) {
-                        String message = iter.next();
-                        addItem(message, eventAddOns.get(message));
+                    for (Entry<String, String> eventAddOn:eventAddOns.entrySet()) {
+                        addItem(eventAddOn.getKey(), eventAddOn.getValue());
                     }
                 }
                 if (fTimeGraphProvider.displayTimesInTooltip()) {
