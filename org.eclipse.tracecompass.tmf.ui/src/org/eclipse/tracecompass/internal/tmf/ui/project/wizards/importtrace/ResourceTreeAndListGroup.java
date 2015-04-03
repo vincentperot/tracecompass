@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Marc-Andre Laperle - Copied from platform (org.eclipse.ui.internal.ide.dialogs)
+ *     Matthew Khouzam - removed a map iteration on keys
  *******************************************************************************/
 package org.eclipse.tracecompass.internal.tmf.ui.project.wizards.importtrace;
 
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.commands.common.EventManager;
@@ -1144,7 +1146,7 @@ class ResourceTreeAndListGroup extends EventManager implements
      * a tree element with an empty list).  If a tree element does not have any selected
      * items, do not include the element in the Map.
      */
-    public void updateSelections(Map items) {
+    public void updateSelections(Map<Object, List> items) {
         // We are replacing all selected items with the given selected items,
         // so reinitialize everything.
         this.listViewer.setAllChecked(false);
@@ -1154,10 +1156,9 @@ class ResourceTreeAndListGroup extends EventManager implements
         checkedStateStore = new HashMap();
 
         //Update the store before the hierarchy to prevent updating parents before all of the children are done
-        Iterator keyIterator = items.keySet().iterator();
-        while (keyIterator.hasNext()) {
-            Object key = keyIterator.next();
-            List selections = (List) items.get(key);
+        for( Entry<Object, List> entry : items.entrySet()){
+            Object key = entry.getKey();
+            List selections = entry.getValue();
             //Replace the items in the checked state store with those from the supplied items
             checkedStateStore.put(key, selections);
             selectedNodes.add(key);
@@ -1200,4 +1201,3 @@ class ResourceTreeAndListGroup extends EventManager implements
     }
 
 }
-
