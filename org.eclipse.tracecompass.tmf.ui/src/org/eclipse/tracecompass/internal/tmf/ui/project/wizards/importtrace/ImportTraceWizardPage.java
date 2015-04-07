@@ -98,6 +98,7 @@ import org.eclipse.tracecompass.tmf.ui.project.model.TraceUtils;
 import org.eclipse.ui.dialogs.FileSystemElement;
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.dialogs.WizardResourceImportPage;
+import org.eclipse.ui.ide.dialogs.ResourceTreeAndListGroup;
 import org.eclipse.ui.internal.ide.DialogUtil;
 import org.eclipse.ui.internal.ide.dialogs.IElementFilter;
 import org.eclipse.ui.internal.wizards.datatransfer.ArchiveFileManipulations;
