@@ -214,6 +214,232 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
     private static final int FILTER_SUMMARY_INDEX = 1;
     private static final int EVENT_COLUMNS_START_INDEX = MARGIN_COLUMN_INDEX + 1;
 
+    private final class RawSelectionListener implements Listener {
+        @Override
+        public void handleEvent(final Event e) {
+            if (e.data instanceof Long) {
+                final long rank = (Long) e.data;
+                int index = (int) rank;
+                if (fTable.getData(Key.FILTER_OBJ) != null) {
+                    index = fCache.getFilteredEventIndex(rank) + 1; // +1 for top filter status row
+                }
+                fTable.setSelection(index + 1); // +1 for header row
+                fSelectedRank = rank;
+                updateStatusLine(null);
+            } else if (e.data instanceof ITmfLocation) {
+                // DOES NOT WORK: rank undefined in context from seekLocation()
+                // ITmfLocation<?> location = (ITmfLocation<?>) e.data;
+                // TmfContext context = fTrace.seekLocation(location);
+                // fTable.setSelection((int) context.getRank());
+                return;
+            } else {
+                return;
+            }
+            final TableItem[] selection = fTable.getSelection();
+            if ((selection != null) && (selection.length > 0)) {
+                TableItem item = fTable.getSelection()[0];
+                final TmfTimestamp ts = (TmfTimestamp) item.getData(Key.TIMESTAMP);
+                if (ts != null) {
+                    broadcast(new TmfSelectionRangeUpdatedSignal(TmfEventsTable.this, ts));
+                }
+                if (item.getData() instanceof ITmfEvent) {
+                    broadcast(new TmfEventSelectedSignal(TmfEventsTable.this, (ITmfEvent) item.getData()));
+                    fireSelectionChanged(new SelectionChangedEvent(TmfEventsTable.this, new StructuredSelection(item.getData())));
+                } else {
+                    fireSelectionChanged(new SelectionChangedEvent(TmfEventsTable.this, StructuredSelection.EMPTY));
+                }
+            }
+        }
+    }
+
+    private final class SetDataListener implements Listener {
+        @Override
+        public void handleEvent(final Event event) {
+
+            final TableItem item = (TableItem) event.item;
+            int index = event.index - 1; // -1 for the header row
+
+            if (event.index == 0) {
+                setHeaderRowItemData(item);
+                return;
+            }
+
+            if (fTable.getData(Key.FILTER_OBJ) != null) {
+                if ((event.index == 1) || (event.index == (fTable.getItemCount() - 1))) {
+                    setFilterStatusRowItemData(item);
+                    return;
+                }
+                index = index - 1; // -1 for top filter status row
+            }
+
+            final CachedEvent cachedEvent = fCache.getEvent(index);
+            if (cachedEvent != null) {
+                setItemData(item, cachedEvent, cachedEvent.rank);
+                return;
+            }
+
+            // Else, fill the cache asynchronously (and off the UI thread)
+            event.doit = false;
+        }
+    }
+
+    private final class PaintItemListener implements Listener {
+        @Override
+        public void handleEvent(Event event) {
+            TableItem item = (TableItem) event.item;
+
+            // we promised to paint the table item's foreground
+            GC gc = event.gc;
+            Image image = item.getImage(event.index);
+            if (image != null) {
+                Rectangle imageBounds = item.getImageBounds(event.index);
+                /*
+                 * The image bounds don't match the default image position.
+                 */
+                if (IS_LINUX) {
+                    gc.drawImage(image, imageBounds.x + 1, imageBounds.y + 3);
+                } else {
+                    gc.drawImage(image, imageBounds.x, imageBounds.y + 1);
+                }
+            }
+            gc.setForeground(item.getForeground(event.index));
+            gc.setFont(item.getFont(event.index));
+            String text = item.getText(event.index);
+            Rectangle textBounds = item.getTextBounds(event.index);
+            /*
+             * The text bounds don't match the default text position.
+             */
+            if (IS_LINUX) {
+                gc.drawText(text, textBounds.x + 1, textBounds.y + 3, true);
+            } else {
+                gc.drawText(text, textBounds.x - 1, textBounds.y + 2, true);
+            }
+        }
+    }
+
+    private final class EraseItemListener implements Listener {
+        @Override
+        public void handleEvent(Event event) {
+            TableItem item = (TableItem) event.item;
+            List<?> styleRanges = (List<?>) item.getData(Key.STYLE_RANGES);
+
+            GC gc = event.gc;
+            Color background = item.getBackground(event.index);
+            /*
+             * Paint the background if it is not the default system color.
+             * In Windows, if you let the widget draw the background, it
+             * will not show the item's background color if the item is
+             * selected or hot. If there are no style ranges and the item
+             * background is the default system color, we do not want to
+             * paint it or otherwise we would override the platform theme
+             * (e.g. alternating colors).
+             */
+            if (styleRanges != null || !background.equals(item.getParent().getBackground())) {
+                // we will paint the table item's background
+                event.detail &= ~SWT.BACKGROUND;
+
+                // paint the item's default background
+                gc.setBackground(background);
+                gc.fillRectangle(event.x, event.y, event.width, event.height);
+            }
+
+            /*
+             * We will paint the table item's foreground. In Windows, if you paint
+             * the background but let the widget draw the foreground, it will
+             * override your background, unless the item is selected or hot.
+             */
+            event.detail &= ~SWT.FOREGROUND;
+
+            // paint the highlighted background for all style ranges
+            if (styleRanges != null) {
+                Rectangle textBounds = item.getTextBounds(event.index);
+                String text = item.getText(event.index);
+                for (Object o : styleRanges) {
+                    if (o instanceof StyleRange) {
+                        StyleRange styleRange = (StyleRange) o;
+                        if (styleRange.data.equals(event.index)) {
+                            int startIndex = styleRange.start;
+                            int endIndex = startIndex + styleRange.length;
+                            int startX = gc.stringExtent(text.substring(0, startIndex)).x;
+                            int endX = gc.stringExtent(text.substring(0, endIndex)).x;
+                            gc.setBackground(styleRange.background);
+                            gc.fillRectangle(textBounds.x + startX, textBounds.y, (endX - startX), textBounds.height);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private final class TooltipListener implements Listener {
+        Shell tooltipShell = null;
+
+        @Override
+        public void handleEvent(final Event event) {
+            switch (event.type) {
+                case SWT.MouseHover:
+                    final TableItem item = fTable.getItem(new Point(event.x, event.y));
+                    if (item == null) {
+                        return;
+                    }
+                    final Long rank = (Long) item.getData(Key.RANK);
+                    if (rank == null) {
+                        return;
+                    }
+                    final String tooltipText = (String) item.getData(Key.BOOKMARK);
+                    final Rectangle bounds = item.getImageBounds(0);
+                    bounds.width = BOOKMARK_IMAGE.getBounds().width;
+                    if (!bounds.contains(event.x,event.y)) {
+                        return;
+                    }
+                    if ((tooltipShell != null) && !tooltipShell.isDisposed()) {
+                        tooltipShell.dispose();
+                    }
+                    tooltipShell = new Shell(fTable.getShell(), SWT.ON_TOP | SWT.NO_FOCUS | SWT.TOOL);
+                    tooltipShell.setBackground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+                    final FillLayout layout = new FillLayout();
+                    layout.marginWidth = 2;
+                    tooltipShell.setLayout(layout);
+                    final Label label = new Label(tooltipShell, SWT.WRAP);
+                    String text = rank.toString() + (tooltipText != null ? ": " + tooltipText : EMPTY_STRING); //$NON-NLS-1$
+                    label.setForeground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
+                    label.setBackground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+                    label.setText(text);
+                    label.addListener(SWT.MouseExit, this);
+                    label.addListener(SWT.MouseDown, this);
+                    label.addListener(SWT.MouseWheel, this);
+                    final Point size = tooltipShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+                    /*
+                     * Bug in Linux.  The coordinates of the event have an origin that excludes the table header but
+                     * the method toDisplay() expects coordinates relative to an origin that includes the table header.
+                     */
+                    int y = event.y;
+                    if (IS_LINUX) {
+                        y += fTable.getHeaderHeight();
+                    }
+                    Point pt = fTable.toDisplay(event.x, y);
+                    pt.x += BOOKMARK_IMAGE.getBounds().width;
+                    pt.y += item.getBounds().height;
+                    tooltipShell.setBounds(pt.x, pt.y, size.x, size.y);
+                    tooltipShell.setVisible(true);
+                    break;
+                case SWT.Dispose:
+                case SWT.KeyDown:
+                case SWT.MouseMove:
+                case SWT.MouseExit:
+                case SWT.MouseDown:
+                case SWT.MouseWheel:
+                    if (tooltipShell != null) {
+                        tooltipShell.dispose();
+                        tooltipShell = null;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     /**
      * The events table search/filter keys
      *
@@ -526,37 +752,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
         fCache = new TmfEventsCache(realCacheSize, this);
 
         // Handle the table item requests
-        fTable.addListener(SWT.SetData, new Listener() {
-
-            @Override
-            public void handleEvent(final Event event) {
-
-                final TableItem item = (TableItem) event.item;
-                int index = event.index - 1; // -1 for the header row
-
-                if (event.index == 0) {
-                    setHeaderRowItemData(item);
-                    return;
-                }
-
-                if (fTable.getData(Key.FILTER_OBJ) != null) {
-                    if ((event.index == 1) || (event.index == (fTable.getItemCount() - 1))) {
-                        setFilterStatusRowItemData(item);
-                        return;
-                    }
-                    index = index - 1; // -1 for top filter status row
-                }
-
-                final CachedEvent cachedEvent = fCache.getEvent(index);
-                if (cachedEvent != null) {
-                    setItemData(item, cachedEvent, cachedEvent.rank);
-                    return;
-                }
-
-                // Else, fill the cache asynchronously (and off the UI thread)
-                event.doit = false;
-            }
-        });
+        fTable.addListener(SWT.SetData, new SetDataListener());
 
         fTable.addMouseListener(new MouseAdapter() {
             @Override
@@ -580,73 +776,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
             }
         });
 
-        final Listener tooltipListener = new Listener () {
-            Shell tooltipShell = null;
-            @Override
-            public void handleEvent(final Event event) {
-                switch (event.type) {
-                    case SWT.MouseHover:
-                        final TableItem item = fTable.getItem(new Point(event.x, event.y));
-                        if (item == null) {
-                            return;
-                        }
-                        final Long rank = (Long) item.getData(Key.RANK);
-                        if (rank == null) {
-                            return;
-                        }
-                        final String tooltipText = (String) item.getData(Key.BOOKMARK);
-                        final Rectangle bounds = item.getImageBounds(0);
-                        bounds.width = BOOKMARK_IMAGE.getBounds().width;
-                        if (!bounds.contains(event.x,event.y)) {
-                            return;
-                        }
-                        if ((tooltipShell != null) && !tooltipShell.isDisposed()) {
-                            tooltipShell.dispose();
-                        }
-                        tooltipShell = new Shell(fTable.getShell(), SWT.ON_TOP | SWT.NO_FOCUS | SWT.TOOL);
-                        tooltipShell.setBackground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-                        final FillLayout layout = new FillLayout();
-                        layout.marginWidth = 2;
-                        tooltipShell.setLayout(layout);
-                        final Label label = new Label(tooltipShell, SWT.WRAP);
-                        String text = rank.toString() + (tooltipText != null ? ": " + tooltipText : EMPTY_STRING); //$NON-NLS-1$
-                        label.setForeground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-                        label.setBackground(PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-                        label.setText(text);
-                        label.addListener(SWT.MouseExit, this);
-                        label.addListener(SWT.MouseDown, this);
-                        label.addListener(SWT.MouseWheel, this);
-                        final Point size = tooltipShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-                        /*
-                         * Bug in Linux.  The coordinates of the event have an origin that excludes the table header but
-                         * the method toDisplay() expects coordinates relative to an origin that includes the table header.
-                         */
-                        int y = event.y;
-                        if (IS_LINUX) {
-                            y += fTable.getHeaderHeight();
-                        }
-                        Point pt = fTable.toDisplay(event.x, y);
-                        pt.x += BOOKMARK_IMAGE.getBounds().width;
-                        pt.y += item.getBounds().height;
-                        tooltipShell.setBounds(pt.x, pt.y, size.x, size.y);
-                        tooltipShell.setVisible(true);
-                        break;
-                    case SWT.Dispose:
-                    case SWT.KeyDown:
-                    case SWT.MouseMove:
-                    case SWT.MouseExit:
-                    case SWT.MouseDown:
-                    case SWT.MouseWheel:
-                        if (tooltipShell != null) {
-                            tooltipShell.dispose();
-                            tooltipShell = null;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
+        final Listener tooltipListener = new TooltipListener();
 
         fTable.addListener(SWT.MouseHover, tooltipListener);
         fTable.addListener(SWT.Dispose, tooltipListener);
@@ -656,93 +786,9 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
         fTable.addListener(SWT.MouseDown, tooltipListener);
         fTable.addListener(SWT.MouseWheel, tooltipListener);
 
-        fTable.addListener(SWT.EraseItem, new Listener() {
-            @Override
-            public void handleEvent(Event event) {
-                TableItem item = (TableItem) event.item;
-                List<?> styleRanges = (List<?>) item.getData(Key.STYLE_RANGES);
+        fTable.addListener(SWT.EraseItem, new EraseItemListener());
 
-                GC gc = event.gc;
-                Color background = item.getBackground(event.index);
-                /*
-                 * Paint the background if it is not the default system color.
-                 * In Windows, if you let the widget draw the background, it
-                 * will not show the item's background color if the item is
-                 * selected or hot. If there are no style ranges and the item
-                 * background is the default system color, we do not want to
-                 * paint it or otherwise we would override the platform theme
-                 * (e.g. alternating colors).
-                 */
-                if (styleRanges != null || !background.equals(item.getParent().getBackground())) {
-                    // we will paint the table item's background
-                    event.detail &= ~SWT.BACKGROUND;
-
-                    // paint the item's default background
-                    gc.setBackground(background);
-                    gc.fillRectangle(event.x, event.y, event.width, event.height);
-                }
-
-                /*
-                 * We will paint the table item's foreground. In Windows, if you paint
-                 * the background but let the widget draw the foreground, it will
-                 * override your background, unless the item is selected or hot.
-                 */
-                event.detail &= ~SWT.FOREGROUND;
-
-                // paint the highlighted background for all style ranges
-                if (styleRanges != null) {
-                    Rectangle textBounds = item.getTextBounds(event.index);
-                    String text = item.getText(event.index);
-                    for (Object o : styleRanges) {
-                        if (o instanceof StyleRange) {
-                            StyleRange styleRange = (StyleRange) o;
-                            if (styleRange.data.equals(event.index)) {
-                                int startIndex = styleRange.start;
-                                int endIndex = startIndex + styleRange.length;
-                                int startX = gc.stringExtent(text.substring(0, startIndex)).x;
-                                int endX = gc.stringExtent(text.substring(0, endIndex)).x;
-                                gc.setBackground(styleRange.background);
-                                gc.fillRectangle(textBounds.x + startX, textBounds.y, (endX - startX), textBounds.height);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        fTable.addListener(SWT.PaintItem, new Listener() {
-            @Override
-            public void handleEvent(Event event) {
-                TableItem item = (TableItem) event.item;
-
-                // we promised to paint the table item's foreground
-                GC gc = event.gc;
-                Image image = item.getImage(event.index);
-                if (image != null) {
-                    Rectangle imageBounds = item.getImageBounds(event.index);
-                    /*
-                     * The image bounds don't match the default image position.
-                     */
-                    if (IS_LINUX) {
-                        gc.drawImage(image, imageBounds.x + 1, imageBounds.y + 3);
-                    } else {
-                        gc.drawImage(image, imageBounds.x, imageBounds.y + 1);
-                    }
-                }
-                gc.setForeground(item.getForeground(event.index));
-                gc.setFont(item.getFont(event.index));
-                String text = item.getText(event.index);
-                Rectangle textBounds = item.getTextBounds(event.index);
-                /*
-                 * The text bounds don't match the default text position.
-                 */
-                if (IS_LINUX) {
-                    gc.drawText(text, textBounds.x + 1, textBounds.y + 3, true);
-                } else {
-                    gc.drawText(text, textBounds.x - 1, textBounds.y + 2, true);
-                }
-            }
-        });
+        fTable.addListener(SWT.PaintItem, new PaintItemListener());
 
         // Create resources
         createResources();
@@ -757,43 +803,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
 
         fRawViewer = new TmfRawEventViewer(fSashForm, SWT.H_SCROLL | SWT.V_SCROLL);
 
-        fRawViewer.addSelectionListener(new Listener() {
-            @Override
-            public void handleEvent(final Event e) {
-                if (e.data instanceof Long) {
-                    final long rank = (Long) e.data;
-                    int index = (int) rank;
-                    if (fTable.getData(Key.FILTER_OBJ) != null) {
-                        index = fCache.getFilteredEventIndex(rank) + 1; // +1 for top filter status row
-                    }
-                    fTable.setSelection(index + 1); // +1 for header row
-                    fSelectedRank = rank;
-                    updateStatusLine(null);
-                } else if (e.data instanceof ITmfLocation) {
-                    // DOES NOT WORK: rank undefined in context from seekLocation()
-                    // ITmfLocation<?> location = (ITmfLocation<?>) e.data;
-                    // TmfContext context = fTrace.seekLocation(location);
-                    // fTable.setSelection((int) context.getRank());
-                    return;
-                } else {
-                    return;
-                }
-                final TableItem[] selection = fTable.getSelection();
-                if ((selection != null) && (selection.length > 0)) {
-                    TableItem item = fTable.getSelection()[0];
-                    final TmfTimestamp ts = (TmfTimestamp) item.getData(Key.TIMESTAMP);
-                    if (ts != null) {
-                        broadcast(new TmfSelectionRangeUpdatedSignal(TmfEventsTable.this, ts));
-                    }
-                    if (item.getData() instanceof ITmfEvent) {
-                        broadcast(new TmfEventSelectedSignal(TmfEventsTable.this, (ITmfEvent) item.getData()));
-                        fireSelectionChanged(new SelectionChangedEvent(TmfEventsTable.this, new StructuredSelection(item.getData())));
-                    } else {
-                        fireSelectionChanged(new SelectionChangedEvent(TmfEventsTable.this, StructuredSelection.EMPTY));
-                    }
-                }
-            }
-        });
+        fRawViewer.addSelectionListener(new RawSelectionListener());
 
         fSashForm.setWeights(new int[] { 1, 1 });
         fRawViewer.setVisible(false);
