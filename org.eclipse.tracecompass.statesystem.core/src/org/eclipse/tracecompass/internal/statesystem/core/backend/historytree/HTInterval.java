@@ -279,7 +279,8 @@ public final class HTInterval implements ITmfStateInterval, Comparable<HTInterva
             buffer.position(endPosOfStringEntry - stringsEntrySize);
 
             /*
-             * write the Strings entry (1st byte = size, then the bytes, then the 0)
+             * write the Strings entry (1st byte = size, then the bytes, then
+             * the 0)
              */
             buffer.put((byte) stringsEntrySize);
             buffer.put(byteArrayToWrite);
@@ -387,7 +388,7 @@ public final class HTInterval implements ITmfStateInterval, Comparable<HTInterva
     }
 
     private int computeStringsEntrySize() {
-        switch(sv.getType()) {
+        switch (sv.getType()) {
         case NULL:
         case INTEGER:
             /* Those don't use the strings section at all */
@@ -400,15 +401,20 @@ public final class HTInterval implements ITmfStateInterval, Comparable<HTInterva
             return DOUBLE_ENTRY_SIZE;
         case STRING:
             try {
-                /* String's length + 2 (1 byte for size, 1 byte for \0 at the end */
+                /*
+                 * String's length + 2 (1 byte for size, 1 byte for \0 at the
+                 * end
+                 */
                 return sv.unboxStr().getBytes().length + 2;
             } catch (StateValueTypeException e) {
                 /* We're inside a switch/case for the string type, can't happen */
                 throw new IllegalStateException(e);
             }
         default:
-            /* It's very important that we know how to write the state value in
-             * the file!! */
+            /*
+             * It's very important that we know how to write the state value in
+             * the file!!
+             */
             throw new IllegalStateException();
         }
     }
@@ -419,13 +425,11 @@ public final class HTInterval implements ITmfStateInterval, Comparable<HTInterva
      */
     @Override
     public int compareTo(HTInterval other) {
-        if (this.end < other.end) {
-            return -1;
-        } else if (this.end > other.end) {
-            return 1;
-        } else {
-            return 0;
+        int comp = Integer.compare(getAttribute(), other.getAttribute());
+        if (comp != 0) {
+            return comp;
         }
+        return Long.compare(getEndTime(), other.getEndTime());
     }
 
     @Override
@@ -462,11 +466,11 @@ public final class HTInterval implements ITmfStateInterval, Comparable<HTInterva
     }
 
     /**
-     * Here we determine how state values "types" are written in the 8-bit
-     * field that indicates the value type in the file.
+     * Here we determine how state values "types" are written in the 8-bit field
+     * that indicates the value type in the file.
      */
     private static byte getByteFromType(ITmfStateValue.Type type) {
-        switch(type) {
+        switch (type) {
         case NULL:
             return TYPE_NULL;
         case INTEGER:
