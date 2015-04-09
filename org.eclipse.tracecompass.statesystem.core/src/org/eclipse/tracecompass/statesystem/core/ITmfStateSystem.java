@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API
+ *   Patrick Tasse - Remove full path string API
  ******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core;
@@ -235,18 +236,6 @@ public interface ITmfStateSystem {
      *             If the attribute quark is out of range
      */
     @NonNull String getAttributeName(int attributeQuark);
-
-    /**
-     * This returns the slash-separated path of an attribute by providing its
-     * quark. '/' and '\' in attribute names are escaped by a preceding '\'.
-     *
-     * @param attributeQuark
-     *            The quark of the attribute we want
-     * @return One single string separated with '/', like a filesystem path
-     * @throws IndexOutOfBoundsException
-     *             If the attribute quark is out of range
-     */
-    @NonNull String getFullAttributePath(int attributeQuark);
 
     /**
      * Return the full attribute path, as an array of strings representing each

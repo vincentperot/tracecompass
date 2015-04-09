@@ -10,7 +10,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
- *   Patrick Tasse - Add message to exceptions
+ *   Patrick Tasse - Add message to exceptions, remove full path string API
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -173,11 +173,6 @@ public class StateSystem implements ITmfStateSystemBuilder {
     @Override
     public String getAttributeName(int attributeQuark) {
         return getAttributeTree().getAttributeName(attributeQuark);
-    }
-
-    @Override
-    public String getFullAttributePath(int attributeQuark) {
-        return getAttributeTree().getFullAttributeName(attributeQuark);
     }
 
     @Override
