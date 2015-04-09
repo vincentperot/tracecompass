@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     Alexandre Montplaisir - Initial API and implementation
+ *     Patrick Tasse - Remove full path string API
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -23,6 +24,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 
 import com.google.common.collect.ImmutableList;
 
@@ -211,27 +213,9 @@ public final class Attribute {
         return checkNotNull(list.toArray(new String[0]));
     }
 
-    /**
-     * Return the absolute path of this attribute, as a single slash-separated
-     * String.
-     *
-     * @return The full name of this attribute
-     */
-    public @NonNull String getFullAttributeName() {
-        String[] array = this.getFullAttribute();
-        StringBuffer buf = new StringBuffer();
-
-        for (int i = 0; i < array.length - 1; i++) {
-            buf.append(array[i]);
-            buf.append('/');
-        }
-        buf.append(array[array.length - 1]);
-        return checkNotNull(buf.toString());
-    }
-
     @Override
     public String toString() {
-        return getFullAttributeName() + " (" + quark + ')'; //$NON-NLS-1$
+        return StateSystemUtils.pathArrayToString(getFullAttribute()) + " (" + quark + ')'; //$NON-NLS-1$
     }
 
     private int curDepth;
