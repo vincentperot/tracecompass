@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 École Polytechnique de Montréal
+ * Copyright (c) 2014, 2015 École Polytechnique de Montréal and others.
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -9,7 +9,7 @@
  * Contributors:
  *   Geneviève Bastien - Initial API and implementation
  *   Alexandre Montplaisir - Initial API and implementation
- *   Patrick Tasse - Add message to exceptions
+ *   Patrick Tasse - Add message to exceptions, add path conversion methods
  *******************************************************************************/
 
 package org.eclipse.tracecompass.statesystem.core;
@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.internal.statesystem.core.AttributeUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateValueTypeException;
@@ -279,4 +280,33 @@ public final class StateSystemUtils {
         return null;
     }
 
+    /**
+     * Convert an attribute path array to a slash-separated path string. '/' and
+     * '\' in attribute names are escaped by a preceding '\' in the returned
+     * string.
+     *
+     * @param path
+     *            The path array
+     * @return The slash-separated escaped path string
+     * @since 1.0
+     * @see #pathStringToArray(String)
+     */
+    public static String pathArrayToString(String... path) {
+        return AttributeUtils.pathArrayToString(path);
+    }
+
+    /**
+     * Convert a slash-separated attribute path string to a path array. '/' and
+     * '\' in the input string can be escaped by a preceding '\'. The attribute
+     * names in the returned path array are unescaped.
+     *
+     * @param string
+     *            The slash-separated escaped path string
+     * @return The path array
+     * @since 1.0
+     * @see #pathArrayToString(String...)
+     */
+    public static String[] pathStringToArray(String string) {
+        return AttributeUtils.pathStringToArray(string);
+    }
 }
