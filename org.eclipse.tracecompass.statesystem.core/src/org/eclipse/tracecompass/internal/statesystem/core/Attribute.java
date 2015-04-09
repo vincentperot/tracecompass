@@ -17,6 +17,7 @@ package org.eclipse.tracecompass.internal.statesystem.core;
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -211,27 +212,9 @@ public final class Attribute {
         return checkNotNull(list.toArray(new String[0]));
     }
 
-    /**
-     * Return the absolute path of this attribute, as a single slash-separated
-     * String.
-     *
-     * @return The full name of this attribute
-     */
-    public @NonNull String getFullAttributeName() {
-        String[] array = this.getFullAttribute();
-        StringBuffer buf = new StringBuffer();
-
-        for (int i = 0; i < array.length - 1; i++) {
-            buf.append(array[i]);
-            buf.append('/');
-        }
-        buf.append(array[array.length - 1]);
-        return checkNotNull(buf.toString());
-    }
-
     @Override
     public String toString() {
-        return getFullAttributeName() + " (" + quark + ')'; //$NON-NLS-1$
+        return Arrays.toString(getFullAttribute()) + " (" + quark + ')'; //$NON-NLS-1$
     }
 
     private int curDepth;

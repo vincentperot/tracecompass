@@ -320,17 +320,6 @@ public final class AttributeTree {
     }
 
     /**
-     * Get the full path name of an attribute specified by a quark.
-     *
-     * @param quark
-     *            The quark of the attribute
-     * @return The full path name of the attribute
-     */
-    public @NonNull String getFullAttributeName(int quark) {
-        return attributeList.get(quark).getFullAttributeName();
-    }
-
-    /**
      * Get the full path name (as an array of path elements) of an attribute
      * specified by a quark.
      *
