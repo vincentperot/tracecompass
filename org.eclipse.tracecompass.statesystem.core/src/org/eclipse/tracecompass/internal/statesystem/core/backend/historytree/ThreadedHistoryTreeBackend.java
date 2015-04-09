@@ -37,7 +37,8 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.TmfStateValue;
 public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
         implements Runnable {
 
-    private final @NonNull BlockingQueue<HTInterval> intervalQueue;
+    private static final int STORAGE_SIZE = 1024;
+    private final @NonNull BlockingQueue<HTInterval[]> intervalQueue;
     private final @NonNull Thread shtThread;
 
     /**
@@ -74,7 +75,7 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
             int queueSize,
             int blockSize,
             int maxChildren)
-                    throws IOException {
+            throws IOException {
         super(ssid, newStateFile, providerVersion, startTime, blockSize, maxChildren);
 
         intervalQueue = new ArrayBlockingQueue<>(queueSize);
@@ -108,7 +109,7 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
             int providerVersion,
             long startTime,
             int queueSize)
-                    throws IOException {
+            throws IOException {
         super(ssid, newStateFile, providerVersion, startTime);
 
         intervalQueue = new ArrayBlockingQueue<>(queueSize);
@@ -124,6 +125,9 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
      * TODO but what about streaming??
      */
 
+    HTInterval[] temp = new HTInterval[STORAGE_SIZE];
+    int index = 0;
+
     @Override
     public void insertPastState(long stateStartTime, long stateEndTime,
             int quark, ITmfStateValue value) throws TimeRangeException {
@@ -132,12 +136,18 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
          * underneath, we'll put them in the Queue. They will then be taken and
          * processed by the other thread executing the run() method.
          */
-        HTInterval interval = new HTInterval(stateStartTime, stateEndTime,
+        temp[index] = new HTInterval(stateStartTime, stateEndTime,
                 quark, (TmfStateValue) value);
-        try {
-            intervalQueue.put(interval);
-        } catch (InterruptedException e) {
-            Activator.getDefault().logError("State system interrupted", e); //$NON-NLS-1$
+        index++;
+        if (index == STORAGE_SIZE) {
+            try {
+
+                intervalQueue.put(temp);
+                temp = new HTInterval[STORAGE_SIZE];
+                index = 0;
+            } catch (InterruptedException e) {
+                Activator.getDefault().logError("State system interrupted", e); //$NON-NLS-1$
+            }
         }
     }
 
@@ -177,7 +187,10 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
          * closeTree()
          */
         try {
-            HTInterval pill = new HTInterval(-1, endTime, -1, TmfStateValue.nullValue());
+            HTInterval[] pill = new HTInterval[] { new HTInterval(-1, endTime, -1, TmfStateValue.nullValue()) };
+            if (index != STORAGE_SIZE) {
+                intervalQueue.put(temp);
+            }
             intervalQueue.put(pill);
             shtThread.join();
         } catch (TimeRangeException e) {
@@ -189,23 +202,22 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
 
     @Override
     public void run() {
-        HTInterval currentInterval;
+        HTInterval[] currentIntervals;
         try {
-            currentInterval = intervalQueue.take();
-            while (currentInterval.getStartTime() != -1) {
+            currentIntervals = intervalQueue.take();
+            while (currentIntervals.length != 1 && currentIntervals[0].getStartTime() != -1) {
                 /* Send the interval to the History Tree */
-                getSHT().insertInterval(currentInterval);
-                currentInterval = intervalQueue.take();
+                for (HTInterval currentInterval : currentIntervals) {
+                    getSHT().insertInterval(currentInterval);
+                }
+                currentIntervals = intervalQueue.take();
             }
-            if (currentInterval.getAttribute() != -1) {
-                /* Make sure this is the "poison pill" we are waiting for */
-                throw new IllegalStateException();
-            }
+
             /*
              * We've been told we're done, let's write down everything and quit.
              * The end time of this "signal interval" is actually correct.
              */
-            getSHT().closeTree(currentInterval.getEndTime());
+            getSHT().closeTree(currentIntervals[0].getEndTime());
             return;
         } catch (InterruptedException e) {
             /* We've been interrupted abnormally */
@@ -261,9 +273,11 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
          * ArrayBlockingQueue's iterator() is thread-safe (no need to lock the
          * queue).
          */
-        for (ITmfStateInterval interval : intervalQueue) {
-            if (interval.getAttribute() == attributeQuark && interval.intersects(t)) {
-                return interval;
+        for (HTInterval[] intervals : intervalQueue) {
+            for (HTInterval interval : intervals) {
+                if (interval.getAttribute() == attributeQuark && interval.intersects(t)) {
+                    return interval;
+                }
             }
         }
 
