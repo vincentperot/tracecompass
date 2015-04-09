@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Update to use path string conversion method
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.core.event.aspect;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.statesystem.core.StateSystemUtils;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
@@ -62,14 +64,14 @@ public class TmfStateSystemAspect implements ITmfEventAspect {
             return name;
         }
 
-        name = fSS.getFullAttributePath(fAttribute);
+        name = StateSystemUtils.pathArrayToString(fSS.getFullAttributePathArray(fAttribute));
         return name;
     }
 
     @Override
     public @NonNull String getHelpText() {
         return Messages.getMessage(NLS.bind(Messages.AspectHelpText_Statesystem,
-                fSS.getSSID(), fSS.getFullAttributePath(fAttribute)));
+                fSS.getSSID(), StateSystemUtils.pathArrayToString(fSS.getFullAttributePathArray(fAttribute))));
     }
 
     @Override

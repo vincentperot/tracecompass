@@ -10,7 +10,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
- *   Patrick Tasse - Add message to exceptions
+ *   Patrick Tasse - Add message to exceptions, remove full path string API
  *******************************************************************************/
 
 package org.eclipse.tracecompass.internal.statesystem.core;
@@ -317,17 +317,6 @@ public final class AttributeTree {
      */
     public @NonNull String getAttributeName(int quark) {
         return attributeList.get(quark).getName();
-    }
-
-    /**
-     * Get the full path name of an attribute specified by a quark.
-     *
-     * @param quark
-     *            The quark of the attribute
-     * @return The full path name of the attribute
-     */
-    public @NonNull String getFullAttributeName(int quark) {
-        return attributeList.get(quark).getFullAttributeName();
     }
 
     /**

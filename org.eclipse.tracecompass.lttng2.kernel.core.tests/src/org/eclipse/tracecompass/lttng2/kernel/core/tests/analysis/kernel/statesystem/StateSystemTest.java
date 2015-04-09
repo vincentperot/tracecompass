@@ -8,10 +8,14 @@
  * accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Patrick Tasse - Update to use path string conversion method
  *******************************************************************************/
 
 package org.eclipse.tracecompass.lttng2.kernel.core.tests.analysis.kernel.statesystem;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -328,11 +332,11 @@ public abstract class StateSystemTest {
     }
 
     @Test
-    public void testFullAttributeName() {
+    public void testFullAttributePath() {
         try {
             int quark = fixture.getQuarkAbsolute(Attributes.CPUS, "0", Attributes.CURRENT_THREAD);
-            String name = fixture.getFullAttributePath(quark);
-            assertEquals(name, "CPUs/0/Current_thread");
+            String[] path = fixture.getFullAttributePathArray(quark);
+            assertArrayEquals(new String[] { "CPUs", "0", "Current_thread" }, path);
 
         } catch (AttributeNotFoundException e) {
             fail();
@@ -415,14 +419,15 @@ public abstract class StateSystemTest {
 
     @Test
     public void testParentAttribute() {
-        String[] path = { "CPUs/0/Current_thread",
-                          "CPUs/0",
-                          "CPUs" };
+        String[][] paths = {
+                { "CPUs", "0", "Current_thread" },
+                { "CPUs", "0" },
+                { "CPUs" } };
         try {
             int q = fixture.getQuarkAbsolute(Attributes.CPUS, "0", Attributes.CURRENT_THREAD);
-            for (int i = 0; i < path.length; i++) {
-                String name = fixture.getFullAttributePath(q);
-                assertEquals(path[i], name);
+            for (int i = 0; i < paths.length; i++) {
+                String[] path = fixture.getFullAttributePathArray(q);
+                assertArrayEquals(paths[i], path);
                 q = fixture.getParentAttributeQuark(q);
             }
             assertEquals(-1, q);
