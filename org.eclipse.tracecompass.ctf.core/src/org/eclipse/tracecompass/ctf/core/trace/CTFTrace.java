@@ -233,8 +233,9 @@ public class CTFTrace implements IDefinitionScope {
      * @param id
      *            Long the id of the stream
      * @return Stream the stream that we need
+     * @since 1.0
      */
-    public CTFStream getStream(Long id) {
+    public CTFStream getStream(long id) {
         return fStreams.get(id);
     }
 
