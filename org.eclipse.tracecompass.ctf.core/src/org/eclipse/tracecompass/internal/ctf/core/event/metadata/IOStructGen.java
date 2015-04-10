@@ -700,22 +700,24 @@ public class IOStructGen {
          * stream
          */
         if (!event.streamIsSet()) {
-            if (fTrace.nbStreams() > 1) {
-                throw new ParseException("Event without stream_id with more than one stream"); //$NON-NLS-1$
-            }
-
             /*
-             * If the event did not specify a stream, the only existing stream
-             * must not have an id. Note: That behavior could be changed, it
-             * could be possible to just get the only existing stream, whatever
-             * is its id.
+             * If the event did not specify a stream, we will consider it is part
+             * of stream 0.
              */
-            CTFStream stream = fTrace.getStream(null);
+            CTFStream stream = fTrace.getStream(0L);
 
             if (stream != null) {
                 event.setStream(stream);
             } else {
                 throw new ParseException("Event without stream_id, but there is no stream without id"); //$NON-NLS-1$
+            }
+
+            /*
+             * In the case of no stream_id defined, there should not be other
+             * streams defined in the trace (other than stream 0).
+             */
+            if (fTrace.nbStreams() > 1) {
+                throw new ParseException("Event without stream_id with more than one stream"); //$NON-NLS-1$
             }
         }
 
