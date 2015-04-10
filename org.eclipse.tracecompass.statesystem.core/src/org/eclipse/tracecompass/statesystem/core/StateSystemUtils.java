@@ -14,6 +14,8 @@
 
 package org.eclipse.tracecompass.statesystem.core;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +31,8 @@ import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 
+import com.google.common.base.Joiner;
+
 /**
  * Provide utility methods for the state system
  *
@@ -38,6 +42,32 @@ import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
 public final class StateSystemUtils {
 
     private StateSystemUtils() {
+    }
+
+    /**
+     * Pretty-printer for attribute path arrays. Will convert an array of path
+     * elements to a single slash-separated string. To reduce confusion, if an
+     * element already contains a forward-slash (/), that element will be
+     * encased in "" quotes.
+     *
+     * Recommended to use if you want to display full attribute paths in the UI.
+     *
+     * @param pathArray
+     *            The path array, normally obtained with
+     *            {@link ITmfStateSystem#getFullAttributePathArray(int)}
+     * @return A pretty-printed string
+     * @since 1.0
+     */
+    public static String attributePathToString(String[] pathArray) {
+        List<String> newNames = new ArrayList<>(pathArray.length);
+        for (String elem : pathArray) {
+            if (elem.contains("/")) { //$NON-NLS-1$
+                newNames.add("\"" + elem + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+            } else {
+                newNames.add(elem);
+            }
+        }
+        return checkNotNull(Joiner.on('/').join(newNames));
     }
 
     /**
