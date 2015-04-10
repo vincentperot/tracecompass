@@ -43,7 +43,8 @@ public interface ITmfEvent extends IAdaptable {
     /**
      * @return the trace that 'owns' the event
      */
-    @NonNull ITmfTrace getTrace();
+    @NonNull
+    ITmfTrace getTrace();
 
     /**
      * @return the event rank within the parent trace
@@ -53,7 +54,8 @@ public interface ITmfEvent extends IAdaptable {
     /**
      * @return the event timestamp
      */
-    @NonNull ITmfTimestamp getTimestamp();
+    @NonNull
+    ITmfTimestamp getTimestamp();
 
     /**
      * @return the event type
@@ -64,4 +66,12 @@ public interface ITmfEvent extends IAdaptable {
      * @return the event content
      */
     ITmfEventField getContent();
+
+    /**
+     * Gets the name of the event
+     *
+     * @return the name of the event, same as getType().getName()
+     * @since 1.0
+     */
+    String getName();
 }
