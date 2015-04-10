@@ -39,8 +39,8 @@
 
 <properties>
   <base.test.vmargs>-Xms256m -Xmx1024m -XX:MaxPermSize=256m</base.test.vmargs>
-  <tycho-version>0.22.0</tycho-version>
-  <tycho-extras-version>0.22.0</tycho-extras-version>
+  <tycho-version>0.23.0</tycho-version>
+  <tycho-extras-version>0.23.0</tycho-extras-version>
   <tycho.scmUrl>scm:git:git://git.eclipse.org/gitroot/tracecompass/org.eclipse.tracecompass.git</tycho.scmUrl>
   <target-platform>tracecompass-eStaging</target-platform>
   <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
@@ -70,6 +70,10 @@
     <id>jboss-public-repository-group</id>
     <name>JBoss Public Repository Group</name>
     <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+  </pluginRepository>
+  <pluginRepository>
+    <id>tycho-staged</id>
+    <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1021/</url>
   </pluginRepository>
 </pluginRepositories>
 
