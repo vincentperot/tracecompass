@@ -233,8 +233,9 @@ public class CTFTrace implements IDefinitionScope {
      * @param id
      *            Long the id of the stream
      * @return Stream the stream that we need
+     * @since 1.0
      */
-    public CTFStream getStream(Long id) {
+    public CTFStream getStream(long id) {
         return fStreams.get(id);
     }
 
@@ -486,12 +487,12 @@ public class CTFTrace implements IDefinitionScope {
                 stream = fStreams.get(streamID);
             } else {
                 /* No stream_id in the packet header */
-                stream = fStreams.get(null);
+                stream = fStreams.get(0L);
             }
 
         } else {
             /* No packet header, we suppose there is only one stream */
-            stream = fStreams.get(null);
+            stream = fStreams.get(0L);
         }
 
         if (stream == null) {
@@ -592,20 +593,24 @@ public class CTFTrace implements IDefinitionScope {
          * If the stream we try to add has the null key, it must be the only
          * one. Thus, if the streams container is not empty, it is not valid.
          */
-        if ((stream.getId() == null) && (!fStreams.isEmpty())) {
-            throw new ParseException("Stream without id with multiple streams"); //$NON-NLS-1$
+        Long id = stream.getId();
+        if (id == null) {
+            if (fStreams.size() > 1 ) {
+                throw new ParseException("Stream without id with multiple streams"); //$NON-NLS-1$
+            }
+            id = Long.valueOf(0L);
         }
 
         /*
          * If a stream with the same ID already exists, it is not valid.
          */
-        CTFStream existingStream = fStreams.get(stream.getId());
+        CTFStream existingStream = fStreams.get(id);
         if (existingStream != null) {
             throw new ParseException("Stream id already exists"); //$NON-NLS-1$
         }
 
         /* This stream is valid and has a unique id. */
-        fStreams.put(stream.getId(), stream);
+        fStreams.put(id, stream);
     }
 
     /**
