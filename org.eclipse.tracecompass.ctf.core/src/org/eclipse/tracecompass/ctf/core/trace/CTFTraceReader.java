@@ -567,4 +567,16 @@ public class CTFTraceReader implements AutoCloseable {
     public CTFTrace getTrace() {
         return fTrace;
     }
+
+    /**
+     * @throws CTFReaderException
+     * @since 1.0
+     */
+    public void populateIndex() throws CTFReaderException {
+        for(CTFStreamInputReader sir : fPrio){
+            sir.goToLastEvent();
+        }
+        seek(0);
+
+    }
 }
