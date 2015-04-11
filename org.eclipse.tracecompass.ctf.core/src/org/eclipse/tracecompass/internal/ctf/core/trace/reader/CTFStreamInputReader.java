@@ -387,15 +387,6 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
      */
     public void goToLastEvent() throws CTFException {
         /*
-         * Search in the index for the packet to search in.
-         */
-        final int len = fStreamInput.getIndex().size();
-
-        /*
-         * Go to beginning of trace.
-         */
-        seek(0);
-        /*
          * if the trace is empty.
          */
         if ((fStreamInput.getIndex().isEmpty()) || (!fPacketReader.hasMoreEvents())) {
@@ -404,12 +395,19 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
              */
             return;
         }
+
+        while (fPacketReader.getCurrentPacket() != null) {
+            goToNextPacket();
+        }
+
+        final int len = fStreamInput.getIndex().size();
         /*
          * Go to the last packet that contains events.
          */
         for (int pos = len - 1; pos > 0; pos--) {
             fPacketIndex = pos;
             fPacketReader.setCurrentPacket(getPacket());
+
             if (fPacketReader.hasMoreEvents()) {
                 break;
             }
