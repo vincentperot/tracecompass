@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="org.eclipse.linuxtools.tmf.import.category"
+            class="org.eclipse.tracecompass.internal.tmf.ctf.ui.wizard.SplitCtfTrace"
+            id="org.eclipse.tracecompass.tmf.ctf.ui.splicer"
+            name="Split Ctf Trace">
+      </wizard>
+   </extension>
+
+</plugin>

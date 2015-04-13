@@ -49,6 +49,7 @@ import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
 import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
 
 /**
  * A CTF trace on the file system.
@@ -901,6 +902,37 @@ public class CTFTrace implements IDefinitionScope {
             fStreams.put(id, stream);
         }
         stream.addInput(new CTFStreamInput(stream, file));
+    }
+
+    /**
+     * Get a preview of the usage of the trace
+     *
+     * @param buckets
+     *            nb of buckets
+     * @return array of usage
+     * @since 1.0
+     */
+    public double[] getPreview(int buckets) {
+        long timeStart = getCurrentStartTime();
+        long timeEnd = getCurrentEndTime();
+        long duration = timeEnd - timeStart;
+        long step = duration / buckets;
+        double[] ret = new double[buckets];
+        Arrays.fill(ret, 0, ret.length, 0);
+        for (long time = timeStart + step / 2, i = 0; i < buckets; time += step, i++) {
+            for (CTFStream stream : getStreams()) {
+                for (CTFStreamInput streamInput : stream.getStreamInputs()) {
+                    long timeOffset = time - getClock().getClockOffset();
+                    StreamInputPacketIndexEntry sipie = streamInput.getIndex().search(timeOffset).next();
+                    if (sipie.includes(timeOffset)) {
+                        long l = sipie.getTimestampEnd() - sipie.getTimestampBegin();
+                        long contentSize = sipie.getContentSizeBits();
+                        ret[(int) i] += contentSize * step / l;
+                    }
+                }
+            }
+        }
+        return ret;
     }
 }
 
