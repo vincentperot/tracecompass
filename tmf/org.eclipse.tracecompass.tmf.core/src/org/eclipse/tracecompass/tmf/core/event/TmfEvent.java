@@ -94,8 +94,9 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
      * Copy constructor
      *
      * @param event the original event
+     * @since 2.0
      */
-    public TmfEvent(final @NonNull ITmfEvent event) {
+    public TmfEvent(final @NonNull TmfEvent event) {
         fTrace = event.getTrace();
         fRank = event.getRank();
         fTimestamp = event.getTimestamp();
@@ -126,10 +127,6 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
         return fTimestamp;
     }
 
-    @Override
-    public ITmfEventType getType() {
-        return fType;
-    }
 
     @Override
     public ITmfEventField getContent() {
@@ -146,6 +143,15 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
             return type.getName();
         }
         return ""; //$NON-NLS-1$
+    }
+
+    /**
+     * Return the event type
+     *
+     * @return The event type
+     */
+    protected ITmfEventType getType() {
+        return fType;
     }
 
     // ------------------------------------------------------------------------

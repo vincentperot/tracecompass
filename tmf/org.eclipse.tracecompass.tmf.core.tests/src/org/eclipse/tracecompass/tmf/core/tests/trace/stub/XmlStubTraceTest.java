@@ -199,7 +199,7 @@ public class XmlStubTraceTest {
             break;
         }
         default:
-            return new Status(IStatus.ERROR, TmfCoreTestPlugin.PLUGIN_ID, "Unexpected event " + event.getType().getName());
+            return new Status(IStatus.ERROR, TmfCoreTestPlugin.PLUGIN_ID, "Unexpected event " + event.getName());
         }
         return Status.OK_STATUS;
     }

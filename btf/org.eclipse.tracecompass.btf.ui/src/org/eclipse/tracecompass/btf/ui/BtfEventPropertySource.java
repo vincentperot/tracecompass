@@ -212,7 +212,7 @@ public class BtfEventPropertySource extends TmfEventPropertySource {
                 ITmfEventField sourceInstance = content.getField(BtfColumnNames.SOURCE_INSTANCE.toString());
                 return new EntityPropertySource(source, sourceInstance.getValue().toString());
             case ID_EVENT_TYPE:
-                return new TypePropertySource(fEvent.getType().getName(), fEvent.getEventDescription());
+                return new TypePropertySource(fEvent.getName(), fEvent.getEventDescription());
             case ID_EVENT_TARGET:
                 String target = fEvent.getTarget();
                 ITmfEventField targetInstance = content.getField(BtfColumnNames.TARGET_INSTANCE.toString());

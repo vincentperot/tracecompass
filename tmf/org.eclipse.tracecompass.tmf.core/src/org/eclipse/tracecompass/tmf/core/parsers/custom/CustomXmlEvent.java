@@ -14,7 +14,6 @@ package org.eclipse.tracecompass.tmf.core.parsers.custom;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -38,14 +37,15 @@ public class CustomXmlEvent extends CustomEvent {
     }
 
     /**
-     * Build a custom trace event from an existing TmfEvent.
+     * Build a custom trace event from an existing CustomXmlEvent.
      *
      * @param definition
      *            Trace definition
      * @param other
-     *            Other TmfEvent to copy
+     *            Other CustomXmlEvent to copy
+     * @since 2.0
      */
-    public CustomXmlEvent(CustomXmlTraceDefinition definition, @NonNull TmfEvent other) {
+    public CustomXmlEvent(CustomXmlTraceDefinition definition, @NonNull CustomXmlEvent other) {
         super(definition, other);
     }
 

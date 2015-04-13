@@ -32,7 +32,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 public class TmfEventPropertySource implements IPropertySource {
 
     private static final String ID_TIMESTAMP = "event_timestamp"; //$NON-NLS-1$
-    private static final String ID_TYPE = "event_type"; //$NON-NLS-1$
+    private static final String ID_TYPE_NAME = "event_type"; //$NON-NLS-1$
     private static final String ID_TRACE = "trace_attribute"; //$NON-NLS-1$
     private static final String ID_CONTENT = "event_content"; //$NON-NLS-1$
     private static final String ID_SOURCE_LOOKUP = "event_lookup"; //$NON-NLS-1$
@@ -275,7 +275,7 @@ public class TmfEventPropertySource implements IPropertySource {
 
         /* Display basic event information */
         descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_TIMESTAMP, NAME_TIMESTAMP));
-        descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_TYPE, NAME_TYPE));
+        descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_TYPE_NAME, NAME_TYPE));
         descriptors.add(new ReadOnlyTextPropertyDescriptor(ID_TRACE, NAME_TRACE));
 
         /* Display event fields */
@@ -306,8 +306,8 @@ public class TmfEventPropertySource implements IPropertySource {
     public Object getPropertyValue(Object id) {
         if (id.equals(ID_TIMESTAMP)) {
             return new TimestampPropertySource(fEvent.getTimestamp());
-        } else if (id.equals(ID_TYPE) && fEvent.getType() != null) {
-            return fEvent.getType().toString();
+        } else if (id.equals(ID_TYPE_NAME) && fEvent.getName() != null) {
+            return fEvent.getName();
         } else if (id.equals(ID_TRACE)) {
             return fEvent.getTrace().getName();
         } else if (id.equals(ID_MODEL_URI)) {
