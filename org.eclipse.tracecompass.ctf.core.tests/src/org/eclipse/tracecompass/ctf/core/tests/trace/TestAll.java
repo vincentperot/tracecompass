@@ -35,6 +35,7 @@ import org.junit.runners.Suite;
     CTFStreamInputReaderTimestampComparatorTest.class,
     CTFStreamInputTest.class,
     CTFStreamTest.class,
+    CTFTraceWriterTest.class,
     TraceReadAllTracesTest.class,
     UtilsTest.class
 })
