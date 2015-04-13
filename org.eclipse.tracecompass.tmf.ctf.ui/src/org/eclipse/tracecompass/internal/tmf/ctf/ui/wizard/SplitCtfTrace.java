@@ -2,7 +2,6 @@ package org.eclipse.tracecompass.internal.tmf.ctf.ui.wizard;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 
@@ -15,7 +14,7 @@ public class SplitCtfTrace extends Wizard implements IImportWizard {
 
     @Override
     public void init(IWorkbench workbench, IStructuredSelection selection) {
-        fPage = new CtfCropWizardPage("Split trace");
+        fPage = new CtfCropWizardPage("Split trace", selection);
         addPage(fPage);
 
     }
@@ -28,10 +27,7 @@ public class SplitCtfTrace extends Wizard implements IImportWizard {
 
     @Override
     public boolean performFinish() {
-        MessageBox mb = new MessageBox(getShell());
-        mb.setMessage("Splitting trace " + fPage.getTrace().toString() + " from time : " + fPage.getTimeStart() + " to " + fPage.getTimeEnd());
-        mb.open();
-        return true;
+        return fPage.finish();
     }
 
 }

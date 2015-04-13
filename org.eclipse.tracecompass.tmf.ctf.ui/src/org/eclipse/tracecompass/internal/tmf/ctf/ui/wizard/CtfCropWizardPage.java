@@ -1,17 +1,24 @@
 package org.eclipse.tracecompass.internal.tmf.ctf.ui.wizard;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -33,6 +40,16 @@ import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
 import org.eclipse.tracecompass.internal.tmf.ctf.ui.Activator;
+import org.eclipse.tracecompass.internal.tmf.ui.project.operations.TmfWorkspaceModifyOperation;
+import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
+import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
+import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
+import org.eclipse.tracecompass.tmf.core.project.model.TraceTypeHelper;
+import org.eclipse.tracecompass.tmf.ui.project.model.TmfProjectElement;
+import org.eclipse.tracecompass.tmf.ui.project.model.TmfProjectRegistry;
+import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceFolder;
+import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceTypeUIUtils;
+import org.eclipse.tracecompass.tmf.ui.project.model.TmfTracesFolder;
 import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.barcharts.TmfBarChartViewer;
 import org.swtchart.ISeries;
 
@@ -68,11 +85,50 @@ public class CtfCropWizardPage extends WizardPage {
         }
     }
 
-    public CtfCropWizardPage(String pageName) {
+    public CtfCropWizardPage(String pageName, IStructuredSelection selection) {
         super(pageName);
         setTitle("cropper");
         setDescription("Cut up ctf files");
         root = ResourcesPlugin.getWorkspace().getRoot();
+
+      // Locate the target trace folder
+        IFolder traceFolder = null;
+        Object element = selection.getFirstElement();
+
+        if (element instanceof TmfTraceFolder) {
+            fTmfTraceFolder = (TmfTraceFolder) element;
+            traceFolder = fTmfTraceFolder.getResource();
+        } else if (element instanceof IProject) {
+            IProject project = (IProject) element;
+            try {
+                if (project.hasNature(TmfProjectNature.ID)) {
+                    TmfProjectElement projectElement = TmfProjectRegistry.getProject(project, true);
+                    fTmfTraceFolder = projectElement.getTracesFolder();
+                    traceFolder = project.getFolder(TmfTracesFolder.TRACES_FOLDER_NAME);
+                }
+            } catch (CoreException e) {
+            }
+        }
+
+        // If no tracing project was selected or trace folder doesn't exist use
+        // default tracing project
+        if (traceFolder == null) {
+            IProject project = TmfProjectRegistry.createProject(
+                    TmfCommonConstants.DEFAULT_TRACE_PROJECT_NAME, null, new NullProgressMonitor());
+            TmfProjectElement projectElement = TmfProjectRegistry.getProject(project, true);
+            fTmfTraceFolder = projectElement.getTracesFolder();
+            traceFolder = project.getFolder(TmfTracesFolder.TRACES_FOLDER_NAME);
+        }
+
+        // Set the target trace folder
+        if (traceFolder != null) {
+            fTargetFolder = traceFolder;
+        }
+
+        if (fTmfTraceFolder == null) {
+            throw new IllegalArgumentException();
+        }
+
     }
 
     private boolean fProjectNameSetByUser;
@@ -86,6 +142,11 @@ public class CtfCropWizardPage extends WizardPage {
     Text fLocation;
     IWorkspaceRoot root;
     Job tracePopulator;
+
+//    private IStructuredSelection fSelection;
+    private TmfTraceFolder fTmfTraceFolder;
+    private IFolder fTargetFolder;
+
 
     @Override
     public void createControl(Composite parent) {
@@ -313,6 +374,82 @@ public class CtfCropWizardPage extends WizardPage {
 
     protected CTFTrace getTrace() {
         return fTrace;
+    }
+
+    /**
+     * Finishes the wizard page.
+     *
+     * @return <code>true</code> if successful else <code>false</code>
+     */
+    public boolean finish() {
+
+        final ImportOperation importOperation = new ImportOperation();
+        try {
+            getContainer().run(true, true, new IRunnableWithProgress() {
+                @Override
+                public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+                    importOperation.run(monitor);
+                    monitor.done();
+                }
+            });
+        } catch (InvocationTargetException e) {
+            ErrorDialog.openError(getShell(), "Spliting Error", "Error during splitting of trace",
+                    new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.toString(), e));
+
+//            handleError(
+//                    Messages.TracePackageExtractManifestOperation_ErrorReadingManifest,
+//                    e);
+            return false;
+        } catch (InterruptedException e) {
+            // Cancelled
+            return false;
+        }
+
+        IStatus status = importOperation.getStatus();
+        if (status.getSeverity() == IStatus.ERROR) {
+            ErrorDialog.openError(getShell(), "Spliting Error", "Error during splitting of trace", status);
+//            handleErrorStatus(status);
+            return false;
+        }
+
+        return true;
+    }
+
+    class ImportOperation extends TmfWorkspaceModifyOperation {
+
+        IStatus fStatus;
+        @Override
+        protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
+            try {
+                String path = fTargetFolder.getLocation().toString() + "/cropped";
+                // TODO pass on monitor
+//                String path = traceFolder.getFullPath().toString();
+                fTrace.crop(getTimeStart(), getTimeEnd(), path);
+                TraceTypeHelper traceTypeHelper = null;
+
+                try {
+                    traceTypeHelper = TmfTraceTypeUIUtils.selectTraceType(path, null, null);
+                } catch (TmfTraceImportException e) {
+                    // the trace did not match any trace type
+                }
+
+                if (traceTypeHelper == null) {
+                    throw new CTFReaderException("trace type cannot be set");
+                }
+                IResource importedResource = ResourcesPlugin.getWorkspace().getRoot().findMember(fTargetFolder + "/cropped");
+
+                TmfTraceTypeUIUtils.setTraceType(importedResource, traceTypeHelper);
+
+            } catch (CTFReaderException e) {
+                fStatus = new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.toString(), e);
+                return;
+            }
+            fStatus = Status.OK_STATUS;
+        }
+
+        public IStatus getStatus() {
+            return fStatus;
+        }
     }
 
 }
