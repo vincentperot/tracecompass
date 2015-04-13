@@ -20,7 +20,6 @@ import java.util.List;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 
 import com.google.common.collect.ImmutableList;
@@ -96,11 +95,7 @@ public interface ITmfEventAspect {
 
             @Override
             public @Nullable String resolve(ITmfEvent event) {
-                ITmfEventType type = event.getType();
-                if (type == null) {
-                    return null;
-                }
-                return type.getName();
+                return event.getName();
             }
         };
 

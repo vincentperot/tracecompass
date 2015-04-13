@@ -183,7 +183,7 @@ public class XmlStubTraceTest {
     }
 
     private static IStatus testEvent(ITmfEvent event) {
-        switch (event.getType().getName()) {
+        switch (event.getName()) {
         case EVENT_A: {
             ITmfEventField content = event.getContent();
             if (content.getField(FIELD_A) == null) {
@@ -199,7 +199,7 @@ public class XmlStubTraceTest {
             break;
         }
         default:
-            return new Status(IStatus.ERROR, TmfCoreTestPlugin.PLUGIN_ID, "Unexpected event " + event.getType().getName());
+            return new Status(IStatus.ERROR, TmfCoreTestPlugin.PLUGIN_ID, "Unexpected event " + event.getName());
         }
         return Status.OK_STATUS;
     }

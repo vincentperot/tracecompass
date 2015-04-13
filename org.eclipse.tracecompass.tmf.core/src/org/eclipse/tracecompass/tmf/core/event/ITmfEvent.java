@@ -56,18 +56,14 @@ public interface ITmfEvent extends IAdaptable {
     @NonNull ITmfTimestamp getTimestamp();
 
     /**
-     * @return the event type
-     */
-    ITmfEventType getType();
-
-    /**
      * @return the event content
      */
     ITmfEventField getContent();
 
     /**
      * Gets the name of the event
-     * @return  the name of the event, same as getType().getName()
+     *
+     * @return the name of the event, same as getType().getName()
      * @since 1.0
      */
     String getName();

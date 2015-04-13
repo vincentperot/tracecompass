@@ -26,7 +26,6 @@ import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.tmf.core.component.ITmfEventProvider;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.filter.ITmfFilter;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
@@ -108,11 +107,6 @@ public class TmfEventsCache {
         @Override
         public ITmfTimestamp getTimestamp() {
             return event.getTimestamp();
-        }
-
-        @Override
-        public ITmfEventType getType() {
-            return event.getType();
         }
 
         @Override

@@ -76,14 +76,15 @@ public class CustomEvent extends TmfEvent {
     }
 
     /**
-     * Build a new CustomEvent from an existing TmfEvent.
+     * Build a new CustomEvent from an existing CustomEvent.
      *
      * @param definition
      *            The trace definition to which this event belongs
      * @param other
-     *            The TmfEvent to copy
+     *            The CustomEvent to copy
+     * @since 1.0
      */
-    public CustomEvent(CustomTraceDefinition definition, @NonNull TmfEvent other) {
+    public CustomEvent(CustomTraceDefinition definition, @NonNull CustomEvent other) {
         super(other);
         fDefinition = definition;
         fData = new HashMap<>();

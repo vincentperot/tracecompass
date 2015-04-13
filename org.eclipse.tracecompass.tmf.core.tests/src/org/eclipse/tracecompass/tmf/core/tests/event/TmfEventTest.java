@@ -53,6 +53,7 @@ public class TmfEventTest {
     private final String fLabel2 = "AnInteger";
     private final String[] fLabels = new String[] { fLabel1, fLabel2 };
     private final TmfEventType fType = new TmfEventType(fTypeId, TmfEventField.makeRoot(fLabels));
+    private final String fName = fType.getName();
 
     private final Object fValue1a = "Some string";
     private final Object fValue1b = Integer.valueOf(10);
@@ -62,7 +63,7 @@ public class TmfEventTest {
     private final String fRawContent1 = fField1a.toString() + fField1b.toString();
     private final ITmfEventField fContent1 = new TmfEventField(fRawContent1, null, fFields1);
     private final TmfTimestamp fTimestamp1 = new TmfTimestamp(12345, 2);
-    private final @NonNull ITmfEvent fEvent1 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
+    private final @NonNull TmfEvent fEvent1 = new TmfEvent(fTrace, 0, fTimestamp1, fType, fContent1);
 
     private final Object fValue2a = "Another string";
     private final Object fValue2b = Integer.valueOf(-4);
@@ -72,7 +73,7 @@ public class TmfEventTest {
     private final String fRawContent2 = fField2a.toString() + fField2b.toString();
     private final ITmfEventField fContent2 = new TmfEventField(fRawContent2, null, fFields2);
     private final TmfTimestamp fTimestamp2 = new TmfTimestamp(12350, 2);
-    private final @NonNull ITmfEvent fEvent2 = new TmfEvent(fTrace, 1, fTimestamp2, fType, fContent2);
+    private final @NonNull TmfEvent fEvent2 = new TmfEvent(fTrace, 1, fTimestamp2, fType, fContent2);
 
     // ------------------------------------------------------------------------
     // Helper functions
@@ -93,7 +94,7 @@ public class TmfEventTest {
         assertNotNull("getTrace", event.getTrace());
         assertEquals("getRank", ITmfContext.UNKNOWN_RANK, event.getRank());
         assertEquals("getTimestamp", TmfTimestamp.ZERO, event.getTimestamp());
-        assertNull("getType", event.getType());
+//        assertNull("getName", event.getName());
         assertNull("getContent", event.getContent());
     }
 
@@ -102,13 +103,13 @@ public class TmfEventTest {
         assertNotNull("getTrace", fEvent1.getTrace());
         assertEquals("getRank", 0, fEvent1.getRank());
         assertEquals("getTimestamp", fTimestamp1, fEvent1.getTimestamp());
-        assertEquals("getType", fType, fEvent1.getType());
+        assertEquals("getName", fName, fEvent1.getName());
         assertEquals("getContent", fContent1, fEvent1.getContent());
 
         assertNotNull("getTrace", fEvent2.getTrace());
         assertEquals("getRank", 1, fEvent2.getRank());
         assertEquals("getTimestamp", fTimestamp2, fEvent2.getTimestamp());
-        assertEquals("getType", fType, fEvent2.getType());
+        assertEquals("getName", fName, fEvent2.getName());
         assertEquals("getContent", fContent2, fEvent2.getContent());
     }
 
@@ -118,7 +119,7 @@ public class TmfEventTest {
         assertNotNull("getTrace", event.getTrace());
         assertEquals("getRank", ITmfContext.UNKNOWN_RANK, event.getRank());
         assertEquals("getTimestamp", fTimestamp1, event.getTimestamp());
-        assertEquals("getType", fType, event.getType());
+        assertEquals("getName", fName, event.getName());
         assertEquals("getContent", fContent1, event.getContent());
     }
 
@@ -129,7 +130,7 @@ public class TmfEventTest {
         assertNotNull("getTrace", event.getTrace());
         assertEquals("getRank", 0, event.getRank());
         assertEquals("getTimestamp", fTimestamp1, event.getTimestamp());
-        assertEquals("getType", fType, event.getType());
+        assertEquals("getName", fName, event.getName());
         assertEquals("getContent", fContent1, event.getContent());
         trace.dispose();
     }
@@ -140,7 +141,7 @@ public class TmfEventTest {
         assertNotNull("getTrace", event.getTrace());
         assertEquals("getRank", 0, event.getRank());
         assertEquals("getTimestamp", fTimestamp1, event.getTimestamp());
-        assertEquals("getType", fType, event.getType());
+        assertEquals("getName", fName, event.getName());
         assertEquals("getContent", fContent1, event.getContent());
     }
 
@@ -150,8 +151,8 @@ public class TmfEventTest {
 
     @Test
     public void testHashCode() {
-        ITmfEvent event1 = new TmfEvent(fTrace, ITmfContext.UNKNOWN_RANK, null, null, null);
-        ITmfEvent event2 = new TmfEvent(fTrace, ITmfContext.UNKNOWN_RANK, null, null, null);
+        TmfEvent event1 = new TmfEvent(fTrace, ITmfContext.UNKNOWN_RANK, null, null, null);
+        TmfEvent event2 = new TmfEvent(fTrace, ITmfContext.UNKNOWN_RANK, null, null, null);
 
         assertTrue("hashCode", event1.hashCode() == event2.hashCode());
 
@@ -185,8 +186,8 @@ public class TmfEventTest {
 
     @Test
     public void testEqualsSymmetry() {
-        final ITmfEvent event1 = new TmfEvent(fEvent1);
-        final ITmfEvent event2 = new TmfEvent(fEvent2);
+        final TmfEvent event1 = new TmfEvent(fEvent1);
+        final TmfEvent event2 = new TmfEvent(fEvent2);
 
         assertTrue("equals", event1.equals(fEvent1));
         assertTrue("equals", fEvent1.equals(event1));
@@ -214,7 +215,7 @@ public class TmfEventTest {
 
     @Test
     public void testNonEqualClasses() {
-        assertFalse("equals", fEvent1.equals(fEvent1.getType()));
+        assertFalse("equals", fEvent1.equals(fEvent1.getName()));
         assertFalse("equals", fEvent1.equals(null));
     }
 
@@ -321,7 +322,7 @@ public class TmfEventTest {
     @Test
     public void testToStringExtended() {
         class ExtendedEvent extends TmfEvent {
-            ExtendedEvent(@NonNull ITmfEvent event) {
+            ExtendedEvent(@NonNull TmfEvent event) {
                 super(event);
             }
         }

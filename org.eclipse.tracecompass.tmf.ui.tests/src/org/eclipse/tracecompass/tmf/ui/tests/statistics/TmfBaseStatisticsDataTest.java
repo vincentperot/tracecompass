@@ -94,9 +94,9 @@ public class TmfBaseStatisticsDataTest {
         fStatsTree = new TmfStatisticsTree();
 
         fStatsTree.setTotal(fTestName, true, 3);
-        fStatsTree.setTypeCount(fTestName, fEvent1.getType().getName(), true, 1);
-        fStatsTree.setTypeCount(fTestName, fEvent2.getType().getName(), true, 1);
-        fStatsTree.setTypeCount(fTestName, fEvent3.getType().getName(), true, 1);
+        fStatsTree.setTypeCount(fTestName, fEvent1.getName(), true, 1);
+        fStatsTree.setTypeCount(fTestName, fEvent2.getName(), true, 1);
+        fStatsTree.setTypeCount(fTestName, fEvent3.getName(), true, 1);
     }
 
     // ------------------------------------------------------------------------
@@ -121,8 +121,8 @@ public class TmfBaseStatisticsDataTest {
         assertEquals("getChildren", Messages.TmfStatisticsData_EventTypes, treeNode.getName());
 
         Vector<String> keyExpected = new Vector<>();
-        keyExpected.add(fEvent1.getType().getName());
-        keyExpected.add(fEvent3.getType().getName());
+        keyExpected.add(fEvent1.getName());
+        keyExpected.add(fEvent3.getName());
         // Getting children of a category
         childrenTreeNode = treeNode.getChildren();
         assertEquals("getChildren", 2, childrenTreeNode.size());
@@ -154,9 +154,9 @@ public class TmfBaseStatisticsDataTest {
 
         Collection<TmfStatisticsTreeNode> childrenTreeNode = fStatsTree.getNode(fTestName, Messages.TmfStatisticsData_EventTypes).getChildren();
         for (TmfStatisticsTreeNode child : childrenTreeNode) {
-            if (child.getName().compareTo(fEvent1.getType().getName()) == 0) {
+            if (child.getName().compareTo(fEvent1.getName()) == 0) {
                 assertEquals("registerEvent", 1, child.getValues().getTotal());
-            } else if (child.getName().compareTo(fEvent3.getType().getName()) == 0) {
+            } else if (child.getName().compareTo(fEvent3.getName()) == 0) {
                 assertEquals("registerEvent", 1, child.getValues().getTotal());
             }
         }
