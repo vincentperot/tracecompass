@@ -26,7 +26,7 @@ public class TmfSyntheticEventStub extends TmfEvent {
 
 
     public TmfSyntheticEventStub(final @NonNull ITmfEvent event) {
-        super(event);
+        super((TmfEvent) event);
     }
     public TmfSyntheticEventStub(final @NonNull TmfSyntheticEventStub other) {
         super(other);

@@ -23,14 +23,13 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * <li>a parent trace
  * <li>a rank (order within the trace)
  * <li>a timestamp
- * <li>a type
+ * <li> a name (or type)
  * <li>a content (payload)
  * </ul>
  *
  * @author Francois Chouinard
  *
  * @see ITmfTimestamp
- * @see ITmfEventType
  * @see ITmfEventField
  * @see TmfEvent
  */
@@ -56,11 +55,6 @@ public interface ITmfEvent extends IAdaptable {
     @NonNull ITmfTimestamp getTimestamp();
 
     /**
-     * @return the event type
-     */
-    ITmfEventType getType();
-
-    /**
      * @return the event content
      */
     ITmfEventField getContent();
@@ -68,7 +62,7 @@ public interface ITmfEvent extends IAdaptable {
     /**
      * Gets the name of the event
      *
-     * @return the name of the event, same as getType().getName()
+     * @return The name of the event
      * @since 1.0
      */
     String getName();
