@@ -270,7 +270,7 @@ public class CTFStreamInput implements IDefinitionScope {
          * create a packet bit buffer to read the packet header
          */
         int maximumSize = fStreamPacketContextDecl.getMaximumSize() + fTracePacketHeaderDecl.getMaximumSize();
-        BitBuffer bitBuffer = new BitBuffer(createPacketBitBuffer(fc, dataOffsetbits/Byte.SIZE, maximumSize));
+        BitBuffer bitBuffer = new BitBuffer(createPacketBitBuffer(fc, dataOffsetbits / Byte.SIZE, maximumSize));
         bitBuffer.setByteOrder(getStream().getTrace().getByteOrder());
         return bitBuffer;
     }
@@ -317,8 +317,7 @@ public class CTFStreamInput implements IDefinitionScope {
         /*
          * Check the CTF magic number
          */
-        IntegerDefinition magicDef = (IntegerDefinition) tracePacketHeaderDef
-                .lookupDefinition("magic"); //$NON-NLS-1$
+        IntegerDefinition magicDef = (IntegerDefinition) tracePacketHeaderDef.lookupDefinition("magic"); //$NON-NLS-1$
         if (magicDef != null) {
             int magic = (int) magicDef.getValue();
             if (magic != Utils.CTF_MAGIC) {
@@ -330,8 +329,7 @@ public class CTFStreamInput implements IDefinitionScope {
         /*
          * Check the trace UUID
          */
-        ArrayDefinition uuidDef =
-                (ArrayDefinition) tracePacketHeaderDef.lookupDefinition("uuid"); //$NON-NLS-1$
+        ArrayDefinition uuidDef = (ArrayDefinition) tracePacketHeaderDef.lookupDefinition("uuid"); //$NON-NLS-1$
         if (uuidDef != null) {
             UUID uuid = Utils.getUUIDfromDefinition(uuidDef);
 
@@ -343,8 +341,7 @@ public class CTFStreamInput implements IDefinitionScope {
         /*
          * Check that the stream id did not change
          */
-        IntegerDefinition streamIDDef = (IntegerDefinition) tracePacketHeaderDef
-                .lookupDefinition("stream_id"); //$NON-NLS-1$
+        IntegerDefinition streamIDDef = (IntegerDefinition) tracePacketHeaderDef.lookupDefinition("stream_id"); //$NON-NLS-1$
         if (streamIDDef != null) {
             long streamID = streamIDDef.getValue();
 

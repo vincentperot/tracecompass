@@ -13,6 +13,7 @@
 
 package org.eclipse.tracecompass.ctf.core.trace;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -577,6 +578,17 @@ public class CTFTraceReader implements AutoCloseable {
             sir.goToLastEvent();
         }
         seek(0);
+    }
 
+    /**
+     * @since 1.0
+     */
+    public void writePackets(long startTime, long endTime, File outTraceDirectory) throws CTFReaderException {
+        // TODO parallelize
+        for (CTFStreamInputReader reader : fStreamInputReaders) {
+            if (reader != null) {
+                reader.writePackets(startTime, endTime, outTraceDirectory);
+            }
+        }
     }
 }

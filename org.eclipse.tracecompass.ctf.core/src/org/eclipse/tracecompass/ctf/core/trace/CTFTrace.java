@@ -76,6 +76,8 @@ public class CTFTrace implements IDefinitionScope {
      */
     private final File fPath;
 
+    private Metadata metadata;
+
     /**
      * Major CTF version number
      */
@@ -167,7 +169,7 @@ public class CTFTrace implements IDefinitionScope {
      */
     public CTFTrace(File path) throws CTFReaderException {
         fPath = path;
-        final Metadata metadata = new Metadata(this);
+        metadata = new Metadata(this);
 
         /* Set up the internal containers for this trace */
         if (!fPath.exists()) {
@@ -189,6 +191,38 @@ public class CTFTrace implements IDefinitionScope {
      */
     public CTFTrace() {
         fPath = null;
+    }
+
+    /**
+     *
+     * @since 1.0
+     */
+    public void crop(long startTime, long endTime, String name) throws CTFReaderException {
+        // do not forget to offset time
+        long adjustedStart = startTime - getClock().getClockOffset();
+        long adjustedEnd = endTime - getClock().getClockOffset();
+        File out = new File(name);
+        if (out.exists()) {
+            throw new CTFReaderException("Trace seqment cannot be created");
+        }
+
+        // create new directory
+        boolean isSuccess = out.mkdir();
+        if (!isSuccess) {
+            throw new CTFReaderException("Trace seqment cannot be created");
+        }
+
+        // copy metadata
+        try {
+            metadata.copyTo(out);
+        } catch (IOException e) {
+            throw new CTFReaderException("metadata couldn't be copied", e);
+        }
+
+        try (CTFTraceReader reader = new CTFTraceReader(this)) {
+            reader.seek(0);
+            reader.writePackets(adjustedStart, adjustedEnd, out);
+        }
     }
 
     private void init(File path) throws CTFReaderException {
