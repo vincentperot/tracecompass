@@ -18,6 +18,7 @@ import static org.junit.Assume.assumeTrue;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
+import org.eclipse.tracecompass.ctf.core.trace.CTFTraceWriter;
 import org.junit.Test;
 
 /**
@@ -71,7 +72,8 @@ public class SplitTraceBenchmark {
 //                long start = 0 ;
 //                long end = Long.MAX_VALUE;
 
-                trace.crop(start, end, "/tmp/hallo");
+                CTFTraceWriter ctfWriter = new CTFTraceWriter(trace);
+                ctfWriter.write(start, end, "/tmp/hallo");
 //                    while (traceReader.hasMoreEvents()) {
 //                        EventDefinition ed = traceReader.getCurrentEventDef();
 //                        /* Do something with the event */

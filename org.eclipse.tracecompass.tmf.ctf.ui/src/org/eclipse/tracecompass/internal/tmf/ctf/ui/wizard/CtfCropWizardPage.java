@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.CTFTraceWriter;
 import org.eclipse.tracecompass.internal.tmf.ctf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.project.operations.TmfWorkspaceModifyOperation;
 import org.eclipse.tracecompass.internal.tmf.ui.project.wizards.importtrace.ImportConfirmation;
@@ -412,7 +413,9 @@ public class CtfCropWizardPage extends WizardResourceImportPage {
 //                String path = fTargetFolder.getLocation().toString() + "/cropped";
                 // TODO pass on monitor
 //                String path = traceFolder.getFullPath().toString();
-                fTrace.crop(getTimeStart(), getTimeEnd(), tmpTrace.toString());
+                CTFTraceWriter ctfWriter = new CTFTraceWriter(fTrace);
+                ctfWriter.write(getTimeStart(), getTimeEnd(), tmpTrace.toString());
+
                 TraceTypeHelper traceTypeHelper = null;
 
                 try {
