@@ -84,15 +84,13 @@ public final class AttributeTree {
         if (res != ATTRIB_TREE_MAGIC_NUMBER) {
             throw new IOException("The attribute tree file section is either invalid or corrupted."); //$NON-NLS-1$
         }
-
-
         ArrayList<String[]> attribList;
         try {
             @SuppressWarnings("unchecked")
             ArrayList<String[]> list = (ArrayList<String[]>) ois.readObject();
             attribList = list;
         } catch (ClassNotFoundException e) {
-            throw new IOException("Unrecognizable attribute list"); //$NON-NLS-1$
+            throw new IOException("Unrecognizable attribute list", e); //$NON-NLS-1$
         }
 
         /*
@@ -113,7 +111,7 @@ public final class AttributeTree {
      *            The position (in bytes) in the file where to write
      */
     public void writeSelf(File file, long pos) {
-        try (FileOutputStream fos = new FileOutputStream(file, true);
+        try (FileOutputStream fos = new FileOutputStream(file, false);
                 FileChannel fc = fos.getChannel();) {
             fc.position(pos);
             try (ObjectOutputStream oos = new ObjectOutputStream(fos)) {
