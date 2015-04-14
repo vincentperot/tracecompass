@@ -13,7 +13,6 @@ package org.eclipse.tracecompass.ctf.core.trace;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -515,15 +514,4 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         return null;
     }
 
-    /**
-     * @since 1.0
-     */
-    public void writePacket(FileChannel out) throws IOException {
-        if (fBitBuffer != null) {
-            ByteBuffer b = fBitBuffer.getByteBuffer();
-            out.write(b);
-        }
-
-
-    }
 }

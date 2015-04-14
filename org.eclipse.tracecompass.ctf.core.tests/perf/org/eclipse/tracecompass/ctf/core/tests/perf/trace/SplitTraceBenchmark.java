@@ -18,6 +18,7 @@ import static org.junit.Assume.assumeTrue;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
+import org.eclipse.tracecompass.ctf.core.trace.CTFTraceWriter;
 import org.junit.Test;
 
 /**
@@ -28,8 +29,6 @@ import org.junit.Test;
  */
 public class SplitTraceBenchmark {
 
-//    private static final String TEST_SUITE_NAME = "CTF Read Benchmark";
-//    private static final String TEST_ID = "org.eclipse.linuxtools#" + TEST_SUITE_NAME;
     private static final int LOOP_COUNT = 1;
 
     /**
@@ -40,49 +39,24 @@ public class SplitTraceBenchmark {
         readTrace(CtfTestTrace.KERNEL, "trace-kernel", true);
     }
 
-//    /**
-//     * Benchmark reading the bigger trace "kernel_vm"
-//     */
-//    @Test
-//    public void testKernelVmTrace() {
-//        readTrace(CtfTestTrace.KERNEL_VM, "trace-kernel-vm", false);
-//    }
-
     private static void readTrace(CtfTestTrace testTrace, String testName, boolean inGlobalSummary) {
         assumeTrue(testTrace.exists());
 
-//        Performance perf = Performance.getDefault();
-//        PerformanceMeter pm = perf.createPerformanceMeter(TEST_ID + '#' + testName);
-//        perf.tagAsSummary(pm, TEST_SUITE_NAME + ':' + testName, Dimension.CPU_TIME);
-
         if (inGlobalSummary) {
-//            perf.tagAsGlobalSummary(pm, TEST_SUITE_NAME + ':' + testName, Dimension.CPU_TIME);
         }
 
         for (int loop = 0; loop < LOOP_COUNT; loop++) {
-//            pm.start();
             try {
                 CTFTrace trace = testTrace.getTrace();
                 long start = 1332166405241713987L + 4277170993912L - 1 ;
                 long end = 1332166405241713987L + 4277170993912L + 2;
 
-//                long end = 4277258593522L - 1;
-
-//                long start = 0 ;
-//                long end = Long.MAX_VALUE;
-
-                trace.crop(start, end, "/tmp/hallo");
-//                    while (traceReader.hasMoreEvents()) {
-//                        EventDefinition ed = traceReader.getCurrentEventDef();
-//                        /* Do something with the event */
-//                        ed.getCPU();
-//                        traceReader.advance();
+                CTFTraceWriter ctfWriter = new CTFTraceWriter(trace);
+                ctfWriter.copyPackets(start, end, "/tmp/hallo");
             } catch (CTFReaderException e) {
                 /* Should not happen if assumeTrue() passed above */
                 fail("Test failed at iteration " + loop + ':' + e.getMessage());
             }
-//            pm.stop();
         }
-//        pm.commit();
     }
 }

@@ -13,13 +13,9 @@
 package org.eclipse.tracecompass.ctf.core.trace;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -499,35 +495,6 @@ public class CTFStreamInputReader implements AutoCloseable {
     public String toString() {
         // this helps debugging
         return fId + ' ' + fCurrentEvent.toString();
-    }
-
-    /**
-     * @since 1.0
-     */
-    public void writePackets(long startTime, long endTime, File outTraceFolder) throws CTFReaderException {
-        String inFileName = fStreamInput.getFile().getName();
-        Path outFilePath = FileSystems.getDefault().getPath(outTraceFolder.getAbsolutePath(), inFileName);
-        try {
-            Path out2 = Files.createFile(outFilePath);
-            int cnt = 0;
-            try (FileOutputStream outStream = new FileOutputStream(out2.toFile())) {
-                try (FileChannel channel = outStream.getChannel()) {
-                    while (fPacketReader.getCurrentPacket() != null) {
-                        if ((fPacketReader.getCurrentPacket().getTimestampBegin() > startTime) &&
-                                (fPacketReader.getCurrentPacket().getTimestampBegin() < endTime)) {
-                            cnt++;
-                            fPacketReader.writePacket(channel);
-                        }
-                        goToNextPacket();
-                    }
-                    if (cnt == 0) {
-                        out2.toFile().delete();
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new CTFReaderException(e.getMessage(), e);
-        }
     }
 
 }
