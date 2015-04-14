@@ -2,6 +2,8 @@ package org.eclipse.tracecompass.internal.tmf.ctf.ui.wizard;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -9,20 +11,21 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,6 +44,8 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
 import org.eclipse.tracecompass.internal.tmf.ctf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.project.operations.TmfWorkspaceModifyOperation;
+import org.eclipse.tracecompass.internal.tmf.ui.project.wizards.importtrace.ImportConfirmation;
+import org.eclipse.tracecompass.internal.tmf.ui.project.wizards.importtrace.ImportConflictHandler;
 import org.eclipse.tracecompass.tmf.core.TmfCommonConstants;
 import org.eclipse.tracecompass.tmf.core.TmfProjectNature;
 import org.eclipse.tracecompass.tmf.core.project.model.TmfTraceImportException;
@@ -51,9 +56,13 @@ import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceFolder;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfTraceTypeUIUtils;
 import org.eclipse.tracecompass.tmf.ui.project.model.TmfTracesFolder;
 import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.barcharts.TmfBarChartViewer;
+import org.eclipse.ui.dialogs.IOverwriteQuery;
+import org.eclipse.ui.dialogs.WizardResourceImportPage;
+import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
+import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import org.swtchart.ISeries;
 
-public class CtfCropWizardPage extends WizardPage {
+public class CtfCropWizardPage extends WizardResourceImportPage {
 
     private final class PreviewWindow extends TmfBarChartViewer {
         private CTFTrace fVisTrace;
@@ -86,7 +95,7 @@ public class CtfCropWizardPage extends WizardPage {
     }
 
     public CtfCropWizardPage(String pageName, IStructuredSelection selection) {
-        super(pageName);
+        super(pageName, selection);
         setTitle("cropper");
         setDescription("Cut up ctf files");
         root = ResourcesPlugin.getWorkspace().getRoot();
@@ -123,6 +132,8 @@ public class CtfCropWizardPage extends WizardPage {
         // Set the target trace folder
         if (traceFolder != null) {
             fTargetFolder = traceFolder;
+            String path = traceFolder.getFullPath().toString();
+            setContainerFieldValue(path);
         }
 
         if (fTmfTraceFolder == null) {
@@ -131,7 +142,7 @@ public class CtfCropWizardPage extends WizardPage {
 
     }
 
-    private boolean fProjectNameSetByUser;
+//    private boolean fProjectNameSetByUser;
     private CTFTrace fTrace;
     private long fTimeStart;
     private long fTimeEnd;
@@ -147,98 +158,52 @@ public class CtfCropWizardPage extends WizardPage {
     private TmfTraceFolder fTmfTraceFolder;
     private IFolder fTargetFolder;
 
-
-    @Override
-    public void createControl(Composite parent) {
-        Composite comp = new Composite(parent, SWT.NONE);
-        GridLayout layout = new GridLayout();
-        comp.setLayout(layout);
-        comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-        addProjectNameSelector(comp);
-        addTraceSelector(comp);
-        addSimpleTimerangeSelector(comp);
-        addVisualTimerangeSelector(comp);
-
-        setControl(comp);
-    }
-
-    private void addProjectNameSelector(Composite parent) {
-        Group group = new Group(parent, SWT.NONE);
-        GridLayout layout = new GridLayout();
-        layout.numColumns = 2;
-        group.setLayout(layout);
-        group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        group.setText("Select Folder to import to");
-
-        fProjectName = new Text(group, SWT.BORDER);
-        fProjectName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        fProjectName.addModifyListener(new ModifyListener() {
-            @Override
-            public void modifyText(ModifyEvent e) {
-                validatePage();
-                if (fProjectName.getText().trim().isEmpty()) {
-                    fProjectNameSetByUser = false;
-                }
-            }
-        });
-
-        // Note that the modify listener gets called not only when the user
-        // enters text but also when we
-        // programatically set the field. This listener only gets called when
-        // the user modifies the field
-        fProjectName.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                fProjectNameSetByUser = true;
-            }
-        });
-    }
-
     /**
      * Validates the contents of the page, setting the page error message and
      * Finish button state accordingly
      */
     private void validatePage() {
-        // Don't generate an error if project name or location is empty, but do
-        // disable Finish button.
-        String msg = null;
-        boolean complete = true; // ultimately treated as false if msg != null
-
-        String name = fProjectName.getText().trim();
-        if (name.isEmpty()) {
-            complete = false;
-        } else {
-            IStatus status = ResourcesPlugin.getWorkspace().validateName(name,
-                    IResource.FOLDER);
-            if (!status.isOK()) {
-                msg = status.getMessage();
-            } else {
-                IProject project = root.getProject(name);
-                if (project.exists()) {
-                    msg = "project";
-                }
-            }
-        }
-        if (msg == null) {
-            String loc = fLocation.getText().trim();
-            if (loc.isEmpty()) {
-                complete = false;
-            } else {
-                final File file = new File(loc);
-                if (file.isDirectory()) {
-                    // Set the project name to the directory name but not if the
-                    // user has supplied a name
-                    if (!fProjectNameSetByUser && !name.equals(file.getName())) {
-                        fProjectName.setText(file.getName());
-                    }
-                } else {
-                }
-            }
-        }
-
-        setErrorMessage(msg);
-        setPageComplete((msg == null) && complete);
+//        // Don't generate an error if project name or location is empty, but do
+//        // disable Finish button.
+//        String msg = null;
+//        boolean complete = true; // ultimately treated as false if msg != null
+//
+//        String name = fProjectName.getText().trim();
+//        if (name.isEmpty()) {
+//            complete = false;
+//        } else {
+//            IStatus status = ResourcesPlugin.getWorkspace().validateName(name,
+//                    IResource.FOLDER);
+//            if (!status.isOK()) {
+//                msg = status.getMessage();
+//            } else {
+//                IProject project = root.getProject(name);
+//                if (project.exists()) {
+//                    msg = "project";
+//                }
+//            }
+//        }
+//        if (msg == null) {
+//            String loc = fLocation.getText().trim();
+//            if (loc.isEmpty()) {
+//                complete = false;
+//            } else {
+//                final File file = new File(loc);
+//                if (file.isDirectory()) {
+//                    // Set the project name to the directory name but not if the
+//                    // user has supplied a name
+//                    if (!fProjectNameSetByUser && !name.equals(file.getName())) {
+//                        fProjectName.setText(file.getName());
+//                    }
+//                } else {
+//                }
+//            }
+//        }
+//
+//        setErrorMessage(msg);
+//        setPageComplete((msg == null) && complete);
+        // TODO
+        setPageComplete(true);
     }
 
     private void addTraceSelector(Composite parent) {
@@ -288,6 +253,7 @@ public class CtfCropWizardPage extends WizardPage {
                                 } catch (CTFReaderException readException) {
                                     Activator.logError(readException.getMessage(), readException);
                                 }
+                                validatePage();
                                 return new Status(IStatus.ERROR, "me", "failed reading trace");
                             }
 
@@ -305,6 +271,7 @@ public class CtfCropWizardPage extends WizardPage {
                         // swallow me
                     }
                 }
+                validatePage();
             }
 
             @Override
@@ -383,7 +350,7 @@ public class CtfCropWizardPage extends WizardPage {
      */
     public boolean finish() {
 
-        final ImportOperation importOperation = new ImportOperation();
+        final MyImportOperation importOperation = new MyImportOperation();
         try {
             getContainer().run(true, true, new IRunnableWithProgress() {
                 @Override
@@ -415,20 +382,41 @@ public class CtfCropWizardPage extends WizardPage {
         return true;
     }
 
-    class ImportOperation extends TmfWorkspaceModifyOperation {
+    class MyImportOperation extends TmfWorkspaceModifyOperation {
 
         IStatus fStatus;
+        private ImportConflictHandler fConflictHandler;
+
+        public MyImportOperation() {
+            fConflictHandler = new ImportConflictHandler(getContainer().getShell(), fTmfTraceFolder, ImportConfirmation.SKIP);
+        }
+
         @Override
         protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
             try {
-                String path = fTargetFolder.getLocation().toString() + "/cropped";
+
+                IPath bla = new Path(fTrace.getTraceDirectory().toString());
+                String traceName = bla.lastSegment() + ".cropped";
+
+                // Temporary directory to contain any extracted files
+                IFolder destTempFolder = fTargetFolder.getProject().getFolder(".tracecrop");
+                if (destTempFolder.exists()) {
+                    SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+                    destTempFolder.delete(true, subMonitor);
+                }
+                SubProgressMonitor subMonitor = new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+                destTempFolder.create(IResource.HIDDEN, true, subMonitor);
+
+                IPath tmpTrace = destTempFolder.getLocation().append(traceName);
+
+//                String path = fTargetFolder.getLocation().toString() + "/cropped";
                 // TODO pass on monitor
 //                String path = traceFolder.getFullPath().toString();
-                fTrace.crop(getTimeStart(), getTimeEnd(), path);
+                fTrace.crop(getTimeStart(), getTimeEnd(), tmpTrace.toString());
                 TraceTypeHelper traceTypeHelper = null;
 
                 try {
-                    traceTypeHelper = TmfTraceTypeUIUtils.selectTraceType(path, null, null);
+                    traceTypeHelper = TmfTraceTypeUIUtils.selectTraceType(tmpTrace.toString(), null, null);
                 } catch (TmfTraceImportException e) {
                     // the trace did not match any trace type
                 }
@@ -436,9 +424,15 @@ public class CtfCropWizardPage extends WizardPage {
                 if (traceTypeHelper == null) {
                     throw new CTFReaderException("trace type cannot be set");
                 }
-                IResource importedResource = ResourcesPlugin.getWorkspace().getRoot().findMember(fTargetFolder + "/cropped");
+//                IResource importedResource = ResourcesPlugin.getWorkspace().getRoot().findMember(fTargetFolder + "/cropped");
+                IResource importedResource = importResource(tmpTrace, monitor);
 
                 TmfTraceTypeUIUtils.setTraceType(importedResource, traceTypeHelper);
+
+                if (destTempFolder.exists()) {
+                    subMonitor = new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+                    destTempFolder.delete(true, subMonitor);
+                }
 
             } catch (CTFReaderException e) {
                 fStatus = new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.toString(), e);
@@ -447,9 +441,86 @@ public class CtfCropWizardPage extends WizardPage {
             fStatus = Status.OK_STATUS;
         }
 
+
+        private IResource importResource(IPath sourcePath, IProgressMonitor monitor)
+                throws InvocationTargetException, InterruptedException, CoreException {
+
+            String traceName = sourcePath.lastSegment();
+
+            IPath tracePath = fTmfTraceFolder.getPath().append(traceName);
+
+
+
+            String newName = fConflictHandler.checkAndHandleNameClash(tracePath, monitor);
+            if (newName == null) {
+                return null;
+            }
+
+            tracePath = fTmfTraceFolder.getPath().append(newName);
+
+            List<File> subList = new ArrayList<>();
+
+            File sourceDirectory = new File(sourcePath.toString());
+
+            IPath containerPath = fTargetFolder.getFullPath();
+                containerPath = tracePath;
+
+                File[] array = sourceDirectory.listFiles();
+                for (int i = 0; i < array.length; i++) {
+                    if (!array[i].isDirectory()) {
+                        subList.add(array[i]);
+                    }
+                }
+
+                FileSystemStructureProvider fileSystemStructureProvider = FileSystemStructureProvider.INSTANCE;
+
+            IOverwriteQuery myQueryImpl = new IOverwriteQuery() {
+                @Override
+                public String queryOverwrite(String file) {
+                    return IOverwriteQuery.NO_ALL;
+                }
+            };
+
+//            monitor.setTaskName(Messages.ImportTraceWizard_ImportOperationTaskName + " " + fileSystemElement.getFileSystemObject().getAbsolutePath(fBaseSourceContainerPath.toOSString())); //$NON-NLS-1$
+            ImportOperation operation = new ImportOperation(containerPath, sourceDirectory, fileSystemStructureProvider, myQueryImpl, subList);
+            operation.setContext(getShell());
+
+            operation.setCreateContainerStructure(false);
+            operation.setOverwriteResources(false);
+            operation.setCreateLinks(false);
+            operation.setVirtualFolders(false);
+
+            operation.run(new SubProgressMonitor(monitor, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+//            String sourceLocation = fileSystemElement.getSourceLocation();
+            IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(tracePath);
+//            if (sourceLocation != null) {
+//                resource.setPersistentProperty(TmfCommonConstants.SOURCE_LOCATION, sourceLocation);
+
+            return resource;
+        }
+
         public IStatus getStatus() {
             return fStatus;
         }
+    }
+
+    @Override
+    protected void createSourceGroup(Composite parent) {
+        addTraceSelector(parent);
+        addSimpleTimerangeSelector(parent);
+        addVisualTimerangeSelector(parent);
+    }
+
+    @Override
+    protected ITreeContentProvider getFileProvider() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected ITreeContentProvider getFolderProvider() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
