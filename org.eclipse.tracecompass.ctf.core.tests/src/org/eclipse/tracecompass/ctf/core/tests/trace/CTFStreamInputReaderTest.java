@@ -30,10 +30,12 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFResponse;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInput;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFStreamInputReader;
 import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
+import org.eclipse.tracecompass.internal.ctf.core.trace.reader.CTFStreamInputReader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -82,14 +84,15 @@ public class CTFStreamInputReaderTest {
         assumeTrue(testTrace.exists());
         CTFTrace trace = testTrace.getTrace();
         CTFStream s = trace.getStream((long) 0);
-        Set<CTFStreamInput> streamInput = s.getStreamInputs();
+        Set<ICTFStreamInput> streamInput = s.getStreamInputs();
         CTFStreamInputReader retVal = null;
-        for (CTFStreamInput si : streamInput) {
+        for (ICTFStreamInput si : streamInput) {
             /*
              * For the tests, we'll use the stream input corresponding to the
              * CPU 0
              */
             if (si.getFilename().endsWith("0_0")) {
+
                 retVal = new CTFStreamInputReader(si);
                 break;
             }
@@ -116,7 +119,7 @@ public class CTFStreamInputReaderTest {
     @Test(expected = CTFReaderException.class)
     public void testStreamInputReader_invalid() throws CTFReaderException, IOException {
         CTFStreamInput streamInput = new CTFStreamInput(new CTFStream(new CTFTrace("")), new File(""));
-        try (CTFStreamInputReader result = new CTFStreamInputReader(streamInput)) {
+        try (ICTFStreamInputReader result = new CTFStreamInputReader(streamInput)) {
             assertNotNull(result);
         }
     }

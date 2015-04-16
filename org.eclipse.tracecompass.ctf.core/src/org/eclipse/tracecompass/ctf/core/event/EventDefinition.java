@@ -22,7 +22,7 @@ import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Definition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFStreamInputReader;
 import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
 
 import com.google.common.collect.ImmutableList;
@@ -70,7 +70,7 @@ public final class EventDefinition implements IDefinitionScope {
     /**
      * The StreamInputReader that reads this event definition.
      */
-    private final CTFStreamInputReader fStreamInputReader;
+    private final ICTFStreamInputReader fStreamInputReader;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -93,9 +93,10 @@ public final class EventDefinition implements IDefinitionScope {
      *            the stream context
      * @param fields
      *            The event fields
+     * @since 1.0
      */
     public EventDefinition(IEventDeclaration declaration,
-            CTFStreamInputReader streamInputReader,
+            ICTFStreamInputReader streamInputReader,
             long timestamp,
             StructDefinition streamContext,
             StructDefinition eventContext,
@@ -210,15 +211,6 @@ public final class EventDefinition implements IDefinitionScope {
                 fieldNames,
                 fieldValues.toArray(new Definition[fieldValues.size()]));
         return mergedContext;
-    }
-
-    /**
-     * Gets the stream input reader that this event was made by
-     *
-     * @return the parent
-     */
-    public CTFStreamInputReader getStreamInputReader() {
-        return fStreamInputReader;
     }
 
     /**

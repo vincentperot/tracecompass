@@ -26,7 +26,8 @@ import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -136,8 +137,8 @@ public class CTFStreamInputTest {
         assertEquals(fixture.getTimestampEnd(), 1L);
     }
 
-    CTFStreamInput s1;
-    CTFStreamInput s2;
+    ICTFStreamInput s1;
+    ICTFStreamInput s2;
 
     @Test
     public void testEquals1() throws CTFReaderException {

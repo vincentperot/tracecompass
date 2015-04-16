@@ -23,7 +23,7 @@ import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.junit.Test;
 
 /**
@@ -69,7 +69,7 @@ public class TraceReadBenchmark {
             pm.start();
             try {
                 CTFTrace trace = testTrace.getTrace();
-                try (CTFTraceReader traceReader = new CTFTraceReader(trace);) {
+                try (ICTFTraceReader traceReader = trace.createReader();) {
 
                     while (traceReader.hasMoreEvents()) {
                         EventDefinition ed = traceReader.getCurrentEventDef();

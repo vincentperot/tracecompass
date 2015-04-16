@@ -28,7 +28,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.IntegerDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFStreamInputReader;
 
 /**
  * Representation of one type of event. A bit like "int" or "long" but for trace
@@ -88,10 +88,10 @@ public class EventDeclaration implements IEventDeclaration {
     }
 
     @Override
-    public EventDefinition createDefinition(CTFStreamInputReader streamInputReader, @NonNull BitBuffer input, long timestamp) throws CTFReaderException {
+    public EventDefinition createDefinition(ICTFStreamInputReader streamInputReader, @NonNull BitBuffer input, long timestamp) throws CTFReaderException {
         StructDeclaration streamEventContextDecl = streamInputReader.getStreamEventContextDecl();
         StructDefinition streamEventContext = streamEventContextDecl != null ? streamEventContextDecl.createDefinition(fStream.getTrace(), ILexicalScope.STREAM_EVENT_CONTEXT, input) : null;
-        StructDefinition packetContext = streamInputReader.getPacketReader().getCurrentPacketEventHeader();
+        StructDefinition packetContext = streamInputReader.getCurrentPacketEventHeader();
         StructDefinition eventContext = fContext != null ? fContext.createDefinition(fStream.getTrace(), ILexicalScope.CONTEXT, input) : null;
         StructDefinition eventPayload = fFields != null ? fFields.createDefinition(fStream.getTrace(), ILexicalScope.FIELDS, input) : null;
 

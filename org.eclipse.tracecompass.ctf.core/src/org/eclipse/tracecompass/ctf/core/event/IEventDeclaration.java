@@ -18,7 +18,7 @@ import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFStreamInputReader;
 
 /**
  * Representation of one type of event. A bit like "int" or "long" but for trace
@@ -41,8 +41,9 @@ public interface IEventDeclaration {
      * @throws CTFReaderException
      *             As a bitbuffer is used to read, it could have wrapped
      *             IOExceptions.
+     * @since 1.0
      */
-    EventDefinition createDefinition(CTFStreamInputReader streamInputReader, @NonNull BitBuffer input, long timestamp) throws CTFReaderException;
+    EventDefinition createDefinition(ICTFStreamInputReader streamInputReader, @NonNull BitBuffer input, long timestamp) throws CTFReaderException;
 
     /**
      * Gets the name of an event declaration

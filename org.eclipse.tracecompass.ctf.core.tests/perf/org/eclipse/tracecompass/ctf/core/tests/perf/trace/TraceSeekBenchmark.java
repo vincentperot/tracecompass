@@ -27,7 +27,7 @@ import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.junit.Test;
 
 /**
@@ -77,7 +77,7 @@ public class TraceSeekBenchmark {
 
         for (int loop = 0; loop < LOOP_COUNT; loop++) {
             CTFTrace trace = testTrace.getTrace();
-            try (CTFTraceReader traceReader = new CTFTraceReader(trace);) {
+            try (ICTFTraceReader traceReader = trace.createReader();) {
 
                 /* Read the whole trace to find out the start and end times */
                 EventDefinition firstEvent = traceReader.getCurrentEventDef();

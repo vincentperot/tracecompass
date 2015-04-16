@@ -67,7 +67,7 @@ public class CTFStream {
     /**
      * The inputs associated to this stream
      */
-    private final Set<CTFStreamInput> fInputs = new HashSet<>();
+    private final Set<ICTFStreamInput> fInputs = new HashSet<>();
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -206,7 +206,7 @@ public class CTFStream {
      *
      * @return the set of all stream inputs for this stream
      */
-    public Set<CTFStreamInput> getStreamInputs() {
+    public Set<ICTFStreamInput> getStreamInputs() {
         return fInputs;
     }
 
@@ -341,8 +341,9 @@ public class CTFStream {
      *
      * @param input
      *            The StreamInput to add.
+     * @since 1.0
      */
-    public void addInput(CTFStreamInput input) {
+    public void addInput(ICTFStreamInput input) {
         fInputs.add(input);
     }
 

@@ -11,7 +11,9 @@
 
 package org.eclipse.tracecompass.ctf.core.tests.trace;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,7 +29,7 @@ import java.util.UUID;
 
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -48,8 +50,10 @@ public class CTFTraceGrowingStreamTest {
     /**
      * Run before every test
      *
-     * @throws IOException won't happen
-     * @throws CTFReaderException won't happen
+     * @throws IOException
+     *             won't happen
+     * @throws CTFReaderException
+     *             won't happen
      */
     @Before
     public void init() throws IOException, CTFReaderException {
@@ -116,13 +120,16 @@ public class CTFTraceGrowingStreamTest {
     /**
      * Test a growing stream
      *
-     * @throws CTFReaderException won't happen
-     * @throws IOException won't happen
-     * @throws FileNotFoundException won't happen
+     * @throws CTFReaderException
+     *             won't happen
+     * @throws IOException
+     *             won't happen
+     * @throws FileNotFoundException
+     *             won't happen
      */
     @Test
     public void testGrowingLive() throws CTFReaderException, FileNotFoundException, IOException {
-        try (CTFTraceReader reader = new CTFTraceReader(fFixture);) {
+        try (ICTFTraceReader reader = fFixture.createReader();) {
             reader.setLive(true);
             assertEquals("0x29", reader.getCurrentEventDef().getFields().getDefinition("f").toString());
             reader.advance();
@@ -138,13 +145,16 @@ public class CTFTraceGrowingStreamTest {
     /**
      * Test a growing stream
      *
-     * @throws CTFReaderException won't happen
-     * @throws IOException won't happen
-     * @throws FileNotFoundException won't happen
+     * @throws CTFReaderException
+     *             won't happen
+     * @throws IOException
+     *             won't happen
+     * @throws FileNotFoundException
+     *             won't happen
      */
     @Test
     public void testGrowingNotLive() throws CTFReaderException, FileNotFoundException, IOException {
-        try (CTFTraceReader reader = new CTFTraceReader(fFixture);) {
+        try (ICTFTraceReader reader = fFixture.createReader()) {
             reader.setLive(false);
             assertEquals("0x29", reader.getCurrentEventDef().getFields().getDefinition("f").toString());
             reader.advance();

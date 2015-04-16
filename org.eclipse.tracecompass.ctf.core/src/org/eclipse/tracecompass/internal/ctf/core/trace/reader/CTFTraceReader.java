@@ -11,7 +11,7 @@
  *     Alexandre Montplaisir - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.ctf.core.trace;
+package org.eclipse.tracecompass.internal.ctf.core.trace.reader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,6 +24,12 @@ import java.util.Set;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
+import org.eclipse.tracecompass.ctf.core.trace.CTFResponse;
+import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
+import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFStreamInputReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.eclipse.tracecompass.internal.ctf.core.Activator;
 import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputReaderTimestampComparator;
 
@@ -37,7 +43,7 @@ import com.google.common.collect.ImmutableSet.Builder;
  * @author Matthew Khouzam
  * @author Alexandre Montplaisir
  */
-public class CTFTraceReader implements AutoCloseable {
+public class CTFTraceReader implements ICTFTraceReader {
 
     private static final int LINE_LENGTH = 60;
 
@@ -116,13 +122,10 @@ public class CTFTraceReader implements AutoCloseable {
     }
 
     /**
-     * Copy constructor
-     *
-     * @return The new CTFTraceReader
-     * @throws CTFReaderException
-     *             if an error occurs
+     * @since 1.0
      */
-    public CTFTraceReader copyFrom() throws CTFReaderException {
+    @Override
+    public ICTFTraceReader copyFrom() throws CTFReaderException {
         CTFTraceReader newReader = null;
 
         newReader = new CTFTraceReader(fTrace);
@@ -154,11 +157,7 @@ public class CTFTraceReader implements AutoCloseable {
     // Getters/Setters/Predicates
     // ------------------------------------------------------------------------
 
-    /**
-     * Return the start time of this trace (== timestamp of the first event)
-     *
-     * @return the trace start time
-     */
+    @Override
     public long getStartTime() {
         return fStartTime;
     }
@@ -197,12 +196,12 @@ public class CTFTraceReader implements AutoCloseable {
          * For each stream.
          */
         for (CTFStream stream : fTrace.getStreams()) {
-            Set<CTFStreamInput> streamInputs = stream.getStreamInputs();
+            Set<ICTFStreamInput> streamInputs = stream.getStreamInputs();
 
             /*
              * For each trace file of the stream.
              */
-            for (CTFStreamInput streamInput : streamInputs) {
+            for (ICTFStreamInput streamInput : streamInputs) {
 
                 /*
                  * Create a reader and add it to the group.
@@ -217,17 +216,12 @@ public class CTFTraceReader implements AutoCloseable {
         fEventCountPerTraceFile = new long[fStreamInputReaders.size()];
     }
 
-    /**
-     * Update the priority queue to make it match the parent trace
-     *
-     * @throws CTFReaderException
-     *             An error occured
-     */
+    @Override
     public void update() throws CTFReaderException {
         Set<CTFStreamInputReader> readers = new HashSet<>();
         for (CTFStream stream : fTrace.getStreams()) {
-            Set<CTFStreamInput> streamInputs = stream.getStreamInputs();
-            for (CTFStreamInput streamInput : streamInputs) {
+            Set<ICTFStreamInput> streamInputs = stream.getStreamInputs();
+            for (ICTFStreamInput streamInput : streamInputs) {
                 /*
                  * Create a reader.
                  */
@@ -254,14 +248,10 @@ public class CTFTraceReader implements AutoCloseable {
         }
     }
 
-    /**
-     * Gets an iterable of the stream input readers, useful for foreaches
-     *
-     * @return the iterable of the stream input readers
-     */
+    @Override
     public Iterable<IEventDeclaration> getEventDeclarations() {
         ImmutableSet.Builder<IEventDeclaration> builder = new Builder<>();
-        for (CTFStreamInputReader sir : fStreamInputReaders) {
+        for (ICTFStreamInputReader sir : fStreamInputReaders) {
             builder.addAll(sir.getEventDeclarations());
         }
         return builder.build();
@@ -309,25 +299,13 @@ public class CTFTraceReader implements AutoCloseable {
         }
     }
 
-    /**
-     * Get the current event, which is the current event of the trace file
-     * reader with the lowest timestamp.
-     *
-     * @return An event definition, or null of the trace reader reached the end
-     *         of the trace.
-     */
+    @Override
     public EventDefinition getCurrentEventDef() {
-        CTFStreamInputReader top = getTopStream();
+        ICTFStreamInputReader top = getTopStream();
         return (top != null) ? top.getCurrentEvent() : null;
     }
 
-    /**
-     * Go to the next event.
-     *
-     * @return True if an event was read.
-     * @throws CTFReaderException
-     *             if an error occurs
-     */
+    @Override
     public boolean advance() throws CTFReaderException {
         /*
          * Remove the reader from the top of the priority queue.
@@ -376,12 +354,10 @@ public class CTFTraceReader implements AutoCloseable {
         return hasMoreEvents();
     }
 
-    /**
-     * Go to the last event in the trace.
-     *
-     * @throws CTFReaderException
-     *             if an error occurs
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFTraceReader#goToLastEvent()
      */
+    @Override
     public void goToLastEvent() throws CTFReaderException {
         seek(getEndTime());
         while (fPrio.size() > 1) {
@@ -389,20 +365,7 @@ public class CTFTraceReader implements AutoCloseable {
         }
     }
 
-    /**
-     * Seeks to a given timestamp. It will seek to the nearest event greater or
-     * equal to timestamp. If a trace is [10 20 30 40] and you are looking for
-     * 19, it will give you 20. If you want 20, you will get 20, if you want 21,
-     * you will get 30. The value -inf will seek to the first element and the
-     * value +inf will seek to the end of the file (past the last event).
-     *
-     * @param timestamp
-     *            the timestamp to seek to
-     * @return true if there are events above or equal the seek timestamp, false
-     *         if seek at the end of the trace (no valid event).
-     * @throws CTFReaderException
-     *             if an error occurs
-     */
+    @Override
     public boolean seek(long timestamp) throws CTFReaderException {
         /*
          * Remove all the trace readers from the priority queue
@@ -433,11 +396,7 @@ public class CTFTraceReader implements AutoCloseable {
         return fPrio.peek();
     }
 
-    /**
-     * Does the trace have more events?
-     *
-     * @return true if yes.
-     */
+    @Override
     public final boolean hasMoreEvents() {
         return fPrio.size() > 0;
     }
@@ -466,7 +425,7 @@ public class CTFTraceReader implements AutoCloseable {
         }
 
         for (int j = 0; j < fEventCountPerTraceFile.length; j++) {
-            CTFStreamInputReader se = fStreamInputReaders.get(j);
+            ICTFStreamInputReader se = fStreamInputReaders.get(j);
 
             long len = (width * fEventCountPerTraceFile[se.getName()])
                     / numEvents;
@@ -487,33 +446,25 @@ public class CTFTraceReader implements AutoCloseable {
         }
     }
 
-    /**
-     * Gets the last event timestamp that was read. This is NOT necessarily the
-     * last event in a trace, just the last one read so far.
-     *
-     * @return the last event
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFTraceReader#getEndTime()
      */
+    @Override
     public long getEndTime() {
         return fEndTime;
     }
 
-    /**
-     * Sets a trace to be live or not
-     *
-     * @param live
-     *            whether the trace is live
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFTraceReader#setLive(boolean)
      */
+    @Override
     public void setLive(boolean live) {
         for (CTFStreamInputReader s : fPrio) {
             s.setLive(live);
         }
     }
 
-    /**
-     * Get if the trace is to read live or not
-     *
-     * @return whether the trace is live or not
-     */
+    @Override
     public boolean isLive() {
         return getTopStream().isLive();
     }
@@ -559,11 +510,10 @@ public class CTFTraceReader implements AutoCloseable {
         return "CTFTraceReader [trace=" + fTrace + ']'; //$NON-NLS-1$
     }
 
-    /**
-     * Gets the parent trace
-     *
-     * @return the parent trace
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFTraceReader#getTrace()
      */
+    @Override
     public CTFTrace getTrace() {
         return fTrace;
     }

@@ -25,10 +25,11 @@ import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInput;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
 import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
 import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -183,7 +184,7 @@ public class CTFStreamTest {
      */
     @Test
     public void testGetStreamInputs() {
-        Set<CTFStreamInput> result = fixture.getStreamInputs();
+        Set<ICTFStreamInput> result = fixture.getStreamInputs();
         assertNotNull(result);
     }
 

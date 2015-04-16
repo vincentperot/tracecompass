@@ -24,7 +24,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.tests.shared.CtfTestTrace;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
 import org.junit.Before;
 import org.junit.Test;
@@ -317,7 +317,7 @@ public class EventDeclarationTest {
     public void testEventDefinition() throws CTFReaderException {
         CTFTrace trace = testTrace.getTrace();
         EventDefinition ed = null;
-        try (CTFTraceReader tr = new CTFTraceReader(trace);) {
+        try (ICTFTraceReader tr = trace.createReader();) {
             tr.advance();
             ed = tr.getCurrentEventDef();
         }
@@ -329,7 +329,6 @@ public class EventDeclarationTest {
         assertNull(ed.getContext());
         assertNotNull(ed.getPacketContext());
         assertNotNull(ed.getCPU());
-        assertNotNull(ed.getStreamInputReader());
         assertNull(ed.lookupDefinition("context"));
         assertNotNull(ed.lookupDefinition("fields"));
         assertNull(ed.lookupDefinition("other"));

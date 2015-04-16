@@ -9,7 +9,7 @@
  * Contributors: Matthew Khouzam - Initial API and implementation
  * Contributors: Simon Marchi - Initial API and implementation
  *******************************************************************************/
-package org.eclipse.tracecompass.ctf.core.trace;
+package org.eclipse.tracecompass.internal.ctf.core.trace.reader;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -36,9 +36,14 @@ import org.eclipse.tracecompass.ctf.core.event.types.SimpleDatatypeDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.VariantDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFPacketReader;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.composite.EventHeaderDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
 
 import com.google.common.collect.ImmutableList;
 
@@ -48,7 +53,7 @@ import com.google.common.collect.ImmutableList;
  * @author Matthew Khouzam
  * @author Simon Marchi
  */
-public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseable {
+public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketReader {
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -98,6 +103,8 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
 
     private boolean fHasLost = false;
 
+    private CTFStreamInput fStreamInput;
+
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
@@ -118,49 +125,51 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         }
         fBitBuffer = new BitBuffer(allocateDirect);
 
-        final CTFStream currentStream = streamInputReader.getStreamInput().getStream();
+        ICTFStreamInput streamInput = streamInputReader.getStreamInput();
+        if (!(streamInput instanceof CTFStreamInput)) {
+            throw new IllegalArgumentException("streamInputReader must have a valid stream input"); //$NON-NLS-1$
+        }
+        fStreamInput = (CTFStreamInput) streamInput;
+        final CTFStream currentStream = streamInput.getStream();
         fTracePacketHeaderDecl = currentStream.getTrace().getPacketHeader();
         fStreamPacketContextDecl = currentStream.getPacketContextDecl();
         fStreamEventHeaderDecl = currentStream.getEventHeaderDeclaration();
         fStreamEventContextDecl = currentStream.getEventContextDecl();
     }
 
-    /**
-     * Get the event context defintiion
+    /*
+     * (non-Javadoc)
      *
-     * @param input
-     *            the bitbuffer to read from
-     * @return an context definition, can be null
-     * @throws CTFReaderException
-     *             out of bounds exception or such
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFPacketReader#
+     * getEventContextDefinition
+     * (org.eclipse.tracecompass.ctf.core.event.io.BitBuffer)
      */
-    public StructDefinition getEventContextDefinition(@NonNull BitBuffer input) throws CTFReaderException {
+    @Override
+    public StructDefinition getEventContextDefinition(BitBuffer input) throws CTFReaderException {
         return fStreamEventContextDecl.createDefinition(fStreamInputReader.getStreamInput(), ILexicalScope.STREAM_EVENT_CONTEXT, input);
     }
 
-    /**
-     * Get the packet context defintiion
+    /*
+     * (non-Javadoc)
      *
-     * @param input
-     *            the bitbuffer to read from
-     * @return an context definition, can be null
-     * @throws CTFReaderException
-     *             out of bounds exception or such
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFPacketReader#
+     * getStreamPacketContextDefinition
+     * (org.eclipse.tracecompass.ctf.core.event.io.BitBuffer)
      */
-    public StructDefinition getStreamPacketContextDefinition(@NonNull BitBuffer input) throws CTFReaderException {
+    @Override
+    public StructDefinition getStreamPacketContextDefinition(BitBuffer input) throws CTFReaderException {
         return fStreamPacketContextDecl.createDefinition(fStreamInputReader.getStreamInput(), ILexicalScope.STREAM_PACKET_CONTEXT, input);
     }
 
-    /**
-     * Get the event header defintiion
+    /*
+     * (non-Javadoc)
      *
-     * @param input
-     *            the bitbuffer to read from
-     * @return an header definition, can be null
-     * @throws CTFReaderException
-     *             out of bounds exception or such
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFPacketReader#
+     * getTracePacketHeaderDefinition
+     * (org.eclipse.tracecompass.ctf.core.event.io.BitBuffer)
      */
-    public StructDefinition getTracePacketHeaderDefinition(@NonNull BitBuffer input) throws CTFReaderException {
+    @Override
+    public StructDefinition getTracePacketHeaderDefinition(BitBuffer input) throws CTFReaderException {
         return fTracePacketHeaderDecl.createDefinition(fStreamInputReader.getStreamInput().getStream().getTrace(), ILexicalScope.TRACE_PACKET_HEADER, input);
     }
 
@@ -185,11 +194,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         return fCurrentPacket;
     }
 
-    /**
-     * Gets the CPU (core) number
-     *
-     * @return the CPU (core) number
-     */
+    @Override
     public int getCPU() {
         return fCurrentCpu;
     }
@@ -265,11 +270,12 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
                      * to 1.
                      */
                     long lostEventsStartTime;
-                    int index = fStreamInputReader.getStreamInput().getIndex().indexOf(currentPacket);
+
+                    int index = fStreamInput.getIndex().indexOf(currentPacket);
                     if (index == 0) {
                         lostEventsStartTime = currentPacket.getTimestampBegin() + 1;
                     } else {
-                        prevPacket = fStreamInputReader.getStreamInput().getIndex().getElement(index - 1);
+                        prevPacket = fStreamInput.getIndex().getElement(index - 1);
                         lostEventsStartTime = prevPacket.getTimestampEnd();
                     }
                     fLostEventsDuration = Math.abs(lostEventsStartTime - currentPacket.getTimestampBegin());
@@ -287,11 +293,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         }
     }
 
-    /**
-     * Returns whether it is possible to read any more events from this packet.
-     *
-     * @return True if it is possible to read any more events from this packet.
-     */
+    @Override
     public boolean hasMoreEvents() {
         BitBuffer bitBuffer = fBitBuffer;
         ICTFPacketInformation currentPacket = fCurrentPacket;
@@ -301,14 +303,13 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         return false;
     }
 
-    /**
-     * Reads the next event of the packet into the right event definition.
+    /*
+     * (non-Javadoc)
      *
-     * @return The event definition containing the event data that was just
-     *         read.
-     * @throws CTFReaderException
-     *             If there was a problem reading the trace
+     * @see
+     * org.eclipse.tracecompass.ctf.core.trace.ICTFPacketReader#readNextEvent()
      */
+    @Override
     public EventDefinition readNextEvent() throws CTFReaderException {
         /* Default values for those fields */
         // compromise since we cannot have 64 bit addressing of arrays yet.
@@ -489,21 +490,12 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         return null;
     }
 
-
-    /**
-     * Get stream event header
-     *
-     * @return the stream event header
-     */
+    @Override
     public ICompositeDefinition getStreamEventHeaderDefinition() {
         return fCurrentStreamEventHeaderDef;
     }
 
-    /**
-     * Get the current packet event header
-     *
-     * @return the current packet event header
-     */
+    @Override
     public StructDefinition getCurrentPacketEventHeader() {
         if (fCurrentTracePacketHeaderDef instanceof StructDefinition) {
             return (StructDefinition) fCurrentTracePacketHeaderDef;

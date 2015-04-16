@@ -38,7 +38,7 @@ import org.eclipse.tracecompass.ctf.core.event.CTFCallsite;
 import org.eclipse.tracecompass.ctf.core.event.CTFClock;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.trace.iterator.CtfIterator;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.trace.iterator.CtfIteratorManager;
@@ -225,7 +225,7 @@ public class CtfTmfTrace extends TmfTrace
             if (!trace.majorIsSet()) {
                 return new Status(IStatus.ERROR, Activator.PLUGIN_ID, Messages.CtfTmfTrace_MajorNotSet);
             }
-            try (CTFTraceReader ctfTraceReader = new CTFTraceReader(trace)) {
+            try (ICTFTraceReader ctfTraceReader = trace.createReader()) {
                 if (!ctfTraceReader.hasMoreEvents()) {
                     // TODO: This will need an additional check when we
                     // support live traces
@@ -264,8 +264,9 @@ public class CtfTmfTrace extends TmfTrace
         context.setLocation(curLocation);
         context.seek(curLocation.getLocationInfo());
         final CtfLocationInfo currentTime = ((CtfLocationInfo) context.getLocation().getLocationInfo());
-        final long startTime = fIteratorManager.getIterator(context).getStartTime();
-        final long endTime = fIteratorManager.getIterator(context).getEndTime();
+        CtfIterator iterator = fIteratorManager.getIterator(context);
+        final long startTime = iterator.getStartTime();
+        final long endTime = iterator.getEndTime();
         return ((double) currentTime.getTimestamp() - startTime)
                 / (endTime - startTime);
     }

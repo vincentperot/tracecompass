@@ -45,10 +45,13 @@ import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
 import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
+import org.eclipse.tracecompass.internal.ctf.core.trace.reader.CTFTraceReader;
 
 /**
  * A CTF trace on the file system.
@@ -205,8 +208,8 @@ public class CTFTrace implements IDefinitionScope {
 
         /* Create their index */
         for (CTFStream stream : getStreams()) {
-            Set<CTFStreamInput> inputs = stream.getStreamInputs();
-            for (CTFStreamInput s : inputs) {
+            Set<ICTFStreamInput> inputs = stream.getStreamInputs();
+            for (ICTFStreamInput s : inputs) {
                 addStream(s);
             }
         }
@@ -370,6 +373,18 @@ public class CTFTrace implements IDefinitionScope {
     }
 
     /**
+     * Creates a reader for this trace
+     *
+     * @return the trace reader
+     * @throws CTFReaderException
+     *             something wrong happened during the opening of the trace
+      * @since 1.0
+     */
+    public ICTFTraceReader createReader() throws CTFReaderException {
+        return new CTFTraceReader(this);
+    }
+
+    /**
      * Method getByteOrder gets the trace byte order
      *
      * @return ByteOrder gets the trace byte order
@@ -419,18 +434,13 @@ public class CTFTrace implements IDefinitionScope {
     // Operations
     // ------------------------------------------------------------------------
 
-    private void addStream(CTFStreamInput s) {
+    private void addStream(ICTFStreamInput s) {
 
         /*
          * add the stream
          */
         CTFStream stream = s.getStream();
         fStreams.put(stream.getId(), stream);
-
-        /*
-         * index the trace
-         */
-        s.setupIndex();
     }
 
     /**
@@ -702,8 +712,8 @@ public class CTFTrace implements IDefinitionScope {
     public long getCurrentStartTime() {
         long currentStart = Long.MAX_VALUE;
         for (CTFStream stream : fStreams.values()) {
-            for (CTFStreamInput si : stream.getStreamInputs()) {
-                currentStart = Math.min(currentStart, si.getIndex().getElement(0).getTimestampBegin());
+            for (ICTFStreamInput si : stream.getStreamInputs()) {
+                currentStart = Math.min(currentStart, si.getTimestampBegin());
             }
         }
         return timestampCyclesToNanos(currentStart);
@@ -717,7 +727,7 @@ public class CTFTrace implements IDefinitionScope {
     public long getCurrentEndTime() {
         long currentEnd = Long.MIN_VALUE;
         for (CTFStream stream : fStreams.values()) {
-            for (CTFStreamInput si : stream.getStreamInputs()) {
+            for (ICTFStreamInput si : stream.getStreamInputs()) {
                 currentEnd = Math.max(currentEnd, si.getTimestampEnd());
             }
         }

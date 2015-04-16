@@ -10,7 +10,7 @@
  * Contributors: Simon Marchi - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.ctf.core.trace;
+package org.eclipse.tracecompass.internal.ctf.core.trace.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,15 @@ import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
+import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.CTFResponse;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFPacketReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFStreamInputReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.eclipse.tracecompass.internal.ctf.core.Activator;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
 
 import com.google.common.collect.ImmutableList;
 
@@ -33,7 +41,7 @@ import com.google.common.collect.ImmutableList;
  * @author Matthew Khouzam
  * @author Simon Marchi
  */
-public class CTFStreamInputReader implements AutoCloseable {
+public class CTFStreamInputReader implements ICTFStreamInputReader {
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -66,7 +74,7 @@ public class CTFStreamInputReader implements AutoCloseable {
 
     private int fId;
 
-    private CTFTraceReader fParent;
+    private ICTFTraceReader fParent;
 
     /**
      * Live trace reading
@@ -84,11 +92,11 @@ public class CTFStreamInputReader implements AutoCloseable {
      * @throws CTFReaderException
      *             If the file cannot be opened
      */
-    public CTFStreamInputReader(CTFStreamInput streamInput) throws CTFReaderException {
-        if (streamInput == null) {
-            throw new IllegalArgumentException("stream cannot be null"); //$NON-NLS-1$
+    public CTFStreamInputReader(ICTFStreamInput streamInput) throws CTFReaderException {
+        if (!(streamInput instanceof CTFStreamInput)) {
+            throw new IllegalArgumentException("stream must be a ctf stream input"); //$NON-NLS-1$
         }
-        fStreamInput = streamInput;
+        fStreamInput = (CTFStreamInput) streamInput;
         fFile = fStreamInput.getFile();
         try {
             fFileChannel = FileChannel.open(fFile.toPath(), StandardOpenOption.READ);
@@ -123,30 +131,37 @@ public class CTFStreamInputReader implements AutoCloseable {
     // Getters/Setters/Predicates
     // ------------------------------------------------------------------------
 
-    /**
-     * Gets the current event in this stream
+    /*
+     * (non-Javadoc)
      *
-     * @return the current event in the stream, null if the stream is
-     *         finished/empty/malformed
+     * @see
+     * org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader#getCurrentEvent
+     * ()
      */
+    @Override
     public EventDefinition getCurrentEvent() {
         return fCurrentEvent;
     }
 
-    /**
-     * Gets the byte order for a trace
+    /*
+     * (non-Javadoc)
      *
-     * @return the trace byte order
+     * @see
+     * org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader#getByteOrder
+     * ()
      */
+    @Override
     public ByteOrder getByteOrder() {
         return fStreamInput.getStream().getTrace().getByteOrder();
     }
 
-    /**
-     * Gets the name of the stream (it's an id and a number)
+    /*
+     * (non-Javadoc)
      *
-     * @return gets the stream name (it's a number)
+     * @see
+     * org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader#getName()
      */
+    @Override
     public int getName() {
         return fId;
     }
@@ -161,21 +176,25 @@ public class CTFStreamInputReader implements AutoCloseable {
         fId = name;
     }
 
-    /**
-     * Gets the CPU of a stream. It's the same as the one in /proc or running
-     * the asm CPUID instruction
+    /*
+     * (non-Javadoc)
      *
-     * @return The CPU id (a number)
+     * @see
+     * org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader#getCPU()
      */
+    @Override
     public int getCPU() {
         return fPacketReader.getCPU();
     }
 
-    /**
-     * Gets the filename of the stream being read
+    /*
+     * (non-Javadoc)
      *
-     * @return The filename of the stream being read
+     * @see
+     * org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader#getFilename
+     * ()
      */
+    @Override
     public String getFilename() {
         return fStreamInput.getFilename();
     }
@@ -183,15 +202,17 @@ public class CTFStreamInputReader implements AutoCloseable {
     /*
      * for internal use only
      */
-    CTFStreamInput getStreamInput() {
+    ICTFStreamInput getStreamInput() {
         return fStreamInput;
     }
 
-    /**
-     * Gets the event definition set for this StreamInput
+    /*
+     * (non-Javadoc)
      *
-     * @return Unmodifiable set with the event definitions
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader#
+     * getEventDeclarations()
      */
+    @Override
     public Iterable<IEventDeclaration> getEventDeclarations() {
         return ImmutableList.copyOf(fStreamInput.getStream().getEventDeclarations());
     }
@@ -215,11 +236,13 @@ public class CTFStreamInputReader implements AutoCloseable {
         return fLive;
     }
 
-    /**
-     * Get the event context of the stream
+    /*
+     * (non-Javadoc)
      *
-     * @return the event context declaration of the stream
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader#
+     * getStreamEventContextDecl()
      */
+    @Override
     public StructDeclaration getStreamEventContextDecl() {
         return getStreamInput().getStream().getEventContextDecl();
     }
@@ -405,10 +428,14 @@ public class CTFStreamInputReader implements AutoCloseable {
         this.setCurrentEvent(prevEvent);
     }
 
-    /**
-     * @return the parent
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInputReader#getParent()
      */
-    public CTFTraceReader getParent() {
+    @Override
+    public ICTFTraceReader getParent() {
         return fParent;
     }
 
@@ -416,7 +443,7 @@ public class CTFStreamInputReader implements AutoCloseable {
      * @param parent
      *            the parent to set
      */
-    public void setParent(CTFTraceReader parent) {
+    public void setParent(ICTFTraceReader parent) {
         fParent = parent;
     }
 
@@ -452,8 +479,9 @@ public class CTFStreamInputReader implements AutoCloseable {
 
     /**
      * @return the packetReader
+     * @since 1.0
      */
-    public CTFStreamInputPacketReader getPacketReader() {
+    public ICTFPacketReader getPacketReader() {
         return fPacketReader;
     }
 
@@ -489,6 +517,11 @@ public class CTFStreamInputReader implements AutoCloseable {
     public String toString() {
         // this helps debugging
         return fId + ' ' + fCurrentEvent.toString();
+    }
+
+    @Override
+    public StructDefinition getCurrentPacketEventHeader() {
+        return getPacketReader().getCurrentPacketEventHeader();
     }
 
 }

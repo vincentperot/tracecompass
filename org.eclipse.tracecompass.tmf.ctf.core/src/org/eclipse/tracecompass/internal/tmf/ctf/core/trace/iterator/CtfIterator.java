@@ -16,9 +16,10 @@ package org.eclipse.tracecompass.internal.tmf.ctf.core.trace.iterator;
 import static org.eclipse.tracecompass.common.core.NonNullUtils.equalsNullable;
 
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
-import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
+import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
-import org.eclipse.tracecompass.ctf.core.trace.CTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFStreamInputReader;
+import org.eclipse.tracecompass.internal.ctf.core.trace.reader.CTFTraceReader;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.location.ITmfLocation;
@@ -36,6 +37,7 @@ import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
  *
  * @author Matthew Khouzam
  */
+@SuppressWarnings("restriction")
 public class CtfIterator extends CTFTraceReader
         implements ITmfContext, Comparable<CtfIterator> {
 
@@ -101,7 +103,7 @@ public class CtfIterator extends CTFTraceReader
         super(ctfTrace);
 
         this.fTrace = ctfTmfTrace;
-        if (this.hasMoreEvents()) {
+        if (hasMoreEvents()) {
             this.fCurLocation = new CtfLocation(ctfLocationData);
             if (this.getCurrentEvent().getTimestamp().getValue() != ctfLocationData.getTimestamp()) {
                 this.seek(ctfLocationData);
@@ -141,7 +143,7 @@ public class CtfIterator extends CTFTraceReader
      * @return CtfTmfEvent The current event
      */
     public synchronized CtfTmfEvent getCurrentEvent() {
-        final CTFStreamInputReader top = super.getPrio().peek();
+        final ICTFStreamInputReader top = super.getPrio().peek();
         if (top != null) {
             if (!fCurLocation.equals(fPreviousLocation)) {
                 fPreviousLocation = fCurLocation;
@@ -160,7 +162,7 @@ public class CtfIterator extends CTFTraceReader
      * @return long The current timestamp location
      */
     public synchronized long getCurrentTimestamp() {
-        final CTFStreamInputReader top = super.getPrio().peek();
+        final ICTFStreamInputReader top = super.getPrio().peek();
         if (top != null) {
             long ts = top.getCurrentEvent().getTimestamp();
             return fTrace.timestampCyclesToNanos(ts);
@@ -258,6 +260,21 @@ public class CtfIterator extends CTFTraceReader
             fCurLocation = NULL_LOCATION;
         }
         return ret;
+    }
+
+    @Override
+    public long getStartTime() {
+        return super.getStartTime();
+    }
+
+    @Override
+    public long getEndTime() {
+        return super.getEndTime();
+    }
+
+    @Override
+    public Iterable<IEventDeclaration> getEventDeclarations() {
+        return super.getEventDeclarations();
     }
 
     // ------------------------------------------------------------------------

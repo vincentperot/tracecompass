@@ -10,7 +10,7 @@
  * Contributors: Simon Marchi - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.ctf.core.trace;
+package org.eclipse.tracecompass.internal.ctf.core.trace;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,17 +24,18 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
-import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.scope.ILexicalScope;
 import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Definition;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.trace.Utils;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndex;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
 
 /**
  * <b><u>StreamInput</u></b>
@@ -42,7 +43,7 @@ import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEn
  * Represents a trace file that belongs to a certain stream.
  */
 @NonNullByDefault
-public class CTFStreamInput implements IDefinitionScope {
+public class CTFStreamInput implements ICTFStreamInput {
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -119,11 +120,10 @@ public class CTFStreamInput implements IDefinitionScope {
     // Getters/Setters/Predicates
     // ------------------------------------------------------------------------
 
-    /**
-     * Gets the stream the streamInput wrapper is wrapping
-     *
-     * @return the stream the streamInput wrapper is wrapping
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput#getStream()
      */
+    @Override
     public CTFStream getStream() {
         return fStream;
     }
@@ -132,16 +132,13 @@ public class CTFStreamInput implements IDefinitionScope {
      * The common streamInput Index
      *
      * @return the stream input Index
+     * @since 1.0
      */
-    StreamInputPacketIndex getIndex() {
+    public StreamInputPacketIndex getIndex() {
         return fIndex;
     }
 
-    /**
-     * Gets the filename of the streamInput file.
-     *
-     * @return the filename of the streaminput file.
-     */
+    @Override
     public String getFilename() {
         String name = fFile.getName();
         if (name == null) {
@@ -150,12 +147,12 @@ public class CTFStreamInput implements IDefinitionScope {
         return name;
     }
 
-    /**
-     * Gets the last read timestamp of a stream. (this is not necessarily the
-     * last time in the stream.)
-     *
-     * @return the last read timestamp
-     */
+    @Override
+    public long getTimestampBegin() {
+        return getIndex().getElement(0).getTimestampBegin();
+    }
+
+    @Override
     public long getTimestampEnd() {
         return fTimestampEnd;
     }
@@ -187,19 +184,6 @@ public class CTFStreamInput implements IDefinitionScope {
     public @Nullable Definition lookupDefinition(@Nullable String lookupPath) {
         /* TODO: lookup in different dynamic scopes is not supported yet. */
         return null;
-    }
-
-    /**
-     * Create the index for this trace file.
-     */
-    public void setupIndex() {
-
-        /*
-         * The BitBuffer to extract data from the StreamInput
-         */
-        BitBuffer bitBuffer = new BitBuffer();
-        bitBuffer.setByteOrder(getStream().getTrace().getByteOrder());
-
     }
 
     /**
@@ -365,12 +349,11 @@ public class CTFStreamInput implements IDefinitionScope {
         return packetIndex;
     }
 
+
     /**
-     * Get the file
-     *
-     * @return the file
      * @since 1.0
      */
+    @Override
     public File getFile() {
         return fFile;
     }

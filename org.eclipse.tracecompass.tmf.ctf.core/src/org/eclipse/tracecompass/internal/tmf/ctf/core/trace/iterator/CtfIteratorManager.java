@@ -190,6 +190,8 @@ public class CtfIteratorManager {
         }
     }
 
+
+
     /**
      * Dispose this iterator manager, which will close all the remaining
      * iterators.
