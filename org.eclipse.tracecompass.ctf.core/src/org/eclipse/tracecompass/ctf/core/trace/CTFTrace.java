@@ -46,12 +46,14 @@ import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
+import org.eclipse.tracecompass.ctf.core.trace.writer.ICTFTraceCropper;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
 import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.trace.CTFStreamInput;
 import org.eclipse.tracecompass.internal.ctf.core.trace.reader.CTFTraceReader;
+import org.eclipse.tracecompass.internal.ctf.core.trace.writer.CTFTraceWriter;
 
 /**
  * A CTF trace on the file system.
@@ -382,6 +384,18 @@ public class CTFTrace implements IDefinitionScope {
      */
     public ICTFTraceReader createReader() throws CTFException {
         return new CTFTraceReader(this);
+    }
+
+    /**
+     * Creates a reader for this trace
+     *
+     * @return the trace reader
+     * @throws CTFException
+     *             something wrong happened during the opening of the trace
+      * @since 1.0
+     */
+    public ICTFTraceCropper createCropper() throws CTFException {
+        return new CTFTraceWriter(this);
     }
 
     /**

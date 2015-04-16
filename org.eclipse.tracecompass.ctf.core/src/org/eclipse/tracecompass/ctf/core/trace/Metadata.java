@@ -14,6 +14,7 @@
 
 package org.eclipse.tracecompass.ctf.core.trace;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -23,6 +24,9 @@ import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import org.antlr.runtime.ANTLRReaderStream;
@@ -388,6 +392,15 @@ public class Metadata {
         metadataText.append(str);
 
         return header;
+    }
+
+    /**
+     * @since 1.0
+     */
+    public Path copyTo(final File path) throws IOException {
+        Path source = FileSystems.getDefault().getPath(trace.getTraceDirectory().getAbsolutePath(), METADATA_FILENAME);
+        Path destPath = FileSystems.getDefault().getPath(path.getAbsolutePath());
+        return Files.copy(source, destPath.resolve(source.getFileName()));
     }
 
     private static class MetadataPacketHeader {
