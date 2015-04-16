@@ -22,7 +22,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.ctf.core.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.CTFException;
 import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.ILexicalScope;
 import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
@@ -193,10 +193,10 @@ public class CTFStreamInput implements ICTFStreamInput {
      * properly</strong>
      *
      * @return true if there are more packets to add
-     * @throws CTFReaderException
+     * @throws CTFException
      *             If there was a problem reading the packed header
      */
-    public boolean addPacketHeaderIndex() throws CTFReaderException {
+    public boolean addPacketHeaderIndex() throws CTFException {
         long currentPosBits = 0L;
         if (!fIndex.isEmpty()) {
             ICTFPacketInformation pos = fIndex.lastElement();
@@ -217,7 +217,7 @@ public class CTFStreamInput implements ICTFStreamInput {
     }
 
     private StreamInputPacketIndexEntry createPacketIndexEntry(long dataOffsetbits)
-            throws CTFReaderException {
+            throws CTFException {
 
         try (FileChannel fc = FileChannel.open(fFile.toPath(), StandardOpenOption.READ)) {
             if (fc == null) {
@@ -237,19 +237,19 @@ public class CTFStreamInput implements ICTFStreamInput {
 
             /* Basic validation */
             if (packetIndex.getContentSizeBits() > packetIndex.getPacketSizeBits()) {
-                throw new CTFReaderException("Content size > packet size"); //$NON-NLS-1$
+                throw new CTFException("Content size > packet size"); //$NON-NLS-1$
             }
 
             if (packetIndex.getPacketSizeBits() > ((size * Byte.SIZE - packetIndex.getOffsetBits()))) {
-                throw new CTFReaderException("Not enough data remaining in the file for the size of this packet"); //$NON-NLS-1$
+                throw new CTFException("Not enough data remaining in the file for the size of this packet"); //$NON-NLS-1$
             }
             return packetIndex;
         } catch (IOException e) {
-            throw new CTFReaderException("Failed to create packet index entry", e); //$NON-NLS-1$
+            throw new CTFException("Failed to create packet index entry", e); //$NON-NLS-1$
         }
     }
 
-    private BitBuffer createBitBufferForPacketHeader(FileChannel fc, long dataOffsetbits) throws CTFReaderException, IOException {
+    private BitBuffer createBitBufferForPacketHeader(FileChannel fc, long dataOffsetbits) throws CTFException, IOException {
         /*
          * create a packet bit buffer to read the packet header
          */
@@ -259,16 +259,16 @@ public class CTFStreamInput implements ICTFStreamInput {
         return bitBuffer;
     }
 
-    private static ByteBuffer getByteBufferAt(FileChannel fc, long position, long size) throws CTFReaderException, IOException {
+    private static ByteBuffer getByteBufferAt(FileChannel fc, long position, long size) throws CTFException, IOException {
         ByteBuffer map = SafeMappedByteBuffer.map(fc, MapMode.READ_ONLY, position, size);
         if (map == null) {
-            throw new CTFReaderException("Failed to allocate mapped byte buffer"); //$NON-NLS-1$
+            throw new CTFException("Failed to allocate mapped byte buffer"); //$NON-NLS-1$
         }
         return map;
     }
 
     private static ByteBuffer createPacketBitBuffer(FileChannel fc,
-            long packetOffsetBytes, long maxSize) throws CTFReaderException, IOException {
+            long packetOffsetBytes, long maxSize) throws CTFException, IOException {
         /*
          * If there is less data remaining than what we want to map, reduce the
          * map size.
@@ -289,12 +289,12 @@ public class CTFStreamInput implements ICTFStreamInput {
         try {
             return getByteBufferAt(fc, packetOffsetBytes, mapSize);
         } catch (IllegalArgumentException | IOException e) {
-            throw new CTFReaderException(e);
+            throw new CTFException(e);
         }
     }
 
     private StructDefinition parseTracePacketHeader(
-            BitBuffer bitBuffer) throws CTFReaderException {
+            BitBuffer bitBuffer) throws CTFException {
 
         StructDefinition tracePacketHeaderDef = fTracePacketHeaderDecl.createDefinition(fStream.getTrace(), ILexicalScope.TRACE_PACKET_HEADER, bitBuffer);
 
@@ -306,7 +306,7 @@ public class CTFStreamInput implements ICTFStreamInput {
         if (magicDef != null) {
             int magic = (int) magicDef.getValue();
             if (magic != Utils.CTF_MAGIC) {
-                throw new CTFReaderException(
+                throw new CTFException(
                         "CTF magic mismatch " + Integer.toHexString(magic) + " vs " + Integer.toHexString(Utils.CTF_MAGIC)); //$NON-NLS-1$//$NON-NLS-2$
             }
         }
@@ -320,7 +320,7 @@ public class CTFStreamInput implements ICTFStreamInput {
             UUID uuid = Utils.getUUIDfromDefinition(uuidDef);
 
             if (!getStream().getTrace().getUUID().equals(uuid)) {
-                throw new CTFReaderException("UUID mismatch"); //$NON-NLS-1$
+                throw new CTFException("UUID mismatch"); //$NON-NLS-1$
             }
         }
 
@@ -333,14 +333,14 @@ public class CTFStreamInput implements ICTFStreamInput {
             long streamID = streamIDDef.getValue();
 
             if (streamID != getStream().getId()) {
-                throw new CTFReaderException("Stream ID changing within a StreamInput"); //$NON-NLS-1$
+                throw new CTFException("Stream ID changing within a StreamInput"); //$NON-NLS-1$
             }
         }
         return tracePacketHeaderDef;
     }
 
     private StreamInputPacketIndexEntry parsePacketContext(long dataOffsetBits, long fileSizeBytes,
-            BitBuffer bitBuffer) throws CTFReaderException {
+            BitBuffer bitBuffer) throws CTFException {
         StreamInputPacketIndexEntry packetIndex;
         StructDefinition streamPacketContextDef = fStreamPacketContextDecl.createDefinition(this, ILexicalScope.STREAM_PACKET_CONTEXT, bitBuffer);
         packetIndex = new StreamInputPacketIndexEntry(dataOffsetBits, streamPacketContextDef, fileSizeBytes, fLostSoFar);

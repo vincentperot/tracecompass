@@ -1,6 +1,6 @@
 package org.eclipse.tracecompass.ctf.core.trace.reader;
 
-import org.eclipse.tracecompass.ctf.core.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.CTFException;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
@@ -14,10 +14,10 @@ public interface ICTFTraceReader extends AutoCloseable {
      * Copy constructor
      *
      * @return The new CTFTraceReader
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    ICTFTraceReader copyFrom() throws CTFReaderException;
+    ICTFTraceReader copyFrom() throws CTFException;
 
     /**
      * Return the start time of this trace (== timestamp of the first event)
@@ -29,10 +29,10 @@ public interface ICTFTraceReader extends AutoCloseable {
     /**
      * Update the priority queue to make it match the parent trace
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             An error occured
      */
-    void update() throws CTFReaderException;
+    void update() throws CTFException;
 
     /**
      * Gets an iterable of the stream input readers, useful for foreaches
@@ -54,18 +54,18 @@ public interface ICTFTraceReader extends AutoCloseable {
      * Go to the next event.
      *
      * @return True if an event was read.
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    boolean advance() throws CTFReaderException;
+    boolean advance() throws CTFException;
 
     /**
      * Go to the last event in the trace.
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    void goToLastEvent() throws CTFReaderException;
+    void goToLastEvent() throws CTFException;
 
     /**
      * Seeks to a given timestamp. It will seek to the nearest event greater or
@@ -78,10 +78,10 @@ public interface ICTFTraceReader extends AutoCloseable {
      *            the timestamp to seek to
      * @return true if there are events above or equal the seek timestamp, false
      *         if seek at the end of the trace (no valid event).
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    boolean seek(long timestamp) throws CTFReaderException;
+    boolean seek(long timestamp) throws CTFException;
 
 
 

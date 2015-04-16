@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.eclipse.tracecompass.ctf.core.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.CTFException;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.trace.CTFResponse;
@@ -93,10 +93,10 @@ public class CTFTraceReader implements ICTFTraceReader {
      *
      * @param trace
      *            The trace to read from.
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    public CTFTraceReader(CTFTrace trace) throws CTFReaderException {
+    public CTFTraceReader(CTFTrace trace) throws CTFException {
         fTrace = trace;
         fStreamInputReaders.clear();
 
@@ -125,7 +125,7 @@ public class CTFTraceReader implements ICTFTraceReader {
      * @since 1.0
      */
     @Override
-    public ICTFTraceReader copyFrom() throws CTFReaderException {
+    public ICTFTraceReader copyFrom() throws CTFException {
         CTFTraceReader newReader = null;
 
         newReader = new CTFTraceReader(fTrace);
@@ -188,10 +188,10 @@ public class CTFTraceReader implements ICTFTraceReader {
     /**
      * Creates one trace file reader per trace file contained in the trace.
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    private void createStreamInputReaders() throws CTFReaderException {
+    private void createStreamInputReaders() throws CTFException {
         /*
          * For each stream.
          */
@@ -217,7 +217,7 @@ public class CTFTraceReader implements ICTFTraceReader {
     }
 
     @Override
-    public void update() throws CTFReaderException {
+    public void update() throws CTFException {
         Set<CTFStreamInputReader> readers = new HashSet<>();
         for (CTFStream stream : fTrace.getStreams()) {
             Set<ICTFStreamInput> streamInputs = stream.getStreamInputs();
@@ -261,10 +261,10 @@ public class CTFTraceReader implements ICTFTraceReader {
      * Initializes the priority queue used to choose the trace file with the
      * lower next event timestamp.
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    private void populateStreamInputReaderHeap() throws CTFReaderException {
+    private void populateStreamInputReaderHeap() throws CTFException {
         if (fStreamInputReaders.isEmpty()) {
             fPrio = new PriorityQueue<>(MIN_PRIO_SIZE,
                     new StreamInputReaderTimestampComparator());
@@ -306,7 +306,7 @@ public class CTFTraceReader implements ICTFTraceReader {
     }
 
     @Override
-    public boolean advance() throws CTFReaderException {
+    public boolean advance() throws CTFException {
         /*
          * Remove the reader from the top of the priority queue.
          */
@@ -358,7 +358,7 @@ public class CTFTraceReader implements ICTFTraceReader {
      * @see org.eclipse.tracecompass.ctf.core.trace.ICTFTraceReader#goToLastEvent()
      */
     @Override
-    public void goToLastEvent() throws CTFReaderException {
+    public void goToLastEvent() throws CTFException {
         seek(getEndTime());
         while (fPrio.size() > 1) {
             advance();
@@ -366,7 +366,7 @@ public class CTFTraceReader implements ICTFTraceReader {
     }
 
     @Override
-    public boolean seek(long timestamp) throws CTFReaderException {
+    public boolean seek(long timestamp) throws CTFException {
         /*
          * Remove all the trace readers from the priority queue
          */

@@ -27,7 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.UUID;
 
-import org.eclipse.tracecompass.ctf.core.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.CTFException;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
 import org.junit.Before;
@@ -52,11 +52,11 @@ public class CTFTraceGrowingStreamTest {
      *
      * @throws IOException
      *             won't happen
-     * @throws CTFReaderException
+     * @throws CTFException
      *             won't happen
      */
     @Before
-    public void init() throws IOException, CTFReaderException {
+    public void init() throws IOException, CTFException {
         fCtfDirectory = Files.createTempDirectory("temptrace", new FileAttribute<?>[] {});
         File metadata = new File(fCtfDirectory.toString() + "/" + "metadata");
         fGrowingStream = new File(fCtfDirectory.toString() + "/" + "stream");
@@ -120,7 +120,7 @@ public class CTFTraceGrowingStreamTest {
     /**
      * Test a growing stream
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             won't happen
      * @throws IOException
      *             won't happen
@@ -128,7 +128,7 @@ public class CTFTraceGrowingStreamTest {
      *             won't happen
      */
     @Test
-    public void testGrowingLive() throws CTFReaderException, FileNotFoundException, IOException {
+    public void testGrowingLive() throws CTFException, FileNotFoundException, IOException {
         try (ICTFTraceReader reader = fFixture.createReader();) {
             reader.setLive(true);
             assertEquals("0x29", reader.getCurrentEventDef().getFields().getDefinition("f").toString());
@@ -145,7 +145,7 @@ public class CTFTraceGrowingStreamTest {
     /**
      * Test a growing stream
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             won't happen
      * @throws IOException
      *             won't happen
@@ -153,7 +153,7 @@ public class CTFTraceGrowingStreamTest {
      *             won't happen
      */
     @Test
-    public void testGrowingNotLive() throws CTFReaderException, FileNotFoundException, IOException {
+    public void testGrowingNotLive() throws CTFException, FileNotFoundException, IOException {
         try (ICTFTraceReader reader = fFixture.createReader()) {
             reader.setLive(false);
             assertEquals("0x29", reader.getCurrentEventDef().getFields().getDefinition("f").toString());

@@ -19,7 +19,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.CTFException;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
@@ -89,10 +89,10 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
      *
      * @param streamInput
      *            The StreamInput to read.
-     * @throws CTFReaderException
+     * @throws CTFException
      *             If the file cannot be opened
      */
-    public CTFStreamInputReader(ICTFStreamInput streamInput) throws CTFReaderException {
+    public CTFStreamInputReader(ICTFStreamInput streamInput) throws CTFException {
         if (!(streamInput instanceof CTFStreamInput)) {
             throw new IllegalArgumentException("stream must be a ctf stream input"); //$NON-NLS-1$
         }
@@ -101,7 +101,7 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
         try {
             fFileChannel = FileChannel.open(fFile.toPath(), StandardOpenOption.READ);
         } catch (IOException e) {
-            throw new CTFReaderException(e);
+            throw new CTFException(e);
         }
         fPacketReader = new CTFStreamInputPacketReader(this);
         /*
@@ -254,10 +254,10 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
      * Reads the next event in the current event variable.
      *
      * @return If an event has been successfully read.
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    public CTFResponse readNextEvent() throws CTFReaderException {
+    public CTFResponse readNextEvent() throws CTFException {
 
         /*
          * Change packet if needed
@@ -285,10 +285,10 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
     /**
      * Change the current packet of the packet reader to the next one.
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    private void goToNextPacket() throws CTFReaderException {
+    private void goToNextPacket() throws CTFException {
         fPacketIndex++;
         // did we already index the packet?
         if (getPacketSize() >= (fPacketIndex + 1)) {
@@ -319,10 +319,10 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
      * @param timestamp
      *            The timestamp to seek to.
      * @return The offset compared to the current position
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    public long seek(long timestamp) throws CTFReaderException {
+    public long seek(long timestamp) throws CTFException {
         long offset = 0;
 
         gotoPacket(timestamp);
@@ -335,7 +335,7 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
             try {
                 fStreamInput.addPacketHeaderIndex();
                 goToNextPacket();
-            } catch (CTFReaderException e) {
+            } catch (CTFException e) {
                 // do nothing here
                 Activator.log(e.getMessage());
             }
@@ -366,10 +366,10 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
     /**
      * @param timestamp
      *            the time to seek
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    private void gotoPacket(long timestamp) throws CTFReaderException {
+    private void gotoPacket(long timestamp) throws CTFException {
         fPacketIndex = fStreamInput.getIndex().search(timestamp)
                 .previousIndex();
         /*
@@ -381,10 +381,10 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
     /**
      * Seeks the last event of a stream and returns it.
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             if an error occurs
      */
-    public void goToLastEvent() throws CTFReaderException {
+    public void goToLastEvent() throws CTFException {
         /*
          * Search in the index for the packet to search in.
          */

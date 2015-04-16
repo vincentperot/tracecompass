@@ -17,7 +17,7 @@ import java.nio.channels.FileChannel.MapMode;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.ctf.core.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.CTFException;
 import org.eclipse.tracecompass.ctf.core.CTFStrings;
 import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.IEventDeclaration;
@@ -145,7 +145,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
      * (org.eclipse.tracecompass.ctf.core.event.io.BitBuffer)
      */
     @Override
-    public StructDefinition getEventContextDefinition(BitBuffer input) throws CTFReaderException {
+    public StructDefinition getEventContextDefinition(BitBuffer input) throws CTFException {
         return fStreamEventContextDecl.createDefinition(fStreamInputReader.getStreamInput(), ILexicalScope.STREAM_EVENT_CONTEXT, input);
     }
 
@@ -157,7 +157,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
      * (org.eclipse.tracecompass.ctf.core.event.io.BitBuffer)
      */
     @Override
-    public StructDefinition getStreamPacketContextDefinition(BitBuffer input) throws CTFReaderException {
+    public StructDefinition getStreamPacketContextDefinition(BitBuffer input) throws CTFException {
         return fStreamPacketContextDecl.createDefinition(fStreamInputReader.getStreamInput(), ILexicalScope.STREAM_PACKET_CONTEXT, input);
     }
 
@@ -169,7 +169,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
      * (org.eclipse.tracecompass.ctf.core.event.io.BitBuffer)
      */
     @Override
-    public StructDefinition getTracePacketHeaderDefinition(BitBuffer input) throws CTFReaderException {
+    public StructDefinition getTracePacketHeaderDefinition(BitBuffer input) throws CTFException {
         return fTracePacketHeaderDecl.createDefinition(fStreamInputReader.getStreamInput().getStream().getTrace(), ILexicalScope.TRACE_PACKET_HEADER, input);
     }
 
@@ -209,10 +209,10 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
     // ------------------------------------------------------------------------
 
     @NonNull
-    private ByteBuffer getByteBufferAt(long position, long size) throws CTFReaderException, IOException {
+    private ByteBuffer getByteBufferAt(long position, long size) throws CTFException, IOException {
         ByteBuffer map = SafeMappedByteBuffer.map(fStreamInputReader.getFc(), MapMode.READ_ONLY, position, size);
         if (map == null) {
-            throw new CTFReaderException("Failed to allocate mapped byte buffer"); //$NON-NLS-1$
+            throw new CTFException("Failed to allocate mapped byte buffer"); //$NON-NLS-1$
         }
         return map;
     }
@@ -222,10 +222,10 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
      *
      * @param currentPacket
      *            The index entry of the packet to switch to.
-     * @throws CTFReaderException
+     * @throws CTFException
      *             If we get an error reading the packet
      */
-    void setCurrentPacket(ICTFPacketInformation currentPacket) throws CTFReaderException {
+    void setCurrentPacket(ICTFPacketInformation currentPacket) throws CTFException {
         ICTFPacketInformation prevPacket = null;
         fCurrentPacket = currentPacket;
 
@@ -237,7 +237,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
             try {
                 bb = getByteBufferAt(fCurrentPacket.getOffsetBytes(), (fCurrentPacket.getPacketSizeBits() + BITS_PER_BYTE - 1) / BITS_PER_BYTE);
             } catch (IOException e) {
-                throw new CTFReaderException(e.getMessage(), e);
+                throw new CTFException(e.getMessage(), e);
             }
 
             BitBuffer bitBuffer = new BitBuffer(bb);
@@ -310,7 +310,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
      * org.eclipse.tracecompass.ctf.core.trace.ICTFPacketReader#readNextEvent()
      */
     @Override
-    public EventDefinition readNextEvent() throws CTFReaderException {
+    public EventDefinition readNextEvent() throws CTFException {
         /* Default values for those fields */
         // compromise since we cannot have 64 bit addressing of arrays yet.
         int eventID = (int) EventDeclaration.UNSET_EVENT_ID;
@@ -371,7 +371,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
                 if (idDef instanceof SimpleDatatypeDefinition) {
                     simpleIdDef = ((SimpleDatatypeDefinition) idDef);
                 } else if (idDef != null) {
-                    throw new CTFReaderException("Id defintion not an integer, enum or float definiton in event header."); //$NON-NLS-1$
+                    throw new CTFException("Id defintion not an integer, enum or float definiton in event header."); //$NON-NLS-1$
                 }
 
                 /*
@@ -414,7 +414,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
         /* Get the right event definition using the event id. */
         IEventDeclaration eventDeclaration = fStreamInputReader.getStreamInput().getStream().getEventDeclaration(eventID);
         if (eventDeclaration == null) {
-            throw new CTFReaderException("Incorrect event id : " + eventID); //$NON-NLS-1$
+            throw new CTFException("Incorrect event id : " + eventID); //$NON-NLS-1$
         }
         EventDefinition eventDef = eventDeclaration.createDefinition(fStreamInputReader, currentBitBuffer, timestamp);
 
@@ -424,7 +424,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
          */
 
         if (posStart == currentBitBuffer.position()) {
-            throw new CTFReaderException("Empty event not allowed, event: " + eventDef.getDeclaration().getName()); //$NON-NLS-1$
+            throw new CTFException("Empty event not allowed, event: " + eventDef.getDeclaration().getName()); //$NON-NLS-1$
         }
 
         return eventDef;

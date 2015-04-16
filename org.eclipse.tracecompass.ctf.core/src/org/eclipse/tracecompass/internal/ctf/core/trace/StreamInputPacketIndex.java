@@ -26,7 +26,7 @@ import java.util.ListIterator;
 import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.ctf.core.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.CTFException;
 import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
 
 /**
@@ -77,11 +77,11 @@ public class StreamInputPacketIndex {
      * @param preParsedIndex
      *            the pre-parsed index file
      *
-     * @throws CTFReaderException
+     * @throws CTFException
      *             If there was a problem reading the entry
      */
     public void appendAll(Collection<StreamInputPacketIndexEntry> preParsedIndex)
-            throws CTFReaderException {
+            throws CTFException {
         for (ICTFPacketInformation sipie : preParsedIndex) {
             append(checkNotNull(sipie));
         }
@@ -93,15 +93,15 @@ public class StreamInputPacketIndex {
      * @param entry
      *            element to be appended to this index, cannot be null
      * @return {@code true} (as specified by {@link Collection#add})
-     * @throws CTFReaderException
+     * @throws CTFException
      *             If there was a problem reading the entry
      */
     public boolean append(@NonNull ICTFPacketInformation entry)
-            throws CTFReaderException {
+            throws CTFException {
 
         /* Validate consistent entry. */
         if (entry.getTimestampBegin() > entry.getTimestampEnd()) {
-            throw new CTFReaderException("Packet begin timestamp is after end timestamp"); //$NON-NLS-1$
+            throw new CTFException("Packet begin timestamp is after end timestamp"); //$NON-NLS-1$
         }
 
         /*
@@ -109,7 +109,7 @@ public class StreamInputPacketIndex {
          * order.
          */
         if (!fEntries.isEmpty() && (entry.getTimestampBegin() < lastElement().getTimestampBegin())) {
-            throw new CTFReaderException("Packets begin timestamp decreasing"); //$NON-NLS-1$
+            throw new CTFException("Packets begin timestamp decreasing"); //$NON-NLS-1$
         }
 
         fEntries.add(entry);
