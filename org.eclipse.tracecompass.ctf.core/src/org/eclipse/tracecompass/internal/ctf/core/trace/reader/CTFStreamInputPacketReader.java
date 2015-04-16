@@ -39,6 +39,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.VariantDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
 import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
 import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.trace.reader.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFPacketReader;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
@@ -212,7 +213,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
     private ByteBuffer getByteBufferAt(long position, long size) throws CTFException, IOException {
         ByteBuffer map = SafeMappedByteBuffer.map(fStreamInputReader.getFc(), MapMode.READ_ONLY, position, size);
         if (map == null) {
-            throw new CTFException("Failed to allocate mapped byte buffer"); //$NON-NLS-1$
+            throw new CTFReaderException("Failed to allocate mapped byte buffer"); //$NON-NLS-1$
         }
         return map;
     }
@@ -237,7 +238,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
             try {
                 bb = getByteBufferAt(fCurrentPacket.getOffsetBytes(), (fCurrentPacket.getPacketSizeBits() + BITS_PER_BYTE - 1) / BITS_PER_BYTE);
             } catch (IOException e) {
-                throw new CTFException(e.getMessage(), e);
+                throw new CTFReaderException(e.getMessage(), e);
             }
 
             BitBuffer bitBuffer = new BitBuffer(bb);
@@ -371,7 +372,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
                 if (idDef instanceof SimpleDatatypeDefinition) {
                     simpleIdDef = ((SimpleDatatypeDefinition) idDef);
                 } else if (idDef != null) {
-                    throw new CTFException("Id defintion not an integer, enum or float definiton in event header."); //$NON-NLS-1$
+                    throw new CTFReaderException("Id defintion not an integer, enum or float definiton in event header."); //$NON-NLS-1$
                 }
 
                 /*
@@ -414,7 +415,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
         /* Get the right event definition using the event id. */
         IEventDeclaration eventDeclaration = fStreamInputReader.getStreamInput().getStream().getEventDeclaration(eventID);
         if (eventDeclaration == null) {
-            throw new CTFException("Incorrect event id : " + eventID); //$NON-NLS-1$
+            throw new CTFReaderException("Incorrect event id : " + eventID); //$NON-NLS-1$
         }
         EventDefinition eventDef = eventDeclaration.createDefinition(fStreamInputReader, currentBitBuffer, timestamp);
 
@@ -424,7 +425,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, ICTFPacketR
          */
 
         if (posStart == currentBitBuffer.position()) {
-            throw new CTFException("Empty event not allowed, event: " + eventDef.getDeclaration().getName()); //$NON-NLS-1$
+            throw new CTFReaderException("Empty event not allowed, event: " + eventDef.getDeclaration().getName()); //$NON-NLS-1$
         }
 
         return eventDef;

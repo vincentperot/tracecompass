@@ -27,6 +27,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.CTFResponse;
 import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
 import org.eclipse.tracecompass.ctf.core.trace.ICTFStreamInput;
+import org.eclipse.tracecompass.ctf.core.trace.reader.CTFReaderException;
 import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFPacketReader;
 import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFStreamInputReader;
 import org.eclipse.tracecompass.ctf.core.trace.reader.ICTFTraceReader;
@@ -101,7 +102,7 @@ public class CTFStreamInputReader implements ICTFStreamInputReader {
         try {
             fFileChannel = FileChannel.open(fFile.toPath(), StandardOpenOption.READ);
         } catch (IOException e) {
-            throw new CTFException(e);
+            throw new CTFReaderException(e);
         }
         fPacketReader = new CTFStreamInputPacketReader(this);
         /*
