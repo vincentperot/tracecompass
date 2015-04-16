@@ -215,7 +215,7 @@ public class CTFStreamInput implements IDefinitionScope {
     public boolean addPacketHeaderIndex() throws CTFReaderException {
         long currentPosBits = 0L;
         if (!fIndex.isEmpty()) {
-            StreamInputPacketIndexEntry pos = fIndex.lastElement();
+            ICTFPacketInformation pos = fIndex.lastElement();
             if (pos == null) {
                 throw new IllegalStateException("Index contains null packet entries"); //$NON-NLS-1$
             }

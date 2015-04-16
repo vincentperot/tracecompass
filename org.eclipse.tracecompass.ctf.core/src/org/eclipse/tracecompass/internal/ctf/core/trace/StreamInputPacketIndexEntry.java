@@ -22,13 +22,14 @@ import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
 
 /**
  * <b><u>StreamInputPacketIndexEntry</u></b>
  * <p>
  * Represents an entry in the index of event packets.
  */
-public class StreamInputPacketIndexEntry {
+public class StreamInputPacketIndexEntry implements ICTFPacketInformation {
 
     private static final int UNKNOWN = -1;
 
@@ -203,14 +204,10 @@ public class StreamInputPacketIndexEntry {
     // Operations
     // ------------------------------------------------------------------------
 
-    /**
-     * Returns whether the packet includes (inclusively) the given timestamp in
-     * the begin-end timestamp range.
-     *
-     * @param ts
-     *            The timestamp to check.
-     * @return True if the packet includes the timestamp.
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#includes(long)
      */
+    @Override
     public boolean includes(long ts) {
         return (ts >= fTimestampBegin) && (ts <= fTimestampEnd);
     }
@@ -226,44 +223,50 @@ public class StreamInputPacketIndexEntry {
     // Getters and Setters
     // ------------------------------------------------------------------------
 
-    /**
-     * @return the offsetBytes
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getOffsetBits()
      */
+    @Override
     public long getOffsetBits() {
         return fOffsetBits;
     }
 
-    /**
-     * @return the packetSizeBits
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getPacketSizeBits()
      */
+    @Override
     public long getPacketSizeBits() {
         return fPacketSizeBits;
     }
 
-    /**
-     * @return the contentSizeBits
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getContentSizeBits()
      */
+    @Override
     public long getContentSizeBits() {
         return fContentSizeBits;
     }
 
-    /**
-     * @return the timestampBegin
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getTimestampBegin()
      */
+    @Override
     public long getTimestampBegin() {
         return fTimestampBegin;
     }
 
-    /**
-     * @return the timestampEnd
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getTimestampEnd()
      */
+    @Override
     public long getTimestampEnd() {
         return fTimestampEnd;
     }
 
-    /**
-     * @return the lostEvents in this packet
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getLostEvents()
      */
+    @Override
     public long getLostEvents() {
         return fLostEvents;
     }
@@ -280,35 +283,34 @@ public class StreamInputPacketIndexEntry {
         fAttributes.put(field, value);
     }
 
-    /**
-     * Retrieve the value of an existing attribute
-     *
-     * @param field
-     *            The name of the attribute
-     * @return The value that was stored, or null if it wasn't found
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#lookupAttribute(java.lang.String)
      */
+    @Override
     public Object lookupAttribute(String field) {
         return fAttributes.get(field);
     }
 
-    /**
-     * @return The target that is being traced
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getTarget()
      */
+    @Override
     public String getTarget() {
         return fTarget;
     }
 
-    /**
-     * @return The ID of the target
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getTargetId()
      */
+    @Override
     public long getTargetId() {
         return fTargetID;
     }
 
-    /**
-     * Get the offset of the packet in bytes
-     * @return The offset of the packet in bytes
+    /* (non-Javadoc)
+     * @see org.eclipse.tracecompass.internal.ctf.core.trace.IStreamInputPacketIndexEntry#getOffsetBytes()
      */
+    @Override
     public long getOffsetBytes() {
         return fOffsetBytes;
     }

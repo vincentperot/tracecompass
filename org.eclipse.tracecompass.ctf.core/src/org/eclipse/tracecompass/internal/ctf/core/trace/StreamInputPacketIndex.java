@@ -27,6 +27,7 @@ import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.ctf.core.CTFReaderException;
+import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
 
 /**
  * <b><u>StreamInputPacketIndex</u></b>
@@ -44,7 +45,7 @@ public class StreamInputPacketIndex {
      * Entries of the index. They are sorted by increasing begin timestamp.
      * index builder.
      */
-    private final List<StreamInputPacketIndexEntry> fEntries = new ArrayList<>();
+    private final List<ICTFPacketInformation> fEntries = new ArrayList<>();
 
     // ------------------------------------------------------------------------
     // Operations
@@ -81,7 +82,7 @@ public class StreamInputPacketIndex {
      */
     public void appendAll(Collection<StreamInputPacketIndexEntry> preParsedIndex)
             throws CTFReaderException {
-        for (StreamInputPacketIndexEntry sipie : preParsedIndex) {
+        for (ICTFPacketInformation sipie : preParsedIndex) {
             append(checkNotNull(sipie));
         }
     }
@@ -95,7 +96,7 @@ public class StreamInputPacketIndex {
      * @throws CTFReaderException
      *             If there was a problem reading the entry
      */
-    public boolean append(@NonNull StreamInputPacketIndexEntry entry)
+    public boolean append(@NonNull ICTFPacketInformation entry)
             throws CTFReaderException {
 
         /* Validate consistent entry. */
@@ -125,7 +126,7 @@ public class StreamInputPacketIndex {
      * @return The StreamInputPacketEntry that corresponds to the packet that
      *         includes the given timestamp.
      */
-    public ListIterator<StreamInputPacketIndexEntry> search(final long timestamp) {
+    public ListIterator<ICTFPacketInformation> search(final long timestamp) {
         /*
          * Start with min and max covering all the elements.
          */
@@ -133,7 +134,7 @@ public class StreamInputPacketIndex {
         int min = 0;
 
         int guessI;
-        StreamInputPacketIndexEntry guessEntry = null;
+        ICTFPacketInformation guessEntry = null;
 
         /*
          * If the index is empty, return the iterator at the very beginning.
@@ -186,7 +187,7 @@ public class StreamInputPacketIndex {
      *
      * @return the last element in the index
      */
-    public StreamInputPacketIndexEntry lastElement() {
+    public ICTFPacketInformation lastElement() {
         return fEntries.get(fEntries.size() - 1);
     }
 
@@ -200,7 +201,7 @@ public class StreamInputPacketIndex {
      *             if the index is out of range (
      *             {@code index < 0 || index >= size()})
      */
-    public StreamInputPacketIndexEntry getElement(int index) {
+    public ICTFPacketInformation getElement(int index) {
         return fEntries.get(index);
     }
 
@@ -227,7 +228,7 @@ public class StreamInputPacketIndex {
      *             not permit null elements (<a
      *             href="Collection.html#optional-restrictions">optional</a>)
      */
-    public int indexOf(StreamInputPacketIndexEntry element) {
+    public int indexOf(ICTFPacketInformation element) {
         int indexOf = -1;
         if (element != null) {
             indexOf = Collections.binarySearch(fEntries, element, new MonotonicComparator());
@@ -239,7 +240,7 @@ public class StreamInputPacketIndex {
      * Ordering comparator for entering entries into a data structure sorted by
      * timestamp.
      */
-    private static class MonotonicComparator implements Comparator<StreamInputPacketIndexEntry>, Serializable {
+    private static class MonotonicComparator implements Comparator<ICTFPacketInformation>, Serializable {
         /**
          * For {@link Serializable}, that way if we migrate to a {@link TreeSet}
          * the comparator is serializable too.
@@ -247,7 +248,7 @@ public class StreamInputPacketIndex {
         private static final long serialVersionUID = -5693064068367242076L;
 
         @Override
-        public int compare(StreamInputPacketIndexEntry left, StreamInputPacketIndexEntry right) {
+        public int compare(ICTFPacketInformation left, ICTFPacketInformation right) {
             if (left.getTimestampBegin() > right.getTimestampBegin()) {
                 return 1;
             }
