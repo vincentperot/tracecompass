@@ -44,7 +44,7 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
     private final @NonNull BlockingQueue<Iterable<HTInterval>> intervalQueue;
     private final @NonNull Thread shtThread;
 
-    private Collection<HTInterval> fCurrentChunk = new ArrayList<>(INTERVAL_CHUNK_SIZE);
+    private List<HTInterval> fCurrentChunk = new ArrayList<>(INTERVAL_CHUNK_SIZE);
 
     /**
      * New state history constructor
@@ -265,7 +265,19 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
         if (ret != null) {
             return ret;
         }
-
+        /*
+         * A fast way to ensure that the data is synchronized since we only ever
+         * append it. Copy it, then get the size and iterate, if it grows,
+         * that's OK since we are not in an enhanced for
+         */
+        List<HTInterval> currentIntervals = fCurrentChunk;
+        int size = currentIntervals.size();
+        for (int i = 0; i < size; i++) {
+            HTInterval interval = currentIntervals.get(i);
+            if (interval.getAttribute() == attributeQuark && interval.intersects(t)) {
+                return interval;
+            }
+        }
         /*
          * We couldn't find the interval in the history tree. It's possible that
          * it is currently in the intervalQueue. Look for it there. Note that
