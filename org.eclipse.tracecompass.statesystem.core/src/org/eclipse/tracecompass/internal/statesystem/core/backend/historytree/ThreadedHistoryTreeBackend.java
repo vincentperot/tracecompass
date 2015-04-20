@@ -131,7 +131,7 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
      */
 
     @Override
-    public void insertPastState(long stateStartTime, long stateEndTime,
+    public synchronized void insertPastState(long stateStartTime, long stateEndTime,
             int quark, ITmfStateValue value) throws TimeRangeException {
         /*
          * Here, instead of directly inserting the elements in the History Tree
@@ -176,7 +176,7 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
         super.dispose();
     }
 
-    private void stopRunningThread(long endTime) {
+    private synchronized void stopRunningThread(long endTime) {
         if (!shtThread.isAlive()) {
             return;
         }
@@ -259,13 +259,21 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
     }
 
     @Override
-    public ITmfStateInterval doSingularQuery(long t, int attributeQuark)
+    public synchronized ITmfStateInterval doSingularQuery(long t, int attributeQuark)
             throws TimeRangeException, StateSystemDisposedException {
         ITmfStateInterval ret = super.doSingularQuery(t, attributeQuark);
         if (ret != null) {
             return ret;
         }
 
+        /*
+         * We couldn't find it so let's query the current chunk.
+         */
+        for (HTInterval interval : fCurrentChunk) {
+            if (interval.getAttribute() == attributeQuark && interval.intersects(t)) {
+                return interval;
+            }
+        }
         /*
          * We couldn't find the interval in the history tree. It's possible that
          * it is currently in the intervalQueue. Look for it there. Note that
