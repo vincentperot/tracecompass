@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="tracecompass-eStaging" sequenceNumber="38">
+<?pde version="3.8"?><target name="tracecompass-eStaging" sequenceNumber="39">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.gnu.dsf.feature.group" version="0.0.0"/>
@@ -41,7 +41,9 @@
 <launcherArgs>
 <vmArgs>-Xms40m
 -Xmx512M
--XX:MaxPermSize=256m</vmArgs>
+-XX:MaxPermSize=256m
+-Xdock:icon=../Resources/Eclipse.icns
+-Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgs>
 <programArgs>-consolelog</programArgs>
 </launcherArgs>
 </target>
