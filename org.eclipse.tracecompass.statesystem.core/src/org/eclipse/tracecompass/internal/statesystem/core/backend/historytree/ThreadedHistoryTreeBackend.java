@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.statesystem.core.Activator;
@@ -45,6 +47,7 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
     private final @NonNull Thread shtThread;
 
     private Collection<HTInterval> fCurrentChunk = new ArrayList<>(INTERVAL_CHUNK_SIZE);
+    private final ReadWriteLock fRwl = new ReentrantReadWriteLock();
 
     /**
      * New state history constructor
@@ -138,8 +141,10 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
          * underneath, we'll put them in the Queue. They will then be taken and
          * processed by the other thread executing the run() method.
          */
+        fRwl.writeLock().lock();
         fCurrentChunk.add(new HTInterval(stateStartTime, stateEndTime,
                 quark, (TmfStateValue) value));
+        fRwl.writeLock().unlock();
         if (fCurrentChunk.size() >= INTERVAL_CHUNK_SIZE) {
             try {
                 intervalQueue.put(fCurrentChunk);
@@ -266,6 +271,16 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
             return ret;
         }
 
+        /*
+         * We couldn't find it so let's query the current chunk.
+         */
+        fRwl.readLock().lock();
+        for (HTInterval interval : fCurrentChunk) {
+            if (interval.getAttribute() == attributeQuark && interval.intersects(t)) {
+                return interval;
+            }
+        }
+        fRwl.readLock().unlock();
         /*
          * We couldn't find the interval in the history tree. It's possible that
          * it is currently in the intervalQueue. Look for it there. Note that
