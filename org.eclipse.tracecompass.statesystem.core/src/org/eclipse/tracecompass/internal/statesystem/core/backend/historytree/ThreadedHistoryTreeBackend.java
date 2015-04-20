@@ -267,6 +267,14 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
         }
 
         /*
+         * We couldn't find it so let's query the current chunk.
+         */
+        for (HTInterval interval : fCurrentChunk) {
+            if (interval.getAttribute() == attributeQuark && interval.intersects(t)) {
+                return interval;
+            }
+        }
+        /*
          * We couldn't find the interval in the history tree. It's possible that
          * it is currently in the intervalQueue. Look for it there. Note that
          * ArrayBlockingQueue's iterator() is thread-safe (no need to lock the
