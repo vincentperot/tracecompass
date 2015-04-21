@@ -14,6 +14,7 @@
 
 package org.eclipse.tracecompass.ctf.core.trace;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -177,6 +178,23 @@ public class Metadata {
         /* Wrap the metadata string with a StringReader */
         return new StringReader(metadataText.toString());
     }
+
+    /**
+     * @param path
+     *            path to CTF trace directory
+     * @return <code>true</code> if pre-validation is ok else <code>false</code>
+     * @since 1.0
+     */
+    public static boolean preValidate(String path) {
+        String metadataPath = path + Utils.SEPARATOR + METADATA_FILENAME;
+        File metadataFile = new File(metadataPath);
+        // TODO add validation for a CTF metadata
+        if (metadataFile.exists()) {
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Read the metadata from a formatted TSDL string
