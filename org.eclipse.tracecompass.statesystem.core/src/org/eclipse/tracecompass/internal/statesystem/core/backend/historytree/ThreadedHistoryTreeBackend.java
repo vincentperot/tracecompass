@@ -16,12 +16,7 @@ package org.eclipse.tracecompass.internal.statesystem.core.backend.historytree;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.statesystem.core.Activator;
@@ -41,10 +36,8 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
         implements Runnable {
 
     private static final int INTERVAL_CHUNK_SIZE = 512;
-    private final @NonNull BlockingQueue<Iterable<HTInterval>> intervalQueue;
+    private final @NonNull BufferedIntervalBlockingQueue fIntervalQueue;
     private final @NonNull Thread shtThread;
-
-    private Collection<HTInterval> fCurrentChunk = new ArrayList<>(INTERVAL_CHUNK_SIZE);
 
     /**
      * New state history constructor
@@ -83,7 +76,7 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
             throws IOException {
         super(ssid, newStateFile, providerVersion, startTime, blockSize, maxChildren);
 
-        intervalQueue = new ArrayBlockingQueue<>(queueSize);
+        fIntervalQueue = new BufferedIntervalBlockingQueue(queueSize, INTERVAL_CHUNK_SIZE);
         shtThread = new Thread(this, "History Tree Thread"); //$NON-NLS-1$
         shtThread.start();
     }
@@ -117,7 +110,7 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
             throws IOException {
         super(ssid, newStateFile, providerVersion, startTime);
 
-        intervalQueue = new ArrayBlockingQueue<>(queueSize);
+        fIntervalQueue = new BufferedIntervalBlockingQueue(queueSize, INTERVAL_CHUNK_SIZE);
         shtThread = new Thread(this, "History Tree Thread"); //$NON-NLS-1$
         shtThread.start();
     }
@@ -138,15 +131,11 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
          * underneath, we'll put them in the Queue. They will then be taken and
          * processed by the other thread executing the run() method.
          */
-        fCurrentChunk.add(new HTInterval(stateStartTime, stateEndTime,
-                quark, (TmfStateValue) value));
-        if (fCurrentChunk.size() >= INTERVAL_CHUNK_SIZE) {
-            try {
-                intervalQueue.put(fCurrentChunk);
-                fCurrentChunk = new ArrayList<>(INTERVAL_CHUNK_SIZE);
-            } catch (InterruptedException e) {
-                Activator.getDefault().logError("State system interrupted", e); //$NON-NLS-1$
-            }
+        try {
+            fIntervalQueue.put(new HTInterval(stateStartTime, stateEndTime,
+                    quark, (TmfStateValue) value));
+        } catch (InterruptedException e) {
+            Activator.getDefault().logError("State system interrupted", e); //$NON-NLS-1$
         }
     }
 
@@ -186,11 +175,8 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
          * closeTree()
          */
         try {
-            Collection<HTInterval> pill = Collections.singletonList(new HTInterval(-1, endTime, -1, TmfStateValue.nullValue()));
-            if (!fCurrentChunk.isEmpty()) {
-                intervalQueue.put(fCurrentChunk);
-            }
-            intervalQueue.put(pill);
+            HTInterval pill = new HTInterval(-1, endTime, -1, TmfStateValue.nullValue());
+            fIntervalQueue.put(pill);
             shtThread.join();
         } catch (TimeRangeException e) {
             Activator.getDefault().logError("Error closing state system", e); //$NON-NLS-1$
@@ -202,21 +188,19 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
     @Override
     public void run() {
         try {
-            consumerloop: while (true) {
-                Iterable<HTInterval> currentIntervals = intervalQueue.take();
-                for (HTInterval currentInterval : currentIntervals) {
-                    if (currentInterval.getAttribute() == -1) {
-                        /*
-                         * We've been told we're done, let's write down
-                         * everything and quit. The end time of this
-                         * "signal interval" is actually correct.
-                         */
-                        getSHT().closeTree(currentInterval.getEndTime());
-                        break consumerloop;
-                    }
-                    /* Send the interval to the History Tree */
-                    getSHT().insertInterval(currentInterval);
+            while (true) {
+                HTInterval currentInterval = (HTInterval) fIntervalQueue.take();
+                if (currentInterval.getAttribute() == -1) {
+                    /*
+                     * We've been told we're done, let's write down everything
+                     * and quit. The end time of this "signal interval" is
+                     * actually correct.
+                     */
+                    getSHT().closeTree(currentInterval.getEndTime());
+                    break;
                 }
+                /* Send the interval to the History Tree */
+                getSHT().insertInterval(currentInterval);
             }
         } catch (InterruptedException e) {
             /* We've been interrupted abnormally */
@@ -272,12 +256,9 @@ public final class ThreadedHistoryTreeBackend extends HistoryTreeBackend
          * ArrayBlockingQueue's iterator() is thread-safe (no need to lock the
          * queue).
          */
-        for (Iterable<HTInterval> intervals : intervalQueue) {
-            for (HTInterval interval : intervals) {
-                if (interval.getAttribute() == attributeQuark && interval.intersects(t)) {
-                    return interval;
-                }
-            }
+        ret = fIntervalQueue.contains(t, attributeQuark);
+        if (ret != null) {
+            return ret;
         }
 
         /*
