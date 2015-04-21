@@ -14,11 +14,10 @@ package org.eclipse.tracecompass.tmf.core.statesystem;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.collect.BufferedBlockingQueue;
+import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -41,10 +40,11 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  */
 public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
 
-    private static final int DEFAULT_EVENTS_QUEUE_SIZE = 10000;
+    private static final int DEFAULT_EVENTS_QUEUE_SEGMENT_SIZE = 127;
+    private static final int DEFAULT_EVENTS_QUEUE_SIZE = 127;
 
     private final ITmfTrace fTrace;
-    private final BlockingQueue<ITmfEvent> fEventsQueue;
+    private final BufferedBlockingQueue<ITmfEvent> fEventsQueue;
     private final Thread fEventHandlerThread;
 
     private boolean fStateSystemAssigned;
@@ -62,7 +62,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
      */
     public AbstractTmfStateProvider(ITmfTrace trace, String id) {
         fTrace = trace;
-        fEventsQueue = new ArrayBlockingQueue<>(DEFAULT_EVENTS_QUEUE_SIZE);
+        fEventsQueue = new BufferedBlockingQueue<>(DEFAULT_EVENTS_QUEUE_SIZE, DEFAULT_EVENTS_QUEUE_SEGMENT_SIZE);
         fStateSystemAssigned = false;
 
         fEventHandlerThread = new Thread(new EventProcessor(), id + " Event Handler"); //$NON-NLS-1$
@@ -102,11 +102,12 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
     @Override
     public void dispose() {
         /* Insert a null event in the queue to stop the event handler's thread. */
+        fEventsQueue.put(END_EVENT);
+        fEventsQueue.flushInputBuffer();
         try {
-            fEventsQueue.put(END_EVENT);
             fEventHandlerThread.join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Activator.logError(e.getMessage(), e);
         }
         fStateSystemAssigned = false;
         fSS = null;
@@ -122,11 +123,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
 
         /* Insert the event we're received into the events queue */
         ITmfEvent curEvent = event;
-        try {
-            fEventsQueue.put(curEvent);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        fEventsQueue.put(curEvent);
     }
 
     /**
@@ -140,6 +137,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
          */
         try {
             fEventsQueue.put(EMPTY_QUEUE_EVENT);
+            fEventsQueue.flushInputBuffer();
             while (!fEventsQueue.isEmpty()) {
                 Thread.sleep(100);
             }
@@ -187,33 +185,28 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
                 System.err.println("Cannot run event manager without assigning a target state system first!"); //$NON-NLS-1$
                 return;
             }
-            @NonNull ITmfEvent event;
+            @NonNull
+            ITmfEvent event;
 
-            try {
-                /*
-                 * We never insert null in the queue. Cannot be checked at
-                 * compile-time until Java 8 annotations...
-                 */
-                event = checkNotNull(fEventsQueue.take());
-                /* This is a singleton, we want to do != instead of !x.equals */
-                while (event != END_EVENT) {
-                    if (event == EMPTY_QUEUE_EVENT) {
-                        /* Synchronization event, should be ignored */
-                        event = checkNotNull(fEventsQueue.take());
-                        continue;
-                    }
-                    currentEvent = event;
-                    eventHandle(event);
+            /*
+             * We never insert null in the queue. Cannot be checked at
+             * compile-time until Java 8 annotations...
+             */
+            event = checkNotNull(fEventsQueue.take());
+            /* This is a singleton, we want to do != instead of !x.equals */
+            while (event != END_EVENT) {
+                if (event == EMPTY_QUEUE_EVENT) {
+                    /* Synchronization event, should be ignored */
                     event = checkNotNull(fEventsQueue.take());
+                    continue;
                 }
-                /* We've received the last event, clean up */
-                closeStateSystem();
-
-            } catch (InterruptedException e) {
-                /* We've been interrupted abnormally */
-                System.out.println("Event handler interrupted!"); //$NON-NLS-1$
-                e.printStackTrace();
+                currentEvent = event;
+                eventHandle(event);
+                event = checkNotNull(fEventsQueue.take());
             }
+            /* We've received the last event, clean up */
+            closeStateSystem();
+
         }
 
         private void closeStateSystem() {
