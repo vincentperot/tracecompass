@@ -14,6 +14,7 @@
 
 package org.eclipse.tracecompass.ctf.core.trace;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -23,6 +24,8 @@ import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.nio.file.StandardOpenOption;
 import java.util.UUID;
 
 import org.antlr.runtime.ANTLRReaderStream;
@@ -50,6 +53,8 @@ public class Metadata {
     // ------------------------------------------------------------------------
     // Constants
     // ------------------------------------------------------------------------
+
+    private static final int PREVALIDATION_SIZE = 8;
 
     private static final int BITS_PER_BYTE = Byte.SIZE;
 
@@ -176,6 +181,40 @@ public class Metadata {
 
         /* Wrap the metadata string with a StringReader */
         return new StringReader(metadataText.toString());
+    }
+
+    /**
+     * @param path
+     *            path to CTF trace directory
+     * @return <code>true</code> if pre-validation is ok else <code>false</code>
+     * @throws CTFReaderException
+     *             file channel cannot be created
+     * @since 1.0
+     */
+    public static boolean preValidate(String path) throws CTFReaderException {
+        String metadataPath = path + Utils.SEPARATOR + METADATA_FILENAME;
+        File metadataFile = new File(metadataPath);
+        if (metadataFile.exists() && metadataFile.length() > PREVALIDATION_SIZE) {
+            try (FileChannel fc = FileChannel.open(metadataFile.toPath(), StandardOpenOption.READ)) {
+                ByteBuffer bb = ByteBuffer.allocate(PREVALIDATION_SIZE);
+                fc.read(bb);
+                if (bb.getInt(0) == Utils.TSDL_MAGIC) {
+                    return true;
+                }
+                bb.order(ByteOrder.LITTLE_ENDIAN);
+                if (bb.getInt(0) == Utils.TSDL_MAGIC) {
+                    return true;
+                }
+                Charset forName = Charset.forName("ASCII"); //$NON-NLS-1$
+                byte bytes[] = new byte[8];
+                bb.get(bytes);
+                String text = new String(bytes, forName);
+                return text.startsWith("/* CTF"); //$NON-NLS-1$
+            } catch (IOException e) {
+                throw new CTFReaderException(e.getMessage(), e);
+            }
+        }
+        return false;
     }
 
     /**
