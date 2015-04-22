@@ -256,6 +256,13 @@ public class TimeGraphTooltipHandler {
 
                         if (eventDuration > 0) {
                             addItem(Messages.TmfTimeTipHandler_DURATION, duration);
+                            long begin = fTimeDataProvider.getSelectionBegin();
+                            long end = fTimeDataProvider.getSelectionEnd();
+                            final long delta = end - begin;
+                            if (delta > 0) {
+                                String percentage = String.format("%,.2f%%", Math.min(eventDuration * 100.0 / delta, 100)); //$NON-NLS-1$
+                                addItem(Messages.TmfTimeTipHandler_PERCENT_OF_SELECTION, percentage);
+                            }
                         }
                     }
                 }
