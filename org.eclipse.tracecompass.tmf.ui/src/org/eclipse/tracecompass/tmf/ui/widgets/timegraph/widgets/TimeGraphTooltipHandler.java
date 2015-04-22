@@ -163,9 +163,12 @@ public class TimeGraphTooltipHandler {
                     ITimeEvent currEvent = Utils.findEvent(entry, currPixelTime, 0);
                     ITimeEvent nextEvent = Utils.findEvent(entry, currPixelTime, 1);
 
-                    // if there is no current event at the start of the current pixel range,
-                    // or if the current event starts before the current pixel range,
-                    // use the next event as long as it starts within the current pixel range
+                    // if there is no current event at the start of the current
+                    // pixel range,
+                    // or if the current event starts before the current pixel
+                    // range,
+                    // use the next event as long as it starts within the
+                    // current pixel range
                     if ((currEvent == null || currEvent.getTime() < currPixelTime) &&
                             (nextEvent != null && nextEvent.getTime() < nextPixelTime)) {
                         currEvent = nextEvent;
@@ -193,7 +196,8 @@ public class TimeGraphTooltipHandler {
                         addItem(Messages.TmfTimeTipHandler_TRACE_STATE, state);
                     }
 
-                    // This block receives a list of <String, String> values to be added to the tip table
+                    // This block receives a list of <String, String> values to
+                    // be added to the tip table
                     Map<String, String> eventAddOns = fTimeGraphProvider.getEventHoverToolTipInfo(currEvent, currPixelTime);
                     if (eventAddOns != null) {
                         for (Entry<String, String> eventAddOn : eventAddOns.entrySet()) {
@@ -256,6 +260,13 @@ public class TimeGraphTooltipHandler {
 
                         if (eventDuration > 0) {
                             addItem(Messages.TmfTimeTipHandler_DURATION, duration);
+                            long begin = fTimeDataProvider.getSelectionBegin();
+                            long end = fTimeDataProvider.getSelectionEnd();
+                            final long delta = end - begin;
+                            if (delta > 0) {
+                                String percentage = String.format("%,.2f%%", Math.min(eventDuration * 100.0 / delta, 100)); //$NON-NLS-1$
+                                addItem(Messages.TmfTimeTipHandler_PERCENT_OF_SELECTION, percentage);
+                            }
                         }
                     }
                 }
@@ -265,7 +276,8 @@ public class TimeGraphTooltipHandler {
                 addItem(Messages.TmfTimeTipHandler_LINK_SOURCE, linkEvent.getEntry().getName());
                 addItem(Messages.TmfTimeTipHandler_LINK_TARGET, linkEvent.getDestinationEntry().getName());
 
-                // This block receives a list of <String, String> values to be added to the tip table
+                // This block receives a list of <String, String> values to be
+                // added to the tip table
                 Map<String, String> eventAddOns = fTimeGraphProvider.getEventHoverToolTipInfo(linkEvent);
                 if (eventAddOns != null) {
                     for (Entry<String, String> eventAddOn : eventAddOns.entrySet()) {
