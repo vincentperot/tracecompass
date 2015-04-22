@@ -82,8 +82,8 @@ public class PacketInformationIndex {
      */
     public void appendAll(Collection<ICTFPacketInformation> preParsedIndex)
             throws CTFException {
-        for (ICTFPacketInformation sipie : preParsedIndex) {
-            append(checkNotNull(sipie));
+        for (ICTFPacketInformation cpi : preParsedIndex) {
+            append(checkNotNull(cpi));
         }
     }
 

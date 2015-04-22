@@ -33,8 +33,9 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFPacketContext;
 import org.eclipse.tracecompass.internal.ctf.core.trace.PacketInformationIndex;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+
 
 /**
  * <b><u>StreamInput</u></b>
@@ -359,7 +360,7 @@ public class CTFStreamInput implements IDefinitionScope {
             BitBuffer bitBuffer) throws CTFException {
         ICTFPacketInformation packetIndex;
         StructDefinition streamPacketContextDef = fStreamPacketContextDecl.createDefinition(this, ILexicalScope.STREAM_PACKET_CONTEXT, bitBuffer);
-        packetIndex = new StreamInputPacketIndexEntry(dataOffsetBits, streamPacketContextDef, fileSizeBytes, fLostSoFar);
+        packetIndex = new CTFPacketContext(dataOffsetBits, streamPacketContextDef, fileSizeBytes, fLostSoFar);
         fLostSoFar = packetIndex.getLostEvents() + fLostSoFar;
         setTimestampEnd(packetIndex.getTimestampEnd());
         return packetIndex;
