@@ -31,18 +31,18 @@ import org.eclipse.tracecompass.ctf.core.event.types.StringDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFPacketContext;
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * The class <code>StreamInputPacketIndexEntryTest</code> contains tests for the
- * class <code>{@link StreamInputPacketIndexEntry}</code>.
+ * class <code>{@link CTFPacketContext}</code>.
  *
  * @author ematkho
  * @version $Revision: 1.0 $
  */
-public class CTFStreamInputPacketIndexEntryTest {
+public class CTFPacketContextTest {
 
     private ICTFPacketInformation fixture;
 
@@ -51,7 +51,7 @@ public class CTFStreamInputPacketIndexEntryTest {
      */
     @Before
     public void setUp() {
-        fixture = new StreamInputPacketIndexEntry(1L, 1L);
+        fixture = new CTFPacketContext(1L, 1L);
     }
 
     /**
@@ -93,10 +93,10 @@ public class CTFStreamInputPacketIndexEntryTest {
         bb.getByteBuffer().put((byte) 0);
         bb.getByteBuffer().put((byte) 0);
         StructDefinition sdef = sd.createDefinition(null, ILexicalScope.PACKET_HEADER, bb);
-        ICTFPacketInformation sipie = new StreamInputPacketIndexEntry(0, sdef, 128, 0);
-        assertNull(sipie.getTarget());
-        assertEquals(100, sipie.getTimestampBegin());
-        assertEquals(200, sipie.getTimestampEnd());
+        ICTFPacketInformation cpc = new CTFPacketContext(0, sdef, 128, 0);
+        assertNull(cpc.getTarget());
+        assertEquals(100, cpc.getTimestampBegin());
+        assertEquals(200, cpc.getTimestampEnd());
     }
 
     /**
@@ -122,10 +122,10 @@ public class CTFStreamInputPacketIndexEntryTest {
         bb.getByteBuffer().put((byte) 0);
         bb.getByteBuffer().put((byte) 0);
         StructDefinition sdef = sd.createDefinition(null, ILexicalScope.PACKET_HEADER, bb);
-        ICTFPacketInformation sipie = new StreamInputPacketIndexEntry(0, sdef, 128, 0);
-        assertNull(sipie.getTarget());
-        assertEquals(100, sipie.getTimestampBegin());
-        assertEquals(200, sipie.getTimestampEnd());
+        ICTFPacketInformation cpc = new CTFPacketContext(0, sdef, 128, 0);
+        assertNull(cpc.getTarget());
+        assertEquals(100, cpc.getTimestampBegin());
+        assertEquals(200, cpc.getTimestampEnd());
     }
 
     /**
@@ -152,13 +152,13 @@ public class CTFStreamInputPacketIndexEntryTest {
         bb.getByteBuffer().put((byte) 0);
         bb.getByteBuffer().put((byte) 0);
         StructDefinition sdef = sd.createDefinition(null, ILexicalScope.PACKET_HEADER, bb);
-        ICTFPacketInformation sipie = new StreamInputPacketIndexEntry(0, sdef, 128, 0);
-        assertNull(sipie.getTarget());
-        assertEquals(100, sipie.getTimestampBegin());
-        assertEquals(200, sipie.getTimestampEnd());
-        assertTrue(sipie.includes(150));
-        assertFalse(sipie.includes(10));
-        assertFalse(sipie.includes(250));
+        ICTFPacketInformation cpc = new CTFPacketContext(0, sdef, 128, 0);
+        assertNull(cpc.getTarget());
+        assertEquals(100, cpc.getTimestampBegin());
+        assertEquals(200, cpc.getTimestampEnd());
+        assertTrue(cpc.includes(150));
+        assertFalse(cpc.includes(10));
+        assertFalse(cpc.includes(250));
     }
 
     /**
@@ -180,10 +180,10 @@ public class CTFStreamInputPacketIndexEntryTest {
         bb.getByteBuffer().put((byte) 0);
         bb.getByteBuffer().put((byte) 0);
         StructDefinition sdef = sd.createDefinition(null, ILexicalScope.PACKET_HEADER, bb);
-        ICTFPacketInformation sipie = new StreamInputPacketIndexEntry(0, sdef, 128, 0);
-        assertNull(sipie.getTarget());
-        assertEquals(Long.MIN_VALUE, sipie.getTimestampBegin());
-        assertEquals(Long.MAX_VALUE, sipie.getTimestampEnd());
+        ICTFPacketInformation cpc = new CTFPacketContext(0, sdef, 128, 0);
+        assertNull(cpc.getTarget());
+        assertEquals(Long.MIN_VALUE, cpc.getTimestampBegin());
+        assertEquals(Long.MAX_VALUE, cpc.getTimestampEnd());
     }
 
     /**
@@ -207,11 +207,11 @@ public class CTFStreamInputPacketIndexEntryTest {
         bb.getByteBuffer().put((byte) 0);
         bb.getByteBuffer().put((byte) 0);
         StructDefinition sdef = sd.createDefinition(null, ILexicalScope.PACKET_HEADER, bb);
-        ICTFPacketInformation sipie = new StreamInputPacketIndexEntry(0, sdef, 128, 0);
-        assertEquals(Long.MIN_VALUE, sipie.getTimestampBegin());
-        assertEquals(Long.MAX_VALUE, sipie.getTimestampEnd());
-        assertEquals("Test66", sipie.getTarget());
-        assertEquals(66, sipie.getTargetId());
+        ICTFPacketInformation cpc = new CTFPacketContext(0, sdef, 128, 0);
+        assertEquals(Long.MIN_VALUE, cpc.getTimestampBegin());
+        assertEquals(Long.MAX_VALUE, cpc.getTimestampEnd());
+        assertEquals("Test66", cpc.getTarget());
+        assertEquals(66, cpc.getTargetId());
     }
 
     /**
@@ -234,14 +234,14 @@ public class CTFStreamInputPacketIndexEntryTest {
         bb.getByteBuffer().putInt(66);
         bb.getByteBuffer().putInt(300);
         StructDefinition sdef = sd.createDefinition(null, ILexicalScope.PACKET_HEADER, bb);
-        ICTFPacketInformation sipie = new StreamInputPacketIndexEntry(0, sdef, 128, 100);
-        assertEquals(Long.MIN_VALUE, sipie.getTimestampBegin());
-        assertEquals(Long.MAX_VALUE, sipie.getTimestampEnd());
-        assertEquals("CPU66", sipie.getTarget());
-        assertEquals(66, sipie.getTargetId());
-        assertEquals(200, sipie.getLostEvents());
-        assertEquals(0, sipie.getOffsetBits());
-        assertEquals(1024, sipie.getPacketSizeBits());
+        ICTFPacketInformation cpc = new CTFPacketContext(0, sdef, 128, 100);
+        assertEquals(Long.MIN_VALUE, cpc.getTimestampBegin());
+        assertEquals(Long.MAX_VALUE, cpc.getTimestampEnd());
+        assertEquals("CPU66", cpc.getTarget());
+        assertEquals(66, cpc.getTargetId());
+        assertEquals(200, cpc.getLostEvents());
+        assertEquals(0, cpc.getOffsetBits());
+        assertEquals(1024, cpc.getPacketSizeBits());
     }
 
     /**
@@ -261,6 +261,6 @@ public class CTFStreamInputPacketIndexEntryTest {
         BitBuffer bb = new BitBuffer(ByteBuffer.allocate(128));
 
         StructDefinition sdef = sd.createDefinition(null, ILexicalScope.PACKET_HEADER, bb);
-        assertEquals(expectedResult, new StreamInputPacketIndexEntry(0, sdef, 10000, 0).toString());
+        assertEquals(expectedResult, new CTFPacketContext(0, sdef, 10000, 0).toString());
     }
 }

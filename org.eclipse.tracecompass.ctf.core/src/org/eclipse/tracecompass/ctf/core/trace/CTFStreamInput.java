@@ -33,8 +33,8 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndex;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.trace.PacketInformationIndex;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFPacketContext;
 
 /**
  * <b><u>StreamInput</u></b>
@@ -63,7 +63,7 @@ public class CTFStreamInput implements IDefinitionScope {
     /**
      * The packet index of this input
      */
-    private final StreamInputPacketIndex fIndex;
+    private final PacketInformationIndex fIndex;
 
     private long fTimestampEnd;
 
@@ -97,7 +97,7 @@ public class CTFStreamInput implements IDefinitionScope {
     public CTFStreamInput(CTFStream stream, File file) {
         fStream = stream;
         fFile = file;
-        fIndex = new StreamInputPacketIndex();
+        fIndex = new PacketInformationIndex();
         /*
          * Create the definitions we need to read the packet headers + contexts
          */
@@ -133,7 +133,7 @@ public class CTFStreamInput implements IDefinitionScope {
      *
      * @return the stream input Index
      */
-    StreamInputPacketIndex getIndex() {
+    PacketInformationIndex getIndex() {
         return fIndex;
     }
 
@@ -359,7 +359,7 @@ public class CTFStreamInput implements IDefinitionScope {
             BitBuffer bitBuffer) throws CTFException {
         ICTFPacketInformation packetIndex;
         StructDefinition streamPacketContextDef = fStreamPacketContextDecl.createDefinition(this, ILexicalScope.STREAM_PACKET_CONTEXT, bitBuffer);
-        packetIndex = new StreamInputPacketIndexEntry(dataOffsetBits, streamPacketContextDef, fileSizeBytes, fLostSoFar);
+        packetIndex = new CTFPacketContext(dataOffsetBits, streamPacketContextDef, fileSizeBytes, fLostSoFar);
         fLostSoFar = packetIndex.getLostEvents() + fLostSoFar;
         setTimestampEnd(packetIndex.getTimestampEnd());
         return packetIndex;

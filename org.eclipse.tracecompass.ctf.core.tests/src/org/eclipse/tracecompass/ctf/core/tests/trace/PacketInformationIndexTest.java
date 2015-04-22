@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.tracecompass.ctf.core.CTFException;
 import org.eclipse.tracecompass.internal.ctf.core.trace.PacketInformationIndex;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
+import org.eclipse.tracecompass.internal.ctf.core.trace.CTFPacketContext;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ public class PacketInformationIndexTest {
     @Before
     public void setUp() throws CTFException {
         fixture = new PacketInformationIndex();
-        fixture.append(new StreamInputPacketIndexEntry(1L,0L));
+        fixture.append(new CTFPacketContext(1L,0L));
     }
 
     /**
