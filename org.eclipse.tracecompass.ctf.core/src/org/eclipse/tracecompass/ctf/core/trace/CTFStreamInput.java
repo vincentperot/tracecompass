@@ -33,7 +33,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
-import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndex;
+import org.eclipse.tracecompass.internal.ctf.core.trace.PacketInformationIndex;
 import org.eclipse.tracecompass.internal.ctf.core.trace.StreamInputPacketIndexEntry;
 
 /**
@@ -63,7 +63,7 @@ public class CTFStreamInput implements IDefinitionScope {
     /**
      * The packet index of this input
      */
-    private final StreamInputPacketIndex fIndex;
+    private final PacketInformationIndex fIndex;
 
     private long fTimestampEnd;
 
@@ -97,7 +97,7 @@ public class CTFStreamInput implements IDefinitionScope {
     public CTFStreamInput(CTFStream stream, File file) {
         fStream = stream;
         fFile = file;
-        fIndex = new StreamInputPacketIndex();
+        fIndex = new PacketInformationIndex();
         /*
          * Create the definitions we need to read the packet headers + contexts
          */
@@ -132,8 +132,9 @@ public class CTFStreamInput implements IDefinitionScope {
      * The common streamInput Index
      *
      * @return the stream input Index
+     * @since 1.0
      */
-    StreamInputPacketIndex getIndex() {
+    public PacketInformationIndex getIndex() {
         return fIndex;
     }
 
