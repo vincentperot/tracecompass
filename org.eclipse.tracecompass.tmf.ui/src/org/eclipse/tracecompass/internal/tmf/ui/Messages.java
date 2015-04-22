@@ -139,6 +139,8 @@ public class Messages extends NLS {
     public static String ColorsView_TickButtonText;
     public static String TickColorDialog_TickColorDialogTitle;
 
+    public static String TimeGraphTooltipHandler_PERCENT_OF_SELECTION;
+
     public static String CustomTxtParserInputWizardPage_addChildLine;
     public static String CustomTxtParserInputWizardPage_addGroup;
     public static String CustomTxtParserInputWizardPage_addNextLine;
