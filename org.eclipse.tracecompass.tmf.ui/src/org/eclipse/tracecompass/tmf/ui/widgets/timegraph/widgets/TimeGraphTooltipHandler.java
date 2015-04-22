@@ -32,6 +32,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfNanoTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -163,9 +167,12 @@ public class TimeGraphTooltipHandler {
                     ITimeEvent currEvent = Utils.findEvent(entry, currPixelTime, 0);
                     ITimeEvent nextEvent = Utils.findEvent(entry, currPixelTime, 1);
 
-                    // if there is no current event at the start of the current pixel range,
-                    // or if the current event starts before the current pixel range,
-                    // use the next event as long as it starts within the current pixel range
+                    // if there is no current event at the start of the current
+                    // pixel range,
+                    // or if the current event starts before the current pixel
+                    // range,
+                    // use the next event as long as it starts within the
+                    // current pixel range
                     if ((currEvent == null || currEvent.getTime() < currPixelTime) &&
                             (nextEvent != null && nextEvent.getTime() < nextPixelTime)) {
                         currEvent = nextEvent;
@@ -193,7 +200,8 @@ public class TimeGraphTooltipHandler {
                         addItem(Messages.TmfTimeTipHandler_TRACE_STATE, state);
                     }
 
-                    // This block receives a list of <String, String> values to be added to the tip table
+                    // This block receives a list of <String, String> values to
+                    // be added to the tip table
                     Map<String, String> eventAddOns = fTimeGraphProvider.getEventHoverToolTipInfo(currEvent, currPixelTime);
                     if (eventAddOns != null) {
                         for (Entry<String, String> eventAddOn : eventAddOns.entrySet()) {
@@ -256,6 +264,13 @@ public class TimeGraphTooltipHandler {
 
                         if (eventDuration > 0) {
                             addItem(Messages.TmfTimeTipHandler_DURATION, duration);
+                            TmfTimeRange range = TmfTraceManager.getInstance().getCurrentTraceContext().getSelectionRange();
+                            final ITmfTimestamp delta = range.getEndTime().getDelta(range.getStartTime());
+                            if (delta.getValue() != 0 && range.getIntersection(new TmfTimeRange(new TmfNanoTimestamp(eventStartTime), new TmfNanoTimestamp(eventEndTime))) != null) {
+                                final long deltaNs = delta.normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+                                String percentage = String.format("%,.2f%%", Math.min(eventDuration * 100.0 / deltaNs, 100)); //$NON-NLS-1$
+                                addItem(Messages.TimeGraphTooltipHandler_PERCENT_OF_SELECTION, percentage);
+                            }
                         }
                     }
                 }
@@ -265,7 +280,8 @@ public class TimeGraphTooltipHandler {
                 addItem(Messages.TmfTimeTipHandler_LINK_SOURCE, linkEvent.getEntry().getName());
                 addItem(Messages.TmfTimeTipHandler_LINK_TARGET, linkEvent.getDestinationEntry().getName());
 
-                // This block receives a list of <String, String> values to be added to the tip table
+                // This block receives a list of <String, String> values to be
+                // added to the tip table
                 Map<String, String> eventAddOns = fTimeGraphProvider.getEventHoverToolTipInfo(linkEvent);
                 if (eventAddOns != null) {
                     for (Entry<String, String> eventAddOn : eventAddOns.entrySet()) {
