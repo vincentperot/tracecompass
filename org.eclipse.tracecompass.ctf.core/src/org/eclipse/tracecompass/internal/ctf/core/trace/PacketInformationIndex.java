@@ -35,7 +35,7 @@ import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketInformation;
  * This is a data structure containing entries, you may append to this and read
  * it. It is not thread safe.
  */
-public class StreamInputPacketIndex {
+public class PacketInformationIndex {
 
     // ------------------------------------------------------------------------
     // Attributes

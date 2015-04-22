@@ -30,7 +30,7 @@ import org.junit.runners.Suite;
     IOstructgenTest.class,
     MetadataTest.class,
     CTFStreamInputPacketIndexEntryTest.class,
-    CTFStreamInputPacketIndexTest.class,
+    PacketInformationIndexTest.class,
     CTFStreamInputReaderTest.class,
     CTFStreamInputReaderTimestampComparatorTest.class,
     CTFStreamInputTest.class,
