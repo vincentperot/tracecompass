@@ -11,23 +11,23 @@
  *   Marc-Andre Laperle - Initial implementation and API
  **********************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands;
+package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands;
 
 /**
- * Get viewer connection type
+ * Create new session return code
  *
  * @author Matthew Khouzam
  */
-public enum ConnectionType implements IBaseCommand {
+public enum CreateSessionReturnCode implements IBaseCommand {
 
-    /** Command sent */
-    VIEWER_CLIENT_COMMAND(1),
-    /** Notification sent */
-    VIEWER_CLIENT_NOTIFICATION(2);
+    /** If new streams are being sent. */
+    LTTNG_VIEWER_CREATE_SESSION_OK(1),
+    /** Fatal error on the server-side. */
+    LTTNG_VIEWER_CREATE_SESSION_ERR(2);
 
     private final int fCode;
 
-    private ConnectionType(int c) {
+    private CreateSessionReturnCode(int c) {
         fCode = c;
     }
 
@@ -35,5 +35,4 @@ public enum ConnectionType implements IBaseCommand {
     public int getCommand() {
         return fCode;
     }
-
 }

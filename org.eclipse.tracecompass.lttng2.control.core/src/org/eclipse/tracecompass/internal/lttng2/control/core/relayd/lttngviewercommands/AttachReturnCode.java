@@ -11,25 +11,31 @@
  *   Marc-Andre Laperle - Initial implementation and API
  **********************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands;
+package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands;
 
 /**
- * Get metadata return code
+ * Return codes for "viewer attach" command
  *
  * @author Matthew Khouzam
  */
-public enum GetMetadataReturnCode implements IBaseCommand {
+public enum AttachReturnCode implements IBaseCommand {
 
-    /** Response was OK */
-    VIEWER_METADATA_OK(1),
-    /** Response was nothing new */
-    VIEWER_NO_NEW_METADATA(2),
-    /** Response was Error */
-    VIEWER_METADATA_ERR(3);
+    /** If the attach command succeeded. */
+    VIEWER_ATTACH_OK(1),
+    /** If a viewer is already attached. */
+    VIEWER_ATTACH_ALREADY(2),
+    /** If the session ID is unknown. */
+    VIEWER_ATTACH_UNK(3),
+    /** If the session is not live. */
+    VIEWER_ATTACH_NOT_LIVE(4),
+    /** Seek error. */
+    VIEWER_ATTACH_SEEK_ERR(5),
+    /** No session */
+    VIEWER_ATTACH_NO_SESSION(6);
 
     private final int fCode;
 
-    private GetMetadataReturnCode(int c) {
+    private AttachReturnCode(int c) {
         fCode = c;
     }
 
@@ -37,5 +43,4 @@ public enum GetMetadataReturnCode implements IBaseCommand {
     public int getCommand() {
         return fCode;
     }
-
 }

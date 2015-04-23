@@ -20,24 +20,24 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.ILttngRelaydConnector;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.AttachSessionRequest;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.AttachSessionResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.Command;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.ConnectResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.CreateSessionResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.GetMetadata;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.GetNextIndex;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.GetPacket;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.IndexResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.ListSessionsResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.MetadataPacketResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.NewStreamsResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.NextIndexReturnCode;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.SeekCommand;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.SessionResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.StreamResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.TracePacketResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.ViewerCommand;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.AttachSessionRequest;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.AttachSessionResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.Command;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.ConnectResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.CreateSessionResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.GetMetadata;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.GetNextIndex;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.GetPacket;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.IndexResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.ListSessionsResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.MetadataPacketResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.NewStreamsResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.NextIndexReturnCode;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.SeekCommand;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.SessionResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.StreamResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.TracePacketResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.ViewerCommand;
 
 /**
  * Lttng 2.4 implementation

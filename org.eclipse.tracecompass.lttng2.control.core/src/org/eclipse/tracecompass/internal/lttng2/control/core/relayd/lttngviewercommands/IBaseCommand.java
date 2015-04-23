@@ -11,33 +11,19 @@
  *   Marc-Andre Laperle - Initial implementation and API
  **********************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands;
+package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands;
 
 /**
- * Seek command
+ * Instruction to send to relayd
  *
  * @author Matthew Khouzam
  */
-public enum SeekCommand implements IBaseCommand {
-
-    /** Receive the trace packets from the beginning. */
-    VIEWER_SEEK_BEGINNING(1),
-    /** Receive the trace packets from now. */
-    VIEWER_SEEK_LAST(2);
-
-    private final int fCode;
+public interface IBaseCommand {
 
     /**
-     * Command size (fCode)
+     * gets the numerical value of the command
+     *
+     * @return the numerical value of the command
      */
-    public static final int SIZE = Integer.SIZE / 8;
-
-    private SeekCommand(int c) {
-        fCode = c;
-    }
-
-    @Override
-    public int getCommand() {
-        return fCode;
-    }
+    int getCommand();
 }

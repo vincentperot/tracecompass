@@ -11,13 +11,29 @@
  *   Marc-Andre Laperle - Initial implementation and API
  **********************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands;
+package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands;
 
 /**
- * Command response, this will allow sorting commands easier
+ * Get viewer connection type
  *
  * @author Matthew Khouzam
  */
-public interface IRelayResponse {
+public enum ConnectionType implements IBaseCommand {
+
+    /** Command sent */
+    VIEWER_CLIENT_COMMAND(1),
+    /** Notification sent */
+    VIEWER_CLIENT_NOTIFICATION(2);
+
+    private final int fCode;
+
+    private ConnectionType(int c) {
+        fCode = c;
+    }
+
+    @Override
+    public int getCommand() {
+        return fCode;
+    }
 
 }

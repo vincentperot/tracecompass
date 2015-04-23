@@ -15,12 +15,12 @@ package org.eclipse.tracecompass.internal.lttng2.control.core.relayd;
 import java.io.IOException;
 import java.util.List;
 
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.AttachSessionResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.CreateSessionResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.IndexResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.SessionResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.StreamResponse;
-import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands.TracePacketResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.AttachSessionResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.CreateSessionResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.IndexResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.SessionResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.StreamResponse;
+import org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands.TracePacketResponse;
 
 /**
  * Connector for Lttng Relayd

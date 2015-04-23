@@ -11,31 +11,27 @@
  *   Marc-Andre Laperle - Initial implementation and API
  **********************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands;
+package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands;
 
 /**
- * Return codes for "viewer attach" command
+ * Get packet return code
  *
  * @author Matthew Khouzam
  */
-public enum AttachReturnCode implements IBaseCommand {
+public enum GetPacketReturnCode implements IBaseCommand {
 
-    /** If the attach command succeeded. */
-    VIEWER_ATTACH_OK(1),
-    /** If a viewer is already attached. */
-    VIEWER_ATTACH_ALREADY(2),
-    /** If the session ID is unknown. */
-    VIEWER_ATTACH_UNK(3),
-    /** If the session is not live. */
-    VIEWER_ATTACH_NOT_LIVE(4),
-    /** Seek error. */
-    VIEWER_ATTACH_SEEK_ERR(5),
-    /** No session */
-    VIEWER_ATTACH_NO_SESSION(6);
+    /** Response was OK */
+    VIEWER_GET_PACKET_OK(1),
+    /** Response was RETRY */
+    VIEWER_GET_PACKET_RETRY(2),
+    /** Response was ERROR */
+    VIEWER_GET_PACKET_ERR(3),
+    /** Response was End of File */
+    VIEWER_GET_PACKET_EOF(4);
 
     private final int fCode;
 
-    private AttachReturnCode(int c) {
+    private GetPacketReturnCode(int c) {
         fCode = c;
     }
 
@@ -43,4 +39,5 @@ public enum AttachReturnCode implements IBaseCommand {
     public int getCommand() {
         return fCode;
     }
+
 }

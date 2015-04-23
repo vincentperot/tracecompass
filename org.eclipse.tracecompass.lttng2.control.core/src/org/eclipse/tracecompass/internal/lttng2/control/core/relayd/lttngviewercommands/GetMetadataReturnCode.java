@@ -11,27 +11,25 @@
  *   Marc-Andre Laperle - Initial implementation and API
  **********************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands;
+package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands;
 
 /**
- * Return codes for "new streams" command
+ * Get metadata return code
  *
  * @author Matthew Khouzam
  */
-public enum NewStreamsReturnCode implements IBaseCommand {
+public enum GetMetadataReturnCode implements IBaseCommand {
 
-    /** If new streams are being sent. */
-    LTTNG_VIEWER_NEW_STREAMS_OK(1),
-    /** If no new streams are available. */
-    LTTNG_VIEWER_NEW_STREAMS_NO_NEW(2),
-    /** Error. */
-    LTTNG_VIEWER_NEW_STREAMS_ERR(3),
-    /** Session closed. */
-    LTTNG_VIEWER_NEW_STREAMS_HUP(4);
+    /** Response was OK */
+    VIEWER_METADATA_OK(1),
+    /** Response was nothing new */
+    VIEWER_NO_NEW_METADATA(2),
+    /** Response was Error */
+    VIEWER_METADATA_ERR(3);
 
     private final int fCode;
 
-    private NewStreamsReturnCode(int c) {
+    private GetMetadataReturnCode(int c) {
         fCode = c;
     }
 
@@ -39,4 +37,5 @@ public enum NewStreamsReturnCode implements IBaseCommand {
     public int getCommand() {
         return fCode;
     }
+
 }

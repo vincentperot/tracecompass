@@ -11,27 +11,31 @@
  *   Marc-Andre Laperle - Initial implementation and API
  **********************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands;
+package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands;
 
 /**
- * Get packet return code
+ * Get next index return code (hope it's viewer_index_ok)
  *
  * @author Matthew Khouzam
  */
-public enum GetPacketReturnCode implements IBaseCommand {
+public enum NextIndexReturnCode implements IBaseCommand {
 
-    /** Response was OK */
-    VIEWER_GET_PACKET_OK(1),
-    /** Response was RETRY */
-    VIEWER_GET_PACKET_RETRY(2),
-    /** Response was ERROR */
-    VIEWER_GET_PACKET_ERR(3),
-    /** Response was End of File */
-    VIEWER_GET_PACKET_EOF(4);
+    /** Index is available. */
+    VIEWER_INDEX_OK(1),
+    /** Index not yet available. */
+    VIEWER_INDEX_RETRY(2),
+    /** Index closed (trace destroyed). */
+    VIEWER_INDEX_HUP(3),
+    /** Unknown error. */
+    VIEWER_INDEX_ERR(4),
+    /** Inactive stream beacon. */
+    VIEWER_INDEX_INACTIVE(5),
+    /** End of index file. */
+    VIEWER_INDEX_EOF(6);
 
     private final int fCode;
 
-    private GetPacketReturnCode(int c) {
+    private NextIndexReturnCode(int c) {
         fCode = c;
     }
 
@@ -39,5 +43,4 @@ public enum GetPacketReturnCode implements IBaseCommand {
     public int getCommand() {
         return fCode;
     }
-
 }

@@ -11,31 +11,27 @@
  *   Marc-Andre Laperle - Initial implementation and API
  **********************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewerCommands;
+package org.eclipse.tracecompass.internal.lttng2.control.core.relayd.lttngviewercommands;
 
 /**
- * Get next index return code (hope it's viewer_index_ok)
+ * Return codes for "new streams" command
  *
  * @author Matthew Khouzam
  */
-public enum NextIndexReturnCode implements IBaseCommand {
+public enum NewStreamsReturnCode implements IBaseCommand {
 
-    /** Index is available. */
-    VIEWER_INDEX_OK(1),
-    /** Index not yet available. */
-    VIEWER_INDEX_RETRY(2),
-    /** Index closed (trace destroyed). */
-    VIEWER_INDEX_HUP(3),
-    /** Unknown error. */
-    VIEWER_INDEX_ERR(4),
-    /** Inactive stream beacon. */
-    VIEWER_INDEX_INACTIVE(5),
-    /** End of index file. */
-    VIEWER_INDEX_EOF(6);
+    /** If new streams are being sent. */
+    LTTNG_VIEWER_NEW_STREAMS_OK(1),
+    /** If no new streams are available. */
+    LTTNG_VIEWER_NEW_STREAMS_NO_NEW(2),
+    /** Error. */
+    LTTNG_VIEWER_NEW_STREAMS_ERR(3),
+    /** Session closed. */
+    LTTNG_VIEWER_NEW_STREAMS_HUP(4);
 
     private final int fCode;
 
-    private NextIndexReturnCode(int c) {
+    private NewStreamsReturnCode(int c) {
         fCode = c;
     }
 
