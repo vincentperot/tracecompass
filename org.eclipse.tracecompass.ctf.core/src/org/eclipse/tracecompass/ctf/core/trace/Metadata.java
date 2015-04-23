@@ -254,6 +254,9 @@ public class Metadata {
         /* Generate IO structures (declarations) */
         fTreeParser = new IOStructGen(tree, trace);
         fTreeParser.generate();
+        if(getDetectedByteOrder() != null && trace.getByteOrder()!=getDetectedByteOrder()){
+            throw new ParseException("Metadata byte order and trace byte order inconsistent."); //$NON-NLS-1$
+        }
     }
 
     /**
