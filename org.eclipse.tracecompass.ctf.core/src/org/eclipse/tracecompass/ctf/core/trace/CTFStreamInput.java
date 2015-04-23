@@ -133,8 +133,9 @@ public class CTFStreamInput implements IDefinitionScope {
      * The common streamInput Index
      *
      * @return the stream input Index
+     * @since 1.0
      */
-    PacketInformationIndex getIndex() {
+    public PacketInformationIndex getIndex() {
         return fIndex;
     }
 
@@ -212,8 +213,9 @@ public class CTFStreamInput implements IDefinitionScope {
      * @return true if there are more packets to add
      * @throws CTFException
      *             If there was a problem reading the packed header
+     * @since 1.0
      */
-    public boolean addPacketHeaderIndex() throws CTFException {
+    public boolean readNextPacket() throws CTFException {
         long currentPosBits = 0L;
         if (!fIndex.isEmpty()) {
             ICTFPacketInformation pos = fIndex.lastElement();
