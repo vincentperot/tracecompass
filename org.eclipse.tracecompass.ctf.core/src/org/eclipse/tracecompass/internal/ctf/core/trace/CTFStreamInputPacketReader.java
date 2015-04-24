@@ -388,7 +388,6 @@ public final class CTFStreamInputPacketReader implements IPacketReader {
             final ImmutableList<String> fieldNameList = ImmutableList.<String> builder().add(CTFStrings.LOST_EVENTS_FIELD).add(CTFStrings.LOST_EVENTS_DURATION).build();
             return new EventDefinition(
                     lostEventDeclaration,
-                    fStreamInputReader,
                     fLastTimestamp,
                     null,
                     null,

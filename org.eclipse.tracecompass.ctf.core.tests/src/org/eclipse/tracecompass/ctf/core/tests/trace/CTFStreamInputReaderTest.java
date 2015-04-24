@@ -68,7 +68,7 @@ public class CTFStreamInputReaderTest {
         fixture = getStreamInputReader();
         fixture.setName(1);
         fixture.setCurrentEvent(new EventDefinition(new EventDeclaration(),
-                getStreamInputReader(), 0, null, null,
+                 0, null, null,
                 new StructDefinition(
                         new StructDeclaration(0),
                         null,
@@ -218,13 +218,11 @@ public class CTFStreamInputReaderTest {
     /**
      * Run the seek test. Seek by passing an EventDefinition to which we've
      * given the timestamp we want.
-     *
-     * @throws CTFException
      */
     @Test
-    public void testSeek_eventDefinition() throws CTFException {
+    public void testSeek_eventDefinition() {
         EventDefinition eventDefinition = new EventDefinition(
-                new EventDeclaration(), getStreamInputReader(), 1L, null, null, null, null);
+                new EventDeclaration(), 1L, null, null, null, null);
         fixture.setCurrentEvent(eventDefinition);
     }
 }

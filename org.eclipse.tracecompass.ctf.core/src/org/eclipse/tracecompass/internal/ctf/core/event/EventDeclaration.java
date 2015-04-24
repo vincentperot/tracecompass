@@ -101,7 +101,6 @@ public class EventDeclaration implements IEventDeclaration {
         // but it's passed to us
         return new EventDefinition(
                 this,
-                streamInputReader,
                 timestamp,
                 streamEventContext,
                 eventContext,

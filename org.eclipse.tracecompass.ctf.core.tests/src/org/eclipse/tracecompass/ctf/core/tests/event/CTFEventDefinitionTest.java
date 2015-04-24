@@ -84,22 +84,22 @@ public class CTFEventDefinitionTest {
         StructDefinition pContext = new StructDefinition(pContextDec, null, ILexicalScope.FIELDS.getPath(), Collections.EMPTY_LIST, new Definition[0]);
         StructDefinition fields = new StructDefinition(fDec, null, ILexicalScope.FIELDS.getPath(), fieldNames, fDefs);
 
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, null, null, null, null));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, null, null, null, fields));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, null, null, pContext, null));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, null, null, pContext, fields));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, null, eContext, null, null));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, null, eContext, null, fields));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, null, eContext, pContext, null));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, null, eContext, pContext, fields));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, sContext, null, null, null));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, sContext, null, null, fields));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, sContext, null, pContext, null));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, sContext, null, pContext, fields));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, sContext, eContext, null, null));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, sContext, eContext, null, fields));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, sContext, eContext, pContext, null));
-        fixture.add(new EventDefinition(eventDeclaration, null, 100, sContext, eContext, pContext, fields));
+        fixture.add(new EventDefinition(eventDeclaration, 100, null, null, null, null));
+        fixture.add(new EventDefinition(eventDeclaration, 100, null, null, null, fields));
+        fixture.add(new EventDefinition(eventDeclaration, 100, null, null, pContext, null));
+        fixture.add(new EventDefinition(eventDeclaration, 100, null, null, pContext, fields));
+        fixture.add(new EventDefinition(eventDeclaration, 100, null, eContext, null, null));
+        fixture.add(new EventDefinition(eventDeclaration, 100, null, eContext, null, fields));
+        fixture.add(new EventDefinition(eventDeclaration, 100, null, eContext, pContext, null));
+        fixture.add(new EventDefinition(eventDeclaration, 100, null, eContext, pContext, fields));
+        fixture.add(new EventDefinition(eventDeclaration, 100, sContext, null, null, null));
+        fixture.add(new EventDefinition(eventDeclaration, 100, sContext, null, null, fields));
+        fixture.add(new EventDefinition(eventDeclaration, 100, sContext, null, pContext, null));
+        fixture.add(new EventDefinition(eventDeclaration, 100, sContext, null, pContext, fields));
+        fixture.add(new EventDefinition(eventDeclaration, 100, sContext, eContext, null, null));
+        fixture.add(new EventDefinition(eventDeclaration, 100, sContext, eContext, null, fields));
+        fixture.add(new EventDefinition(eventDeclaration, 100, sContext, eContext, pContext, null));
+        fixture.add(new EventDefinition(eventDeclaration, 100, sContext, eContext, pContext, fields));
     }
 
     /**
@@ -131,7 +131,7 @@ public class CTFEventDefinitionTest {
         }
         if (((rank / 4) % 2) == 1) {
             assertNotNull(title, ed.getEventContext());
-        }else{
+        } else {
             assertNull(title, ed.getEventContext());
         }
         if (rank % 2 == 1) {
