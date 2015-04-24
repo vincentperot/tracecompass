@@ -53,7 +53,7 @@ public class Metadata {
     // ------------------------------------------------------------------------
     // Constants
     // ------------------------------------------------------------------------
-    private static final String TEXT_ONLY_METADATA_HEADER_PREFIX = "/* CTF";  //$NON-NLS-1$
+    private static final String TEXT_ONLY_METADATA_HEADER_PREFIX = "/* CTF"; //$NON-NLS-1$
 
     private static final int PREVALIDATION_SIZE = 8;
 
@@ -185,10 +185,10 @@ public class Metadata {
     }
 
     /**
-     * Executes a weak validation of the metadata. It checks if a file with
-     * name metadata exists and if one of the following conditions are met:
-     * - For text-only metadata, the file starts with "/* CTF" (without the quotes)
-     * - For packet-based metadata, the file starts with correct magic number
+     * Executes a weak validation of the metadata. It checks if a file with name
+     * metadata exists and if one of the following conditions are met: - For
+     * text-only metadata, the file starts with "/* CTF" (without the quotes) -
+     * For packet-based metadata, the file starts with correct magic number
      *
      * @param path
      *            path to CTF trace directory
@@ -254,6 +254,9 @@ public class Metadata {
         /* Generate IO structures (declarations) */
         fTreeParser = new IOStructGen(tree, trace);
         fTreeParser.generate();
+        if (getDetectedByteOrder() != null && trace.getByteOrder() != getDetectedByteOrder()) {
+            throw new ParseException("Metadata byte order and trace byte order inconsistent."); //$NON-NLS-1$
+        }
     }
 
     /**
