@@ -671,6 +671,7 @@ public class IOStructGen {
 
         EventDeclaration event = new EventDeclaration();
 
+        CTFStream stream = null;
         pushScope();
 
         for (CommonTree child : children) {
@@ -710,19 +711,13 @@ public class IOStructGen {
              * could be possible to just get the only existing stream, whatever
              * is its id.
              */
-            CTFStream stream = fTrace.getStream(null);
+            stream = fTrace.getStream(null);
 
-            if (stream != null) {
-                event.setStream(stream);
-            } else {
+            if (stream == null) {
                 throw new ParseException("Event without stream_id, but there is no stream without id"); //$NON-NLS-1$
             }
         }
 
-        /*
-         * Add the event to the stream.
-         */
-        event.getStream().addEvent(event);
 
         popScope();
     }
@@ -777,7 +772,7 @@ public class IOStructGen {
                 throw new ParseException("Stream " + streamId + " not found"); //$NON-NLS-1$ //$NON-NLS-2$
             }
 
-            event.setStream(stream);
+            event.setTraceScope(fTrace);
         } else if (left.equals(MetadataStrings.CONTEXT)) {
             if (event.contextIsSet()) {
                 throw new ParseException("context already defined"); //$NON-NLS-1$
