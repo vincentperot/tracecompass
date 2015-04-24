@@ -206,11 +206,13 @@ public class Metadata {
                 bb.clear();
                 fc.read(bb);
                 bb.flip();
-                if (bb.getInt(0) == Utils.TSDL_MAGIC) {
+                int int1 = bb.getInt(0);
+                if (int1 == Utils.TSDL_MAGIC) {
                     return true;
                 }
                 bb.order(ByteOrder.LITTLE_ENDIAN);
-                if (bb.getInt(0) == Utils.TSDL_MAGIC) {
+                int1 = bb.getInt(0);
+                if (int1 == Utils.TSDL_MAGIC) {
                     return true;
                 }
                 bb.position(0);
