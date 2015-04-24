@@ -58,7 +58,7 @@ public class Metadata {
     // ------------------------------------------------------------------------
     // Constants
     // ------------------------------------------------------------------------
-    private static final String TEXT_ONLY_METADATA_HEADER_PREFIX = "/* CTF";  //$NON-NLS-1$
+    private static final String TEXT_ONLY_METADATA_HEADER_PREFIX = "/* CTF"; //$NON-NLS-1$
 
     private static final int PREVALIDATION_SIZE = 8;
 
@@ -154,10 +154,7 @@ public class Metadata {
         try (FileInputStream fis = new FileInputStream(getMetadataPath());
                 FileChannel metadataFileChannel = fis.getChannel();
                 /* Check if metadata is packet-based, if not it is text based */
-                Reader metadataTextInput =
-                        (isPacketBased(metadataFileChannel) ?
-                                readBinaryMetaData(metadataFileChannel) :
-                                new FileReader(getMetadataPath()));) {
+                Reader metadataTextInput = (isPacketBased(metadataFileChannel) ? readBinaryMetaData(metadataFileChannel) : new FileReader(getMetadataPath()));) {
 
             readMetaDataText(metadataTextInput);
 
@@ -190,10 +187,10 @@ public class Metadata {
     }
 
     /**
-     * Executes a weak validation of the metadata. It checks if a file with
-     * name metadata exists and if one of the following conditions are met:
-     * - For text-only metadata, the file starts with "/* CTF" (without the quotes)
-     * - For packet-based metadata, the file starts with correct magic number
+     * Executes a weak validation of the metadata. It checks if a file with name
+     * metadata exists and if one of the following conditions are met: - For
+     * text-only metadata, the file starts with "/* CTF" (without the quotes) -
+     * For packet-based metadata, the file starts with correct magic number
      *
      * @param path
      *            path to CTF trace directory
@@ -259,6 +256,10 @@ public class Metadata {
         /* Generate IO structures (declarations) */
         fTreeParser = new IOStructGen(tree, trace);
         fTreeParser.generate();
+        ByteOrder localDetectedByteOrder = getDetectedByteOrder();
+        if (detectedByteOrder != null && trace.getByteOrder() != localDetectedByteOrder) {
+            throw new ParseException("Metadata byte order and trace byte order inconsistent."); //$NON-NLS-1$
+        }
     }
 
     /**
@@ -372,7 +373,7 @@ public class Metadata {
      */
     private MetadataPacketHeader readMetadataPacket(
             FileChannel metadataFileChannel, StringBuffer metadataText)
-            throws CTFException {
+                    throws CTFException {
         /* Allocate a ByteBuffer for the header */
         ByteBuffer headerByteBuffer = ByteBuffer.allocate(METADATA_PACKET_HEADER_SIZE);
 
@@ -508,8 +509,9 @@ public class Metadata {
 
     /**
      * Copies the metadata file to a destination directory.
+     *
      * @param path
-     *             the destination directory
+     *            the destination directory
      * @return the path to the target file
      * @throws IOException
      *             if an error occurred
