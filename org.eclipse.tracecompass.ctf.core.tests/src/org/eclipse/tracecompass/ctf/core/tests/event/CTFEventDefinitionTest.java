@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.event.IEventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.scope.ILexicalScope;
 import org.eclipse.tracecompass.ctf.core.event.types.Definition;
 import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
@@ -32,6 +32,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.event.EventDefinition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -108,13 +109,13 @@ public class CTFEventDefinitionTest {
     @Test
     public void testEvents() {
         int i = 0;
-        for (EventDefinition ed : fixture) {
+        for (IEventDefinition ed : fixture) {
             test(i, ed);
             i++;
         }
     }
 
-    private static void test(int rank, EventDefinition ed) {
+    private static void test(int rank, IEventDefinition ed) {
         String title = "event #" + rank;
         assertEquals(title, 100L, ed.getTimestamp());
         ICompositeDefinition context = ed.getContext();

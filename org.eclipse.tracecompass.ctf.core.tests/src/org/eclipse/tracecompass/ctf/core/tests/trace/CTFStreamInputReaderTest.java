@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.eclipse.tracecompass.ctf.core.CTFException;
-import org.eclipse.tracecompass.ctf.core.event.EventDefinition;
+import org.eclipse.tracecompass.ctf.core.event.IEventDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.Definition;
 import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
 import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDefinition;
@@ -35,6 +35,7 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInput;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
 import org.eclipse.tracecompass.ctf.core.trace.CTFTrace;
 import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
+import org.eclipse.tracecompass.internal.ctf.core.event.EventDefinition;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -136,7 +137,7 @@ public class CTFStreamInputReaderTest {
      */
     @Test
     public void testGetCurrentEvent() {
-        EventDefinition result = fixture.getCurrentEvent();
+        IEventDefinition result = fixture.getCurrentEvent();
         assertNotNull(result);
     }
 
