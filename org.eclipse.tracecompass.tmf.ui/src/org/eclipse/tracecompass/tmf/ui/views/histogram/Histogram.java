@@ -513,7 +513,7 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
     public synchronized long getTimestamp(final int offset) {
         assert offset > 0 && offset < fScaledData.fWidth;
         try {
-            return fScaledData.fFirstBucketTime + fScaledData.fBucketDuration * offset;
+            return fScaledData.fFirstBucketTime + (long) (fScaledData.fBucketDuration * offset + .5);
         } catch (final Exception e) {
             return 0; // TODO: Fix that racing condition (NPE)
         }
@@ -762,7 +762,7 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
             imageGC.fillRectangle(0, 0, image.getBounds().width + 1, image.getBounds().height + 1);
 
             // Draw the histogram bars
-            final int limit = width < scaledData.fWidth ? width : scaledData.fWidth;
+            final int limit = scaledData.fWidth;
             double factor = HistogramScaledData.hideLostEvents ? scaledData.fScalingFactor : scaledData.fScalingFactorCombined;
             final boolean showTracesColors = showTraces();
             for (int i = 0; i < limit; i++) {
@@ -870,7 +870,7 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
         }
 
         // Map times to histogram coordinates
-        long bucketSpan = Math.max(fScaledData.fBucketDuration, 1);
+        long bucketSpan = Math.max((long) fScaledData.fBucketDuration, 1);
         long startTime = Math.min(rangeStartTime, rangeStartTime + rangeDuration);
         int rangeWidth = (int) (Math.abs(rangeDuration) / bucketSpan);
 
