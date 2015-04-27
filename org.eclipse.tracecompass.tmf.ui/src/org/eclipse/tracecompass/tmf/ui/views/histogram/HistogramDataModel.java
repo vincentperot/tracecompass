@@ -107,7 +107,8 @@ public class HistogramDataModel implements IHistogramDataModel {
     private int fLastBucket;
 
     // Timestamps
-    private long fFirstBucketTime; // could be negative when analyzing events with descending order!!!
+    private long fFirstBucketTime; // could be negative when analyzing events
+                                   // with descending order!!!
     private long fFirstEventTime;
     private long fEndTime;
     private long fSelectionBegin;
@@ -194,7 +195,6 @@ public class HistogramDataModel implements IHistogramDataModel {
         }
     }
 
-
     /**
      * Disposes the data model
      */
@@ -254,7 +254,9 @@ public class HistogramDataModel implements IHistogramDataModel {
 
     /**
      * Sets the trace of this model.
-     * @param trace - a {@link ITmfTrace}
+     *
+     * @param trace
+     *            - a {@link ITmfTrace}
      */
     public void setTrace(ITmfTrace trace) {
         this.fTrace = trace;
@@ -268,6 +270,7 @@ public class HistogramDataModel implements IHistogramDataModel {
 
     /**
      * Gets the trace of this model.
+     *
      * @return a {@link ITmfTrace}
      */
     public ITmfTrace getTrace() {
@@ -276,6 +279,7 @@ public class HistogramDataModel implements IHistogramDataModel {
 
     /**
      * Gets the traces names of this model.
+     *
      * @return an array of trace names
      */
     public String[] getTraceNames() {
@@ -291,6 +295,7 @@ public class HistogramDataModel implements IHistogramDataModel {
 
     /**
      * Gets the number of traces of this model.
+     *
      * @return the number of traces of this model.
      */
     public int getNbTraces() {
@@ -582,7 +587,8 @@ public class HistogramDataModel implements IHistogramDataModel {
         int lostEventPerBucket = (int) Math.ceil((double) nbLostEvents / nbBucketRange);
         long lastLostCol = Math.max(1, nbLostEvents - lostEventPerBucket * (nbBucketRange - 1));
 
-        // Increment the right bucket, bear in mind that ranges make it almost certain that some lost events are out of range
+        // Increment the right bucket, bear in mind that ranges make it almost
+        // certain that some lost events are out of range
         for (int index = indexStart; index <= indexEnd && index < fLostEventsBuckets.length; index++) {
             if (index == (indexStart + nbBucketRange - 1)) {
                 fLostEventsBuckets[index] += lastLostCol;
@@ -626,13 +632,16 @@ public class HistogramDataModel implements IHistogramDataModel {
         result.fMaxValue = 0;
 
         int nbBars = width / barWidth;
-        int bucketsPerBar = (fLastBucket / nbBars) + 1;
+        double bucketsPerBar = ((double) fLastBucket / nbBars);
         result.fBucketDuration = Math.max(bucketsPerBar * fBucketDuration, 1);
         for (int i = 0; i < nbBars; i++) {
             int count = 0;
             int countLostEvent = 0;
             result.fData[i] = new HistogramBucket(getNbTraces());
-            for (int j = i * bucketsPerBar; j < ((i + 1) * bucketsPerBar); j++) {
+            // .5 to round to the center
+            final double bucketStart = i * bucketsPerBar + .5;
+            final double bucketEnd = (i + 1) * bucketsPerBar;
+            for (int j = (int) bucketStart; j <= bucketEnd; j++) {
                 if (fNbBuckets <= j) {
                     break;
                 }
@@ -662,8 +671,8 @@ public class HistogramDataModel implements IHistogramDataModel {
 
         fBucketDuration = Math.max(fBucketDuration, 1);
         // Set selection begin and end index in the scaled histogram
-        result.fSelectionBeginBucket = (int) ((fSelectionBegin - fFirstBucketTime) / fBucketDuration) / bucketsPerBar;
-        result.fSelectionEndBucket = (int) ((fSelectionEnd - fFirstBucketTime) / fBucketDuration) / bucketsPerBar;
+        result.fSelectionBeginBucket = (int) ((int) ((fSelectionBegin - fFirstBucketTime) / fBucketDuration) / bucketsPerBar);
+        result.fSelectionEndBucket = (int) ((int) ((fSelectionEnd - fFirstBucketTime) / fBucketDuration) / bucketsPerBar);
 
         result.fFirstBucketTime = fFirstBucketTime;
         result.fFirstEventTime = fFirstEventTime;
