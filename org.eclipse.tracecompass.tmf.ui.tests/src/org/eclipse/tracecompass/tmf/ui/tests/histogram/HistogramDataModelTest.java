@@ -36,14 +36,14 @@ public class HistogramDataModelTest {
 
     private static final double DELTA = 1e-15;
 
-    private final static HistogramBucket _0 = new HistogramBucket(new int[] {0});
-    private final static HistogramBucket _1 = new HistogramBucket(new int[] {1});
-    private final static HistogramBucket _2 = new HistogramBucket(new int[] {2});
-    private final static HistogramBucket _3 = new HistogramBucket(new int[] {3});
-    private final static HistogramBucket _4 = new HistogramBucket(new int[] {4});
-    private final static HistogramBucket _9 = new HistogramBucket(new int[] {9});
-    private final static HistogramBucket _20 = new HistogramBucket(new int[] {20});
-    private final static HistogramBucket _24 = new HistogramBucket(new int[] {24});
+    private final static HistogramBucket _0 = new HistogramBucket(new int[] { 0 });
+    private final static HistogramBucket _1 = new HistogramBucket(new int[] { 1 });
+    private final static HistogramBucket _2 = new HistogramBucket(new int[] { 2 });
+    private final static HistogramBucket _3 = new HistogramBucket(new int[] { 3 });
+    private final static HistogramBucket _4 = new HistogramBucket(new int[] { 4 });
+    private final static HistogramBucket _9 = new HistogramBucket(new int[] { 9 });
+    private final static HistogramBucket _20 = new HistogramBucket(new int[] { 20 });
+    private final static HistogramBucket _24 = new HistogramBucket(new int[] { 24 });
 
     /**
      * Test method for {@link HistogramDataModel#HistogramDataModel()}.
@@ -51,17 +51,18 @@ public class HistogramDataModelTest {
     @Test
     public void testHistogramDataModel() {
         HistogramDataModel model = new HistogramDataModel();
-        testModelConsistency(model, HistogramDataModel.DEFAULT_NUMBER_OF_BUCKETS,0, 1, 0 , 0 , 0 , HistogramDataModel.DEFAULT_NUMBER_OF_BUCKETS);
+        testModelConsistency(model, HistogramDataModel.DEFAULT_NUMBER_OF_BUCKETS, 0, 1, 0, 0, 0, HistogramDataModel.DEFAULT_NUMBER_OF_BUCKETS);
     }
 
     /**
-     * Test method for {@link HistogramDataModel#HistogramDataModel(HistogramDataModel)}.
+     * Test method for
+     * {@link HistogramDataModel#HistogramDataModel(HistogramDataModel)}.
      */
     @Test
     public void testHistogramDataModelCopyConstructor() {
         HistogramDataModel model = new HistogramDataModel();
         HistogramDataModel copy = new HistogramDataModel(model);
-        testModelConsistency(copy, HistogramDataModel.DEFAULT_NUMBER_OF_BUCKETS,0, 1, 0 , 0 , 0 , HistogramDataModel.DEFAULT_NUMBER_OF_BUCKETS);
+        testModelConsistency(copy, HistogramDataModel.DEFAULT_NUMBER_OF_BUCKETS, 0, 1, 0, 0, 0, HistogramDataModel.DEFAULT_NUMBER_OF_BUCKETS);
     }
 
     /**
@@ -75,7 +76,8 @@ public class HistogramDataModelTest {
     }
 
     /**
-     * Test methods for {@link HistogramDataModel#countEvent(long,long, ITmfTrace)}.
+     * Test methods for
+     * {@link HistogramDataModel#countEvent(long,long, ITmfTrace)}.
      */
     @Test
     public void testClear() {
@@ -87,7 +89,8 @@ public class HistogramDataModelTest {
     }
 
     /**
-     * Test methods for {@link HistogramDataModel#countEvent(long,long, ITmfTrace)}.
+     * Test methods for
+     * {@link HistogramDataModel#countEvent(long,long, ITmfTrace)}.
      */
     @Test
     public void testCountEvent_0() {
@@ -99,7 +102,8 @@ public class HistogramDataModelTest {
     }
 
     /**
-     * Test methods for {@link HistogramDataModel#countEvent(long,long, ITmfTrace)} and
+     * Test methods for
+     * {@link HistogramDataModel#countEvent(long,long, ITmfTrace)} and
      * {@link HistogramDataModel#scaleTo(int,int,int)}.
      */
     @Test
@@ -119,7 +123,8 @@ public class HistogramDataModelTest {
     }
 
     /**
-     * Test methods for {@link HistogramDataModel#countEvent(long,long, ITmfTrace)} and
+     * Test methods for
+     * {@link HistogramDataModel#countEvent(long,long, ITmfTrace)} and
      * {@link HistogramDataModel#scaleTo(int,int,int)}.
      */
     @Test
@@ -133,13 +138,14 @@ public class HistogramDataModelTest {
         HistogramScaledData result = model.scaleTo(nbBuckets, maxHeight, 1);
         assertEquals(_1, result.fData[0]);
 
-        assertArrayEqualsInt(0, result.fData,1);
+        assertArrayEqualsInt(0, result.fData, 1);
 
         testModelConsistency(model, nbBuckets, 1, 1, 1, 1, 1, nbBuckets + 1);
     }
 
     /**
-     * Test methods for {@link HistogramDataModel#countEvent(long,long, ITmfTrace)} and
+     * Test methods for
+     * {@link HistogramDataModel#countEvent(long,long, ITmfTrace)} and
      * {@link HistogramDataModel#scaleTo(int,int,int)}.
      */
     @Test
@@ -158,7 +164,8 @@ public class HistogramDataModelTest {
     }
 
     /**
-     * Test methods for {@link HistogramDataModel#countEvent(long,long,ITmfTrace)} and
+     * Test methods for
+     * {@link HistogramDataModel#countEvent(long,long,ITmfTrace)} and
      * {@link HistogramDataModel#scaleTo(int,int,int)}.
      */
     @Test
@@ -177,12 +184,12 @@ public class HistogramDataModelTest {
 
         assertArrayEqualsInt(2, result.fData);
 
-        testModelConsistency(model, nbBuckets, 2 * nbBuckets, 1, 0, 0, nbBuckets- 1, nbBuckets);
+        testModelConsistency(model, nbBuckets, 2 * nbBuckets, 1, 0, 0, nbBuckets - 1, nbBuckets);
     }
 
-
     /**
-     * Test methods for {@link HistogramDataModel#countEvent(long,long,ITmfTrace)} and
+     * Test methods for
+     * {@link HistogramDataModel#countEvent(long,long,ITmfTrace)} and
      * {@link HistogramDataModel#scaleTo(int,int,int)}.
      */
     @Test
@@ -200,11 +207,12 @@ public class HistogramDataModelTest {
 
         assertArrayEqualsInt(1, result.fData);
 
-        testModelConsistency(model, nbBuckets, nbBuckets, 1, startTime, startTime, startTime + nbBuckets- 1, startTime + nbBuckets);
+        testModelConsistency(model, nbBuckets, nbBuckets, 1, startTime, startTime, startTime + nbBuckets - 1, startTime + nbBuckets);
     }
 
     /**
-     * Test methods for {@link HistogramDataModel#countEvent(long,long,ITmfTrace)} and
+     * Test methods for
+     * {@link HistogramDataModel#countEvent(long,long,ITmfTrace)} and
      * {@link HistogramDataModel#scaleTo(int,int,int)}.
      */
     @Test
@@ -261,7 +269,7 @@ public class HistogramDataModelTest {
 
         HistogramScaledData result = model.scaleTo(nbBuckets, maxHeight, 1);
 
-        assertArrayEquals( expectedResult, result.fData);
+        assertArrayEquals(expectedResult, result.fData);
 
         testModelConsistency(model, nbBuckets, nbEvents, 1, 0, 0, nbEvents - 1, nbBuckets);
     }
@@ -386,7 +394,7 @@ public class HistogramDataModelTest {
         // -> buckets per bar = 50 / 2 + 1 = 26
         // -> first entry in expected result is 26 * 4 = 104
         // -> second entry in expected result is 22 * 4 + 9 = 97
-        final HistogramBucket[] expectedResult = new HistogramBucket[] { new HistogramBucket(new int[] {104}) , new HistogramBucket(new int[] {97}) };
+        final HistogramBucket[] expectedResult = new HistogramBucket[] { new HistogramBucket(new int[] { 104 }), new HistogramBucket(new int[] { 97 }) };
 
         HistogramDataModel model = new HistogramDataModel(nbBuckets);
         countEventsInModel(nbEvents, model);
@@ -394,7 +402,7 @@ public class HistogramDataModelTest {
         // verify scaled data
         HistogramScaledData result = model.scaleTo(width, maxHeight, barWidth);
 
-        assertEquals(4 * 26, result.fBucketDuration);
+        assertEquals(4.0 * 26, result.fBucketDuration, 0.5);
         assertEquals(0, result.fSelectionBeginBucket);
         assertEquals(0, result.fSelectionEndBucket);
         assertEquals(0, result.fFirstBucketTime);
@@ -429,7 +437,7 @@ public class HistogramDataModelTest {
         // buckets in (model) per bar = last bucket id / nbBars + 1 (plus 1 to
         // cover all used buckets)
         // -> buckets per bar = 50 / 10 + 1 = 6
-        final HistogramBucket[] expectedResult = new HistogramBucket[] { new HistogramBucket(new int[] {21}), _24, _24, _24, _24, _24, _24, _24, new HistogramBucket(new int[] {12}), _0 };
+        final HistogramBucket[] expectedResult = new HistogramBucket[] { new HistogramBucket(new int[] { 21 }), _24, _24, _24, _24, _24, _24, _24, new HistogramBucket(new int[] { 12 }), _0 };
 
         HistogramDataModel model = new HistogramDataModel(nbBuckets);
         countInvertedEvents(nbEvents, model);
@@ -437,7 +445,7 @@ public class HistogramDataModelTest {
         // verify scaled data
         HistogramScaledData result = model.scaleTo(width, maxHeight, barWidth);
 
-        assertEquals(4 * 6, result.fBucketDuration);
+        assertEquals(4.0 * 6, result.fBucketDuration,0.5);
         assertEquals(0, result.fSelectionBeginBucket);
         assertEquals(0, result.fSelectionEndBucket);
         assertEquals(-3, result.fFirstBucketTime); // negative is correct, can
@@ -487,9 +495,10 @@ public class HistogramDataModelTest {
 
         testModelConsistency(model, nbBuckets, nbEvents, 2, 0, 0, nbEvents - 1, 2 * nbBuckets);
 
-        // For the above number of events, result and revResult are exactly the same.
+        // For the above number of events, result and revResult are exactly the
+        // same.
 
-        assertEquals(result.fBucketDuration, revResult.fBucketDuration);
+        assertEquals(result.fBucketDuration, revResult.fBucketDuration, 0.0);
         assertEquals(result.fSelectionBeginBucket, revResult.fSelectionBeginBucket);
         assertEquals(result.fSelectionEndBucket, revResult.fSelectionEndBucket);
         assertEquals(result.fFirstBucketTime, revResult.fFirstBucketTime);
@@ -650,7 +659,7 @@ public class HistogramDataModelTest {
 
         HistogramScaledData result = model.scaleTo(nbBuckets, maxHeight, 1);
 
-        assertArrayEquals(expectedLostEventsResult, result.fLostEventsData );
+        assertArrayEquals(expectedLostEventsResult, result.fLostEventsData);
 
         testModelConsistency(model, nbBuckets, nbCombinedEvents, 4, 0, 0, nbEvents - 1, 4 * nbBuckets);
         assertEquals(10, result.fMaxCombinedValue);
@@ -678,7 +687,7 @@ public class HistogramDataModelTest {
 
         HistogramScaledData result = model.scaleTo(nbBuckets, maxHeight, 1);
 
-        assertArrayEquals(expectedLostEventsResult, result.fLostEventsData );
+        assertArrayEquals(expectedLostEventsResult, result.fLostEventsData);
 
         testModelConsistency(model, nbBuckets, nbCombinedEvents, 4, 0, 0, nbEvents - 1, 4 * nbBuckets);
         assertEquals(9, result.fMaxCombinedValue);
@@ -752,11 +761,11 @@ public class HistogramDataModelTest {
         assertEquals(timeLimit, model.getTimeLimit());
     }
 
-    private static void assertArrayEqualsInt(final int val , HistogramBucket[] result) {
+    private static void assertArrayEqualsInt(final int val, HistogramBucket[] result) {
         assertArrayEqualsInt(val, result, 0);
     }
 
-    private static void assertArrayEqualsInt(final int val , HistogramBucket[] result, int startVal ) {
+    private static void assertArrayEqualsInt(final int val, HistogramBucket[] result, int startVal) {
         for (int i = startVal; i < result.length; i++) {
             assertEquals(val, result[i].getNbEvents());
         }
