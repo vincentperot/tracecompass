@@ -19,6 +19,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.eclipse.swt.SWT;
@@ -37,6 +38,8 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTimestampFormatUpdateSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimePreferences;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.Resolution;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeFormat;
+
+import com.google.common.collect.ImmutableList;
 
 /**
  * Implementation of the scale for the time graph view.
@@ -334,7 +337,7 @@ public class TimeGraphScale extends TimeGraphBaseControl implements
 
         int labelWidth = gc.getCharWidth('0') * numDigits;
         double pixelsPerNanoSec = (timeSpace <= RIGHT_MARGIN) ? 0 :
-            (double) (timeSpace - RIGHT_MARGIN) / (time1 - time0);
+                (double) (timeSpace - RIGHT_MARGIN) / (time1 - time0);
         long timeDelta = calcTimeDelta(labelWidth, pixelsPerNanoSec);
 
         TimeDraw timeDraw = getTimeDraw(timeDelta);
@@ -582,10 +585,11 @@ public class TimeGraphScale extends TimeGraphBaseControl implements
         }
     }
 
-        /**
+    /**
      * Update the display to use the updated timestamp format
      *
-     * @param signal the incoming signal
+     * @param signal
+     *            the incoming signal
      */
     @TmfSignalHandler
     public void timestampFormatUpdated(TmfTimestampFormatUpdateSignal signal) {
@@ -601,33 +605,95 @@ abstract class TimeDraw {
     protected static final long MILLISEC_IN_US = 1000;
     protected static final long SEC_IN_NS = 1000000000;
     protected static final long SEC_IN_MS = 1000;
-    private static final String S   = ""  ; //$NON-NLS-1$
-    private static final String S0  = "0" ; //$NON-NLS-1$
+    private static final String S = ""; //$NON-NLS-1$
+    private static final String S0 = "0"; //$NON-NLS-1$
     private static final String S00 = "00"; //$NON-NLS-1$
     protected static final long PAD_1000 = 1000;
-    protected static final SimpleDateFormat SEC_FORMAT_HEADER = new SimpleDateFormat("yyyy MMM dd"); //$NON-NLS-1$
-    protected static final SimpleDateFormat SEC_FORMAT = new SimpleDateFormat("HH:mm:ss");           //$NON-NLS-1$
-    protected static final SimpleDateFormat MIN_FORMAT_HEADER = new SimpleDateFormat("yyyy MMM dd"); //$NON-NLS-1$
-    protected static final SimpleDateFormat MIN_FORMAT = new SimpleDateFormat("HH:mm");              //$NON-NLS-1$
-    protected static final SimpleDateFormat HOURS_FORMAT_HEADER = new SimpleDateFormat("yyyy");      //$NON-NLS-1$
-    protected static final SimpleDateFormat HOURS_FORMAT = new SimpleDateFormat("MMM dd HH:mm");     //$NON-NLS-1$
-    protected static final SimpleDateFormat DAY_FORMAT_HEADER = new SimpleDateFormat("yyyy");        //$NON-NLS-1$
-    protected static final SimpleDateFormat DAY_FORMAT = new SimpleDateFormat("MMM dd");             //$NON-NLS-1$
-    protected static final SimpleDateFormat MONTH_FORMAT = new SimpleDateFormat("yyyy MMM");         //$NON-NLS-1$
-    protected static final SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy");              //$NON-NLS-1$
-
-    protected static final SimpleDateFormat formatArray[] = {
-        SEC_FORMAT, SEC_FORMAT_HEADER, MIN_FORMAT, MIN_FORMAT_HEADER,
-        HOURS_FORMAT, HOURS_FORMAT_HEADER, DAY_FORMAT, DAY_FORMAT_HEADER, MONTH_FORMAT, YEAR_FORMAT
+    protected static final ThreadLocal<SimpleDateFormat> SEC_FORMAT_HEADER = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy MMM dd");//$NON-NLS-1$
+        }
     };
+    protected static final ThreadLocal<SimpleDateFormat> SEC_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> MIN_FORMAT_HEADER = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy MMM dd"); //$NON-NLS-1$
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> MIN_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("HH:mm"); //$NON-NLS-1$
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> HOURS_FORMAT_HEADER = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy"); //$NON-NLS-1$
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> HOURS_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("MMM dd HH:mm"); //$NON-NLS-1$
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> DAY_FORMAT_HEADER = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy"); //$NON-NLS-1$
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> DAY_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("MMM dd"); //$NON-NLS-1$
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> MONTH_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy MMM"); //$NON-NLS-1$
+        }
+    };
+    protected static final ThreadLocal<SimpleDateFormat> YEAR_FORMAT = new ThreadLocal<SimpleDateFormat>() {
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy"); //$NON-NLS-1$
+        }
+    };
+
+    protected static final List<ThreadLocal<SimpleDateFormat>> formats;
+    static
+    {
+        ImmutableList.Builder<ThreadLocal<SimpleDateFormat>> formatArrayBuilder = ImmutableList.<ThreadLocal<SimpleDateFormat>>builder();
+        formatArrayBuilder.add(SEC_FORMAT);
+        formatArrayBuilder.add(SEC_FORMAT_HEADER);
+        formatArrayBuilder.add(MIN_FORMAT);
+        formatArrayBuilder.add(MIN_FORMAT_HEADER);
+        formatArrayBuilder.add(HOURS_FORMAT);
+        formatArrayBuilder.add(HOURS_FORMAT_HEADER);
+        formatArrayBuilder.add(DAY_FORMAT);
+        formatArrayBuilder.add(DAY_FORMAT_HEADER);
+        formatArrayBuilder.add(MONTH_FORMAT);
+        formatArrayBuilder.add(YEAR_FORMAT);
+        formats = formatArrayBuilder.build();
+    }
 
     /**
      * Updates the timezone using the preferences.
      */
     public static void updateTimeZone() {
         final TimeZone timeZone = TmfTimePreferences.getTimeZone();
-        for (SimpleDateFormat sdf : formatArray) {
-            sdf.setTimeZone(timeZone);
+        for (ThreadLocal<SimpleDateFormat> sdf : formats) {
+            sdf.get().setTimeZone(timeZone);
         }
     }
 
@@ -719,7 +785,7 @@ class TimeDrawNanosec extends TimeDraw {
 class TimeDrawAbsYear extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = YEAR_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = YEAR_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         return Utils.drawText(gc, stime, rect, true);
     }
 }
@@ -727,7 +793,7 @@ class TimeDrawAbsYear extends TimeDraw {
 class TimeDrawAbsMonth extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = MONTH_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = MONTH_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         return Utils.drawText(gc, stime, rect, true);
     }
 }
@@ -735,13 +801,13 @@ class TimeDrawAbsMonth extends TimeDraw {
 class TimeDrawAbsDay extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = DAY_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = DAY_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         return Utils.drawText(gc, stime, rect, true);
     }
 
     @Override
     public void drawAbsHeader(GC gc, long nanosec, Rectangle rect) {
-        String header = DAY_FORMAT_HEADER.format(new Date(nanosec / MILLISEC_IN_NS));
+        String header = DAY_FORMAT_HEADER.get().format(new Date(nanosec / MILLISEC_IN_NS));
         int headerwidth = gc.stringExtent(header).x + 4;
         if (headerwidth <= rect.width) {
             rect.x += (rect.width - headerwidth);
@@ -753,13 +819,13 @@ class TimeDrawAbsDay extends TimeDraw {
 class TimeDrawAbsHrs extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = HOURS_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = HOURS_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         return Utils.drawText(gc, stime, rect, true);
     }
 
     @Override
     public void drawAbsHeader(GC gc, long nanosec, Rectangle rect) {
-        String header = HOURS_FORMAT_HEADER.format(new Date(nanosec / MILLISEC_IN_NS));
+        String header = HOURS_FORMAT_HEADER.get().format(new Date(nanosec / MILLISEC_IN_NS));
         int headerwidth = gc.stringExtent(header).x + 4;
         if (headerwidth <= rect.width) {
             rect.x += (rect.width - headerwidth);
@@ -771,13 +837,13 @@ class TimeDrawAbsHrs extends TimeDraw {
 class TimeDrawAbsMin extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = MIN_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = MIN_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         return Utils.drawText(gc, stime, rect, true);
     }
 
     @Override
     public void drawAbsHeader(GC gc, long nanosec, Rectangle rect) {
-        String header = MIN_FORMAT_HEADER.format(new Date(nanosec / MILLISEC_IN_NS));
+        String header = MIN_FORMAT_HEADER.get().format(new Date(nanosec / MILLISEC_IN_NS));
         int headerwidth = gc.stringExtent(header).x + 4;
         if (headerwidth <= rect.width) {
             rect.x += (rect.width - headerwidth);
@@ -789,13 +855,13 @@ class TimeDrawAbsMin extends TimeDraw {
 class TimeDrawAbsSec extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = SEC_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = SEC_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         return Utils.drawText(gc, stime, rect, true);
     }
 
     @Override
     public void drawAbsHeader(GC gc, long nanosec, Rectangle rect) {
-        String header = SEC_FORMAT_HEADER.format(new Date(nanosec / MILLISEC_IN_NS));
+        String header = SEC_FORMAT_HEADER.get().format(new Date(nanosec / MILLISEC_IN_NS));
         int headerwidth = gc.stringExtent(header).x + 4;
         if (headerwidth <= rect.width) {
             rect.x += (rect.width - headerwidth);
@@ -807,14 +873,14 @@ class TimeDrawAbsSec extends TimeDraw {
 class TimeDrawAbsMillisec extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = SEC_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = SEC_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         String ns = Utils.formatNs(nanosec, Resolution.MILLISEC);
         return Utils.drawText(gc, stime + "." + ns, rect, true); //$NON-NLS-1$
     }
 
     @Override
     public void drawAbsHeader(GC gc, long nanosec, Rectangle rect) {
-        String header = SEC_FORMAT_HEADER.format(new Date(nanosec / MILLISEC_IN_NS));
+        String header = SEC_FORMAT_HEADER.get().format(new Date(nanosec / MILLISEC_IN_NS));
         int headerwidth = gc.stringExtent(header).x + 4;
         if (headerwidth <= rect.width) {
             rect.x += (rect.width - headerwidth);
@@ -826,14 +892,14 @@ class TimeDrawAbsMillisec extends TimeDraw {
 class TimeDrawAbsMicroSec extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = SEC_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = SEC_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         String micr = Utils.formatNs(nanosec, Resolution.MICROSEC);
         return Utils.drawText(gc, stime + "." + micr, rect, true); //$NON-NLS-1$
     }
 
     @Override
     public void drawAbsHeader(GC gc, long nanosec, Rectangle rect) {
-        String header = SEC_FORMAT_HEADER.format(new Date(nanosec / MILLISEC_IN_NS));
+        String header = SEC_FORMAT_HEADER.get().format(new Date(nanosec / MILLISEC_IN_NS));
         int headerwidth = gc.stringExtent(header).x + 4;
         if (headerwidth <= rect.width) {
             rect.x += (rect.width - headerwidth);
@@ -845,14 +911,14 @@ class TimeDrawAbsMicroSec extends TimeDraw {
 class TimeDrawAbsNanoSec extends TimeDraw {
     @Override
     public int draw(GC gc, long nanosec, Rectangle rect) {
-        String stime = SEC_FORMAT.format(new Date(nanosec / MILLISEC_IN_NS));
+        String stime = SEC_FORMAT.get().format(new Date(nanosec / MILLISEC_IN_NS));
         String ns = Utils.formatNs(nanosec, Resolution.NANOSEC);
         return Utils.drawText(gc, stime + "." + ns, rect, true); //$NON-NLS-1$
     }
 
     @Override
     public void drawAbsHeader(GC gc, long nanosec, Rectangle rect) {
-        String header = SEC_FORMAT_HEADER.format(new Date(nanosec / MILLISEC_IN_NS));
+        String header = SEC_FORMAT_HEADER.get().format(new Date(nanosec / MILLISEC_IN_NS));
         int headerwidth = gc.stringExtent(header).x + 4;
         if (headerwidth <= rect.width) {
             rect.x += (rect.width - headerwidth);
