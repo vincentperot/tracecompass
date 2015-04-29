@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2014 Ericsson
+ * Copyright (c) 2009, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -9,12 +9,18 @@
  * Contributors:
  *   Francois Chouinard - Initial API and implementation
  *   Bernd Hufmann - Added possibility to pin view
+ *   Marc-Andre Laperle - Support for view alignment
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.ui.views;
 
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.tracecompass.internal.tmf.ui.views.TimeAlignViewsAction;
+import org.eclipse.tracecompass.internal.tmf.ui.views.TmfAlignmentSynchronizer;
 import org.eclipse.tracecompass.tmf.core.component.ITmfComponent;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
@@ -32,11 +38,15 @@ import org.eclipse.ui.part.ViewPart;
 public abstract class TmfView extends ViewPart implements ITmfComponent {
 
     private final String fName;
+    /** This allows us to keep track of the view sizes */
+    private Composite fParentComposite;
+    private static final TmfAlignmentSynchronizer fTimeAlignmentSynchronizer = new TmfAlignmentSynchronizer();
 
     /**
      * Action class for pinning of TmfView.
      */
     protected PinTmfViewAction fPinAction;
+    private static TimeAlignViewsAction fAlignViewsAction;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -109,5 +119,44 @@ public abstract class TmfView extends ViewPart implements ITmfComponent {
             toolBarManager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
             toolBarManager.add(fPinAction);
         }
+    }
+
+    @Override
+    public void createPartControl(Composite parent) {
+        fParentComposite = parent;
+        if (this instanceof ITmfTimeAligned) {
+            contributeAlignViewsActionToToolbar();
+
+            parent.addControlListener(new ControlAdapter() {
+                @Override
+                public void controlResized(ControlEvent e) {
+                    fTimeAlignmentSynchronizer.handleViewResized(TmfView.this);
+                }
+            });
+
+            fTimeAlignmentSynchronizer.handleViewCreated(TmfView.this);
+        }
+    }
+
+    private void contributeAlignViewsActionToToolbar() {
+        if (fAlignViewsAction == null) {
+            fAlignViewsAction = new TimeAlignViewsAction();
+        }
+
+        IToolBarManager toolBarManager = getViewSite().getActionBars()
+                .getToolBarManager();
+        toolBarManager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+        toolBarManager.add(fAlignViewsAction);
+    }
+
+    /**
+     * Returns the parent control of the view
+     *
+     * @return the parent control
+     *
+     * @since 1.0
+     */
+    public Composite getParentComposite() {
+        return fParentComposite;
     }
 }
