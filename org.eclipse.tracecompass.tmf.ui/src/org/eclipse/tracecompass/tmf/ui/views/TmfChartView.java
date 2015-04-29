@@ -11,9 +11,13 @@
  **********************************************************************/
 package org.eclipse.tracecompass.tmf.ui.views;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentInfo;
 import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.TmfXYChartViewer;
 
 /**
@@ -23,7 +27,7 @@ import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.TmfXYChartViewer;
  *
  * @author Bernd Hufmann
  */
-public abstract class TmfChartView extends TmfView {
+public abstract class TmfChartView extends TmfView implements ITmfTimeAligned {
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -32,6 +36,7 @@ public abstract class TmfChartView extends TmfView {
     private TmfXYChartViewer fChartViewer;
     /** The Trace reference */
     private ITmfTrace fTrace;
+    private Composite fChartContainer;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -59,14 +64,15 @@ public abstract class TmfChartView extends TmfView {
     }
 
     /**
-     * Sets the TMF XY chart viewer implementation.
+     * Create the TMF XY chart viewer implementation
      *
-     * @param chartViewer
-     *            The TMF XY chart viewer {@link TmfXYChartViewer}
+     * @param parent
+     *            the parent control
+     *
+     * @return The TMF XY chart viewer {@link TmfXYChartViewer}
+     * @since 1.0
      */
-    protected void setChartViewer(TmfXYChartViewer chartViewer) {
-        fChartViewer = chartViewer;
-    }
+    abstract protected TmfXYChartViewer createChartViewer(Composite parent);
 
     /**
      * Returns the ITmfTrace implementation
@@ -92,6 +98,13 @@ public abstract class TmfChartView extends TmfView {
     // ------------------------------------------------------------------------
     @Override
     public void createPartControl(Composite parent) {
+        super.createPartControl(parent);
+        fChartContainer = new Composite(parent, SWT.NONE);
+        GridLayout layout = new GridLayout();
+        layout.marginWidth = 0;
+        fChartContainer.setLayout(layout);
+        fChartViewer = createChartViewer(fChartContainer);
+        fChartViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
         if (trace != null) {
             setTrace(trace);
@@ -115,4 +128,45 @@ public abstract class TmfChartView extends TmfView {
         }
     }
 
+    /**
+     * @since 1.0
+     */
+    @Override
+    public TmfTimeViewAlignmentInfo getTimeViewAlignmentInfo() {
+        if (fChartViewer == null) {
+            return null;
+        }
+
+        // There is no movable sash in this view so set the timeAxisOffset so
+        // that it is not considered to be used as a reference for other views
+        // to align on.
+        return new TmfTimeViewAlignmentInfo(fChartViewer.getControl().getShell(), fChartViewer.getControl().toControl(0, 0), 0);
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public int getAvailableWidth(int requestedOffset) {
+        if (fChartViewer == null) {
+            return 0;
+        }
+
+        int pointAreaWidth = fChartViewer.getPointAreaWidth();
+        int endOffset = fChartViewer.getPointAreaOffset() + pointAreaWidth;
+        // TODO this is just an approximation that assumes that the end will be at the same position but that can change for a different data range/scaling
+        int availableWidth = endOffset - requestedOffset;
+        return availableWidth;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void performAlign(int offset, int width) {
+        GridLayout layout = (GridLayout) fChartContainer.getLayout();
+        int axisOffset = offset - fChartViewer.getPointAreaOffset();
+        layout.marginLeft = Math.min(fChartContainer.getBounds().width, Math.max(0, axisOffset));
+        fChartContainer.layout();
+    }
 }
