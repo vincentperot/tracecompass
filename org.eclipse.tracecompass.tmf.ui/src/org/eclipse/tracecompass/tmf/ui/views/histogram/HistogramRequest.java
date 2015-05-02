@@ -17,12 +17,16 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.histogram;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.collect.BufferedBlockingQueue;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfLostEvent;
+import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
 /**
  * Class to request events for given time range from a trace to fill a
@@ -38,12 +42,18 @@ public class HistogramRequest extends TmfEventRequest {
     // Attributes
     // ------------------------------------------------------------------------
 
+    private static final @NonNull ITmfEvent POISON_PILL = new TmfEvent(null, Long.MIN_VALUE, TmfTimestamp.BIG_BANG, null, null);
+
     /**
      * The histogram data model to fill.
      */
     protected final HistogramDataModel fHistogram;
 
     private final boolean fFullRange;
+
+    private BufferedBlockingQueue<ITmfEvent> fEventsQueue = new BufferedBlockingQueue<>(127, 127);
+
+    private Thread fHistogramPopulator;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -73,6 +83,28 @@ public class HistogramRequest extends TmfEventRequest {
         super(ITmfEvent.class, range, rank, nbEvents, execType);
         fHistogram = histogram;
         fFullRange = fullRange;
+        fHistogramPopulator = new Thread() {
+            @Override
+            public void run() {
+                ITmfEvent event = fEventsQueue.take();
+                while (event != POISON_PILL) {
+                    if (!isCancelled()) {
+                        if (event instanceof ITmfLostEvent) {
+                            ITmfLostEvent lostEvents = (ITmfLostEvent) event;
+                            /* clear the old data when it is a new request */
+                            fHistogram.countLostEvent(lostEvents.getTimeRange(), lostEvents.getNbLostEvents(), fFullRange);
+
+                        } else { /* handle lost event */
+                            long timestamp = event.getTimestamp().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+                            fHistogram.countEvent(getNbRead(), timestamp, event.getTrace());
+                        }
+                    }
+                    event = fEventsQueue.take();
+                }
+            }
+        };
+        fHistogramPopulator.setName("Histogram Populator : " + (fFullRange ? "Full Range" : "Time Range")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        fHistogramPopulator.start();
     }
 
     // ------------------------------------------------------------------------
@@ -89,19 +121,8 @@ public class HistogramRequest extends TmfEventRequest {
     @Override
     public void handleData(ITmfEvent event) {
         super.handleData(event);
-        synchronized (fHistogram) {
-            if (!isCancelled()) {
-                if (event instanceof ITmfLostEvent) {
-                    ITmfLostEvent lostEvents = (ITmfLostEvent) event;
-                    /* clear the old data when it is a new request */
-                    fHistogram.countLostEvent(lostEvents.getTimeRange(), lostEvents.getNbLostEvents(), fFullRange);
+        fEventsQueue.put(event);
 
-                } else { /* handle lost event */
-                    long timestamp = event.getTimestamp().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
-                    fHistogram.countEvent(getNbRead(), timestamp, event.getTrace());
-                }
-            }
-        }
     }
 
     /**
@@ -113,6 +134,13 @@ public class HistogramRequest extends TmfEventRequest {
     @Override
     public void handleCompleted() {
         fHistogram.complete();
+        fEventsQueue.put(POISON_PILL);
+        fEventsQueue.flushInputBuffer();
+        try {
+            fHistogramPopulator.join();
+        } catch (InterruptedException e) {
+            // do nothing
+        }
         super.handleCompleted();
     }
 }
