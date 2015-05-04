@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -50,6 +51,8 @@ import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampDelta;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampFormat;
+import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentSignal;
+import org.eclipse.tracecompass.tmf.ui.views.ITmfTimeAligned;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 
 /**
@@ -172,6 +175,8 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
      */
     protected Canvas fCanvas;
 
+    private Composite canvasComposite;
+
     /**
      * The histogram data model.
      */
@@ -222,6 +227,9 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
      */
     static boolean showTraces = true;
 
+
+    private boolean fSendTimeAlignSignals = false;
+
     // ------------------------------------------------------------------------
     // Construction
     // ------------------------------------------------------------------------
@@ -235,8 +243,23 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
      *            A parent composite
      */
     public Histogram(final TmfView view, final Composite parent) {
-        fParentView = view;
+        this(view, parent, false);
+    }
 
+    /**
+     * Full constructor.
+     *
+     * @param view
+     *            A reference to the parent TMF view.
+     * @param parent
+     *            A parent composite
+     * @param sendTimeAlignSignals
+     *            Flag to send time alignment signals or not
+     * @since 1.0
+     */
+    public Histogram(final TmfView view, final Composite parent, final boolean sendTimeAlignSignals) {
+        fParentView = view;
+        fSendTimeAlignSignals = sendTimeAlignSignals;
         fComposite = createWidget(parent);
         fDataModel = new HistogramDataModel();
         fDataModel.addHistogramListener(this);
@@ -307,7 +330,7 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
         fMaxNbEventsLabel.setLayoutData(gridData);
 
         // Histogram itself
-        Composite canvasComposite = new Composite(composite, SWT.BORDER);
+        canvasComposite = new Composite(composite, SWT.BORDER);
         gridData = new GridData();
         gridData.horizontalSpan = 2;
         gridData.verticalSpan = 2;
@@ -628,11 +651,17 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
                                 // Display histogram and update X-,Y-axis labels
                                 updateRangeTextControls();
                                 long maxNbEvents = HistogramScaledData.hideLostEvents ? fScaledData.fMaxValue : fScaledData.fMaxCombinedValue;
+                                String old = fMaxNbEventsLabel.getText();
                                 fMaxNbEventsLabel.setText(Long.toString(maxNbEvents));
                                 // The Y-axis area might need to be re-sized
                                 GridData gd = (GridData) fMaxNbEventsLabel.getLayoutData();
                                 gd.widthHint = Math.max(gd.widthHint, fMaxNbEventsLabel.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
                                 fMaxNbEventsLabel.getParent().layout();
+                                if (old.length() < fMaxNbEventsLabel.getText().length()) {
+                                    if ((fSendTimeAlignSignals) && (fParentView instanceof ITmfTimeAligned)) {
+                                        TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(this, ((ITmfTimeAligned) fParentView).getTimeViewAlignmentInfo()));
+                                    }
+                                }
                             }
                         }
                     }
@@ -897,6 +926,55 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
         int chHalfWidth = ((rangeWidth < 60) ? (rangeWidth * 2) / 3 : 40) / 2;
         imageGC.drawLine(center - chHalfWidth, height / 2, center + chHalfWidth, height / 2);
         imageGC.drawLine(center, (height / 2) - chHalfWidth, center, (height / 2) + chHalfWidth);
+    }
+
+    /**
+     * Relative to the whole XY chart viewer
+     *
+     * @since 1.0
+     */
+    public int getPlotAreaOffset() {
+        Point absCanvas = fCanvas.toDisplay(0, 0);
+        Point viewPoint = fComposite.toDisplay(0, 0);
+
+        System.out.println(absCanvas);
+        System.out.println(viewPoint);
+        System.out.println(absCanvas.x - viewPoint.x);
+        return absCanvas.x - viewPoint.x;
+    }
+
+    /**
+     * @since 1.0
+     */
+    public int getAbsolutePlotAreaX() {
+        Point absCanvas = fCanvas.toDisplay(0, 0);
+        return absCanvas.x + 7;
+    }
+
+    /**
+     * @since 1.0
+     */
+    public int getPlotAreaWidth() {
+        if (!fCanvas.isDisposed()) {
+            // Retrieve and normalize the data
+            return fComposite.getBounds().width;
+//            return fCanvas.getBounds().width;
+
+        }
+        return 0; // ?
+//        IAxis[] xAxes = getSwtChart().getAxisSet().getXAxes();
+//        if (xAxes.length > 0) {
+//            IAxis iAxis = xAxes[0];
+//            int x1 = getPlotAreaOffset();
+//            long windowEndTime = getWindowEndTime() - getTimeOffset();
+//            int x2 = iAxis.getPixelCoordinate(windowEndTime - 1);
+//            x2 = getSwtChart().toControl(getSwtChart().getPlotArea().toDisplay(x2, 0)).x;
+//            int width = x2 - x1;
+////            System.out.println("chart width: " + width);
+//            return width;
+//        }
+//
+//        return getSwtChart().getPlotArea().getSize().x;
     }
 
     // ------------------------------------------------------------------------
