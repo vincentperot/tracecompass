@@ -44,26 +44,33 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Sash;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest.ExecutionType;
-import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
-import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
-import org.eclipse.tracecompass.tmf.core.signal.TmfSignalThrottler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
+import org.eclipse.tracecompass.tmf.core.signal.TmfSignalThrottler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceClosedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceUpdatedSignal;
+import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentInfo;
+import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentSignal;
+import org.eclipse.tracecompass.tmf.ui.views.ITmfTimeAligned;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.ui.IActionBars;
 
@@ -82,7 +89,7 @@ import org.eclipse.ui.IActionBars;
  * @version 2.0
  * @author Francois Chouinard
  */
-public class HistogramView extends TmfView {
+public class HistogramView extends TmfView implements ITmfTimeAligned {
 
     // ------------------------------------------------------------------------
     // Constants
@@ -105,9 +112,6 @@ public class HistogramView extends TmfView {
     // Attributes
     // ------------------------------------------------------------------------
 
-    // Parent widget
-    private Composite fParent;
-
     // The current trace
     private ITmfTrace fTrace;
 
@@ -120,9 +124,12 @@ public class HistogramView extends TmfView {
     private long fSelectionBeginTime;
     private long fSelectionEndTime;
 
+    // SashForm
+    private SashForm fSashForm;
     private ScrolledComposite fScrollComposite;
     private Composite fTimeControlsComposite;
     private Composite fTimeRangeComposite;
+    private Listener fSashDragListener;
 
     // Time controls
     private HistogramTextControl fSelectionStartControl;
@@ -200,8 +207,7 @@ public class HistogramView extends TmfView {
 
     @Override
     public void createPartControl(Composite parent) {
-
-        fParent = parent;
+        super.createPartControl(parent);
 
         // Control labels
         final String selectionStartLabel = Messages.HistogramView_selectionStartLabel;
@@ -211,7 +217,7 @@ public class HistogramView extends TmfView {
         // --------------------------------------------------------------------
         // Set the HistogramView layout
         // --------------------------------------------------------------------
-        Composite viewComposite = new Composite(fParent, SWT.FILL);
+        Composite viewComposite = new Composite(getParentComposite(), SWT.FILL);
         GridLayout gridLayout = new GridLayout(1, false);
         gridLayout.verticalSpacing = 0;
         gridLayout.marginHeight = 0;
@@ -221,14 +227,14 @@ public class HistogramView extends TmfView {
         // --------------------------------------------------------------------
         // Add a sash for time controls and time range histogram
         // --------------------------------------------------------------------
-        SashForm sashForm = new SashForm(viewComposite, SWT.NONE);
+        fSashForm = new SashForm(viewComposite, SWT.NONE);
         GridData gridData = new GridData(GridData.FILL, GridData.FILL, false, true);
-        sashForm.setLayoutData(gridData);
+        fSashForm.setLayoutData(gridData);
 
         // --------------------------------------------------------------------
         // Time controls
         // --------------------------------------------------------------------
-        fScrollComposite = new PackedScrolledComposite(sashForm, SWT.H_SCROLL | SWT.V_SCROLL);
+        fScrollComposite = new PackedScrolledComposite(fSashForm, SWT.H_SCROLL | SWT.V_SCROLL);
         fTimeControlsComposite = new Composite(fScrollComposite, SWT.NONE);
         fScrollComposite.setContent(fTimeControlsComposite);
         gridLayout = new GridLayout(1, false);
@@ -292,7 +298,7 @@ public class HistogramView extends TmfView {
         // --------------------------------------------------------------------
         // Time range histogram
         // --------------------------------------------------------------------
-        Composite timeRangeComposite = new Composite(sashForm, SWT.NONE);
+        fTimeRangeComposite = new Composite(fSashForm, SWT.NONE);
         gridLayout = new GridLayout(1, true);
         gridLayout.marginTop = 0;
         gridLayout.marginLeft = HISTOGRAM_MARGIN_LEFT;
@@ -304,7 +310,7 @@ public class HistogramView extends TmfView {
         fTimeRangeComposite.setLayoutData(gridData);
 
         // Histogram
-        fTimeRangeHistogram = new TimeRangeHistogram(this, timeRangeComposite);
+        fTimeRangeHistogram = new TimeRangeHistogram(this, fTimeRangeComposite, true);
 
         // --------------------------------------------------------------------
         // Full range histogram
@@ -341,8 +347,32 @@ public class HistogramView extends TmfView {
             traceSelected(new TmfTraceSelectedSignal(this, trace));
         }
 
-        sashForm.setVisible(true);
-        sashForm.setWeights(DEFAULT_WEIGHTS);
+        fSashForm.setVisible(true);
+        fSashForm.setWeights(DEFAULT_WEIGHTS);
+
+        fTimeControlsComposite.addPaintListener(new PaintListener() {
+            @Override
+            public void paintControl(PaintEvent e) {
+                // Sashes in a SashForm are being created on layout so add the
+                // drag listener here
+                if (fSashDragListener == null) {
+                    for (Control control : fSashForm.getChildren()) {
+                        if (control instanceof Sash) {
+                            fSashDragListener = new Listener() {
+                                @Override
+                                public void handleEvent(Event event) {
+                                    TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(fSashForm, getTimeViewAlignmentInfo()));
+                                }
+                            };
+                            control.removePaintListener(this);
+                            control.addListener(SWT.Selection, fSashDragListener);
+                            // There should be only one sash
+                            break;
+                        }
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -351,7 +381,66 @@ public class HistogramView extends TmfView {
     }
 
     void refresh() {
-        fParent.layout(true);
+    	getParentComposite().layout(true);
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public TmfTimeViewAlignmentInfo getTimeViewAlignmentInfo() {
+        if (fSashForm == null) {
+            return null;
+        }
+        return new TmfTimeViewAlignmentInfo(fSashForm.getShell(), fSashForm.toDisplay(0, 0), getTimeAxisOffset());
+    }
+
+    private int getTimeAxisOffset() {
+        int[] weights = fSashForm.getWeights();
+        int width = (int) (((float) weights[0] / (weights[0] + weights[1])) * fSashForm.getBounds().width);
+        int curTimeAxisOffset = width + fSashForm.getSashWidth() + fTimeRangeHistogram.getPointAreaOffset();
+        return curTimeAxisOffset;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public int getAvailableWidth(int requestedOffset) {
+        int pointAreaWidth = fTimeRangeHistogram.getPointAreaWidth();
+        int curTimeAxisOffset = getTimeAxisOffset();
+        if (pointAreaWidth <= 0) {
+            pointAreaWidth = fSashForm.getBounds().width - curTimeAxisOffset;
+        }
+        // TODO this is just an approximation that assumes that the end will be at the same position but that can change for a different data range/scaling
+        int endOffset = curTimeAxisOffset + pointAreaWidth;
+        GridLayout layout = (GridLayout) fTimeRangeComposite.getLayout();
+        int endOffsetWithoutMargin = endOffset + layout.marginRight;
+        int availableWidth = endOffsetWithoutMargin - requestedOffset;
+        availableWidth = Math.min(fSashForm.getBounds().width, Math.max(0, availableWidth));
+
+        return availableWidth;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void performAlign(int offset, int width) {
+        int plotAreaOffset = fTimeRangeHistogram.getPointAreaOffset();
+        int sashOffset = Math.max(1, offset - plotAreaOffset);
+        int total = fSashForm.getBounds().width;
+        int width1 = (int) (sashOffset / (float) total * 1000);
+        int width2 = (int) ((total - sashOffset) / (float) total * 1000);
+        fSashForm.setWeights(new int[] { width1, width2 });
+        fSashForm.layout();
+
+        // calculate right margin
+        GridLayout layout = (GridLayout) fTimeRangeComposite.getLayout();
+        int timeBasedControlsWidth = fTimeRangeComposite.getSize().x;
+        int marginSize = timeBasedControlsWidth - width - plotAreaOffset;
+        layout.marginRight = Math.max(0, marginSize);
+        fTimeRangeComposite.layout();
     }
 
     // ------------------------------------------------------------------------
@@ -553,7 +642,7 @@ public class HistogramView extends TmfView {
 
     private void loadTrace() {
         initializeHistograms();
-        fParent.redraw();
+        getParentComposite().redraw();
     }
 
     /**
@@ -662,7 +751,7 @@ public class HistogramView extends TmfView {
             Display.getDefault().asyncExec(new Runnable() {
                 @Override
                 public void run() {
-                    if (fParent.isDisposed()) {
+                    if (getParentComposite().isDisposed()) {
                         return;
                     }
                     selectionRangeUpdated(signal);
@@ -692,7 +781,7 @@ public class HistogramView extends TmfView {
             Display.getDefault().asyncExec(new Runnable() {
                 @Override
                 public void run() {
-                    if (fParent.isDisposed()) {
+                    if (getParentComposite().isDisposed()) {
                         return;
                     }
                     windowRangeUpdated(signal);
