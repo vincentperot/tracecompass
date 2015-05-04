@@ -36,7 +36,6 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -347,10 +346,8 @@ public class HistogramView extends TmfView implements ITmfTimeAligned {
                     for (Control control : fSashForm.getChildren()) {
                         if (control instanceof Sash) {
                             fSashDragListener = new Listener() {
-
                                 @Override
                                 public void handleEvent(Event event) {
-                                    System.out.println("HistogramView.createPartControl() " + getTimeViewAlignmentInfo().getTimeAxisOffset());
                                     TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(fSashForm, getTimeViewAlignmentInfo()));
                                 }
                             };
@@ -381,16 +378,16 @@ public class HistogramView extends TmfView implements ITmfTimeAligned {
         if (fSashForm == null) {
             return null;
         }
-        Point viewPoint = getParentComposite().toDisplay(0, 0);
-        int offset = fTimeRangeHistogram.getAbsolutePlotAreaX() - viewPoint.x;
-        return new TmfTimeViewAlignmentInfo(fSashForm.getShell(), fSashForm.toDisplay(0, 0), offset);
-//        return new TmfTimeViewAlignmentInfo(fSashForm.getShell(), fSashForm.toDisplay(0, 0), getTimeAxisOffset());
+//        Point viewPoint = getParentComposite().toDisplay(0, 0);
+//        int offset = fTimeRangeHistogram.getAbsolutePlotAreaX() - viewPoint.x;
+//        return new TmfTimeViewAlignmentInfo(fSashForm.getShell(), fSashForm.toDisplay(0, 0), offset);
+        return new TmfTimeViewAlignmentInfo(fSashForm.getShell(), fSashForm.toDisplay(0, 0), getTimeAxisOffset());
     }
 
     private int getTimeAxisOffset() {
-        int width = (int) ((float) fSashForm.getWeights()[0] / 1000 * fSashForm.getBounds().width);
-        System.out.println("width=" + width + ", sashWidth=" + fSashForm.getSashWidth() + ", offset=" + fTimeRangeHistogram.getPlotAreaOffset());
-        int curTimeAxisOffset = width + fSashForm.getSashWidth() + fTimeRangeHistogram.getPlotAreaOffset();
+        int[] weights = fSashForm.getWeights();
+        int width = (int) (((float) weights[0] / (weights[0] + weights[1])) * fSashForm.getBounds().width);
+        int curTimeAxisOffset = width + fSashForm.getSashWidth() + fTimeRangeHistogram.getPointAreaOffset() + HISTOGRAM_MARGIN_LEFT + HISTOGRAM_MARGIN_RIGHT;
         return curTimeAxisOffset;
     }
 
@@ -399,12 +396,16 @@ public class HistogramView extends TmfView implements ITmfTimeAligned {
      */
     @Override
     public int getAvailableWidth(int requestedOffset) {
-        int plotAreaWidth = fTimeRangeHistogram.getPlotAreaWidth();
-//        System.out.println("plotAreaWidth: " + plotAreaWidth);
+        int pointAreaWidth = fTimeRangeHistogram.getPointAreaWidth();
         int curTimeAxisOffset = getTimeAxisOffset();
-        int endOffset = curTimeAxisOffset + plotAreaWidth;
+        if (pointAreaWidth <= 0) {
+            pointAreaWidth = fSashForm.getBounds().width - curTimeAxisOffset;
+        }
+        int endOffset = curTimeAxisOffset + pointAreaWidth;
         // TODO this is just an approximation that assumes that the end will be at the same position but that can change for a different data range/scaling
         int availableWidth = endOffset - requestedOffset;
+        availableWidth = Math.min(fSashForm.getBounds().width, Math.max(0, availableWidth));
+
         return availableWidth;
     }
 
@@ -413,21 +414,18 @@ public class HistogramView extends TmfView implements ITmfTimeAligned {
      */
     @Override
     public void performAlign(int offset, int width) {
-        Point viewPoint = timeRangeComposite.toDisplay(0, 0);
-        int plotAreaOffset = fTimeRangeHistogram.getAbsolutePlotAreaX() - viewPoint.x;
-//        int plotAreaOffset = fTimeRangeHistogram.getPlotAreaOffset();
+        int plotAreaOffset = fTimeRangeHistogram.getPointAreaOffset() + HISTOGRAM_MARGIN_LEFT + HISTOGRAM_MARGIN_RIGHT - fSashForm.getSashWidth();
         int sashOffset = Math.max(1, offset - plotAreaOffset);
         int total = fSashForm.getBounds().width;
         int width1 = (int) (sashOffset / (float) total * 1000);
         int width2 = (int) ((total - sashOffset) / (float) total * 1000);
         fSashForm.setWeights(new int[] { width1, width2 });
-        fSashForm.layout(); // nedded?
+        fSashForm.layout();
 
-        System.out.println("Histogram.performAlign " + offset + ", width=" + width + ", size.x=" + timeRangeComposite.getSize().x);
+        // calculate right margin
         GridLayout layout = (GridLayout) timeRangeComposite.getLayout();
         int timeBasedControlsWidth = timeRangeComposite.getSize().x;
         int marginSize = timeBasedControlsWidth - width - plotAreaOffset;
-        System.out.println("margin=" + marginSize);
         layout.marginRight = Math.max(0, marginSize);
         timeRangeComposite.layout();
     }

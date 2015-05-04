@@ -659,7 +659,7 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
                                 fMaxNbEventsLabel.getParent().layout();
                                 if (old.length() < fMaxNbEventsLabel.getText().length()) {
                                     if ((fSendTimeAlignSignals) && (fParentView instanceof ITmfTimeAligned)) {
-                                        TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(this, ((ITmfTimeAligned) fParentView).getTimeViewAlignmentInfo()));
+                                        TmfSignalManager.dispatchSignal(new TmfTimeViewAlignmentSignal(this, ((ITmfTimeAligned) fParentView).getTimeViewAlignmentInfo(), true));
                                     }
                                 }
                             }
@@ -929,52 +929,37 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
     }
 
     /**
-     * Relative to the whole XY chart viewer
+     * Get the offset of the point area, relative to the histogram canvas
+     * We consider the point area to be from where the first point could
+     * be drawn to where the last point could be drawn.
+     *
+     * @return the offset in pixels
      *
      * @since 1.0
      */
-    public int getPlotAreaOffset() {
+    public int getPointAreaOffset() {
         Point absCanvas = fCanvas.toDisplay(0, 0);
-        Point viewPoint = fComposite.toDisplay(0, 0);
-
-        System.out.println(absCanvas);
-        System.out.println(viewPoint);
-        System.out.println(absCanvas.x - viewPoint.x);
+        Point viewPoint = fComposite.getParent().toDisplay(0, 0);
         return absCanvas.x - viewPoint.x;
     }
 
     /**
+     * Get the width of the point area. We consider the point area to be from
+     * where the first point could be drawn to where the last point could be
+     * drawn. The point area differs from the plot area because there might be a
+     * gap between where the plot area start and where the fist point is drawn.
+     * This also matches the width that the use can select.
+     *
+     * @return the width in pixels
+     *
      * @since 1.0
      */
-    public int getAbsolutePlotAreaX() {
-        Point absCanvas = fCanvas.toDisplay(0, 0);
-        return absCanvas.x + 7;
-    }
-
-    /**
-     * @since 1.0
-     */
-    public int getPlotAreaWidth() {
+    public int getPointAreaWidth() {
         if (!fCanvas.isDisposed()) {
             // Retrieve and normalize the data
             return fComposite.getBounds().width;
-//            return fCanvas.getBounds().width;
-
         }
-        return 0; // ?
-//        IAxis[] xAxes = getSwtChart().getAxisSet().getXAxes();
-//        if (xAxes.length > 0) {
-//            IAxis iAxis = xAxes[0];
-//            int x1 = getPlotAreaOffset();
-//            long windowEndTime = getWindowEndTime() - getTimeOffset();
-//            int x2 = iAxis.getPixelCoordinate(windowEndTime - 1);
-//            x2 = getSwtChart().toControl(getSwtChart().getPlotArea().toDisplay(x2, 0)).x;
-//            int width = x2 - x1;
-////            System.out.println("chart width: " + width);
-//            return width;
-//        }
-//
-//        return getSwtChart().getPlotArea().getSize().x;
+        return 0;
     }
 
     // ------------------------------------------------------------------------
