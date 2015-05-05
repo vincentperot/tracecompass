@@ -2015,7 +2015,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
             }
             final int startRank = (int) rank;
             boolean wrapped = false;
-            while (!monitor.isCanceled() && (foundRank == -1) && (fTrace != null)) {
+            while (!monitor.isCanceled() && (foundRank == -1)) {
                 int nbRequested = (direction == Direction.FORWARD ? Integer.MAX_VALUE : Math.min((int) rank + 1, fTrace.getCacheSize()));
                 if (direction == Direction.BACKWARD) {
                     rank = Math.max(0, rank - fTrace.getCacheSize() + 1);
@@ -2327,7 +2327,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                 fTable.removeAll();
                 fCache.setTrace(fTrace); // Clear the cache
                 if (fTrace != null) {
-                    if (!fTable.isDisposed() && (fTrace != null)) {
+                    if (!fTable.isDisposed()) {
                         if (fTable.getData(Key.FILTER_OBJ) == null) {
                             fTable.setItemCount((int) fTrace.getNbEvents() + 1); // +1 for header row
                         } else {
