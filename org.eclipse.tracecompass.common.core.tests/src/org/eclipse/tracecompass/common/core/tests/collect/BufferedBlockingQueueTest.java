@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
@@ -35,6 +36,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
+
+import com.google.common.collect.Iterators;
 
 /**
  * Test suite for the {@link BufferedBlockingQueue}
@@ -206,6 +209,60 @@ public class BufferedBlockingQueueTest {
 
         consumer.join();
         producer.join();
+    }
+
+    /**
+     * Test the contents returned by {@link BufferedBlockingQueue#iterator()}.
+     *
+     * The test is sequential, because the iterator has no guarantee wrt to its
+     * contents when run concurrently.
+     */
+    @Test
+    public void testIteratorContents() {
+        Deque<Character> expected = new LinkedList<>();
+
+        /* Iterator should be empty initially */
+        assertFalse(charQueue.iterator().hasNext());
+
+        /* Insert the first 50 elements */
+        for (int i = 0; i < 50; i++) {
+            char c = testString.charAt(i);
+            charQueue.put(c);
+            expected.addFirst(c);
+        }
+        LinkedList<Character> actual = new LinkedList<>();
+        Iterators.addAll(actual, charQueue.iterator());
+        assertEquals(expected, actual);
+
+        /*
+         * Insert more elements, flush the input buffer (should not affect the
+         * iteration).
+         */
+        for (int i = 50; i < 60; i++) {
+            char c = testString.charAt(i);
+            charQueue.put(c);
+            charQueue.flushInputBuffer();
+            expected.addFirst(c);
+        }
+        actual = new LinkedList<>();
+        Iterators.addAll(actual, charQueue.iterator());
+        assertEquals(expected, actual);
+
+        /* Consume the 30 last elements from the queue */
+        for (int i = 0; i < 30; i++) {
+            charQueue.take();
+            expected.removeLast();
+        }
+        actual = new LinkedList<>();
+        Iterators.addAll(actual, charQueue.iterator());
+        assertEquals(expected, actual);
+
+        /* Now empty the queue */
+        while (!charQueue.isEmpty()) {
+            charQueue.take();
+            expected.removeLast();
+        }
+        assertFalse(charQueue.iterator().hasNext());
     }
 
     /**
