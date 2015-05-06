@@ -49,6 +49,25 @@ import com.google.common.collect.Iterators;
  */
 public class BufferedBlockingQueueTest {
 
+    private final class ConsumerThread extends Thread {
+        private final String fLastElement;
+        private final Set<String> fRes;
+
+        private ConsumerThread(Set<String> res, String lastElement) {
+            fRes = res;
+            fLastElement = lastElement;
+        }
+
+        @Override
+        public void run() {
+            String val = fStringQueue.take();
+            while (!val.equals(fLastElement)) {
+                fRes.add(val);
+                val = fStringQueue.take();
+            }
+        }
+    }
+
     /** Timeout the tests after 2 minutes */
     @Rule
     public TestRule timeoutRule = new Timeout(120000);
@@ -234,7 +253,7 @@ public class BufferedBlockingQueueTest {
     }
 
     /**
-
+     *
      * Test the contents returned by {@link BufferedBlockingQueue#iterator()}.
      *
      * The test is sequential, because the iterator has no guarantee wrt to its
@@ -287,7 +306,6 @@ public class BufferedBlockingQueueTest {
         }
         assertFalse(fStringQueue.iterator().hasNext());
     }
-
 
     /**
      * Read with a 2 producers and a consumer
@@ -361,6 +379,74 @@ public class BufferedBlockingQueueTest {
             multipliedList.addAll(testString);
         }
         assertSameElements(multipliedList, actual);
+    }
+
+    /**
+     * Test multiple consumers for one producer
+     *
+     * @throws InterruptedException
+     *             should not happen
+     */
+    @Test
+    public void test1Producer2Consumers() throws InterruptedException {
+        testMultConsumers(1, 2, generateTestVector(300));
+    }
+
+    /**
+     * Test multiple consumers for one producer
+     *
+     * @throws InterruptedException
+     *             should not happen
+     */
+    @Test
+    public void test10Producer10Consumers() throws InterruptedException {
+        testMultConsumers(10, 10, generateTestVector(3000));
+    }
+
+    private void testMultConsumers(int numProducers, int numConsumers, final List<String> testString) throws InterruptedException {
+        final String lastElement = "!";
+        Thread.currentThread().setName("Unit test");
+        List<Thread> producers = new ArrayList<>();
+        for (int i = 0; i < numProducers; i++) {
+            Thread producer = new Thread() {
+                @Override
+                public void run() {
+                    for (String c : testString) {
+                        fStringQueue.put(NonNullUtils.checkNotNull(c));
+                    }
+                }
+            };
+            producer.setName("Producer " + i);
+            producer.start();
+            producers.add(producer);
+        }
+        List<Thread> consumers = new ArrayList<>();
+        List<Set<String>> outs = new ArrayList<>();
+
+        for (int i = 0; i < numConsumers; i++) {
+            final Set<String> res = new HashSet<>();
+            outs.add(res);
+            Thread consumer = new ConsumerThread(res, lastElement);
+            consumer.setName("Consumer " + i);
+            consumer.start();
+            consumers.add(consumer);
+        }
+        for (Thread producer : producers) {
+            producer.join();
+        }
+        for (int i = 0; i < consumers.size(); i++) {
+            fStringQueue.put(lastElement);
+        }
+        fStringQueue.flushInputBuffer();
+        for (Thread consumer : consumers) {
+            consumer.join();
+        }
+        Set<String> merge = new HashSet<>();
+        for (Set<String> set : outs) {
+            merge.addAll(set);
+        }
+        assertTrue(merge.containsAll(testString));
+
     }
 
     /**
