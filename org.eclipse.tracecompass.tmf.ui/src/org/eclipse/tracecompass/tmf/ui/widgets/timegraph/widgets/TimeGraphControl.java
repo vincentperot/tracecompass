@@ -1944,15 +1944,15 @@ public class TimeGraphControl extends TimeGraphBaseControl
                         new Object[] {
                                 tf == TimeFormat.CALENDAR ? Utils.formatDate(time) + ' ' : "", //$NON-NLS-1$
                                 Utils.formatTime(time, tf, res),
-                                tf == TimeFormat.CALENDAR ? Utils.formatDate(Math.min(selectionBegin, selectionEnd)) + ' ' : "", //$NON-NLS-1$
-                                Utils.formatTime(Math.min(selectionBegin, selectionEnd), tf, res)
+                                tf == TimeFormat.CALENDAR ? Utils.formatDate(selectionBegin) + ' ' : "", //$NON-NLS-1$
+                                Utils.formatTime(selectionBegin, tf, res)
                         }));
                 if (selectionBegin != selectionEnd) {
                     message.append(NLS.bind("     T2: {0}{1}     \u0394: {2}", //$NON-NLS-1$
                             new Object[] {
-                                    tf == TimeFormat.CALENDAR ? Utils.formatDate(Math.max(selectionBegin, selectionEnd)) + ' ' : "", //$NON-NLS-1$
-                                    Utils.formatTime(Math.max(selectionBegin, selectionEnd), tf, res),
-                                    Utils.formatDelta(Math.abs(selectionBegin - selectionEnd), tf, res)
+                                    tf == TimeFormat.CALENDAR ? Utils.formatDate(selectionEnd) + ' ' : "", //$NON-NLS-1$
+                                    Utils.formatTime(selectionEnd, tf, res),
+                                    Utils.formatDelta(selectionEnd - selectionBegin, tf, res)
                             }));
                 }
             }
@@ -1965,11 +1965,11 @@ public class TimeGraphControl extends TimeGraphBaseControl
             }
             message.append(NLS.bind("T1: {0}{1}     T2: {2}{3}     \u0394: {4}", //$NON-NLS-1$
                     new Object[] {
-                            tf == TimeFormat.CALENDAR ? Utils.formatDate(Math.min(time, time0)) + ' ' : "", //$NON-NLS-1$
-                            Utils.formatTime(Math.min(time, time0), tf, res),
-                            tf == TimeFormat.CALENDAR ? Utils.formatDate(Math.max(time, time0)) + ' ' : "", //$NON-NLS-1$
-                            Utils.formatTime(Math.max(time, time0), tf, res),
-                            Utils.formatDelta(Math.abs(time - time0), tf, res)
+                            tf == TimeFormat.CALENDAR ? Utils.formatDate(time0) + ' ' : "", //$NON-NLS-1$
+                            Utils.formatTime(time0, tf, res),
+                            tf == TimeFormat.CALENDAR ? Utils.formatDate(time) + ' ' : "", //$NON-NLS-1$
+                            Utils.formatTime(time, tf, res),
+                            Utils.formatDelta(time - time0, tf, res)
                     }));
         }
         fStatusLineManager.setMessage(message.toString());
@@ -2167,11 +2167,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
                 } else {
                     long time0 = fDragTime0;
                     long time1 = getTimeAtX(fDragX);
-                    if (time0 <= time1) {
-                        fTimeProvider.setSelectionRangeNotify(time0, time1);
-                    } else {
-                        fTimeProvider.setSelectionRangeNotify(time1, time0);
-                    }
+                    fTimeProvider.setSelectionRangeNotify(time0, time1);
                 }
                 fDragState = DRAG_NONE;
                 redraw();
