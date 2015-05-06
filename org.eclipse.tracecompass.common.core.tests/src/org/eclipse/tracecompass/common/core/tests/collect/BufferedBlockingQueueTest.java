@@ -17,10 +17,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -30,6 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.common.core.collect.BufferedBlockingQueue;
 import org.junit.Before;
@@ -39,6 +42,7 @@ import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 
 import com.google.common.collect.HashMultiset;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 
 /**
@@ -50,18 +54,24 @@ public class BufferedBlockingQueueTest {
     @Rule
     public TestRule timeoutRule = new Timeout(120000);
 
-    private static final String testString = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz" +
-            "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz" +
-            "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
+    private static final List<Integer> TEST_VECTOR = generateTestVector(40000);
 
-    private BufferedBlockingQueue<Character> charQueue;
+    private BufferedBlockingQueue<Integer> fIntegerQueue;
 
     /**
      * Test setup
      */
     @Before
     public void init() {
-        charQueue = new BufferedBlockingQueue<>(15, 15);
+        fIntegerQueue = new BufferedBlockingQueue<>(15, 15);
+    }
+
+    private static List<Integer> generateTestVector(int size) {
+        ImmutableList.Builder<Integer> sb = new ImmutableList.Builder<>();
+        for (int i = 0; i < size; i++) {
+            sb.add(Integer.valueOf(i));
+        }
+        return sb.build();
     }
 
     /**
@@ -69,11 +79,11 @@ public class BufferedBlockingQueueTest {
      */
     @Test
     public void testSingleInsertion() {
-        Character element = 'x';
-        charQueue.put(element);
-        charQueue.flushInputBuffer();
+        Integer element = NonNullUtils.checkNotNull(Integer.valueOf(3141592));
+        fIntegerQueue.put(element);
+        fIntegerQueue.flushInputBuffer();
 
-        Character out = charQueue.take();
+        Integer out = fIntegerQueue.take();
         assertEquals(element, out);
     }
 
@@ -82,17 +92,22 @@ public class BufferedBlockingQueueTest {
      */
     @Test
     public void testSimpleInsertion() {
-        String string = "Hello world!";
-        for (char elem : string.toCharArray()) {
-            charQueue.put(elem);
+        Iterable<Integer> testVector = generateTestVector(10);
+        for (Integer elem : testVector) {
+            fIntegerQueue.put(NonNullUtils.checkNotNull(elem));
         }
-        charQueue.flushInputBuffer();
+        fIntegerQueue.flushInputBuffer();
 
         StringBuilder sb = new StringBuilder();
-        while (!charQueue.isEmpty()) {
-            sb.append(charQueue.take());
+        while (!fIntegerQueue.isEmpty()) {
+            sb.append(fIntegerQueue.take()).append(' ');
         }
-        assertEquals(string, sb.toString());
+        StringBuilder expected = new StringBuilder();
+        for (Integer element : testVector) {
+            expected.append(element).append(' ');
+        }
+
+        assertEquals(expected.toString(), sb.toString());
     }
 
     /**
@@ -100,17 +115,19 @@ public class BufferedBlockingQueueTest {
      */
     @Test
     public void testLargeInsertion() {
-        String string = testString.substring(0, 222);
-        for (char elem : string.toCharArray()) {
-            charQueue.put(elem);
+        Iterable<Integer> ints = generateTestVector(100);
+        StringBuilder expected = new StringBuilder();
+        for (Integer elem : ints) {
+            fIntegerQueue.put(NonNullUtils.checkNotNull(elem));
+            expected.append(elem).append(' ');
         }
-        charQueue.flushInputBuffer();
+        fIntegerQueue.flushInputBuffer();
 
         StringBuilder sb = new StringBuilder();
-        while (!charQueue.isEmpty()) {
-            sb.append(charQueue.take());
+        while (!fIntegerQueue.isEmpty()) {
+            sb.append(fIntegerQueue.take()).append(' ');
         }
-        assertEquals(string, sb.toString());
+        assertEquals(expected.toString(), sb.toString());
     }
 
     /**
@@ -188,16 +205,16 @@ public class BufferedBlockingQueueTest {
     @Test
     public void testMultiThread() throws InterruptedException {
         /* A character not found in the test string */
-        final Character lastElement = '%';
-
+        final @NonNull Integer lastElement = NonNullUtils.checkNotNull(Integer.MIN_VALUE);
+        final List<Integer> actual = new ArrayList<>();
         Thread producer = new Thread() {
             @Override
             public void run() {
-                for (char c : testString.toCharArray()) {
-                    charQueue.put(c);
+                for (Integer c : TEST_VECTOR) {
+                    fIntegerQueue.put(NonNullUtils.checkNotNull(c));
                 }
-                charQueue.put(lastElement);
-                charQueue.flushInputBuffer();
+                fIntegerQueue.put(lastElement);
+                fIntegerQueue.flushInputBuffer();
             }
         };
         producer.start();
@@ -205,9 +222,10 @@ public class BufferedBlockingQueueTest {
         Thread consumer = new Thread() {
             @Override
             public void run() {
-                Character s = charQueue.take();
-                while (!s.equals(lastElement)) {
-                    s = charQueue.take();
+                Integer val = fIntegerQueue.take();
+                while (!val.equals(lastElement)) {
+                    actual.add(val);
+                    val = fIntegerQueue.take();
                 }
             }
         };
@@ -215,9 +233,11 @@ public class BufferedBlockingQueueTest {
 
         consumer.join();
         producer.join();
+        assertEquals(TEST_VECTOR, actual);
     }
 
     /**
+
      * Test the contents returned by {@link BufferedBlockingQueue#iterator()}.
      *
      * The test is sequential, because the iterator has no guarantee wrt to its
@@ -225,19 +245,19 @@ public class BufferedBlockingQueueTest {
      */
     @Test
     public void testIteratorContents() {
-        Deque<Character> expected = new LinkedList<>();
+        Deque<Integer> expected = new LinkedList<>();
 
         /* Iterator should be empty initially */
-        assertFalse(charQueue.iterator().hasNext());
+        assertFalse(fIntegerQueue.iterator().hasNext());
 
         /* Insert the first 50 elements */
         for (int i = 0; i < 50; i++) {
-            char c = testString.charAt(i);
-            charQueue.put(c);
-            expected.addFirst(c);
+            Integer element = TEST_VECTOR.get(i);
+            fIntegerQueue.put(NonNullUtils.checkNotNull(element));
+            expected.addFirst(element);
         }
-        LinkedList<Character> actual = new LinkedList<>();
-        Iterators.addAll(actual, charQueue.iterator());
+        LinkedList<Integer> actual = new LinkedList<>();
+        Iterators.addAll(actual, fIntegerQueue.iterator());
         assertSameElements(expected, actual);
 
         /*
@@ -245,30 +265,30 @@ public class BufferedBlockingQueueTest {
          * iteration).
          */
         for (int i = 50; i < 60; i++) {
-            char c = testString.charAt(i);
-            charQueue.put(c);
-            charQueue.flushInputBuffer();
-            expected.addFirst(c);
+            Integer element = TEST_VECTOR.get(i);
+            fIntegerQueue.put(NonNullUtils.checkNotNull(element));
+            fIntegerQueue.flushInputBuffer();
+            expected.addFirst(element);
         }
         actual = new LinkedList<>();
-        Iterators.addAll(actual, charQueue.iterator());
+        Iterators.addAll(actual, fIntegerQueue.iterator());
         assertSameElements(expected, actual);
 
         /* Consume the 30 last elements from the queue */
         for (int i = 0; i < 30; i++) {
-            charQueue.take();
+            fIntegerQueue.take();
             expected.removeLast();
         }
         actual = new LinkedList<>();
-        Iterators.addAll(actual, charQueue.iterator());
+        Iterators.addAll(actual, fIntegerQueue.iterator());
         assertSameElements(expected, actual);
 
         /* Now empty the queue */
-        while (!charQueue.isEmpty()) {
-            charQueue.take();
+        while (!fIntegerQueue.isEmpty()) {
+            fIntegerQueue.take();
             expected.removeLast();
         }
-        assertFalse(charQueue.iterator().hasNext());
+        assertFalse(fIntegerQueue.iterator().hasNext());
     }
 
     /**
@@ -281,8 +301,8 @@ public class BufferedBlockingQueueTest {
      * Using a {@link Set} or {@link Collection#containsAll} is not sufficient
      * either, because those will throw away duplicate elements.
      */
-    private static <T> void assertSameElements(Collection<T> c1, Collection<T> c2) {
-        assertEquals(HashMultiset.create(c1), HashMultiset.create(c2));
+    private static <T> void assertSameElements(Collection<T> expected, Collection<T> actual) {
+        assertEquals(HashMultiset.create(expected), HashMultiset.create(actual));
     }
 
     /**
@@ -307,8 +327,8 @@ public class BufferedBlockingQueueTest {
         Runnable producer = new Runnable() {
             @Override
             public void run() {
-                for (int i = 0; i < testString.length(); i++) {
-                    queue.put(nullToEmptyString(String.valueOf(testString.charAt(i))));
+                for (Integer element : TEST_VECTOR) {
+                    queue.put(nullToEmptyString(element));
                 }
                 queue.put(poisonPill);
                 queue.flushInputBuffer();
@@ -350,9 +370,10 @@ public class BufferedBlockingQueueTest {
 
         pool.shutdown();
         pool.awaitTermination(2, TimeUnit.MINUTES);
-
-        assertEquals(testString, message.get());
+        StringBuilder expected = new StringBuilder();
+        for (Integer element : TEST_VECTOR) {
+            expected.append(element);
+        }
+        assertEquals(expected.toString(), message.get());
     }
-
-
 }
