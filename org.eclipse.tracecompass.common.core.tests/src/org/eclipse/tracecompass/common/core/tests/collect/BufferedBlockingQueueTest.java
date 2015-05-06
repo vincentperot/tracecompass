@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
@@ -285,6 +286,81 @@ public class BufferedBlockingQueueTest {
             expected.removeLast();
         }
         assertFalse(fStringQueue.iterator().hasNext());
+    }
+
+
+    /**
+     * Read with a 2 producers and a consumer
+     *
+     * @throws InterruptedException
+     *             The test was interrupted
+     */
+    @Test
+    public void testMultiThread2Producers() throws InterruptedException {
+        /* A character not found in the test string */
+        final List<String> testString = generateTestVector(1000);
+        testNProducers(2, testString);
+    }
+
+    /**
+     * Read with a many producers and a consumer
+     *
+     * @throws InterruptedException
+     *             The test was interrupted
+     */
+    @Test
+    public void testMultiThreadManyProducers() throws InterruptedException {
+        final int NUM_PRODUCERS = 9;
+        /* A character not found in the test string */
+        final List<String> testString = generateTestVector(150);
+        testNProducers(NUM_PRODUCERS, testString);
+    }
+
+    private void testNProducers(final int NUM_PRODUCERS, final List<String> testString) throws InterruptedException {
+        final String lastElement = "!";
+        Thread.currentThread().setName("Unit test");
+        List<Thread> producers = new ArrayList<>();
+        for (int i = 0; i < NUM_PRODUCERS; i++) {
+            Thread producer = new Thread() {
+                @Override
+                public void run() {
+                    for (String c : testString) {
+                        fStringQueue.put(NonNullUtils.checkNotNull(c));
+                    }
+                }
+            };
+            producer.setName("Producer " + i);
+            producer.start();
+            producers.add(producer);
+        }
+
+        final List<String> actual = new ArrayList<>();
+        Thread consumer = new Thread() {
+            @Override
+            public void run() {
+                String take = fStringQueue.take();
+                while (!take.equals(lastElement)) {
+                    actual.add(take);
+                    take = fStringQueue.take();
+                }
+            }
+        };
+        consumer.setName("Consumer");
+        consumer.start();
+        for (Thread producer : producers) {
+            producer.join();
+        }
+        fStringQueue.put(lastElement);
+        fStringQueue.flushInputBuffer();
+        consumer.join();
+        assertTrue(fStringQueue.isEmpty());
+        assertEquals(new HashSet<>(testString), new HashSet<>(actual));
+        assertEquals(testString.size() * NUM_PRODUCERS, actual.size());
+        Collection<String> multipliedList = new ArrayList<>();
+        for (int i = 0; i < NUM_PRODUCERS; i++) {
+            multipliedList.addAll(testString);
+        }
+        assertSameElements(multipliedList, actual);
     }
 
     /**
