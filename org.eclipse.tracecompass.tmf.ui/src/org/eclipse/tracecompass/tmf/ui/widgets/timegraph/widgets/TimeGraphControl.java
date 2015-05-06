@@ -107,6 +107,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
     private static final int ARROW_HOVER_MAX_DIST = 5;
 
     private static final int NO_STATUS = -1;
+    private static final int STATUS_WITHOUT_CURSOR_TIME = -2;
 
     /** Resource manager */
     private LocalResourceManager fResourceManager = new LocalResourceManager(JFaceResources.getResources());
@@ -714,10 +715,13 @@ public class TimeGraphControl extends TimeGraphBaseControl
     /**
      * Select an event
      *
-     * @param n
-     *            1 for next event, -1 for previous event
+     * @param forward
+     *            true for next event, false for previous event
+     * @param extend
+     *            true to extend selection range, false for single selection
+     * @since 1.0
      */
-    public void selectEvent(int n) {
+    public void selectEvent(boolean forward, boolean extend) {
         if (null == fTimeProvider) {
             return;
         }
@@ -725,54 +729,71 @@ public class TimeGraphControl extends TimeGraphBaseControl
         if (trace == null) {
             return;
         }
-        long selectedTime = fTimeProvider.getSelectionBegin();
+        long selectedTime = fTimeProvider.getSelectionEnd();
         long endTime = fTimeProvider.getMaxTime();
         ITimeEvent nextEvent;
-        if (-1 == n && selectedTime > endTime) {
+        if (!forward && selectedTime > endTime) {
             nextEvent = Utils.findEvent(trace, selectedTime, 0);
         } else {
-            nextEvent = Utils.findEvent(trace, selectedTime, n);
+            nextEvent = Utils.findEvent(trace, selectedTime, (forward ? 1 : -1));
         }
-        if (null == nextEvent && -1 == n) {
+        if (null == nextEvent && !forward) {
             nextEvent = Utils.getFirstEvent(trace);
         }
         if (null != nextEvent) {
             long nextTime = nextEvent.getTime();
             // If last event detected e.g. going back or not moving to a next
             // event
-            if (nextTime <= selectedTime && n == 1) {
+            if (nextTime <= selectedTime && forward) {
                 // Select to the end of this last event
                 nextTime = nextEvent.getTime() + nextEvent.getDuration();
                 // but not beyond the end of the trace
                 if (nextTime > endTime) {
                     nextTime = endTime;
                 }
-            } else if (n == -1 && nextEvent.getTime() + nextEvent.getDuration() < selectedTime) {
+            } else if (!forward && nextEvent.getTime() + nextEvent.getDuration() < selectedTime) {
                 // for previous event go to its end time unless we were already there
                 nextTime = nextEvent.getTime() + nextEvent.getDuration();
             }
-            fTimeProvider.setSelectedTimeNotify(nextTime, true);
+            if (extend) {
+                fTimeProvider.setSelectionRangeNotify(fTimeProvider.getSelectionBegin(), nextTime);
+            } else {
+                fTimeProvider.setSelectedTimeNotify(nextTime, true);
+            }
             fireSelectionChanged();
-        } else if (1 == n) {
-            fTimeProvider.setSelectedTimeNotify(endTime, true);
+        } else if (forward) {
+            if (extend) {
+                fTimeProvider.setSelectionRangeNotify(fTimeProvider.getSelectionBegin(), endTime);
+            } else {
+                fTimeProvider.setSelectedTimeNotify(endTime, true);
+            }
             fireSelectionChanged();
         }
+        updateStatusLine(STATUS_WITHOUT_CURSOR_TIME);
     }
 
     /**
      * Select the next event
+     *
+     * @param extend
+     *            true to extend selection range, false for single selection
+     * @since 1.0
      */
-    public void selectNextEvent() {
-        selectEvent(1);
+    public void selectNextEvent(boolean extend) {
+        selectEvent(true, extend);
         // Notify if visible time window has been adjusted
         fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
     }
 
     /**
      * Select the previous event
+     *
+     * @param extend
+     *            true to extend selection range, false for single selection
+     * @since 1.0
      */
-    public void selectPrevEvent() {
-        selectEvent(-1);
+    public void selectPrevEvent(boolean extend) {
+        selectEvent(false, extend);
         // Notify if visible time window has been adjusted
         fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
     }
@@ -914,50 +935,68 @@ public class TimeGraphControl extends TimeGraphBaseControl
 
     /**
      * Follow the arrow forward
+     *
+     * @param extend
+     *            true to extend selection range, false for single selection
+     * @since 1.0
      */
-    public void followArrowFwd() {
+    public void followArrowFwd(boolean extend) {
         ITimeGraphEntry trace = getSelectedTrace();
         if (trace == null) {
             return;
         }
-        long selectedTime = fTimeProvider.getSelectionBegin();
+        long selectedTime = fTimeProvider.getSelectionEnd();
         for (ILinkEvent link : fItemData.fLinks) {
             if (link.getEntry() == trace && link.getTime() == selectedTime) {
                 selectItem(link.getDestinationEntry(), false);
                 if (link.getDuration() != 0) {
-                    fTimeProvider.setSelectedTimeNotify(link.getTime() + link.getDuration(), true);
+                    if (extend) {
+                        fTimeProvider.setSelectionRangeNotify(fTimeProvider.getSelectionBegin(), link.getTime() + link.getDuration());
+                    } else {
+                        fTimeProvider.setSelectedTimeNotify(link.getTime() + link.getDuration(), true);
+                    }
                     // Notify if visible time window has been adjusted
                     fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
                 }
                 fireSelectionChanged();
+                updateStatusLine(STATUS_WITHOUT_CURSOR_TIME);
                 return;
             }
         }
-        selectNextEvent();
+        selectNextEvent(extend);
     }
 
     /**
      * Follow the arrow backward
+     *
+     * @param extend
+     *            true to extend selection range, false for single selection
+     * @since 1.0
      */
-    public void followArrowBwd() {
+    public void followArrowBwd(boolean extend) {
         ITimeGraphEntry trace = getSelectedTrace();
         if (trace == null) {
             return;
         }
-        long selectedTime = fTimeProvider.getSelectionBegin();
+        long selectedTime = fTimeProvider.getSelectionEnd();
         for (ILinkEvent link : fItemData.fLinks) {
             if (link.getDestinationEntry() == trace && link.getTime() + link.getDuration() == selectedTime) {
                 selectItem(link.getEntry(), false);
                 if (link.getDuration() != 0) {
-                    fTimeProvider.setSelectedTimeNotify(link.getTime(), true);
+                    if (extend) {
+                        fTimeProvider.setSelectionRangeNotify(fTimeProvider.getSelectionBegin(), link.getTime());
+                    } else {
+                        fTimeProvider.setSelectedTimeNotify(link.getTime(), true);
+                    }
                     // Notify if visible time window has been adjusted
                     fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
                 }
                 fireSelectionChanged();
+                updateStatusLine(STATUS_WITHOUT_CURSOR_TIME);
                 return;
             }
         }
-        selectPrevEvent();
+        selectPrevEvent(extend);
     }
 
     /**
@@ -1368,7 +1407,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
         ITimeGraphEntry entry = item.fEntry;
         long time0 = timeProvider.getTime0();
         long time1 = timeProvider.getTime1();
-        long selectedTime = fTimeProvider.getSelectionBegin();
+        long selectedTime = fTimeProvider.getSelectionEnd();
 
         Rectangle nameRect = getNameRect(bounds, i, nameSpace);
         if (nameRect.y >= bounds.y + bounds.height) {
@@ -1803,9 +1842,11 @@ public class TimeGraphControl extends TimeGraphBaseControl
                 idx--;
             }
         } else if (SWT.ARROW_LEFT == e.keyCode) {
-            selectPrevEvent();
+            boolean extend = (e.stateMask & SWT.SHIFT) != 0;
+            selectPrevEvent(extend);
         } else if (SWT.ARROW_RIGHT == e.keyCode) {
-            selectNextEvent();
+            boolean extend = (e.stateMask & SWT.SHIFT) != 0;
+            selectNextEvent(extend);
         } else if (SWT.PAGE_DOWN == e.keyCode) {
             int page = countPerPage();
             idx = getSelectedIndex();
@@ -1855,7 +1896,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
     public void focusGained(FocusEvent e) {
         fIsInFocus = true;
         redraw();
-        updateStatusLine(NO_STATUS);
+        updateStatusLine(STATUS_WITHOUT_CURSOR_TIME);
     }
 
     @Override
@@ -1932,29 +1973,34 @@ public class TimeGraphControl extends TimeGraphBaseControl
         TimeFormat tf = tdp.getTimeFormat();
         Resolution res = Resolution.NANOSEC;
         StringBuilder message = new StringBuilder();
-        if (x >= 0 && fDragState == DRAG_NONE) {
-            long time = getTimeAtX(x);
-            if (time >= 0) {
-                if (tdp instanceof ITimeDataProviderConverter) {
-                    time = ((ITimeDataProviderConverter) tdp).convertTime(time);
-                }
-                long selectionBegin = tdp.getSelectionBegin();
-                long selectionEnd = tdp.getSelectionEnd();
-                message.append(NLS.bind("T: {0}{1}     T1: {2}{3}", //$NON-NLS-1$
-                        new Object[] {
-                                tf == TimeFormat.CALENDAR ? Utils.formatDate(time) + ' ' : "", //$NON-NLS-1$
-                                Utils.formatTime(time, tf, res),
-                                tf == TimeFormat.CALENDAR ? Utils.formatDate(selectionBegin) + ' ' : "", //$NON-NLS-1$
-                                Utils.formatTime(selectionBegin, tf, res)
-                        }));
-                if (selectionBegin != selectionEnd) {
-                    message.append(NLS.bind("     T2: {0}{1}     \u0394: {2}", //$NON-NLS-1$
+        if ((x >= 0 || x == STATUS_WITHOUT_CURSOR_TIME) && fDragState == DRAG_NONE) {
+            if (x != STATUS_WITHOUT_CURSOR_TIME) {
+                long time = getTimeAtX(x);
+                if (time >= 0) {
+                    if (tdp instanceof ITimeDataProviderConverter) {
+                        time = ((ITimeDataProviderConverter) tdp).convertTime(time);
+                    }
+                    message.append(NLS.bind("T: {0}{1}     ", //$NON-NLS-1$
                             new Object[] {
-                                    tf == TimeFormat.CALENDAR ? Utils.formatDate(selectionEnd) + ' ' : "", //$NON-NLS-1$
-                                    Utils.formatTime(selectionEnd, tf, res),
-                                    Utils.formatDelta(selectionEnd - selectionBegin, tf, res)
+                                    tf == TimeFormat.CALENDAR ? Utils.formatDate(time) + ' ' : "", //$NON-NLS-1$
+                                    Utils.formatTime(time, tf, res)
                             }));
                 }
+            }
+            long selectionBegin = tdp.getSelectionBegin();
+            long selectionEnd = tdp.getSelectionEnd();
+            message.append(NLS.bind("T1: {0}{1}", //$NON-NLS-1$
+                    new Object[] {
+                            tf == TimeFormat.CALENDAR ? Utils.formatDate(selectionBegin) + ' ' : "", //$NON-NLS-1$
+                            Utils.formatTime(selectionBegin, tf, res)
+                    }));
+            if (selectionBegin != selectionEnd) {
+                message.append(NLS.bind("     T2: {0}{1}     \u0394: {2}", //$NON-NLS-1$
+                        new Object[] {
+                                tf == TimeFormat.CALENDAR ? Utils.formatDate(selectionEnd) + ' ' : "", //$NON-NLS-1$
+                                Utils.formatTime(selectionEnd, tf, res),
+                                Utils.formatDelta(selectionEnd - selectionBegin, tf, res)
+                        }));
             }
         } else if (fDragState == DRAG_SELECTION || fDragState == DRAG_ZOOM) {
             long time0 = fDragTime0;
@@ -2203,7 +2249,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
             fMouseOverSplitLine = false;
             redraw();
         }
-        updateStatusLine(NO_STATUS);
+        updateStatusLine(STATUS_WITHOUT_CURSOR_TIME);
     }
 
     @Override
