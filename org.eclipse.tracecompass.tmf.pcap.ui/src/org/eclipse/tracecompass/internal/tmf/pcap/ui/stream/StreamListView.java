@@ -129,7 +129,7 @@ public class StreamListView extends TmfView {
     private static final long WAIT_TIME = 1000;
 
     private @Nullable CTabFolder fTabFolder;
-    private @Nullable Map<TmfPcapProtocol, Table> fTableMap;
+    private final Map<TmfPcapProtocol, Table> fTableMap = new HashMap<>();
 
     private @Nullable TmfPacketStream fCurrentStream;
     private @Nullable ITmfTrace fCurrentTrace;
@@ -242,11 +242,7 @@ public class StreamListView extends TmfView {
                 if (display.isDisposed()) {
                     return;
                 }
-                Map<TmfPcapProtocol, Table> tableMap = fTableMap;
-                if (tableMap == null) {
-                    return;
-                }
-                for (Table table : tableMap.values()) {
+                for (Table table : fTableMap.values()) {
                     if (!table.isDisposed()) {
                         table.removeAll();
                     }
@@ -277,11 +273,7 @@ public class StreamListView extends TmfView {
                     return;
                 }
 
-                Map<TmfPcapProtocol, Table> tables = fTableMap;
-                if (tables == null) {
-                    return;
-                }
-                for (Entry<TmfPcapProtocol, Table> protocolEntry : tables.entrySet()) {
+                for (Entry<TmfPcapProtocol, Table> protocolEntry : fTableMap.entrySet()) {
                     TmfPcapProtocol protocol = protocolEntry.getKey();
                     if (protocol == null) {
                         throw new IllegalStateException();
@@ -323,7 +315,6 @@ public class StreamListView extends TmfView {
     @Override
     public void createPartControl(@Nullable Composite parent) {
         // Initialize
-        fTableMap = new HashMap<>();
         fCurrentTrace = TmfTraceManager.getInstance().getActiveTrace();
         fCurrentStream = null;
 
@@ -333,12 +324,11 @@ public class StreamListView extends TmfView {
 
             @Override
             public void widgetSelected(@Nullable SelectionEvent e) {
-                Map<TmfPcapProtocol, Table> tables = fTableMap;
-                if (tables == null || e == null) {
+                if (e == null) {
                     return;
                 }
                 TmfPcapProtocol protocol = (TmfPcapProtocol) e.item.getData(KEY_PROTOCOL);
-                tables.get(protocol).deselectAll();
+                fTableMap.get(protocol).deselectAll();
                 fCurrentStream = null;
             }
 
@@ -373,12 +363,7 @@ public class StreamListView extends TmfView {
 
                 });
 
-                Map<TmfPcapProtocol, Table> tables = fTableMap;
-                if (tables == null) {
-                    return;
-                }
-
-                tables.put(protocol, table);
+                fTableMap.put(protocol, table);
 
                 // Add right click menu
                 Menu menu = new Menu(table);
