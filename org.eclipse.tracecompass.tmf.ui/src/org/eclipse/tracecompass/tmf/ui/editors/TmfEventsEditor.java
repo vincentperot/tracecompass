@@ -229,6 +229,8 @@ public class TmfEventsEditor extends TmfEditor implements ITmfTraceEditor, IReus
                 fEventsTable = new TmfEventsTable(fParent, 0);
                 fEventsTable.addSelectionChangedListener(this);
             }
+            IStatusLineManager statusLineManager = getEditorSite().getActionBars().getStatusLineManager();
+            fEventsTable.setStatusLineManager(statusLineManager);
             fParent.layout();
         }
     }
