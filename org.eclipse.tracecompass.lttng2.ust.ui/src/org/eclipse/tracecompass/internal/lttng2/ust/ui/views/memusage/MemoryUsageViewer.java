@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2014 Ericsson, École Polytechnique de Montréal
+d * Copyright (c) 2014 Ericsson, École Polytechnique de Montréal
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -111,11 +111,11 @@ public class MemoryUsageViewer extends TmfCommonXLineChartViewer {
                     int procNameQuark = ss.getQuarkRelative(quark, UstMemoryStrings.UST_MEMORY_PROCNAME_ATTRIBUTE);
                     try {
                         ITmfStateValue procnameValue = ss.querySingleState(start, procNameQuark).getStateValue();
-                        String procname = new String();
+                        String procname = ""; //$NON-NLS-1$
                         if (!procnameValue.isNull()) {
                             procname = procnameValue.unboxStr();
                         }
-                        fSeriesName.put(quark, new String(procname + ' ' + '(' + ss.getAttributeName(quark) + ')').trim());
+                        fSeriesName.put(quark, (procname + ' ' + '(' + ss.getAttributeName(quark) + ')').trim() );
                     } catch (TimeRangeException e) {
                         fSeriesName.put(quark, '(' + ss.getAttributeName(quark) + ')');
                     }
