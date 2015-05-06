@@ -130,7 +130,7 @@ public class TmfCoreTracer {
     /**
      * Close the trace log file
      */
-    public static void stop() {
+    public static synchronized void stop() {
         if (fTraceFile != null) {
             try {
                 fTraceFile.close();
