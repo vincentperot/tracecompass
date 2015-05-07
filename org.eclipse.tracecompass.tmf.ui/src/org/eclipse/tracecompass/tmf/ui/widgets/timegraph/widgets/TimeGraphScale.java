@@ -30,6 +30,7 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
@@ -170,7 +171,11 @@ public class TimeGraphScale extends TimeGraphBaseControl implements
      *            The height to use
      */
     public void setHeight(int height) {
+        int oldHeight = this.fHeight;
         this.fHeight = height;
+        if (oldHeight != height) {
+            getParent().layout(new Control[] { this });
+        }
     }
 
     /**
