@@ -13,9 +13,7 @@
 package org.eclipse.tracecompass.common.core.tests.collect;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,6 +88,46 @@ public class BufferedBlockingQueueTest {
             sb.add(Integer.toString(i));
         }
         return sb.build();
+    }
+
+
+    /**
+     * Test with chunksize = 1  and buffer length = 1
+     */
+    public void testValidConstructor1() {
+        assertNotNull(new BufferedBlockingQueue<>(1, 1));
+    }
+
+    /**
+     * Test with chunksize = 0  and buffer length = 0
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidConstructor1() {
+        assertNotNull(new BufferedBlockingQueue<>(0, 0));
+    }
+
+    /**
+     * Test with chunksize = 0  and buffer length = 1
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidConstructor2() {
+        assertNotNull(new BufferedBlockingQueue<>(1, 0));
+    }
+
+    /**
+     * Test with chunksize = 1  and buffer length = 0
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidConstructor3() {
+        assertNotNull(new BufferedBlockingQueue<>(0, 1));
+    }
+
+    /**
+     * Test with chunksize = -1  and buffer length = 1
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidConstructor4() {
+        assertNotNull(new BufferedBlockingQueue<>(1, -1));
     }
 
     /**

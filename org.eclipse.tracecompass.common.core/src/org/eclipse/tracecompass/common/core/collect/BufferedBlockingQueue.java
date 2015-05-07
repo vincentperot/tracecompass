@@ -72,6 +72,12 @@ public class BufferedBlockingQueue<T> implements Iterable<T> {
      *            The size of an individual chunk.
      */
     public BufferedBlockingQueue(int queueSize, int chunkSize) {
+        if(queueSize <= 0) {
+            throw new IllegalArgumentException("queuesize must be > 0"); //$NON-NLS-1$
+        }
+        if(chunkSize <= 0) {
+            throw new IllegalArgumentException("chunksize must be > 0"); //$NON-NLS-1$
+        }
         fInnerQueue = new ArrayBlockingQueue<>(queueSize);
         fChunkSize = chunkSize;
 
