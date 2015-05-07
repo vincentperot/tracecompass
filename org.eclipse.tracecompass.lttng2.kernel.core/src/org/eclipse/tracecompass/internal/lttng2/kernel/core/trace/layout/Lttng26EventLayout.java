@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Alexandre Montplaisir - Initial API and implementation
+ *   Sébastien Lorrain - Initial API and implementation for lttng28
  ******************************************************************************/
 
 package org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout;
@@ -18,9 +19,10 @@ package org.eclipse.tracecompass.internal.lttng2.kernel.core.trace.layout;
  *
  * @author Alexandre Montplaisir
  */
+@SuppressWarnings("javadoc")
 public class Lttng26EventLayout extends LttngEventLayout {
 
-    private Lttng26EventLayout() {}
+    protected Lttng26EventLayout() {}
 
     private static final Lttng26EventLayout INSTANCE = new Lttng26EventLayout();
 
