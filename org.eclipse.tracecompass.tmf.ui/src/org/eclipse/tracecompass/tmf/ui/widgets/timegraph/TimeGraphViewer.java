@@ -1857,7 +1857,9 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
      * @since 1.0
      */
     public int getAvailableWidth(int requestedOffset) {
-        return fTimeAlignedComposite.getSize().x - requestedOffset;
+        int availableWidth = fTimeAlignedComposite.getSize().x - requestedOffset;
+        availableWidth = Math.min(fTimeAlignedComposite.getSize().x, Math.max(0, availableWidth));
+        return availableWidth;
     }
 
     /**
