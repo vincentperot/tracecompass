@@ -136,12 +136,8 @@ class FileAndName implements Comparable<FileAndName> {
     public int compareTo(FileAndName o) {
         int retVal = getFile().compareTo(o.getFile());
         if (retVal == 0) {
-            if (getTraceTypeId() != null) {
-                if (getTraceTypeId() != null) {
-                    if (o.getTraceTypeId() != null) {
-                        retVal = getTraceTypeId().compareTo(o.getTraceTypeId());
-                    }
-                }
+            if (getTraceTypeId() != null && o.getTraceTypeId() != null) {
+                    retVal = getTraceTypeId().compareTo(o.getTraceTypeId());
             }
         }
         return retVal;
