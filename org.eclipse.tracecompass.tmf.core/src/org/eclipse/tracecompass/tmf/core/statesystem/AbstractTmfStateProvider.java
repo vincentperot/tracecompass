@@ -112,8 +112,11 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
         fSS = null;
     }
 
+    /**
+     * @since 1.0
+     */
     @Override
-    public final void processEvent(ITmfEvent event) {
+    public final void processEvent(Object event) {
         /* Make sure the target state system has been assigned */
         if (!fStateSystemAssigned) {
             System.err.println("Cannot process event without a target state system"); //$NON-NLS-1$
@@ -121,8 +124,7 @@ public abstract class AbstractTmfStateProvider implements ITmfStateProvider {
         }
 
         /* Insert the event we're received into the events queue */
-        ITmfEvent curEvent = event;
-        fEventsQueue.put(curEvent);
+        fEventsQueue.put((ITmfEvent) event);
     }
 
     /**

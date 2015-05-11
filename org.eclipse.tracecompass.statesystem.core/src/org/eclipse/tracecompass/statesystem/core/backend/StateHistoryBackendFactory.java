@@ -16,10 +16,13 @@ import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.tracecompass.internal.statesystem.core.StateSystem;
 import org.eclipse.tracecompass.internal.statesystem.core.backend.InMemoryBackend;
 import org.eclipse.tracecompass.internal.statesystem.core.backend.NullBackend;
 import org.eclipse.tracecompass.internal.statesystem.core.backend.historytree.HistoryTreeBackend;
 import org.eclipse.tracecompass.internal.statesystem.core.backend.historytree.ThreadedHistoryTreeBackend;
+import org.eclipse.tracecompass.statesystem.core.IStateProvider;
+import org.eclipse.tracecompass.statesystem.core.StateSystemFactory;
 
 /**
  * Factory for the various types {@link IStateHistoryBackend} supplied by this
@@ -31,7 +34,8 @@ import org.eclipse.tracecompass.internal.statesystem.core.backend.historytree.Th
 @NonNullByDefault
 public final class StateHistoryBackendFactory {
 
-    private StateHistoryBackendFactory() {}
+    private StateHistoryBackendFactory() {
+    }
 
     /**
      * Create a new null-backend, which will not store any history intervals
@@ -57,6 +61,54 @@ public final class StateHistoryBackendFactory {
      */
     public static IStateHistoryBackend createInMemoryBackend(String ssid, long startTime) {
         return new InMemoryBackend(ssid, startTime);
+    }
+
+    public static IStateHistoryBackend createPartialStateBackend(String id, IStateProvider provider, File htPartialFile, final int QUEUE_SIZE, final long granularity, IPartialStateHelper helper) {
+        /*
+         * The order of initializations is very tricky (but very important!)
+         * here. We need to follow this pattern: (1 is done before the call to
+         * this method)
+         *
+         * 1- Instantiate realStateProvider 2- Instantiate realBackend 3-
+         * Instantiate partialBackend, with prereqs: 3a- Instantiate
+         * partialProvider, via realProvider.getNew() 3b- Instantiate
+         * nullBackend (partialSS's backend) 3c- Instantiate partialSS 3d-
+         * partialProvider.assignSS(partialSS) 4- Instantiate realSS 5-
+         * partialSS.assignUpstream(realSS) 6- realProvider.assignSS(realSS) 7-
+         * Call HistoryBuilder(realProvider, realSS, partialBackend) to build
+         * the thing.
+         */
+        /* 2 */
+        IStateHistoryBackend realBackend = null;
+        try {
+            realBackend = StateHistoryBackendFactory.createHistoryTreeBackendNewFile(
+                    id, htPartialFile, provider.getVersion(), provider.getStartTime(), QUEUE_SIZE);
+        } catch (IOException e) {
+            throw new IllegalStateException(e.toString(), e);
+        }
+
+        /* 3a */
+        IStateProvider partialProvider = provider.getNewInstance();
+
+        /* 3b-3c, constructor automatically uses a NullBackend */
+        PartialStateSystem pss = new PartialStateSystem();
+
+        /* 3d */
+        partialProvider.assignTargetStateSystem(pss);
+
+        /* 3 */
+        String partialId = new String(id + ".partial"); //$NON-NLS-1$
+        IStateHistoryBackend partialBackend = new PartialHistoryBackend(partialId, partialProvider, pss, realBackend, granularity, helper);
+
+        /* 4 */
+        StateSystem realSS = (StateSystem) StateSystemFactory.newStateSystem(partialBackend);
+
+        /* 5 */
+        pss.assignUpstream(realSS);
+
+        /* 6 */
+        provider.assignTargetStateSystem(realSS);
+        return partialBackend;
     }
 
     /**

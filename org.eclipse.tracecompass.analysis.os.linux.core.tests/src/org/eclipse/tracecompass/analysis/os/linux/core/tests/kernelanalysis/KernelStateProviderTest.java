@@ -17,7 +17,7 @@ import static org.junit.Assume.assumeTrue;
 
 import org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelAnalysisEventLayout;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.kernelanalysis.KernelStateProvider;
-import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
+import org.eclipse.tracecompass.statesystem.core.IStateProvider;
 import org.eclipse.tracecompass.tmf.ctf.core.tests.shared.CtfTmfTestTrace;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class KernelStateProviderTest {
 
     private static final CtfTmfTestTrace testTrace = CtfTmfTestTrace.TRACE2;
 
-    private static ITmfStateProvider input;
+    private static IStateProvider input;
 
     /**
      * Set-up.

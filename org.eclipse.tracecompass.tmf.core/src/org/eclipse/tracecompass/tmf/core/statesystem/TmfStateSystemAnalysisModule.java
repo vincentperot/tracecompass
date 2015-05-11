@@ -24,8 +24,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.tracecompass.internal.tmf.core.statesystem.backends.partial.PartialHistoryBackend;
-import org.eclipse.tracecompass.internal.tmf.core.statesystem.backends.partial.PartialStateSystem;
+import org.eclipse.tracecompass.internal.tmf.core.statesystem.backends.partial.PartialHistoryHelper;
+import org.eclipse.tracecompass.statesystem.core.IStateProvider;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.StateSystemFactory;
@@ -64,11 +64,16 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
     private final CountDownLatch fInitialized = new CountDownLatch(1);
     private final Object fRequestSyncObj = new Object();
 
-    @Nullable private ITmfStateSystemBuilder fStateSystem;
-    @Nullable private ITmfStateProvider fStateProvider;
-    @Nullable private IStateHistoryBackend fHtBackend;
-    @Nullable private ITmfEventRequest fRequest;
-    @Nullable private TmfTimeRange fTimeRange = null;
+    @Nullable
+    private ITmfStateSystemBuilder fStateSystem;
+    @Nullable
+    private ITmfStateProvider fStateProvider;
+    @Nullable
+    private IStateHistoryBackend fHtBackend;
+    @Nullable
+    private ITmfEventRequest fRequest;
+    @Nullable
+    private TmfTimeRange fTimeRange = null;
 
     private int fNbRead = 0;
 
@@ -79,12 +84,9 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
      */
     protected enum StateSystemBackendType {
         /** Full history in file */
-        FULL,
-        /** In memory state system */
-        INMEM,
-        /** Null history */
-        NULL,
-        /** State system backed with partial history */
+        FULL, /** In memory state system */
+        INMEM, /** Null history */
+        NULL, /** State system backed with partial history */
         PARTIAL
     }
 
@@ -102,8 +104,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
      * @return The state system, or null if there was no match
      */
     public static @Nullable ITmfStateSystem getStateSystem(ITmfTrace trace, String moduleId) {
-        TmfStateSystemAnalysisModule module =
-                TmfTraceUtils.getAnalysisModuleOfClass(trace, TmfStateSystemAnalysisModule.class, moduleId);
+        TmfStateSystemAnalysisModule module = TmfTraceUtils.getAnalysisModuleOfClass(trace, TmfStateSystemAnalysisModule.class, moduleId);
         if (module != null) {
             ITmfStateSystem ss = module.getStateSystem();
             if (ss != null) {
@@ -164,7 +165,8 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
     public void waitForInitialization() {
         try {
             fInitialized.await();
-        } catch (InterruptedException e) {}
+        } catch (InterruptedException e) {
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -172,13 +174,15 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
     // ------------------------------------------------------------------------
 
     @Override
-    protected boolean executeAnalysis(@Nullable final  IProgressMonitor monitor) {
+    protected boolean executeAnalysis(@Nullable final IProgressMonitor monitor) {
         IProgressMonitor mon = (monitor == null ? new NullProgressMonitor() : monitor);
         final ITmfStateProvider provider = createStateProvider();
 
         String id = getId();
 
-        /* FIXME: State systems should make use of the monitor, to be cancelled */
+        /*
+         * FIXME: State systems should make use of the monitor, to be cancelled
+         */
         try {
             /* Get the state system according to backend */
             StateSystemBackendType backend = getBackendType();
@@ -250,7 +254,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
         // at least if its range matches the trace's range.
 
         if (htFile.exists()) {
-           /* Load an existing history */
+            /* Load an existing history */
             final int version = provider.getVersion();
             try {
                 IStateHistoryBackend backend = StateHistoryBackendFactory.createHistoryTreeBackendExistingFile(
@@ -289,9 +293,9 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
 
     /*
      * Create a new state system backed with a partial history. A partial
-     * history is similar to a "full" one (which you get with
-     * {@link #newFullHistory}), except that the file on disk is much smaller,
-     * but queries are a bit slower.
+     * history is similar to a "full" one (which you get with {@link
+     * #newFullHistory}), except that the file on disk is much smaller, but
+     * queries are a bit slower.
      *
      * Also note that single-queries are implemented using a full-query
      * underneath, (which are much slower), so this might not be a good fit for
@@ -299,74 +303,25 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
      */
     private void createPartialHistory(String id, ITmfStateProvider provider, File htPartialFile)
             throws TmfTraceException {
-        /*
-         * The order of initializations is very tricky (but very important!)
-         * here. We need to follow this pattern:
-         * (1 is done before the call to this method)
-         *
-         * 1- Instantiate realStateProvider
-         * 2- Instantiate realBackend
-         * 3- Instantiate partialBackend, with prereqs:
-         *  3a- Instantiate partialProvider, via realProvider.getNew()
-         *  3b- Instantiate nullBackend (partialSS's backend)
-         *  3c- Instantiate partialSS
-         *  3d- partialProvider.assignSS(partialSS)
-         * 4- Instantiate realSS
-         * 5- partialSS.assignUpstream(realSS)
-         * 6- realProvider.assignSS(realSS)
-         * 7- Call HistoryBuilder(realProvider, realSS, partialBackend) to build the thing.
-         */
 
         /* Size of the blocking queue to use when building a state history */
         final int QUEUE_SIZE = 10000;
 
         final long granularity = 50000;
 
-        /* 2 */
-        IStateHistoryBackend realBackend = null;
-        try {
-            realBackend = StateHistoryBackendFactory.createHistoryTreeBackendNewFile(
-                    id, htPartialFile, provider.getVersion(), provider.getStartTime(), QUEUE_SIZE);
-        } catch (IOException e) {
-            throw new TmfTraceException(e.toString(), e);
-        }
-
-        /* 3a */
-        ITmfStateProvider partialProvider = provider.getNewInstance();
-
-        /* 3b-3c, constructor automatically uses a NullBackend */
-        PartialStateSystem pss = new PartialStateSystem();
-
-        /* 3d */
-        partialProvider.assignTargetStateSystem(pss);
-
-        /* 3 */
-        String partialId = new String(id + ".partial"); //$NON-NLS-1$
-        IStateHistoryBackend partialBackend =
-                new PartialHistoryBackend(partialId, partialProvider, pss, realBackend, granularity);
-
-        /* 4 */
-        @SuppressWarnings("restriction")
-        org.eclipse.tracecompass.internal.statesystem.core.StateSystem realSS =
-        (org.eclipse.tracecompass.internal.statesystem.core.StateSystem) StateSystemFactory.newStateSystem(partialBackend);
-
-        /* 5 */
-        pss.assignUpstream(realSS);
-
-        /* 6 */
-        provider.assignTargetStateSystem(realSS);
+        IStateHistoryBackend partialBackend = StateHistoryBackendFactory.createPartialStateBackend(id, provider, htPartialFile, QUEUE_SIZE, granularity, new PartialHistoryHelper(provider, granularity));
 
         /* 7 */
         fHtBackend = partialBackend;
-        fStateSystem = realSS;
+        fStateSystem = (ITmfStateSystemBuilder) provider.getAssignedStateSystem();
 
         build(provider);
     }
 
     /*
      * Create a new state system using a null history back-end. This means that
-     * no history intervals will be saved anywhere, and as such only
-     * {@link ITmfStateSystem#queryOngoingState} will be available.
+     * no history intervals will be saved anywhere, and as such only {@link
+     * ITmfStateSystem#queryOngoingState} will be available.
      */
     private void createNullHistory(String id, ITmfStateProvider provider) {
         IStateHistoryBackend backend = StateHistoryBackendFactory.createNullBackend(id);
@@ -390,7 +345,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
     }
 
     private void disposeProvider(boolean deleteFiles) {
-        ITmfStateProvider provider = fStateProvider;
+        IStateProvider provider = fStateProvider;
         if (provider != null) {
             provider.dispose();
         }
@@ -435,7 +390,7 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
                 fRequest.waitForCompletion();
             }
         } catch (InterruptedException e) {
-             e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -528,12 +483,13 @@ public abstract class TmfStateSystemAnalysisModule extends TmfAbstractAnalysisMo
     /**
      * Signal handler for the TmfTraceRangeUpdatedSignal signal
      *
-     * @param signal The incoming signal
+     * @param signal
+     *            The incoming signal
      */
     @TmfSignalHandler
     public void traceRangeUpdated(final TmfTraceRangeUpdatedSignal signal) {
         fTimeRange = signal.getRange();
-        ITmfStateProvider stateProvider = fStateProvider;
+        IStateProvider stateProvider = fStateProvider;
         synchronized (fRequestSyncObj) {
             if (signal.getTrace() == getTrace() && stateProvider != null && stateProvider.getAssignedStateSystem() != null) {
                 ITmfEventRequest request = fRequest;

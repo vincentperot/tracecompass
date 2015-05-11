@@ -9,7 +9,7 @@
  *   Alexandre Montplaisir - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.internal.tmf.core.statesystem.backends.partial;
+package org.eclipse.tracecompass.statesystem.core.backend;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -19,7 +19,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.tracecompass.internal.statesystem.core.AttributeTree;
 import org.eclipse.tracecompass.internal.statesystem.core.StateSystem;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
-import org.eclipse.tracecompass.statesystem.core.backend.StateHistoryBackendFactory;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
 import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
 
@@ -31,8 +30,8 @@ import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
  * values.
  *
  * @author Alexandre Montplaisir
+ * @since 1.0
  */
-@SuppressWarnings("restriction") /* We're using AttributeTree directly */
 public class PartialStateSystem extends StateSystem {
 
     private static final String ERR_MSG = "Partial state system should not modify the attribute tree!"; //$NON-NLS-1$
