@@ -157,8 +157,6 @@
     <module>statesystem</module>
     <module>tmf</module>
     <module>universal-analyses</module>
-
-    <module>org.eclipse.tracecompass.examples</module>
   </modules>
 
     <build>
