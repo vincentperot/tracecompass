@@ -376,7 +376,7 @@ public class TimeGraphCombo extends Composite {
 
         fSashForm = new SashForm(this, SWT.NONE);
 
-        fTreeViewer = new TreeViewer(fSashForm, SWT.FULL_SELECTION | SWT.H_SCROLL);
+        fTreeViewer = new TreeViewer(fSashForm, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.NO_SCROLL);
         fTreeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
         final Tree tree = fTreeViewer.getTree();
         tree.setHeaderVisible(true);
@@ -393,21 +393,6 @@ public class TimeGraphCombo extends Composite {
 
         fFilterDialog = new TimeGraphFilterDialog(getShell());
 
-        // Feature in Windows. The tree vertical bar reappears when
-        // the control is resized so we need to hide it again.
-        tree.addControlListener(new ControlAdapter() {
-            private int depth = 0;
-            @Override
-            public void controlResized(ControlEvent e) {
-                if (depth == 0) {
-                    depth++;
-                    tree.getVerticalBar().setEnabled(false);
-                    // this can trigger controlResized recursively
-                    tree.getVerticalBar().setVisible(false);
-                    depth--;
-                }
-            }
-        });
         // Bug in Linux. The tree header height is 0 in constructor,
         // so we need to reset it later when the control is painted.
         // This work around used to be done on control resized but the header
@@ -889,8 +874,6 @@ public class TimeGraphCombo extends Composite {
             listenerWrapper.selection = null;
         }
         fInhibitTreeSelection = false;
-        fTreeViewer.getTree().getVerticalBar().setEnabled(false);
-        fTreeViewer.getTree().getVerticalBar().setVisible(false);
         fTimeGraphViewer.setItemHeight(getItemHeight(fTreeViewer.getTree()));
         fTimeGraphViewer.setInput(input);
         // queue the alignment update because in Linux the item bounds are not
