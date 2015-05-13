@@ -16,6 +16,8 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.histogram;
 
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
@@ -37,7 +39,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
@@ -50,10 +51,11 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfTimestampFormatUpdateSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampDelta;
-import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampFormat;
 import org.eclipse.tracecompass.tmf.ui.signal.TmfTimeViewAlignmentSignal;
 import org.eclipse.tracecompass.tmf.ui.views.ITmfTimeAligned;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphColorScheme;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphScale;
 
 /**
  * Re-usable histogram widget.
@@ -67,7 +69,8 @@ import org.eclipse.tracecompass.tmf.ui.views.TmfView;
  * </ul>
  * The widget also has 1 'marker' to identify:
  * <ul>
- * <li>a blue dashed line over the bar that contains the currently selected event
+ * <li>a blue dashed line over the bar that contains the currently selected
+ * event
  * </ul>
  * Clicking on the histogram will select the current event at the mouse
  * location.
@@ -163,9 +166,6 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
 
     // Histogram text fields
     private Label fMaxNbEventsLabel;
-    private Label fMinNbEventsLabel;
-    private Label fTimeRangeStartLabel;
-    private Label fTimeRangeEndLabel;
 
     /**
      * Histogram drawing area
@@ -224,8 +224,9 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
      */
     static boolean showTraces = true;
 
-
     private boolean fSendTimeAlignSignals = false;
+
+    private TimeGraphScale fTimegraphScale;
 
     // ------------------------------------------------------------------------
     // Construction
@@ -269,6 +270,7 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
         fCanvas.addMouseTrackListener(this);
         fCanvas.addMouseMoveListener(this);
 
+        fTimegraphScale = new TimeGraphScale(parent, new TimeGraphColorScheme());
         TmfSignalManager.register(this);
     }
 
@@ -291,14 +293,12 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
 
         fFont = adjustFont(parent);
 
-        final int initalWidth = 10;
-
         // --------------------------------------------------------------------
         // Define the histogram
         // --------------------------------------------------------------------
 
         final GridLayout gridLayout = new GridLayout();
-        gridLayout.numColumns = 3;
+        gridLayout.numColumns = 2;
         gridLayout.marginHeight = 0;
         gridLayout.marginWidth = 0;
         gridLayout.marginTop = 0;
@@ -328,17 +328,8 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
 
         // Histogram itself
         canvasComposite = new Composite(composite, SWT.BORDER);
-        gridData = new GridData();
-        gridData.horizontalSpan = 2;
-        gridData.verticalSpan = 2;
-        gridData.horizontalAlignment = SWT.FILL;
-        gridData.verticalAlignment = SWT.FILL;
-        gridData.heightHint = 0;
-        gridData.widthHint = 0;
-        gridData.grabExcessHorizontalSpace = true;
-        gridData.grabExcessVerticalSpace = true;
-        canvasComposite.setLayoutData(gridData);
-        canvasComposite.setLayout(new FillLayout());
+        canvasComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+        canvasComposite.setLayout(GridLayoutFactory.fillDefaults().create());
         fCanvas = new Canvas(canvasComposite, SWT.DOUBLE_BUFFERED);
         fCanvas.addDisposeListener(new DisposeListener() {
             @Override
@@ -349,38 +340,13 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
                 }
             }
         });
+        fCanvas.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 
-        // Y-axis min event (always 0...)
-        gridData = new GridData();
-        gridData.horizontalAlignment = SWT.RIGHT;
-        gridData.verticalAlignment = SWT.BOTTOM;
-        fMinNbEventsLabel = new Label(composite, SWT.RIGHT);
-        fMinNbEventsLabel.setFont(fFont);
-        fMinNbEventsLabel.setText("0"); //$NON-NLS-1$
-        fMinNbEventsLabel.setLayoutData(gridData);
-
-        // Dummy cell
-        gridData = new GridData(initalWidth, SWT.DEFAULT);
-        gridData.horizontalAlignment = SWT.RIGHT;
-        gridData.verticalAlignment = SWT.BOTTOM;
-        final Label dummyLabel = new Label(composite, SWT.NONE);
-        dummyLabel.setLayoutData(gridData);
-
-        // Window range start time
-        gridData = new GridData();
-        gridData.horizontalAlignment = SWT.LEFT;
-        gridData.verticalAlignment = SWT.BOTTOM;
-        fTimeRangeStartLabel = new Label(composite, SWT.NONE);
-        fTimeRangeStartLabel.setFont(fFont);
-        fTimeRangeStartLabel.setLayoutData(gridData);
-
-        // Window range end time
-        gridData = new GridData();
-        gridData.horizontalAlignment = SWT.RIGHT;
-        gridData.verticalAlignment = SWT.BOTTOM;
-        fTimeRangeEndLabel = new Label(composite, SWT.NONE);
-        fTimeRangeEndLabel.setFont(fFont);
-        fTimeRangeEndLabel.setLayoutData(gridData);
+        fTimegraphScale = new TimeGraphScale(canvasComposite, new TimeGraphColorScheme());
+        fTimegraphScale.setLayout(GridLayoutFactory.fillDefaults().create());
+        fTimegraphScale.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+        fTimegraphScale.setHeight(22);
+        fTimegraphScale.setTimeProvider(fDataModel);
 
         return composite;
     }
@@ -716,6 +682,7 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
             long end = fSelectionBegin;
             fSelectionBegin = fSelectionEnd;
             fSelectionEnd = end;
+            fDataModel.setSelectionRange(fSelectionBegin, fSelectionEnd);
         }
         ((HistogramView) fParentView).updateSelectionTime(fSelectionBegin, fSelectionEnd);
     }
@@ -725,11 +692,9 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
      */
     private void updateRangeTextControls() {
         if (fDataModel.getStartTime() < fDataModel.getEndTime()) {
-            fTimeRangeStartLabel.setText(TmfTimestampFormat.getDefaulTimeFormat().format(fDataModel.getStartTime()));
-            fTimeRangeEndLabel.setText(TmfTimestampFormat.getDefaulTimeFormat().format(fDataModel.getEndTime()));
+            fTimegraphScale.setTimeProvider(fDataModel);
         } else {
-            fTimeRangeStartLabel.setText(""); //$NON-NLS-1$
-            fTimeRangeEndLabel.setText(""); //$NON-NLS-1$
+            fTimegraphScale.setTimeProvider(null);
         }
     }
 
@@ -768,6 +733,7 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
         formatImage(imageGC, image);
         event.gc.drawImage(image, 0, 0);
         imageGC.dispose();
+        fTimegraphScale.redraw();
     }
 
     private void formatImage(final GC imageGC, final Image image) {
@@ -908,9 +874,9 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
     }
 
     /**
-     * Get the offset of the point area, relative to the histogram canvas
-     * We consider the point area to be from where the first point could
-     * be drawn to where the last point could be drawn.
+     * Get the offset of the point area, relative to the histogram canvas We
+     * consider the point area to be from where the first point could be drawn
+     * to where the last point could be drawn.
      *
      * @return the offset in pixels
      *

@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.ITimeDataProvider;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeFormat;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -74,7 +76,7 @@ import com.google.common.collect.FluentIterable;
  * @version 2.0
  * @author Francois Chouinard
  */
-public class HistogramDataModel implements IHistogramDataModel {
+public class HistogramDataModel implements IHistogramDataModel, ITimeDataProvider {
 
     // ------------------------------------------------------------------------
     // Constants
@@ -340,6 +342,7 @@ public class HistogramDataModel implements IHistogramDataModel {
      *
      * @return the time of the last used bucket
      */
+    @Override
     public long getEndTime() {
         return fEndTime;
     }
@@ -349,6 +352,7 @@ public class HistogramDataModel implements IHistogramDataModel {
      *
      * @return the begin time of the current selection.
      */
+    @Override
     public long getSelectionBegin() {
         return fSelectionBegin;
     }
@@ -358,6 +362,7 @@ public class HistogramDataModel implements IHistogramDataModel {
      *
      * @return the end time of the current selection.
      */
+    @Override
     public long getSelectionEnd() {
         return fSelectionEnd;
     }
@@ -733,4 +738,150 @@ public class HistogramDataModel implements IHistogramDataModel {
         }
         return offset;
     }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setSelectionRangeNotify(long beginTime, long endTime) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setSelectionRange(long beginTime, long endTime) {
+        fSelectionBegin = beginTime;
+        fSelectionEnd = endTime;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public long getBeginTime() {
+        return getFirstBucketTime();
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public long getMinTime() {
+        return fFirstBucketTime;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public long getMaxTime() {
+        return fEndTime;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public long getTime0() {
+        return fFirstBucketTime;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public long getTime1() {
+        return fEndTime;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public long getMinTimeInterval() {
+        return fBucketDuration;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setStartFinishTimeNotify(long time0, long time1) {
+
+    }
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setStartFinishTime(long time0, long time1) {
+
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void notifyStartFinishTime() {
+
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setSelectedTimeNotify(long time, boolean ensureVisible) {
+
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setSelectedTime(long time, boolean ensureVisible) {
+
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void resetStartFinishTime() {
+
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public int getNameSpace() {
+        return 0;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setNameSpace(int width) {
+
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public int getTimeSpace() {
+        return 0;
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public TimeFormat getTimeFormat() {
+        return TimeFormat.CALENDAR;
+    }
+
 }
