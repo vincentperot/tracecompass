@@ -189,7 +189,7 @@ public class CpuUsageXYViewer extends TmfCommonXLineChartViewer {
                 if (monitor.isCanceled()) {
                     return;
                 }
-                updateDisplay();
+                updateDisplay(start, end);
             }
         } catch (StateValueTypeException e) {
             Activator.getDefault().logError("Error updating the data of the CPU usage view", e); //$NON-NLS-1$
@@ -207,7 +207,7 @@ public class CpuUsageXYViewer extends TmfCommonXLineChartViewer {
         cancelUpdate();
         deleteSeries(Long.toString(fSelectedThread));
         fSelectedThread = tid;
-        updateContent();
+        updateContent(getWindowStartTime(), getWindowEndTime());
     }
 
 }

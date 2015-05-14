@@ -140,16 +140,20 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
     private class UpdateThread extends Thread {
         private final IProgressMonitor fMonitor;
         private final int fNumRequests;
+        private final long fStart;
+        private final long fEnd;
 
-        public UpdateThread(int numRequests) {
+        public UpdateThread(int numRequests, long start, long end) {
             super("Line chart update"); //$NON-NLS-1$
             fNumRequests = numRequests;
+            fStart = start;
+            fEnd = end;
             fMonitor = new NullProgressMonitor();
         }
 
         @Override
         public void run() {
-            updateData(getWindowStartTime(), getWindowEndTime(), fNumRequests, fMonitor);
+            updateData(fStart, fEnd, fNumRequests, fMonitor);
             updateThreadFinished(this);
         }
 
@@ -158,10 +162,10 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
         }
     }
 
-    private synchronized void newUpdateThread() {
+    private synchronized void newUpdateThread(final long start, final long end) {
         cancelUpdate();
         final int numRequests = (int) (getSwtChart().getPlotArea().getBounds().width * fResolution);
-        fUpdateThread = new UpdateThread(numRequests);
+        fUpdateThread = new UpdateThread(numRequests, start, end);
         fUpdateThread.start();
     }
 
@@ -184,11 +188,11 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
     }
 
     @Override
-    protected void updateContent() {
+    protected void updateContent(final long start, final long end) {
         getDisplay().asyncExec(new Runnable() {
             @Override
             public void run() {
-                newUpdateThread();
+                newUpdateThread(start, end);
             }
         });
     }
@@ -246,7 +250,7 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
      * {@link TmfCommonXLineChartViewer#setSeries(String, double[])}.
      *
      * This method is responsible for calling the
-     * {@link TmfCommonXLineChartViewer#updateDisplay()} when needed for the new
+     * {@link TmfCommonXLineChartViewer#updateDisplay(long, long)} when needed for the new
      * values to be displayed.
      *
      * @param start
@@ -317,8 +321,14 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
 
     /**
      * Update the chart's values before refreshing the viewer
+     *
+     * @param windowStartTime
+     *            the start time of the window range to update
+     * @param windowEndTime
+     *            the end time of the window range to update
+     * @since 1.0
      */
-    protected void updateDisplay() {
+    protected void updateDisplay(final long windowStartTime, final long windowEndTime) {
         Display.getDefault().asyncExec(new Runnable() {
             final TmfChartTimeStampFormat tmfChartTimeStampFormat = new TmfChartTimeStampFormat(getTimeOffset());
 
@@ -333,6 +343,8 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
                             series = addSeries(entry.getKey());
                         }
                         series.setXSeries(fXValues);
+                        // Set the window range here to have matching fXValues and window range
+                        setWindowRange(windowStartTime, windowEndTime);
                         /* Find the minimal and maximum values in this series */
                         for (double value : entry.getValue()) {
                             maxy = Math.max(maxy, value);

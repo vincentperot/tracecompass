@@ -20,6 +20,8 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTimestampFormatUpdateSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfTimeViewer;
 import org.swtchart.Chart;
@@ -263,7 +265,7 @@ public abstract class TmfXYChartViewer extends TmfTimeViewer implements ITmfChar
     public void loadTrace(ITmfTrace trace) {
         super.loadTrace(trace);
         clearContent();
-        updateContent();
+        updateContent(getWindowStartTime(), getWindowEndTime());
     }
 
     /**
@@ -277,8 +279,14 @@ public abstract class TmfXYChartViewer extends TmfTimeViewer implements ITmfChar
 
     /**
      * Method to implement to update the chart content.
+     *
+     *  @param windowStartTime
+     *            the start time of the window range to update
+     *  @param windowEndTime
+     *            the end time of the window range to update
+     * @since 1.0
      */
-    protected abstract void updateContent();
+    protected abstract void updateContent(long windowStartTime, long windowEndTime);
 
     // ------------------------------------------------------------------------
     // Signal Handler
@@ -310,8 +318,20 @@ public abstract class TmfXYChartViewer extends TmfTimeViewer implements ITmfChar
     @Override
     @TmfSignalHandler
     public void windowRangeUpdated(TmfWindowRangeUpdatedSignal signal) {
-        super.windowRangeUpdated(signal);
-        updateContent();
+        ITmfTrace trace = getTrace();
+        if (trace != null) {
+            // Validate the time range
+            TmfTimeRange range = signal.getCurrentRange().getIntersection(trace.getTimeRange());
+            if (range == null) {
+                return;
+            }
+
+            // Update the time range
+            long windowStartTime = range.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+            long windowEndTime = range.getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+
+            updateContent(windowStartTime, windowEndTime);
+        }
     }
 
     /**

@@ -80,7 +80,7 @@ public abstract class TmfBarChartViewer extends TmfXYChartViewer {
     // Operations
     // ------------------------------------------------------------------------
     @Override
-    protected void updateContent() {
+    protected void updateContent(final long start, final long end) {
 
         getDisplay().asyncExec(new Runnable() {
 
@@ -94,7 +94,7 @@ public abstract class TmfBarChartViewer extends TmfXYChartViewer {
                     if (series == null) {
                         series = initSeries(seriesNames.get(i), colors.get(i));
                     }
-                    readData(series, getWindowStartTime(), getWindowEndTime(), numRequests);
+                    readData(series, start, end, numRequests);
                 }
             }
         });
@@ -134,8 +134,13 @@ public abstract class TmfBarChartViewer extends TmfXYChartViewer {
      *            {@link #getTimeOffset()}.
      * @param y
      *            The Y values that were computed by the extended class
+     * @param windowStartTime
+     *            the start time of the window range to update
+     * @param windowEndTime
+     *            the end time of the window range to update
+     * @since 1.0
      */
-    protected void drawChart(final ISeries series, final double[] x, final double[] y) {
+    protected void drawChart(final ISeries series, final double[] x, final double[] y, final long windowStartTime, final long windowEndTime) {
         // Run in GUI thread to make sure that chart is ready after restart
         final Display display = getDisplay();
         if (display.isDisposed()) {
@@ -152,6 +157,8 @@ public abstract class TmfBarChartViewer extends TmfXYChartViewer {
                 IAxisTick xTick = swtChart.getAxisSet().getXAxis(0).getTick();
                 xTick.setFormat(new TmfChartTimeStampFormat(getTimeOffset()));
                 series.setXSeries(x);
+                /* Set the window range here to have matching fXValues and window range */
+                setWindowRange(windowStartTime, windowEndTime);
                 series.setYSeries(y);
                 xTick.setTickMarkStepHint(256);
 

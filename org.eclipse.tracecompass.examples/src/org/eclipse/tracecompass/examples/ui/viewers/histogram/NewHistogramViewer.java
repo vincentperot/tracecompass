@@ -105,7 +105,7 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                     }
 
                     /* Update the viewer */
-                    drawChart(series, x, y);
+                    drawChart(series, x, y, start, end);
                 }
             };
             thread.start();

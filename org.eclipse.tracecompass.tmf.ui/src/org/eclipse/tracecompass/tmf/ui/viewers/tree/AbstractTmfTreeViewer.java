@@ -39,6 +39,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
+import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -492,8 +494,20 @@ public abstract class AbstractTmfTreeViewer extends TmfTimeViewer {
     @Override
     @TmfSignalHandler
     public void windowRangeUpdated(TmfWindowRangeUpdatedSignal signal) {
-        super.windowRangeUpdated(signal);
-        updateContent(this.getWindowStartTime(), this.getWindowEndTime(), false);
+        ITmfTrace trace = getTrace();
+        if (trace != null) {
+            // Validate the time range
+            TmfTimeRange range = signal.getCurrentRange().getIntersection(trace.getTimeRange());
+            if (range == null) {
+                return;
+            }
+
+            // Update the time range
+            long windowStartTime = range.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+            long windowEndTime = range.getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+
+            updateContent(windowStartTime, windowEndTime, false);
+        }
     }
 
     @Override
