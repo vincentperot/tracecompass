@@ -223,13 +223,10 @@ public abstract class TmfTimeViewer extends TmfViewer implements ITmfTimeProvide
 
     @Override
     public void updateWindow(long windowStartTime, long windowEndTime) {
-
-        setWindowRange(windowStartTime, windowEndTime);
-
         // Build the new time range; keep the current time
         TmfTimeRange timeRange = new TmfTimeRange(
-                new TmfTimestamp(getWindowStartTime(), ITmfTimestamp.NANOSECOND_SCALE),
-                new TmfTimestamp(getWindowEndTime(), ITmfTimestamp.NANOSECOND_SCALE));
+                new TmfTimestamp(windowStartTime, ITmfTimestamp.NANOSECOND_SCALE),
+                new TmfTimestamp(windowEndTime, ITmfTimestamp.NANOSECOND_SCALE));
 
         // Send the signal
         TmfWindowRangeUpdatedSignal signal = new TmfWindowRangeUpdatedSignal(this, timeRange);
@@ -350,7 +347,6 @@ public abstract class TmfTimeViewer extends TmfViewer implements ITmfTimeProvide
      */
     @TmfSignalHandler
     public void windowRangeUpdated(TmfWindowRangeUpdatedSignal signal) {
-
         if (fTrace != null) {
             // Validate the time range
             TmfTimeRange range = signal.getCurrentRange().getIntersection(fTrace.getTimeRange());
@@ -358,13 +354,11 @@ public abstract class TmfTimeViewer extends TmfViewer implements ITmfTimeProvide
                 return;
             }
 
-            if (signal.getSource() != this) {
-                // Update the time range
-                long windowStartTime = range.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
-                long windowEndTime = range.getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+            // Update the time range
+            long windowStartTime = range.getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
+            long windowEndTime = range.getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
 
-                setWindowRange(windowStartTime, windowEndTime);
-            }
+            setWindowRange(windowStartTime, windowEndTime);
         }
     }
 

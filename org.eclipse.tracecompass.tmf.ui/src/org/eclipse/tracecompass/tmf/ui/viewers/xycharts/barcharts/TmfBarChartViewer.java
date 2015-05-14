@@ -80,7 +80,7 @@ public abstract class TmfBarChartViewer extends TmfXYChartViewer {
     // Operations
     // ------------------------------------------------------------------------
     @Override
-    protected void updateContent() {
+    protected void updateContent(final long start, final long end) {
 
         getDisplay().asyncExec(new Runnable() {
 
@@ -94,7 +94,7 @@ public abstract class TmfBarChartViewer extends TmfXYChartViewer {
                     if (series == null) {
                         series = initSeries(seriesNames.get(i), colors.get(i));
                     }
-                    readData(series, getWindowStartTime(), getWindowEndTime(), numRequests);
+                    readData(series, start, end, numRequests);
                 }
             }
         });

@@ -303,7 +303,7 @@ public class XmlXYViewer extends TmfCommonXLineChartViewer {
                 for (int quark : quarks) {
                     setSeries(fSeriesData.get(quark).getSeriesName(), fSeriesData.get(quark).getYValues());
                 }
-                updateDisplay();
+                updateDisplay(start, end);
             } catch (AttributeNotFoundException | StateValueTypeException e) {
                 Activator.logError("Error updating the data of XML XY view", e); //$NON-NLS-1$
             } catch (StateSystemDisposedException e) {

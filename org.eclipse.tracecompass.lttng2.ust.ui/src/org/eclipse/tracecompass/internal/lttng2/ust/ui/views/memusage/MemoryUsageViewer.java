@@ -151,7 +151,7 @@ public class MemoryUsageViewer extends TmfCommonXLineChartViewer {
                 for (int quark : tidQuarks) {
                     setSeries(fSeriesName.get(quark), fYValues.get(quark));
                 }
-                updateDisplay();
+                updateDisplay(start, end);
             }
         } catch (AttributeNotFoundException | StateValueTypeException e) {
             Activator.logError("Error updating the data of the Memory usage view", e); //$NON-NLS-1$
