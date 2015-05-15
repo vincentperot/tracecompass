@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Geneviève Bastien - Initial API and implementation
+ *   Patrick Tasse - Fix setFocus
  *******************************************************************************/
 
 package org.eclipse.tracecompass.analysis.os.linux.ui.views.cpuusage;
@@ -147,6 +148,7 @@ public class CpuUsageView extends TmfView implements ITmfTimeAligned {
 
     @Override
     public void setFocus() {
+        fXYViewer.getControl().setFocus();
     }
 
     @Override
