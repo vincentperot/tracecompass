@@ -161,7 +161,7 @@ public class StructDeclaration extends Declaration {
             String fieldName, BitBuffer input) throws CTFException {
         alignRead(input);
         final Definition[] myFields = new Definition[fFieldMap.size()];
-        StructDefinition structDefinition = new StructDefinition(this, definitionScope, fieldName, fFieldMap.keySet(), myFields);
+        StructDefinition structDefinition = new StructDefinition(this, definitionScope, fieldName, myFields);
         fillStruct(input, myFields, structDefinition);
         return structDefinition;
     }
