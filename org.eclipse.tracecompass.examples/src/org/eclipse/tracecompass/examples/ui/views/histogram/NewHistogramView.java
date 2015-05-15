@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Bernd Hufmann - Initial API and implementation
+ *   Patrick Tasse - Fix setFocus
  *******************************************************************************/
 package org.eclipse.tracecompass.examples.ui.views.histogram;
 
@@ -30,10 +31,6 @@ public class NewHistogramView extends TmfChartView {
      */
     public NewHistogramView() {
         super(ID);
-    }
-
-    @Override
-    public void setFocus() {
     }
 
     @Override

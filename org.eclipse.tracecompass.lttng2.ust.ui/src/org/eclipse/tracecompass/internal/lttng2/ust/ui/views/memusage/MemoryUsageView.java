@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2014 Ericsson
+ * Copyright (c) 2014, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Matthew Khouzam - Initial API and implementation
+ *   Patrick Tasse - Fix setFocus
  **********************************************************************/
 
 package org.eclipse.tracecompass.internal.lttng2.ust.ui.views.memusage;
@@ -31,10 +32,6 @@ public class MemoryUsageView extends TmfChartView {
      */
     public MemoryUsageView() {
         super(Messages.MemoryUsageView_Title);
-    }
-
-    @Override
-    public void setFocus() {
     }
 
     @Override

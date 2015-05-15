@@ -1,5 +1,5 @@
 /**********************************************************************
- * Copyright (c) 2013, 2014 Ericsson
+ * Copyright (c) 2013, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *   Bernd Hufmann - Initial API and implementation
+ *   Patrick Tasse - Fix setFocus
  **********************************************************************/
 package org.eclipse.tracecompass.tmf.ui.views;
 
@@ -162,6 +163,11 @@ public abstract class TmfChartView extends TmfView implements ITmfTimeAligned {
         if (fChartViewer != null) {
             fChartViewer.dispose();
         }
+    }
+
+    @Override
+    public void setFocus() {
+        fChartViewer.getControl().setFocus();
     }
 
     /**
