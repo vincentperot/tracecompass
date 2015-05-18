@@ -49,6 +49,7 @@ import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
 import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.ArrayDefinition;
+import org.eclipse.tracecompass.internal.ctf.core.trace.Utils;
 
 /**
  * A CTF trace on the file system.
