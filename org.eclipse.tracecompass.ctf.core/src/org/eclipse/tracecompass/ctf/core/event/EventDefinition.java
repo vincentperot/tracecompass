@@ -206,10 +206,8 @@ public final class EventDefinition implements IDefinitionScope {
                 fieldValues.add(definition);
             }
         }
-        fieldNames = builder.build();
-        StructDefinition mergedContext = new StructDefinition(mergedDeclaration, this, "context", //$NON-NLS-1$
+        return new StructDefinition(mergedDeclaration, this, "context", //$NON-NLS-1$
                 fieldValues.toArray(new Definition[fieldValues.size()]));
-        return mergedContext;
     }
 
     /**
@@ -270,15 +268,14 @@ public final class EventDefinition implements IDefinitionScope {
         StringBuilder retString = new StringBuilder();
         final String cr = System.getProperty("line.separator");//$NON-NLS-1$
 
-        retString.append("Event type: " + fDeclaration.getName() + cr); //$NON-NLS-1$
-        retString.append("Timestamp: " + Long.toString(fTimestamp) + cr); //$NON-NLS-1$
+        retString.append("Event type: ").append(fDeclaration.getName()).append(cr); //$NON-NLS-1$
+        retString.append("Timestamp: ").append(Long.toString(fTimestamp)).append(cr); //$NON-NLS-1$
 
         if (fEventContext != null) {
             list = fEventContext.getFieldNames();
 
             for (String field : list) {
-                retString.append(field
-                        + " : " + fEventContext.getDefinition(field).toString() + cr); //$NON-NLS-1$
+                retString.append(field).append(" : ").append(fEventContext.getDefinition(field).toString()).append(cr); //$NON-NLS-1$
             }
         }
 
@@ -286,8 +283,7 @@ public final class EventDefinition implements IDefinitionScope {
             list = fFields.getFieldNames();
 
             for (String field : list) {
-                retString.append(field
-                        + " : " + fFields.getDefinition(field).toString() + cr); //$NON-NLS-1$
+                retString.append(field).append(" : ").append(fFields.getDefinition(field).toString()).append(cr); //$NON-NLS-1$
             }
         }
 
