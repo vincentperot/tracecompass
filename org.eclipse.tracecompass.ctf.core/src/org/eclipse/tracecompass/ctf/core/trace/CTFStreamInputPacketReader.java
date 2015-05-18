@@ -311,11 +311,11 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
     public EventDefinition readNextEvent() throws CTFException {
         /* Default values for those fields */
         // compromise since we cannot have 64 bit addressing of arrays yet.
-        int eventID = (int) EventDeclaration.UNSET_EVENT_ID;
+        int eventID = (int) IEventDeclaration.UNSET_EVENT_ID;
         long timestamp = 0;
         if (fHasLost) {
             fHasLost = false;
-            EventDeclaration lostEventDeclaration = EventDeclaration.getLostEventDeclaration();
+            IEventDeclaration lostEventDeclaration = EventDeclaration.getLostEventDeclaration();
             StructDeclaration lostFields = lostEventDeclaration.getFields();
             // this is a hard coded map, we know it's not null
             IntegerDeclaration lostFieldsDecl = (IntegerDeclaration) lostFields.getField(CTFStrings.LOST_EVENTS_FIELD);
