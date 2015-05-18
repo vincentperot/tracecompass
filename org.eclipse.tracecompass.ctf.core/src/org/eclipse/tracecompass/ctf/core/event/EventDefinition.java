@@ -24,7 +24,6 @@ import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
-import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -42,7 +41,7 @@ public final class EventDefinition implements IDefinitionScope {
      * A null event, can be used for testing or poison pilling
      */
     @NonNull
-    public static final EventDefinition NULL_EVENT = new EventDefinition(new EventDeclaration(), null, -1L, null, null, null, null);
+    public static final EventDefinition NULL_EVENT = new EventDefinition(null, null, -1L, null, null, null, null);
 
     /**
      * The corresponding event declaration.
