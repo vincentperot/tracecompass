@@ -33,12 +33,6 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
  */
 public class EventDeclaration implements IEventDeclaration {
 
-    /** Id of lost events */
-    public static final long LOST_EVENT_ID = -1L;
-
-    /** Id of events when not set */
-    public static final long UNSET_EVENT_ID = -2L;
-
     // ------------------------------------------------------------------------
     // Attributes
     // ------------------------------------------------------------------------

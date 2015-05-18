@@ -28,8 +28,11 @@ import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
  */
 public interface IEventDeclaration {
 
-    /** Id of events when not set
-     * @since 1.0*/
+    /**
+     * Id of events when not set
+     *
+     * @since 1.0
+     */
     public static final long UNSET_EVENT_ID = -2L;
 
     /**
