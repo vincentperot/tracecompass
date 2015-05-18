@@ -14,8 +14,11 @@ package org.eclipse.tracecompass.ctf.core.event;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.ctf.core.CTFException;
+import org.eclipse.tracecompass.ctf.core.event.io.BitBuffer;
 import org.eclipse.tracecompass.ctf.core.event.scope.IDefinitionScope;
 import org.eclipse.tracecompass.ctf.core.event.scope.ILexicalScope;
 import org.eclipse.tracecompass.ctf.core.event.scope.LexicalScope;
@@ -23,8 +26,8 @@ import org.eclipse.tracecompass.ctf.core.event.types.Definition;
 import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
+import org.eclipse.tracecompass.ctf.core.trace.CTFStream;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
-import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -34,6 +37,53 @@ import com.google.common.collect.ImmutableList.Builder;
  */
 public final class EventDefinition implements IDefinitionScope {
 
+    private static final class NullEventDeclaration implements IEventDeclaration {
+        @Override
+        public CTFStream getStream() {
+            return null;
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public long getLogLevel() {
+            return 0;
+        }
+
+        @Override
+        public Long getId() {
+            return null;
+        }
+
+        @Override
+        public StructDeclaration getFields() {
+            return null;
+        }
+
+        @Override
+        public Set<String> getCustomAttributes() {
+            return null;
+        }
+
+        @Override
+        public String getCustomAttribute(String key) {
+            return null;
+        }
+
+        @Override
+        public StructDeclaration getContext() {
+            return null;
+        }
+
+        @Override
+        public EventDefinition createDefinition(CTFStreamInputReader streamInputReader, BitBuffer input, long timestamp) throws CTFException {
+            return null;
+        }
+    }
+
     // ------------------------------------------------------------------------
     // Attributes
     // ------------------------------------------------------------------------
@@ -42,7 +92,7 @@ public final class EventDefinition implements IDefinitionScope {
      * A null event, can be used for testing or poison pilling
      */
     @NonNull
-    public static final EventDefinition NULL_EVENT = new EventDefinition(new EventDeclaration(), null, -1L, null, null, null, null);
+    public static final EventDefinition NULL_EVENT = new EventDefinition(new NullEventDeclaration(), null, -1L, null, null, null, null);
 
     /**
      * The corresponding event declaration.
