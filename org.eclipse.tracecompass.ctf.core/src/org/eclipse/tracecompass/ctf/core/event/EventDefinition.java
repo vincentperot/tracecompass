@@ -25,9 +25,6 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.CTFStreamInputReader;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
-
 /**
  * Representation of a particular instance of an event.
  */
@@ -179,18 +176,16 @@ public final class EventDefinition implements IDefinitionScope {
         /* The stream context and event context are assigned. */
         StructDeclaration mergedDeclaration = new StructDeclaration(1);
 
-        Builder<String> builder = ImmutableList.<String> builder();
         List<Definition> fieldValues = new ArrayList<>();
 
         /* Add fields from the stream */
-        for (String fieldName : fStreamContext.getFieldNames()) {
+        List<String> fieldNames = fStreamContext.getFieldNames();
+        for (String fieldName : fieldNames) {
             Definition definition = fStreamContext.getDefinition(fieldName);
             mergedDeclaration.addField(fieldName, definition.getDeclaration());
-            builder.add(fieldName);
             fieldValues.add(definition);
         }
 
-        ImmutableList<String> fieldNames = builder.build();
         /*
          * Add fields from the event context, overwrite the stream ones if
          * needed.
@@ -201,7 +196,6 @@ public final class EventDefinition implements IDefinitionScope {
             if (fieldNames.contains(fieldName)) {
                 fieldValues.set((fieldNames.indexOf(fieldName)), definition);
             } else {
-                builder.add(fieldName);
                 fieldValues.add(definition);
             }
         }
