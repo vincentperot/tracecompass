@@ -584,15 +584,18 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
             }
             break;
 
-        case SWT.ARROW_RIGHT:
+        case SWT.ARROW_RIGHT: {
+            long prevTime = getTimestamp(fScaledData.fSelectionBeginBucket);
             index = Math.max(0, fScaledData.fSelectionBeginBucket + 1);
-            while (index < fScaledData.fWidth && fScaledData.fData[index].isEmpty()) {
+            while (index < fScaledData.fWidth && (fScaledData.fData[index].isEmpty() || prevTime == getTimestamp(index))) {
                 index++;
             }
-            if (index < fScaledData.fLastBucket) {
-                fScaledData.fSelectionBeginBucket = index;
+            if (index >= fScaledData.fLastBucket) {
+                index = fScaledData.fLastBucket;
             }
+            fScaledData.fSelectionBeginBucket = index;
             break;
+        }
 
         case SWT.END:
             index = fScaledData.fLastBucket;
@@ -604,15 +607,18 @@ public abstract class Histogram implements ControlListener, PaintListener, KeyLi
             }
             break;
 
-        case SWT.ARROW_LEFT:
+        case SWT.ARROW_LEFT: {
+            long prevTime = getTimestamp(fScaledData.fSelectionBeginBucket);
             index = Math.min(fScaledData.fLastBucket - 1, fScaledData.fSelectionBeginBucket - 1);
-            while (index >= 0 && fScaledData.fData[index].isEmpty()) {
+            while (index >= 0 && (fScaledData.fData[index].isEmpty() || prevTime == getTimestamp(index))) {
                 index--;
             }
-            if (index >= 0) {
-                fScaledData.fSelectionBeginBucket = index;
+            if (index <= 0) {
+                index = 0;
             }
+            fScaledData.fSelectionBeginBucket = index;
             break;
+        }
 
         default:
             return;
