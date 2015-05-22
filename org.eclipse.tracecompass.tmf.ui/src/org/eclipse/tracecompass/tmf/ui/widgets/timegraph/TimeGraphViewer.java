@@ -168,12 +168,14 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
                             return;
                         }
                         if (fSelectionChanged) {
+                            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::ListenerNotifier.run() calling fireSelectionChanged("+fSelectedEntry.getName()+")");
                             fireSelectionChanged(fSelectedEntry);
                         }
                         if (fTimeRangeUpdated) {
                             fireTimeRangeUpdated(fTime0, fTime1);
                         }
                         if (fTimeSelected) {
+                            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::ListenerNotifier.run() calling fireTimeSelected("+fSelectionBegin+","+fSelectionEnd+")");
                             fireTimeSelected(fSelectionBegin, fSelectionEnd);
                         }
                     }
@@ -182,6 +184,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
         }
 
         public void selectionChanged() {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::ListenerNotifier.selectionChanged()");
             fSelectionChanged = true;
             fLastUpdateTime = System.currentTimeMillis();
         }
@@ -192,6 +195,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
         }
 
         public void timeSelected() {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::ListenerNotifier.timeSelected()");
             fTimeSelected = true;
             fLastUpdateTime = System.currentTimeMillis();
         }
@@ -806,6 +810,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     }
 
     private void setSelectedTimeInt(long time, boolean ensureVisible, boolean doNotify) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelectedTimeInt calling setSelectedTimeNotify("+time+","+ensureVisible+","+doNotify+")");
         long time0 = fTime0;
         long time1 = fTime1;
         if (ensureVisible) {
@@ -823,6 +828,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
         }
 
         if (doNotify && notifySelectedTime) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::setSelectedTimeInt.setSelectedTimeInt calling notifyTimeListeners");
             notifyTimeListeners();
         }
     }
@@ -1103,6 +1109,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
      *            The trace that was selected
      */
     public void setSelection(ITimeGraphEntry trace) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelection("+trace+")");
         fSelectedEntry = trace;
         fTimeGraphCtrl.selectItem(trace, false);
         adjustVerticalScrollBar();
@@ -1724,6 +1731,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
             fFollowArrowFwdAction = new Action() {
                 @Override
                 public void runWithEvent(Event event) {
+                    System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::FollowArrowFwdAction.runWithEvent("+event+")");
                     boolean extend = (event.stateMask & SWT.SHIFT) != 0;
                     fTimeGraphCtrl.followArrowFwd(extend);
                     adjustVerticalScrollBar();
