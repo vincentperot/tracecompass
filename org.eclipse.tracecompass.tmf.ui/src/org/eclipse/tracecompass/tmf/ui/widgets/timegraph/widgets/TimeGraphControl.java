@@ -947,7 +947,9 @@ public class TimeGraphControl extends TimeGraphBaseControl
      */
     public void followArrowFwd(boolean extend) {
         ITimeGraphEntry trace = getSelectedTrace();
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowFwd("+extend+")");
         if (trace == null) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowFwd selected entry is null");
             return;
         }
         long selectedTime = fTimeProvider.getSelectionEnd();
@@ -1165,6 +1167,10 @@ public class TimeGraphControl extends TimeGraphBaseControl
     }
 
     void selectItem(int idx, boolean addSelection) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.selectItem("+idx+","+addSelection+")");
+        if (idx == -1) {
+            new Throwable().printStackTrace();
+        }
         boolean changed = false;
         if (addSelection) {
             if (idx >= 0 && idx < fItemData.fExpandedItems.length) {

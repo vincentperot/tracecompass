@@ -1103,6 +1103,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
      *            The trace that was selected
      */
     public void setSelection(ITimeGraphEntry trace) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelection("+trace+")");
         fSelectedEntry = trace;
         fTimeGraphCtrl.selectItem(trace, false);
         adjustVerticalScrollBar();
@@ -1724,6 +1725,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
             fFollowArrowFwdAction = new Action() {
                 @Override
                 public void runWithEvent(Event event) {
+                    System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::FollowArrowFwdAction.runWithEvent("+event+")");
                     boolean extend = (event.stateMask & SWT.SHIFT) != 0;
                     fTimeGraphCtrl.followArrowFwd(extend);
                     adjustVerticalScrollBar();
