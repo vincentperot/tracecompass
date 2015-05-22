@@ -161,6 +161,7 @@ public final class TmfTraceManager {
             /* There are no traces opened at the moment. */
             return TmfTraceContext.NULL_CONTEXT;
         }
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TmfTraceManager.getCurrentTraceContext for trace "+fCurrentTrace.getName()+" range="+curCtx.getSelectionRange());
         return curCtx;
     }
 
@@ -363,9 +364,11 @@ public final class TmfTraceManager {
     public synchronized void selectionRangeUpdated(final TmfSelectionRangeUpdatedSignal signal) {
         final ITmfTimestamp beginTs = signal.getBeginTime();
         final ITmfTimestamp endTs = signal.getEndTime();
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TmfTraceManager.selectionRangeUpdated("+signal+")");
 
         for (Map.Entry<ITmfTrace, TmfTraceContext> entry : fTraces.entrySet()) {
             final ITmfTrace trace = entry.getKey();
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TmfTraceManager.selectionRangeUpdated valid timerange="+getValidTimeRange(trace));
             if (beginTs.intersects(getValidTimeRange(trace)) || endTs.intersects(getValidTimeRange(trace))) {
                 TmfTraceContext prevCtx = checkNotNull(entry.getValue());
 
@@ -378,6 +381,7 @@ public final class TmfTraceManager {
                         prevCtx.getWindowRange(),
                         prevCtx.getEditorFile(),
                         prevCtx.getFilter());
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TmfTraceManager.selectionRangeUpdated calling setValue("+newCtx+") for trace"+trace.getName());
                 entry.setValue(newCtx);
             }
         }
