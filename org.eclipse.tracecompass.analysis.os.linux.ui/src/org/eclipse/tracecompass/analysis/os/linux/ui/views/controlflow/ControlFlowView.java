@@ -337,6 +337,7 @@ public class ControlFlowView extends AbstractTimeGraphView {
             updateTree(entryList, parentTrace);
 
             if (parentTrace.equals(getTrace())) {
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::ControlFlowView.buildEventList calling refresh()");
                 refresh();
             }
 

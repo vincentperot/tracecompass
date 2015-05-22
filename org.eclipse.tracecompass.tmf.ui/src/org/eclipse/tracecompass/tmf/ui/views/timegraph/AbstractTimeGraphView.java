@@ -884,6 +884,7 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
             public void timeSelected(TimeGraphTimeEvent event) {
                 TmfNanoTimestamp startTime = new TmfNanoTimestamp(event.getBeginTime());
                 TmfNanoTimestamp endTime = new TmfNanoTimestamp(event.getEndTime());
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::"+AbstractTimeGraphView.this.getClass().getSimpleName()+".timeSelected() calling broadcast("+new TmfSelectionRangeUpdatedSignal(AbstractTimeGraphView.this, startTime, endTime)+")");
                 broadcast(new TmfSelectionRangeUpdatedSignal(AbstractTimeGraphView.this, startTime, endTime));
             }
         });
@@ -1193,6 +1194,7 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
                 }
                 fTimeGraphWrapper.getTimeGraphViewer().setTimeBounds(fStartTime, fEndTime);
 
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::"+AbstractTimeGraphView.this.getClass().getSimpleName()+".refresh() calling getCurrentTraceContext()");
                 TmfTraceContext ctx = TmfTraceManager.getInstance().getCurrentTraceContext();
                 long selectionBeginTime = fTrace == null ? 0 : ctx.getSelectionRange().getStartTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
                 long selectionEndTime = fTrace == null ? 0 : ctx.getSelectionRange().getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
@@ -1200,6 +1202,7 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
                 long endTime = fTrace == null ? 0 : ctx.getWindowRange().getEndTime().normalize(0, ITmfTimestamp.NANOSECOND_SCALE).getValue();
                 startTime = Math.max(startTime, fStartTime);
                 endTime = Math.min(endTime, fEndTime);
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::"+AbstractTimeGraphView.this.getClass().getSimpleName()+".refresh() calling setSelectionRange("+selectionBeginTime+","+selectionEndTime+")");
                 fTimeGraphWrapper.getTimeGraphViewer().setSelectionRange(selectionBeginTime, selectionEndTime);
                 fTimeGraphWrapper.getTimeGraphViewer().setStartFinishTime(startTime, endTime);
 
