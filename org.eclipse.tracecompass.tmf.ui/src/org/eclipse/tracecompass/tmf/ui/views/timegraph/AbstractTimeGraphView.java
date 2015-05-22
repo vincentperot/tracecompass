@@ -884,6 +884,7 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
             public void timeSelected(TimeGraphTimeEvent event) {
                 TmfNanoTimestamp startTime = new TmfNanoTimestamp(event.getBeginTime());
                 TmfNanoTimestamp endTime = new TmfNanoTimestamp(event.getEndTime());
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::"+AbstractTimeGraphView.this.getClass().getSimpleName()+".timeSelected() calling broadcast("+new TmfSelectionRangeUpdatedSignal(AbstractTimeGraphView.this, startTime, endTime)+")");
                 broadcast(new TmfSelectionRangeUpdatedSignal(AbstractTimeGraphView.this, startTime, endTime));
             }
         });
