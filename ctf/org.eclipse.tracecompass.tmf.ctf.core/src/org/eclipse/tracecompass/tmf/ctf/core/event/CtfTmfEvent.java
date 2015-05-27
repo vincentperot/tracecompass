@@ -31,11 +31,9 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfModelLookup;
-import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfSourceLookup;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfNanoTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.ctf.core.CtfConstants;
-import org.eclipse.tracecompass.tmf.ctf.core.event.lookup.CtfTmfCallsite;
 import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
 
 /**
@@ -45,7 +43,7 @@ import org.eclipse.tracecompass.tmf.ctf.core.trace.CtfTmfTrace;
  * @author Alexandre Montplaisir
  */
 public class CtfTmfEvent extends TmfEvent
-        implements ITmfSourceLookup, ITmfModelLookup, ITmfCustomAttributes {
+        implements ITmfModelLookup, ITmfCustomAttributes {
 
     // ------------------------------------------------------------------------
     // Constants
@@ -210,29 +208,6 @@ public class CtfTmfEvent extends TmfEvent
             return null;
         }
         return fEventDeclaration.getCustomAttribute(name);
-    }
-
-    /**
-     * Get the call site for this event.
-     *
-     * @return the call site information, or null if there is none
-     */
-    @Override
-    public CtfTmfCallsite getCallsite() {
-        CtfTmfCallsite callsite = null;
-        CtfTmfTrace trace = getTrace();
-
-        if (getContent() != null) {
-            ITmfEventField ipField = getContent().getField(CtfConstants.CONTEXT_FIELD_PREFIX + CtfConstants.IP_KEY);
-            if (ipField != null && ipField.getValue() instanceof Long) {
-                long ip = (Long) ipField.getValue();
-                callsite = trace.getCallsite(fEventName, ip);
-            }
-        }
-        if (callsite == null) {
-            callsite = trace.getCallsite(fEventName);
-        }
-        return callsite;
     }
 
     @Override
