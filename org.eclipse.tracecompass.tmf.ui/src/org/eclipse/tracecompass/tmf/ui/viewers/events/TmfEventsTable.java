@@ -107,6 +107,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
@@ -214,45 +215,6 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
     private static final int EVENT_COLUMNS_START_INDEX = MARGIN_COLUMN_INDEX + 1;
 
     /**
-     * The events table search/filter keys
-     *
-     * @version 1.0
-     * @author Patrick Tasse
-     */
-    public interface Key {
-        /** Search text */
-        String SEARCH_TXT = "$srch_txt"; //$NON-NLS-1$
-
-        /** Search object */
-        String SEARCH_OBJ = "$srch_obj"; //$NON-NLS-1$
-
-        /** Filter text */
-        String FILTER_TXT = "$fltr_txt"; //$NON-NLS-1$
-
-        /** Filter object */
-        String FILTER_OBJ = "$fltr_obj"; //$NON-NLS-1$
-
-        /** Timestamp */
-        String TIMESTAMP = "$time"; //$NON-NLS-1$
-
-        /** Rank */
-        String RANK = "$rank"; //$NON-NLS-1$
-
-        /** Bookmark indicator */
-        String BOOKMARK = "$bookmark"; //$NON-NLS-1$
-
-        /** Event aspect represented by this column */
-        String ASPECT = "$aspect"; //$NON-NLS-1$
-
-        /**
-         * Table item list of style ranges
-         *
-         * @since 1.0
-         */
-        String STYLE_RANGES = "$style_ranges"; //$NON-NLS-1$
-    }
-
-    /**
      * The events table search/filter state
      *
      * @version 1.0
@@ -331,6 +293,12 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
     private int[] fColumnOrder;
 
     private boolean fDisposeOnClose;
+
+    private Menu fHeaderMenu;
+
+    private Menu fTablePopup;
+
+    private Menu fRawTablePopup;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -436,6 +404,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
         TmfMarginColumn collapseCol = new TmfMarginColumn();
         fColumns.add(MARGIN_COLUMN_INDEX, collapseCol);
 
+        fHeaderMenu = new Menu(fTable);
         // Create the UI columns in the table
         for (TmfEventTableColumn col : fColumns) {
             TableColumn column = fTable.newTableColumn(SWT.LEFT);
@@ -470,6 +439,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                     fColumnOrder = fTable.getColumnOrder();
                 }
             });
+            createMenuItem(fHeaderMenu, column);
         }
         fColumnOrder = fTable.getColumnOrder();
 
@@ -557,6 +527,16 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
             }
         });
 
+        fTable.addListener(SWT.MenuDetect, new Listener() {
+            @Override
+            public void handleEvent(Event event) {
+                Point pt = fTable.getDisplay().map(null, fTable, new Point(event.x, event.y));
+                Rectangle clientArea = fTable.getClientArea();
+                boolean header = clientArea.y <= pt.y && pt.y < (clientArea.y + fTable.getHeaderHeight());
+                fTable.setMenu(header ? fHeaderMenu : fTablePopup);
+            }
+        });
+
         fTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(final MouseEvent event) {
@@ -577,6 +557,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                     }
                 }
             }
+
         });
 
         final Listener tooltipListener = new Listener() {
@@ -809,6 +790,30 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
 
         createPopupMenu();
     }
+
+    /**
+     * Taken from vogella tutorial
+     * @param parent the parent menu
+     * @param column the column
+     */
+    private static void createMenuItem(Menu parent, final TableColumn column) {
+      final MenuItem itemName = new MenuItem(parent, SWT.CHECK);
+      itemName.setText(column.getText());
+      itemName.setSelection(column.getResizable());
+      itemName.addSelectionListener(new SelectionAdapter() {
+          @Override
+          public void widgetSelected(SelectionEvent e) {
+          if (itemName.getSelection()) {
+            column.setWidth(150);
+            column.setResizable(true);
+          } else {
+            column.setWidth(0);
+            column.setResizable(false);
+          }
+        }
+      });
+    }
+
 
     // ------------------------------------------------------------------------
     // Operations
@@ -1177,11 +1182,11 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
             }
         });
 
-        Menu menu = tablePopupMenu.createContextMenu(fTable);
-        fTable.setMenu(menu);
+        fTablePopup = tablePopupMenu.createContextMenu(fTable);
+        fTable.setMenu(fTablePopup);
 
-        menu = rawViewerPopupMenu.createContextMenu(fRawViewer);
-        fRawViewer.setMenu(menu);
+        fRawTablePopup = rawViewerPopupMenu.createContextMenu(fRawViewer);
+        fRawViewer.setMenu(fRawTablePopup);
     }
 
     /**
