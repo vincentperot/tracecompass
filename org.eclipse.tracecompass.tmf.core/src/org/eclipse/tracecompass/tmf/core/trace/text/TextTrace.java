@@ -62,6 +62,7 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
 
     /** The text file */
     protected BufferedRandomAccessFile fFile;
+    private boolean fLive = true;
 
     /**
      * Constructor
@@ -276,8 +277,14 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
                 parseNextLine(event, line);
                 rawPos = fFile.getFilePointer();
                 line = fFile.getNextLine();
+                if(fLive){
+                    while(line == null){
+                        Thread.sleep(500);
+                        line = fFile.getNextLine();
+                    }
+                }
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             Activator.logError("Error reading file: " + getPath(), e); //$NON-NLS-1$
         }
 
@@ -391,5 +398,15 @@ public abstract class TextTrace<T extends TextTraceEvent> extends TmfTrace imple
     @Override
     public ITmfLocation restoreLocation(ByteBuffer bufferIn) {
         return new TmfLongLocation(bufferIn);
+    }
+
+    @Override
+    public boolean isComplete() {
+        return !fLive;
+    }
+
+    @Override
+    public void setComplete(boolean isComplete) {
+        fLive = isComplete;
     }
 }
