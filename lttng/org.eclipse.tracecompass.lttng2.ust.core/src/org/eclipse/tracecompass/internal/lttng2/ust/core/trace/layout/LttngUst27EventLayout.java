@@ -17,7 +17,7 @@ package org.eclipse.tracecompass.internal.lttng2.ust.core.trace.layout;
  *
  * @author Alexandre Montplaisir
  */
-@SuppressWarnings("nls")
+@SuppressWarnings({"javadoc", "nls"})
 public class LttngUst27EventLayout extends LttngUst20EventLayout {
 
     /**
@@ -34,6 +34,22 @@ public class LttngUst27EventLayout extends LttngUst20EventLayout {
      */
     public static LttngUst27EventLayout getInstance() {
         return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------
+    // UST Statedump events
+    // ------------------------------------------------------------------------
+
+    public String eventStatedumpStart() {
+        return "lttng_ust_statedump:start";
+    }
+
+    public String eventStatedumpEnd() {
+        return "lttng_ust_statedump:end";
+    }
+
+    public String eventStatedumpSoInfo() {
+        return "lttng_ust_statedump:soinfo";
     }
 
     // ------------------------------------------------------------------------
@@ -69,5 +85,26 @@ public class LttngUst27EventLayout extends LttngUst20EventLayout {
     @Override
     public String eventLibcPosixMemalign() {
         return "lttng_ust_libc:posix_memalign";
+    }
+
+    // ------------------------------------------------------------------------
+    // Field names used by statedump and liblttng-ust-dl events
+    // (only supported for 2.7+ traces)
+    // ------------------------------------------------------------------------
+
+    public String fieldBaddr() {
+        return "baddr";
+    }
+
+    public String fieldSopath() {
+        return "sopath";
+    }
+
+    public String fieldMemsz() {
+        return "memsz";
+    }
+
+    public String fieldBuildId() {
+        return "build_id";
     }
 }

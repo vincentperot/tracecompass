@@ -23,9 +23,10 @@ package org.eclipse.tracecompass.lttng2.ust.core.trace.layout;
 public interface ILttngUstEventLayout {
 
     // ------------------------------------------------------------------------
-    // Event names used in liblttng-ust-libc-wrapper
+    // Event names
     // ------------------------------------------------------------------------
 
+    /* liblttng-ust-libc-wrapper events */
     String eventLibcMalloc();
     String eventLibcCalloc();
     String eventLibcRealloc();
@@ -33,10 +34,11 @@ public interface ILttngUstEventLayout {
     String eventLibcMemalign();
     String eventLibcPosixMemalign();
 
-    // ------------------------------------------------------------------------
-    // Event names used in liblttng-ust-cyg-profile(-fast)
-    // ------------------------------------------------------------------------
+    /* liblttng-ust-dl events */
+    String eventDlOpen();
+    String eventDlClose();
 
+    /* liblttng-ust-cyg-profile(-fast) events */
     String eventCygProfileFuncEntry();
     String eventCygProfileFastFuncEntry();
     String eventCygProfileFuncExit();
@@ -58,6 +60,8 @@ public interface ILttngUstEventLayout {
     // Context field names
     // ------------------------------------------------------------------------
 
+    String contextVpid();
     String contextVtid();
     String contextProcname();
+    String contextIp();
 }
