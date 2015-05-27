@@ -10,7 +10,7 @@
  *   Matthew Khouzam, Geneviève Bastien - Initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.internal.lttng2.ust.core.analysis.memory;
+package org.eclipse.tracecompass.internal.lttng2.ust.core;
 
 /**
  * Strings for the memory usage state system using the LTTng UST libc
@@ -20,32 +20,32 @@ package org.eclipse.tracecompass.internal.lttng2.ust.core.analysis.memory;
  * @author Geneviève Bastien
  */
 @SuppressWarnings({ "nls", "javadoc" })
-public interface UstMemoryStrings {
+public interface UstStrings {
 
     /** Memory state system attribute name */
-    static final String UST_MEMORY_MEMORY_ATTRIBUTE = "Memory"; //$NON-NLS-1$
+    String UST_MEMORY_MEMORY_ATTRIBUTE = "Memory"; //$NON-NLS-1$
     /** Procname state system attribute name */
-    static final String UST_MEMORY_PROCNAME_ATTRIBUTE = "Procname"; //$NON-NLS-1$
+    String UST_MEMORY_PROCNAME_ATTRIBUTE = "Procname"; //$NON-NLS-1$
     /** Name of the attribute to store memory usage of events with no context */
-    static final String OTHERS = "Others";
+    String OTHERS = "Others";
 
     /* UST_libc event names */
-    static final String MALLOC = "ust_libc:malloc";
-    static final String CALLOC = "ust_libc:calloc";
-    static final String REALLOC = "ust_libc:realloc";
-    static final String FREE = "ust_libc:free";
-    static final String MEMALIGN = "ust_libc:memalign";
-    static final String POSIX_MEMALIGN = "ust_libc:posix_memalign";
+    String MALLOC = "ust_libc:malloc";
+    String CALLOC = "ust_libc:calloc";
+    String REALLOC = "ust_libc:realloc";
+    String FREE = "ust_libc:free";
+    String MEMALIGN = "ust_libc:memalign";
+    String POSIX_MEMALIGN = "ust_libc:posix_memalign";
 
     /* Possible contexts */
-    static final String CONTEXT_VTID = "context._vtid";
-    static final String CONTEXT_PROCNAME = "context._procname";
+    String CONTEXT_VTID = "context._vtid";
+    String CONTEXT_PROCNAME = "context._procname";
 
     /* Event fields */
-    static final String FIELD_PTR = "ptr";
-    static final String FIELD_NMEMB = "nmemb";
-    static final String FIELD_SIZE = "size";
-    static final String FIELD_OUTPTR = "out_ptr";
-    static final String FIELD_INPTR = "in_ptr";
+    String FIELD_PTR = "ptr";
+    String FIELD_NMEMB = "nmemb";
+    String FIELD_SIZE = "size";
+    String FIELD_OUTPTR = "out_ptr";
+    String FIELD_INPTR = "in_ptr";
 
 }

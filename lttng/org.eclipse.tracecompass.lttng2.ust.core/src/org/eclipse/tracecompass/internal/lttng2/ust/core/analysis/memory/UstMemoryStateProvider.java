@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.internal.lttng2.ust.core.UstStrings;
 import org.eclipse.tracecompass.lttng2.ust.core.trace.LttngUstTrace;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystemBuilder;
 import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
@@ -64,59 +65,59 @@ public class UstMemoryStateProvider extends AbstractTmfStateProvider {
     protected void eventHandle(ITmfEvent event) {
         String name = event.getName();
         switch (name) {
-        case UstMemoryStrings.MALLOC: {
-            Long ptr = (Long) event.getContent().getField(UstMemoryStrings.FIELD_PTR).getValue();
+        case UstStrings.MALLOC: {
+            Long ptr = (Long) event.getContent().getField(UstStrings.FIELD_PTR).getValue();
             if (ZERO.equals(ptr)) {
                 return;
             }
-            Long size = (Long) event.getContent().getField(UstMemoryStrings.FIELD_SIZE).getValue();
+            Long size = (Long) event.getContent().getField(UstStrings.FIELD_SIZE).getValue();
             setMem(event, ptr, size);
         }
             break;
-        case UstMemoryStrings.FREE: {
-            Long ptr = (Long) event.getContent().getField(UstMemoryStrings.FIELD_PTR).getValue();
+        case UstStrings.FREE: {
+            Long ptr = (Long) event.getContent().getField(UstStrings.FIELD_PTR).getValue();
             if (ZERO.equals(ptr)) {
                 return;
             }
             setMem(event, ptr, ZERO);
         }
             break;
-        case UstMemoryStrings.CALLOC: {
-            Long ptr = (Long) event.getContent().getField(UstMemoryStrings.FIELD_PTR).getValue();
+        case UstStrings.CALLOC: {
+            Long ptr = (Long) event.getContent().getField(UstStrings.FIELD_PTR).getValue();
             if (ZERO.equals(ptr)) {
                 return;
             }
-            Long nmemb = (Long) event.getContent().getField(UstMemoryStrings.FIELD_NMEMB).getValue();
-            Long size = (Long) event.getContent().getField(UstMemoryStrings.FIELD_SIZE).getValue();
+            Long nmemb = (Long) event.getContent().getField(UstStrings.FIELD_NMEMB).getValue();
+            Long size = (Long) event.getContent().getField(UstStrings.FIELD_SIZE).getValue();
             setMem(event, ptr, size * nmemb);
         }
             break;
-        case UstMemoryStrings.REALLOC: {
-            Long ptr = (Long) event.getContent().getField(UstMemoryStrings.FIELD_PTR).getValue();
+        case UstStrings.REALLOC: {
+            Long ptr = (Long) event.getContent().getField(UstStrings.FIELD_PTR).getValue();
             if (ZERO.equals(ptr)) {
                 return;
             }
-            Long newPtr = (Long) event.getContent().getField(UstMemoryStrings.FIELD_INPTR).getValue();
-            Long size = (Long) event.getContent().getField(UstMemoryStrings.FIELD_SIZE).getValue();
+            Long newPtr = (Long) event.getContent().getField(UstStrings.FIELD_INPTR).getValue();
+            Long size = (Long) event.getContent().getField(UstStrings.FIELD_SIZE).getValue();
             setMem(event, ptr, ZERO);
             setMem(event, newPtr, size);
         }
             break;
-        case UstMemoryStrings.MEMALIGN: {
-            Long ptr = (Long) event.getContent().getField(UstMemoryStrings.FIELD_PTR).getValue();
+        case UstStrings.MEMALIGN: {
+            Long ptr = (Long) event.getContent().getField(UstStrings.FIELD_PTR).getValue();
             if (ZERO.equals(ptr)) {
                 return;
             }
-            Long size = (Long) event.getContent().getField(UstMemoryStrings.FIELD_SIZE).getValue();
+            Long size = (Long) event.getContent().getField(UstStrings.FIELD_SIZE).getValue();
             setMem(event, ptr, size);
         }
             break;
-        case UstMemoryStrings.POSIX_MEMALIGN: {
-            Long ptr = (Long) event.getContent().getField(UstMemoryStrings.FIELD_OUTPTR).getValue();
+        case UstStrings.POSIX_MEMALIGN: {
+            Long ptr = (Long) event.getContent().getField(UstStrings.FIELD_OUTPTR).getValue();
             if (ZERO.equals(ptr)) {
                 return;
             }
-            Long size = (Long) event.getContent().getField(UstMemoryStrings.FIELD_SIZE).getValue();
+            Long size = (Long) event.getContent().getField(UstStrings.FIELD_SIZE).getValue();
             setMem(event, ptr, size);
         }
             break;
@@ -142,7 +143,7 @@ public class UstMemoryStateProvider extends AbstractTmfStateProvider {
     }
 
     private static Long getVtid(ITmfEvent event) {
-        ITmfEventField field = event.getContent().getField(UstMemoryStrings.CONTEXT_VTID);
+        ITmfEventField field = event.getContent().getField(UstStrings.CONTEXT_VTID);
         if (field == null) {
             return MINUS_ONE;
         }
@@ -150,7 +151,7 @@ public class UstMemoryStateProvider extends AbstractTmfStateProvider {
     }
 
     private static String getProcname(ITmfEvent event) {
-        ITmfEventField field = event.getContent().getField(UstMemoryStrings.CONTEXT_PROCNAME);
+        ITmfEventField field = event.getContent().getField(UstStrings.CONTEXT_PROCNAME);
         if (field == null) {
             return EMPTY_STRING;
         }
@@ -175,19 +176,19 @@ public class UstMemoryStateProvider extends AbstractTmfStateProvider {
         }
         try {
             int tidQuark = ss.getQuarkAbsoluteAndAdd(tid.toString());
-            int tidMemQuark = ss.getQuarkRelativeAndAdd(tidQuark, UstMemoryStrings.UST_MEMORY_MEMORY_ATTRIBUTE);
+            int tidMemQuark = ss.getQuarkRelativeAndAdd(tidQuark, UstStrings.UST_MEMORY_MEMORY_ATTRIBUTE);
 
             ITmfStateValue prevMem = ss.queryOngoingState(tidMemQuark);
             /* First time we set this value */
             if (prevMem.isNull()) {
-                int procNameQuark = ss.getQuarkRelativeAndAdd(tidQuark, UstMemoryStrings.UST_MEMORY_PROCNAME_ATTRIBUTE);
+                int procNameQuark = ss.getQuarkRelativeAndAdd(tidQuark, UstStrings.UST_MEMORY_PROCNAME_ATTRIBUTE);
                 String procName = getProcname(event);
                 /*
                  * No tid/procname for the event for the event, added to a
                  * 'others' thread
                  */
                 if (tid.equals(MINUS_ONE)) {
-                    procName = UstMemoryStrings.OTHERS;
+                    procName = UstStrings.OTHERS;
                 }
                 ss.modifyAttribute(ts, TmfStateValue.newValueString(procName), procNameQuark);
                 prevMem = TmfStateValue.newValueLong(0);

@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
-import org.eclipse.tracecompass.internal.lttng2.ust.core.analysis.memory.UstMemoryStrings;
+import org.eclipse.tracecompass.internal.lttng2.ust.core.UstStrings;
 import org.eclipse.tracecompass.lttng2.control.core.session.SessionConfigStrings;
 import org.eclipse.tracecompass.lttng2.ust.core.analysis.memory.UstMemoryAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement;
@@ -81,12 +81,12 @@ public class UstMemoryAnalysisModuleTest {
 
         /* Events */
         Set<String> expectedEvents = ImmutableSet.of(
-                UstMemoryStrings.MALLOC,
-                UstMemoryStrings.FREE,
-                UstMemoryStrings.CALLOC,
-                UstMemoryStrings.REALLOC,
-                UstMemoryStrings.MEMALIGN,
-                UstMemoryStrings.POSIX_MEMALIGN
+                UstStrings.MALLOC,
+                UstStrings.FREE,
+                UstStrings.CALLOC,
+                UstStrings.REALLOC,
+                UstStrings.MEMALIGN,
+                UstStrings.POSIX_MEMALIGN
                 );
 
         assertEquals(6, eventReq.getValues().size());
