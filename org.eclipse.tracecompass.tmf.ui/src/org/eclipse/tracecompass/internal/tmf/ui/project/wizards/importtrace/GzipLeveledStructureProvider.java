@@ -17,6 +17,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.ui.internal.wizards.datatransfer.DataTransferMessages;
 import org.eclipse.ui.internal.wizards.datatransfer.ILeveledImportStructureProvider;
@@ -25,6 +28,7 @@ import org.eclipse.ui.internal.wizards.datatransfer.ILeveledImportStructureProvi
  * Leveled Structure provider for Gzip file
  */
 @SuppressWarnings("restriction")
+@NonNullByDefault
 public class GzipLeveledStructureProvider implements ILeveledImportStructureProvider {
 
     private final GzipFile fFile;
@@ -42,31 +46,31 @@ public class GzipLeveledStructureProvider implements ILeveledImportStructureProv
         super();
 
         fFile = sourceFile;
-        fEntry = sourceFile.entries().nextElement();
+        fEntry = NonNullUtils.checkNotNull(sourceFile.entries().nextElement());
     }
 
     @Override
-    public List getChildren(Object element) {
+    public List getChildren(@Nullable Object element) {
         ArrayList<Object> children = new ArrayList<>();
-        if (element == root) {
+        if (root.equals(element)) {
             children.add(fEntry);
         }
         return children;
     }
 
     @Override
-    public InputStream getContents(Object element) {
-        return fFile.getInputStream((GzipEntry) element);
+    public InputStream getContents(@Nullable Object element) {
+        return NonNullUtils.checkNotNull(fFile.getInputStream((GzipEntry) element));
     }
 
     @Override
-    public String getFullPath(Object element) {
-        return ((GzipEntry) element).getName();
+    public @Nullable String getFullPath(@Nullable Object element) {
+        return ((GzipEntry) NonNullUtils.checkNotNull(element)).getName();
     }
 
     @Override
-    public String getLabel(Object element) {
-        if (element != root && element != fEntry) {
+    public @Nullable String getLabel(@Nullable Object element) {
+        if (element == null || (!root.equals(element) && !fEntry.equals(element))) {
             throw new IllegalArgumentException();
         }
         return ((GzipEntry) element).getName();
@@ -95,7 +99,10 @@ public class GzipLeveledStructureProvider implements ILeveledImportStructureProv
     }
 
     @Override
-    public boolean isFolder(Object element) {
+    public boolean isFolder(@Nullable Object element) {
+        if (element == null) {
+            return false;
+        }
         return ((GzipEntry) element).getFileType() == GzipEntry.DIRECTORY;
     }
 
