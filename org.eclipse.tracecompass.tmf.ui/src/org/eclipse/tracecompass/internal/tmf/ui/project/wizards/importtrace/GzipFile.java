@@ -106,10 +106,10 @@ public class GzipFile implements AutoCloseable {
      * @return an input stream for the given file
      */
     public InputStream getInputStream(GzipEntry entry) {
-        if (entry != fEntry) {
-            throw new IllegalArgumentException();
+        if (entry.equals(fEntry)) {
+            return fInternalEntryStream;
         }
-        return fInternalEntryStream;
+        throw new IllegalArgumentException();
     }
 
     /**
@@ -124,6 +124,7 @@ public class GzipFile implements AutoCloseable {
     @Override
     protected void finalize() throws Throwable {
         close();
+        super.finalize();
     }
 
 }
