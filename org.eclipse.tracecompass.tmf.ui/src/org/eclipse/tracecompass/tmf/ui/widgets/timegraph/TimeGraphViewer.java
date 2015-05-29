@@ -136,7 +136,6 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     private Action fFollowArrowBwdAction;
 
     private ListenerNotifier fListenerNotifier;
-    private final Object fListenerNotifierLock = new Object();
 
     private Composite fTimeAlignedComposite;
 
@@ -157,31 +156,34 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
                     return;
                 }
             }
-            synchronized (fListenerNotifierLock) {
-                fListenerNotifier = null;
-            }
-            if (!isInterrupted()) {
-                Display.getDefault().asyncExec(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (fDataViewer.isDisposed()) {
-                            return;
-                        }
-                        if (fSelectionChanged) {
-                            fireSelectionChanged(fSelectedEntry);
-                        }
-                        if (fTimeRangeUpdated) {
-                            fireTimeRangeUpdated(fTime0, fTime1);
-                        }
-                        if (fTimeSelected) {
-                            fireTimeSelected(fSelectionBegin, fSelectionEnd);
-                        }
+            Display.getDefault().asyncExec(new Runnable() {
+                @Override
+                public void run() {
+                    if (fListenerNotifier != ListenerNotifier.this) {
+                        return;
                     }
-                });
-            }
+                    System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.ListenerNotifier.run() sets fListenerNotifier = null");
+                    fListenerNotifier = null;
+                    if (ListenerNotifier.this.isInterrupted() || fDataViewer.isDisposed()) {
+                        return;
+                    }
+                    if (fSelectionChanged) {
+                        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.ListenerNotifier.run() calling fireSelectionChanged("+fSelectedEntry.getName()+")");
+                        fireSelectionChanged(fSelectedEntry);
+                    }
+                    if (fTimeRangeUpdated) {
+                        fireTimeRangeUpdated(fTime0, fTime1);
+                    }
+                    if (fTimeSelected) {
+                        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.ListenerNotifier.run() calling fireTimeSelected("+fSelectionBegin+","+fSelectionEnd+")");
+                        fireTimeSelected(fSelectionBegin, fSelectionEnd);
+                    }
+                }
+            });
         }
 
         public void selectionChanged() {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.ListenerNotifier.selectionChanged()");
             fSelectionChanged = true;
             fLastUpdateTime = System.currentTimeMillis();
         }
@@ -192,8 +194,21 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
         }
 
         public void timeSelected() {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.ListenerNotifier.timeSelected()");
             fTimeSelected = true;
             fLastUpdateTime = System.currentTimeMillis();
+        }
+
+        public boolean hasSelectionChanged() {
+            return fSelectionChanged;
+        }
+
+        public boolean hasTimeRangeUpdated() {
+            return fTimeRangeUpdated;
+        }
+
+        public boolean hasTimeSelected() {
+            return fTimeSelected;
         }
     }
 
@@ -254,11 +269,13 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     public void setInput(Object inputElement) {
         fInputElement = inputElement;
         ITimeGraphEntry[] input = fTimeGraphContentProvider.getElements(inputElement);
-
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setInput sets fListenerNotifier = null");
+        fListenerNotifier = null;
         if (fTimeGraphCtrl != null) {
             setTimeRange(input);
             setTopIndex(0);
             fSelectionBegin = SWT.DEFAULT;
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setInput sets fSelectionBegin="+fSelectionBegin);
             fSelectionEnd = SWT.DEFAULT;
             fSelectedEntry = null;
             refreshAllData(input);
@@ -281,6 +298,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
      *            the links to display in this time graph combo
      */
     public void setLinks(List<ILinkEvent> links) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setLinks("+links.size()+")");
         if (fTimeGraphCtrl != null) {
             fTimeGraphCtrl.refreshArrows(links);
         }
@@ -332,6 +350,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     void loadOptions() {
         fMinTimeInterval = 1;
         fSelectionBegin = SWT.DEFAULT;
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.loadOptions sets fSelectionBegin="+fSelectionBegin);
         fSelectionEnd = SWT.DEFAULT;
         fNameWidth = Utils.loadIntOption(getPreferenceString("namewidth"), //$NON-NLS-1$
                 fNameWidthPref, fMinNameWidth, MAX_NAME_WIDTH);
@@ -607,8 +626,10 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     private void refreshAllData(ITimeGraphEntry[] traces) {
         setTimeBounds();
         if (fSelectionBegin < fBeginTime) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.refreshAllData sets fSelectionBegin "+fSelectionBegin+" -> "+fBeginTime);
             fSelectionBegin = fBeginTime;
         } else if (fSelectionBegin > fEndTime) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.refreshAllData sets fSelectionBegin "+fSelectionBegin+" <- "+fEndTime);
             fSelectionBegin = fEndTime;
         }
         if (fSelectionEnd < fBeginTime) {
@@ -740,6 +761,10 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
 
     @Override
     public void setStartFinishTime(long time0, long time1) {
+        /* if there is a pending time range, ignore this one */
+        if (fListenerNotifier != null && fListenerNotifier.hasTimeRangeUpdated()) {
+            return;
+        }
         fTime0 = time0;
         if (fTime0 < fTime0Bound) {
             fTime0 = fTime0Bound;
@@ -776,11 +801,17 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
 
     @Override
     public void setSelectedTime(long time, boolean ensureVisible) {
+        /* if there is a pending time selection, ignore this one */
+        if (fListenerNotifier != null && fListenerNotifier.hasTimeSelected()) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelectedTime("+time+","+ensureVisible+") IGNORED");
+            return;
+        }
         setSelectedTimeInt(time, ensureVisible, false);
     }
 
     @Override
     public void setSelectionRangeNotify(long beginTime, long endTime) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelectionRangeNotify("+beginTime+","+endTime+")");
         long time0 = fTime0;
         long time1 = fTime1;
         boolean changed = (beginTime != fSelectionBegin || endTime != fSelectionEnd);
@@ -799,6 +830,12 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
 
     @Override
     public void setSelectionRange(long beginTime, long endTime) {
+        /* if there is a pending time selection, ignore this one */
+        if (fListenerNotifier != null && fListenerNotifier.hasTimeSelected()) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelectionRange("+beginTime+","+endTime+") IGNORED");
+            return;
+        }
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelectionRange("+beginTime+","+endTime+")");
         fSelectionBegin = Math.max(fTime0Bound, Math.min(fTime1Bound, beginTime));
         fSelectionEnd = Math.max(fTime0Bound, Math.min(fTime1Bound, endTime));
         fTimeGraphCtrl.redraw();
@@ -806,6 +843,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     }
 
     private void setSelectedTimeInt(long time, boolean ensureVisible, boolean doNotify) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelectedTimeInt calling setSelectedTimeNotify("+time+","+ensureVisible+","+doNotify+")");
         long time0 = fTime0;
         long time1 = fTime1;
         if (ensureVisible) {
@@ -823,6 +861,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
         }
 
         if (doNotify && notifySelectedTime) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::setSelectedTimeInt.setSelectedTimeInt calling notifyTimeListeners");
             notifyTimeListeners();
         }
     }
@@ -957,13 +996,11 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     }
 
     private void notifySelectionListeners() {
-        synchronized (fListenerNotifierLock) {
-            if (fListenerNotifier == null) {
-                fListenerNotifier = new ListenerNotifier();
-                fListenerNotifier.start();
-            }
-            fListenerNotifier.selectionChanged();
+        if (fListenerNotifier == null) {
+            fListenerNotifier = new ListenerNotifier();
+            fListenerNotifier.start();
         }
+        fListenerNotifier.selectionChanged();
     }
 
     private void fireSelectionChanged(ITimeGraphEntry selection) {
@@ -995,13 +1032,11 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     }
 
     private void notifyTimeListeners() {
-        synchronized (fListenerNotifierLock) {
-            if (fListenerNotifier == null) {
-                fListenerNotifier = new ListenerNotifier();
-                fListenerNotifier.start();
-            }
-            fListenerNotifier.timeSelected();
+        if (fListenerNotifier == null) {
+            fListenerNotifier = new ListenerNotifier();
+            fListenerNotifier.start();
         }
+        fListenerNotifier.timeSelected();
     }
 
     private void fireTimeSelected(long startTime, long endTime) {
@@ -1033,13 +1068,11 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
     }
 
     private void notifyRangeListeners() {
-        synchronized (fListenerNotifierLock) {
-            if (fListenerNotifier == null) {
-                fListenerNotifier = new ListenerNotifier();
-                fListenerNotifier.start();
-            }
-            fListenerNotifier.timeRangeUpdated();
+        if (fListenerNotifier == null) {
+            fListenerNotifier = new ListenerNotifier();
+            fListenerNotifier.start();
         }
+        fListenerNotifier.timeRangeUpdated();
     }
 
     private void fireTimeRangeUpdated(long startTime, long endTime) {
@@ -1103,6 +1136,12 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
      *            The trace that was selected
      */
     public void setSelection(ITimeGraphEntry trace) {
+        /* if there is a pending selection, ignore this one */
+        if (fListenerNotifier != null && fListenerNotifier.hasSelectionChanged()) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelection("+trace+") IGNORED");
+            return;
+        }
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphViewer.setSelection("+trace+")");
         fSelectedEntry = trace;
         fTimeGraphCtrl.selectItem(trace, false);
         adjustVerticalScrollBar();
@@ -1724,6 +1763,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
             fFollowArrowFwdAction = new Action() {
                 @Override
                 public void runWithEvent(Event event) {
+                    System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::FollowArrowFwdAction.runWithEvent("+event+")");
                     boolean extend = (event.stateMask & SWT.SHIFT) != 0;
                     fTimeGraphCtrl.followArrowFwd(extend);
                     adjustVerticalScrollBar();
@@ -1749,6 +1789,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
             fFollowArrowBwdAction = new Action() {
                 @Override
                 public void runWithEvent(Event event) {
+                    System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::FollowArrowBwdAction.runWithEvent("+event+")");
                     boolean extend = (event.stateMask & SWT.SHIFT) != 0;
                     fTimeGraphCtrl.followArrowBwd(extend);
                     adjustVerticalScrollBar();

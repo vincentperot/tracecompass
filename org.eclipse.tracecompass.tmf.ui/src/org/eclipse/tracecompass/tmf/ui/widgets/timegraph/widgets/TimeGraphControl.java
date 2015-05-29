@@ -739,11 +739,14 @@ public class TimeGraphControl extends TimeGraphBaseControl
      * @since 1.0
      */
     public void selectEvent(int n, boolean extend) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.selectEvent("+n+","+extend+")");
         if (null == fTimeProvider) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.selectEvent fTimeProvider is null");
             return;
         }
         ITimeGraphEntry trace = getSelectedTrace();
         if (trace == null) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.selectEvent selected entry is null");
             return;
         }
         long selectedTime = fTimeProvider.getSelectionEnd();
@@ -758,6 +761,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
             nextEvent = Utils.getFirstEvent(trace);
         }
         if (null != nextEvent) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.selectEvent selectedTime="+selectedTime+" nextEvent="+nextEvent);
             long nextTime = nextEvent.getTime();
             // If last event detected e.g. going back or not moving to a next
             // event
@@ -775,6 +779,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
             if (extend) {
                 fTimeProvider.setSelectionRangeNotify(fTimeProvider.getSelectionBegin(), nextTime);
             } else {
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.selectEvent (1) calling setSelectedTimeNotify("+nextTime+", true)");
                 fTimeProvider.setSelectedTimeNotify(nextTime, true);
             }
             fireSelectionChanged();
@@ -782,6 +787,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
             if (extend) {
                 fTimeProvider.setSelectionRangeNotify(fTimeProvider.getSelectionBegin(), endTime);
             } else {
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.selectEvent (2) calling setSelectedTimeNotify("+endTime+", true)");
                 fTimeProvider.setSelectedTimeNotify(endTime, true);
             }
             fireSelectionChanged();
@@ -960,16 +966,20 @@ public class TimeGraphControl extends TimeGraphBaseControl
     public void followArrowFwd(boolean extend) {
         ITimeGraphEntry trace = getSelectedTrace();
         if (trace == null) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowFwd("+extend+") selected entry is null");
             return;
         }
         long selectedTime = fTimeProvider.getSelectionEnd();
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowFwd("+extend+") selected entry="+trace.getName()+" selected time="+selectedTime+" links size:"+fItemData.fLinks.size());
         for (ILinkEvent link : fItemData.fLinks) {
             if (link.getEntry() == trace && link.getTime() == selectedTime) {
+                System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowFwd("+extend+") following link: "+link);
                 selectItem(link.getDestinationEntry(), false);
                 if (link.getDuration() != 0) {
                     if (extend) {
                         fTimeProvider.setSelectionRangeNotify(fTimeProvider.getSelectionBegin(), link.getTime() + link.getDuration());
                     } else {
+                        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowFwd calling setSelectedTimeNotify("+(link.getTime() + link.getDuration())+", true)");
                         fTimeProvider.setSelectedTimeNotify(link.getTime() + link.getDuration(), true);
                     }
                     // Notify if visible time window has been adjusted
@@ -993,9 +1003,11 @@ public class TimeGraphControl extends TimeGraphBaseControl
     public void followArrowBwd(boolean extend) {
         ITimeGraphEntry trace = getSelectedTrace();
         if (trace == null) {
+            System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowBwd("+extend+") selected entry is null");
             return;
         }
         long selectedTime = fTimeProvider.getSelectionEnd();
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowBwd("+extend+") selected entry="+trace.getName()+" selected time="+selectedTime+" links size:"+fItemData.fLinks.size());
         for (ILinkEvent link : fItemData.fLinks) {
             if (link.getDestinationEntry() == trace && link.getTime() + link.getDuration() == selectedTime) {
                 selectItem(link.getEntry(), false);
@@ -1003,6 +1015,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
                     if (extend) {
                         fTimeProvider.setSelectionRangeNotify(fTimeProvider.getSelectionBegin(), link.getTime());
                     } else {
+                        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.followArrowBwd calling setSelectedTimeNotify("+link.getTime()+", true)");
                         fTimeProvider.setSelectedTimeNotify(link.getTime(), true);
                     }
                     // Notify if visible time window has been adjusted
@@ -1177,6 +1190,10 @@ public class TimeGraphControl extends TimeGraphBaseControl
     }
 
     void selectItem(int idx, boolean addSelection) {
+        System.out.println(System.currentTimeMillis()+" "+Thread.currentThread().getName()+"::TimeGraphControl.selectItem("+idx+","+addSelection+")");
+        if (idx == -1) {
+            new Throwable().printStackTrace();
+        }
         boolean changed = false;
         if (addSelection) {
             if (idx >= 0 && idx < fItemData.fExpandedItems.length) {

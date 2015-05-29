@@ -161,6 +161,7 @@
 </profiles>
 
   <modules>
+    <module>org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests</module>
     <module>doc</module>
     <module>org.eclipse.tracecompass.common.core</module>
     <module>org.eclipse.tracecompass.common.core.tests</module>
@@ -231,7 +232,6 @@
     <module>org.eclipse.tracecompass.lttng2.kernel.core</module>
     <module>org.eclipse.tracecompass.lttng2.kernel.core.tests</module>
     <module>org.eclipse.tracecompass.lttng2.kernel.ui</module>
-    <module>org.eclipse.tracecompass.lttng2.kernel.ui.swtbot.tests</module>
 
     <module>org.eclipse.tracecompass.lttng2.ust</module>
     <module>org.eclipse.tracecompass.lttng2.ust.core</module>
