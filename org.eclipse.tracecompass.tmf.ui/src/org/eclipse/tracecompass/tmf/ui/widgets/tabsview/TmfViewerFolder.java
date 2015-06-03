@@ -124,6 +124,8 @@ public class TmfViewerFolder extends Composite {
         return true;
     }
 
+
+
     /**
      * Gets the folder that will be use as the parent of tabs that will hold the
      * viewer.
