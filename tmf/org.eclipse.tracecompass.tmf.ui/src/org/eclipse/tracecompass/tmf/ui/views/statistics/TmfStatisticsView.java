@@ -20,7 +20,9 @@ package org.eclipse.tracecompass.tmf.ui.views.statistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -36,6 +38,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.ui.viewers.piecharts.TmfPieChartViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.TmfStatisticsViewer;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.tabsview.TmfViewerFolder;
@@ -44,8 +47,9 @@ import org.eclipse.tracecompass.tmf.ui.widgets.tabsview.TmfViewerFolder;
  * The generic Statistics View displays statistics for any kind of traces.
  *
  * It is implemented according to the MVC pattern. - The model is a
- * TmfStatisticsModel. The view is built with a TreeViewer. - The controller
- * that keeps model and view synchronized is an observer of the model.
+ * TmfStatisticsModel. The view is built with a TreeViewer as well as a
+ * PieChartViewer. - The controller that keeps model and view synchronized is an
+ * observer of the model.
  *
  * @author Mathieu Denis
  */
@@ -64,6 +68,13 @@ public class TmfStatisticsView extends TmfView {
      * Update range synchronization object
      */
     private final Object fStatisticsRangeUpdateSyncObj = new Object();
+
+    /**
+     * The viewer that builds the piecharts to show statistics
+     *
+     * @since 1.0
+     */
+    private final TmfPieChartViewer fPieChartViewer;
 
     /**
      * Tells to send a time range request when the trace gets updated.
@@ -114,6 +125,10 @@ public class TmfStatisticsView extends TmfView {
         Composite temporaryParent = new Shell();
         fFolderViewer = new TmfViewerFolder(temporaryParent);
         fModel = new TmfStatisticsModel(this);
+        fPieChartViewer = new TmfPieChartViewer(temporaryParent,
+                Messages.TmfStatisticsView_GlobalTabName,
+                Messages.TmfStatisticsView_TimeRangeSelectionPieChartName,
+                Messages.TmfStatisticsView_PieChartOthersSliceName);
         TmfSignalManager.register(this);
     }
 
@@ -126,8 +141,22 @@ public class TmfStatisticsView extends TmfView {
 
     @Override
     public void createPartControl(Composite parent) {
-        fFolderViewer.setParent(parent);
+        SashForm sash = new SashForm(parent, SWT.NONE);
+        sash.setLayout(new FillLayout());
+        /*
+         * The Tree Viewer
+         */
+        fFolderViewer.setParent(sash);
+        /*
+         * Create the Statistics Tree viewer that will included in the folder
+         * viewer
+         */
         createStatisticsTreeViewer();
+
+        /*
+         * The Piechart Viewer
+         */
+        getPieChartViewer().setParent(sash);
 
         ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
         if (trace != null) {
@@ -142,6 +171,7 @@ public class TmfStatisticsView extends TmfView {
             fWaitCursor.dispose();
         }
         fFolderViewer.dispose();
+        getPieChartViewer().dispose();
     }
 
     // ------------------------------------------------------------------------
@@ -168,6 +198,7 @@ public class TmfStatisticsView extends TmfView {
         createStatisticsTreeViewer();
         fModel.requestData(fModel.getTrace().getTimeRange());
         fFolderViewer.layout();
+        getPieChartViewer().layout();
     }
 
     /**
@@ -233,11 +264,8 @@ public class TmfStatisticsView extends TmfView {
             fModel.setTrace(signal.getTrace());
             createStatisticsTreeViewer();
             fFolderViewer.layout();
-            ITmfTrace trace = fModel.getTrace();
-            TmfTraceRangeUpdatedSignal updateSignal = new TmfTraceRangeUpdatedSignal(this, trace, trace.getTimeRange());
-
             sendPartialRequestOnNextUpdate();
-            traceRangeUpdated(updateSignal);
+            traceRangeUpdated(new TmfTraceRangeUpdatedSignal(this, fModel.getTrace(), fModel.getTrace().getTimeRange()));
         } else {
             /*
              * If the same trace is reselected, sends a notification to the
@@ -263,8 +291,9 @@ public class TmfStatisticsView extends TmfView {
         fModel.setTrace(null);
 
         // Clear the UI widgets
-        fFolderViewer.clear();
+        fFolderViewer.clear(); // Also cancels ongoing requests
         createStatisticsTreeViewer();
+        getPieChartViewer().reinitializeCharts();
         fFolderViewer.layout();
     }
 
@@ -307,10 +336,10 @@ public class TmfStatisticsView extends TmfView {
 
         // The folder composite that will contain the tabs
         Composite folder = fFolderViewer.getParentFolder();
+
         // Instantiation of the global viewer
         if (fModel.getTrace() != null) {
             // Shows the name of the trace in the global tab
-
             fStatsViewer = new TmfStatisticsViewer(folder, Messages.TmfStatisticsView_GlobalTabName + " - " + fModel.getTrace().getName()); //$NON-NLS-1$
             fFolderViewer.addTab(fStatsViewer, Messages.TmfStatisticsView_GlobalTabName, defaultStyle);
         } else {
@@ -333,9 +362,9 @@ public class TmfStatisticsView extends TmfView {
      *            request.
      * @since 1.0
      */
-    public void signalModelComplete(boolean global) {
+    public void modelComplete(boolean global) {
         fStatsViewer.refresh();
-        waitCursor(false);
+        // waitCursor(false);
     }
 
     /**
@@ -391,6 +420,43 @@ public class TmfStatisticsView extends TmfView {
                     }
                 }
             });
+        }
+    }
+
+    /**
+     * @return The viewer representing the piechart.
+     * @since 1.0
+     */
+    private TmfPieChartViewer getPieChartViewer() {
+        return fPieChartViewer;
+    }
+
+    /**
+     * Called when an trace request has been completed successfully.
+     *
+     * @param global
+     *            Tells if the request is a global or time range (partial)
+     *            request.
+     * @since 1.0
+     */
+    public void signalTreeModelReady(boolean global) {
+        fStatsViewer.refresh();
+        waitCursor(false);
+    }
+
+    /**
+     * Called when an trace request has been completed successfully.
+     *
+     * @param global
+     *            Tells if the request is a global or time range (partial)
+     *            request.
+     * @since 1.0
+     */
+    public void signalPieChartModelReady(boolean global) {
+        if (global) {
+            fPieChartViewer.setGlobalPieChartEntries(fModel.getPieChartGlobalModel());
+        } else {
+        fPieChartViewer.setTimeRangePieChartEntries(fModel.getPieChartSelectionModel());
         }
     }
 

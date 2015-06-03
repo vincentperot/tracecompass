@@ -239,12 +239,14 @@ public class TmfStatisticsViewer extends TmfViewer {
                         return;
                     }
 
-                    // Otherwise, get percentage and draw bar and text if applicable.
+                    // Otherwise, get percentage and draw bar and text if
+                    // applicable.
                     double percentage = columnDataList.get(event.index).getPercentageProvider().getPercentage(node);
 
                     // The item is selected.
                     if ((event.detail & SWT.SELECTED) > 0) {
-                        // Draws our own background to avoid overwriting the bar.
+                        // Draws our own background to avoid overwriting the
+                        // bar.
                         event.gc.fillRectangle(event.x, event.y, event.width, event.height);
                         event.detail &= ~SWT.SELECTED;
                     }
