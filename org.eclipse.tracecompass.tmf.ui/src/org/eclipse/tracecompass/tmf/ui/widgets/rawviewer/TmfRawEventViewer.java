@@ -156,6 +156,9 @@ public class TmfRawEventViewer extends Composite implements ControlListener, Sel
 
     @Override
     public void dispose() {
+        if (fBottomContext != null) {
+            fBottomContext.dispose();
+        }
         PlatformUI.getWorkbench().getThemeManager().removePropertyChangeListener(this);
         super.dispose();
     }
@@ -294,14 +297,20 @@ public class TmfRawEventViewer extends Composite implements ControlListener, Sel
             if (fLines.size() == 0) {
                 setTopRank(0);
             } else if (fLines.size() < fNumVisibleLines) {
-                fBottomContext = null;
+                if (fBottomContext != null) {
+                    fBottomContext.dispose();
+                    fBottomContext = null;
+                }
                 loadLineData();
                 fillTextArea();
                 //fSlider.setSelection((int) (SLIDER_MAX * ((double) fLines.get(fTopLineIndex).rank / fTrace.getNbEvents())));
                 fSlider.setSelection((int) (SLIDER_MAX * fTrace.getLocationRatio(fLines.get(fTopLineIndex).location)));
             }
         } else {
-            fBottomContext = null;
+            if (fBottomContext != null) {
+                fBottomContext.dispose();
+                fBottomContext = null;
+            }
             fillTextArea();
             fSlider.setThumb(SLIDER_MAX);
             fSlider.setSelection(0);
@@ -371,6 +380,9 @@ public class TmfRawEventViewer extends Composite implements ControlListener, Sel
     }
 
     private void setTopRank(long rank) {
+        if (fBottomContext != null) {
+            fBottomContext.dispose();
+        }
         fBottomContext = fTrace.seekEvent(rank);
         if (fBottomContext == null) {
             return;
@@ -389,6 +401,9 @@ public class TmfRawEventViewer extends Composite implements ControlListener, Sel
     }
 
     private void setTopPosition(double ratio) {
+        if (fBottomContext != null) {
+            fBottomContext.dispose();
+        }
         fBottomContext = fTrace.seekEvent(ratio);
         if (fBottomContext == null) {
             return;
@@ -464,6 +479,7 @@ public class TmfRawEventViewer extends Composite implements ControlListener, Sel
                         }
                         rank++;
                     }
+                    context.dispose();
                     long rankOffset = fLines.get(index).rank - rank;
                     for (int i = 0; i < index; i++) {
                         fLines.get(i).rank += rankOffset;
@@ -522,7 +538,10 @@ public class TmfRawEventViewer extends Composite implements ControlListener, Sel
                 for (int i = MAX_LINE_DATA_SIZE; i < fLines.size(); i++) {
                     if (fLines.get(i).rank > rank) {
                         fLines.subList(i, fLines.size()).clear();
-                        fBottomContext = null;
+                        if (fBottomContext != null) {
+                            fBottomContext.dispose();
+                            fBottomContext = null;
+                        }
                         break;
                     }
                 }
