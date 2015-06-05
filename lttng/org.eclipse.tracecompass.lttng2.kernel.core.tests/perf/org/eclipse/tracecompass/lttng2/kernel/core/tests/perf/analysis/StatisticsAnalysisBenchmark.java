@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Alexis Cabana-Loriaux - Initial API and implementation
+ *   Alexis Cabana-Loriaux <alex021994@gmail.com> - Initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis;
@@ -39,7 +39,7 @@ import org.junit.Test;
 /**
  * This is a test of the time to build a statistics module
  *
- * @author Alexis Cabana-Loriaux
+ * @author Alexis Cabana-Loriaux <alex021994@gmail.com>
  */
 public class StatisticsAnalysisBenchmark {
 
@@ -97,7 +97,7 @@ public class StatisticsAnalysisBenchmark {
         PerformanceMeter pm = perf.createPerformanceMeter(TEST_ID + '#' + testName);
         perf.tagAsSummary(pm, "Statistics Analysis: " + testName, Dimension.CPU_TIME);
 
-        if (testTrace == CtfTmfTestTrace.DJANGO_CLIENT) {
+        if (testTrace == CtfTmfTestTrace.DJANGO_CLIENT || testTrace == CtfTmfTestTrace.DJANGO_HTTPD) {
             /* Do not show all traces in the global summary */
             perf.tagAsGlobalSummary(pm, "Statistics Analysis: " + testName, Dimension.CPU_TIME);
         }

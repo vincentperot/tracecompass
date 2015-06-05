@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
@@ -45,6 +46,7 @@ public class TmfStatisticsModel {
      */
     public static final @NonNull String ID = "org.eclipse.linuxtools.tmf.ui.views.statistics"; //$NON-NLS-1$
 
+    private String fName;
     /**
      * The update jobs containers
      */
@@ -64,11 +66,6 @@ public class TmfStatisticsModel {
     private final Map<String, Long> fPieChartSelectionModel = new ConcurrentHashMap<>();
 
     /**
-     * A reference to the view paired with this model
-     */
-    private TmfStatisticsView fView;
-
-    /**
      * Stores a reference to the selected trace.
      */
     private ITmfTrace fTrace;
@@ -79,13 +76,21 @@ public class TmfStatisticsModel {
     private TmfStatisticsTree fStatisticsData;
 
     /**
+     * Thread-safe flag storing the current state of the model
+     */
+    private AtomicBoolean fGlobalModelIsConstructed;
+    private AtomicBoolean fPartialModelIsConstructed;
+
+    /**
      * Default constructor
      *
      * @param view
      *            the view paired with this model
      */
-    public TmfStatisticsModel(TmfStatisticsView view) {
-        this.fView = view;
+    public TmfStatisticsModel(String name, TmfStatisticsView view) {
+        fGlobalModelIsConstructed = new AtomicBoolean(false);
+        fPartialModelIsConstructed = new AtomicBoolean(false);
+        fName = name;
     }
 
     // ------------------------------------------------------------------------
@@ -107,6 +112,8 @@ public class TmfStatisticsModel {
         getPieChartSelectionModel().clear();
         TmfStatisticsTreeManager.removeStatTreeRoot(getTreeID());
         fStatisticsData = null;
+        fGlobalModelIsConstructed.set(false);
+        fPartialModelIsConstructed.set(false);
     }
 
     /**
@@ -173,7 +180,7 @@ public class TmfStatisticsModel {
 
             Job job = updateJobs.get(aTrace);
             if (job == null) {
-                job = new StatisticsUpdateJob("Statistics update", aTrace, isGlobal, statsMod, this); //$NON-NLS-1$
+                job = new StatisticsUpdateJob(Messages.TmfStatisticsView_StatisticsUpdateJobName, aTrace, isGlobal, statsMod, this);
                 updateJobs.put(aTrace, job);
                 job.setSystem(true);
                 job.schedule();
@@ -189,6 +196,7 @@ public class TmfStatisticsModel {
      * @since 1.0
      */
     public void requestData(final TmfTimeRange timeRange) {
+        fGlobalModelIsConstructed.set(false);
         buildStatisticsViewers(fTrace, timeRange, true);
     }
 
@@ -200,6 +208,7 @@ public class TmfStatisticsModel {
      * @since 1.0
      */
     public void requestTimeRangeData(final TmfTimeRange timeRange) {
+        fPartialModelIsConstructed.set(false);
         buildStatisticsViewers(fTrace, timeRange, false);
     }
 
@@ -224,7 +233,7 @@ public class TmfStatisticsModel {
      * @since 1.0
      */
     public String getTreeID() {
-        return fView.getStatsViewer().getTreeID();
+        return getName();
     }
 
     /**
@@ -303,12 +312,15 @@ public class TmfStatisticsModel {
             }
         }
 
-        if (fUpdateJobsGlobal.size() == 1 && isGlobal || fUpdateJobsPartial.size() == 1 && !isGlobal) {
-            /*
-             * This thread is the last, send a signal to update the view
-             * depending on the piechart model finished
-             */
-            fView.signalModelComplete(isGlobal);
+        /*
+         * This thread is the last, set a flag to update the view depending
+         * on the part of the model finished
+         */
+        if (fUpdateJobsGlobal.size() == 1 && isGlobal) {
+            fGlobalModelIsConstructed.set(true);
+
+        } else if (fUpdateJobsPartial.size() == 1 && !isGlobal) {
+            fPartialModelIsConstructed.set(true);
         }
     }
 
@@ -352,6 +364,19 @@ public class TmfStatisticsModel {
     public ITmfTrace getTrace() {
         return fTrace;
     }
+    /**
+     * @return the name of this model
+     */
+    public String getName() {
+        return fName;
+    }
+    /**
+     *
+     * @param name the new name of this model
+     */
+    public void setName(String name) {
+        fName = name;
+    }
 
     /**
      * @param trace
@@ -389,17 +414,16 @@ public class TmfStatisticsModel {
     }
 
     /**
-     * Method normally called by a StatisticsUpdateJob to signal the Tree
-     * viewer's model is ready to be shown
-     *
-     * @param isGlobal
-     *            Tells if the model was completed for a global request or not
+     * @return a boolean indicating if the the global model is completed
      */
-    public void signalTreeModelReady(boolean isGlobal) {
-        /*
-         * The model does the request to refresh the view one it is completed
-         */
-        fView.signalModelComplete(isGlobal);
+    public boolean isGlobalModelReady(){
+        return fGlobalModelIsConstructed.get();
     }
 
+    /**
+     * @return a boolean indicating if the the partial model is completed
+     */
+    public boolean isPartialModelReady(){
+        return fPartialModelIsConstructed.get();
+    }
 }

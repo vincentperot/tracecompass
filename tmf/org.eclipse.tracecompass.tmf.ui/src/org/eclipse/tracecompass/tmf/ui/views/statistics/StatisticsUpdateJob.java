@@ -54,18 +54,18 @@ public class StatisticsUpdateJob extends Job {
      */
     private static final byte TIME_SCALE = ITmfTimestamp.NANOSECOND_SCALE;
 
-
     /**
      * @param name
-     *          The name of the working job
+     *            The name of the working job
      * @param trace
-     *          The trace to query
+     *            The trace to query
      * @param isGlobal
-     *          If the query is for the global time-range or a selection time-range
+     *            If the query is for the global time-range or a selection
+     *            time-range
      * @param statsMod
-     *          The statistics module of the trace
+     *            The statistics module of the trace
      * @param model
-     *          the calling model to update
+     *            the calling model to update
      */
     public StatisticsUpdateJob(String name, ITmfTrace trace, boolean isGlobal, TmfStatisticsModule statsMod, TmfStatisticsModel model) {
         super(name);
@@ -108,6 +108,7 @@ public class StatisticsUpdateJob extends Job {
         long end = 0;
         boolean finished = false;
         do {
+            /* This model update is done every second */
             if (monitor.isCanceled()) {
                 return Status.CANCEL_STATUS;
             }
@@ -122,17 +123,18 @@ public class StatisticsUpdateJob extends Job {
             end = localtimeRange.getEndTime().normalize(0, TIME_SCALE).getValue();
 
             Map<String, Long> map = stats.getEventTypesInRange(start, end);
-            updateStats(map);
+            updateTreeModel(map);
         } while (!finished);
 
         /* Query one last time for the final values */
         Map<String, Long> map = stats.getEventTypesInRange(start, end);
+
         /*
-         * Add the result for the current to the global (or selection) model
-         * for the pie charts
+         * Add the result for the current query to the global (or selection)
+         * model for the pie charts
          */
         fModel.addEventsTypeCount(fIsGlobal, map);
-        updateStats(map);
+        updateTreeModel(map);
 
         /*
          * Remove job from map so that new range selection updates can be
@@ -143,9 +145,9 @@ public class StatisticsUpdateJob extends Job {
     }
 
     /*
-     * Update statistics for a given trace
+     * Update the tree for a given trace
      */
-    private void updateStats(Map<String, Long> eventsPerType) {
+    private void updateTreeModel(Map<String, Long> eventsPerType) {
 
         final TmfStatisticsTree statsData = TmfStatisticsTreeManager.getStatTree(fModel.getTreeID());
         if (statsData == null) {
@@ -191,7 +193,5 @@ public class StatisticsUpdateJob extends Job {
             globalTotal += val;
         }
         statsData.setTotal(name, fIsGlobal, globalTotal);
-
-        fModel.signalTreeModelReady(fIsGlobal);
     }
 }
