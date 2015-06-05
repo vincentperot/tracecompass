@@ -463,7 +463,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                 column.setResizable(false);
             } else {
                 column.setMoveable(true);
-                createHeaderMenuItem(fHeaderMenu, column);
+                column.setData(Key.WIDTH, -1);
             }
             column.addControlListener(new ControlAdapter() {
                 /*
@@ -845,8 +845,8 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
      * @param column
      *            the column
      */
-    private static void createHeaderMenuItem(Menu parent, final TableColumn column) {
-        final MenuItem columnMenuItem = new MenuItem(parent, SWT.CHECK);
+    private void createHeaderMenuItem(final TableColumn column) {
+        final MenuItem columnMenuItem = new MenuItem(fHeaderMenu, SWT.CHECK);
         columnMenuItem.setText(column.getText());
         columnMenuItem.setSelection(column.getResizable());
         columnMenuItem.addSelectionListener(new SelectionAdapter() {
@@ -906,7 +906,6 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
      * Create a pop-up menu.
      */
     private void createPopupMenu() {
-        createResetHeaderMenuItem();
         final IAction showTableAction = new Action(Messages.TmfEventsTable_ShowTableActionText) {
             @Override
             public void run() {
@@ -1142,6 +1141,13 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
         tablePopupMenu.addMenuListener(new IMenuListener() {
             @Override
             public void menuAboutToShow(final IMenuManager manager) {
+                for( int index : fTable.getColumnOrder()){
+                    if( fTable.getColumns()[index].getData(Key.WIDTH)!= null) {
+                        createHeaderMenuItem(fTable.getColumns()[index]);
+                    }
+                }
+                createResetHeaderMenuItem();
+
                 if (fTable.getSelectionIndex() == 0) {
                     // Right-click on header row
                     if (fHeaderState == HeaderState.FILTER) {
@@ -2299,7 +2305,7 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
         fTable.setRedraw(false);
         try {
             TableColumn tableColumns[] = fTable.getColumns();
-            for (int i = 0; i < tableColumns.length; i++) {
+            for (int i = 1; i < tableColumns.length; i++) {
                 final TableColumn column = tableColumns[i];
                 packSingleColumn(i, column);
                 column.setData(Key.WIDTH, column.getWidth());
