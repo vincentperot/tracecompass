@@ -49,6 +49,8 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
 import org.eclipse.tracecompass.internal.ctf.core.event.CTFCallsiteComparator;
+import org.eclipse.tracecompass.internal.ctf.core.event.metadata.DeclarationScope;
+import org.eclipse.tracecompass.internal.ctf.core.event.metadata.MetadataStrings;
 import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.ParseException;
 import org.eclipse.tracecompass.internal.ctf.core.trace.Utils;
 
@@ -141,6 +143,8 @@ public class CTFTrace implements IDefinitionScope {
 
     /** Callsite helpers */
     private TreeSet<CTFCallsite> fCallsitesByIP = new TreeSet<>();
+
+    private final DeclarationScope fScope = new DeclarationScope(null, MetadataStrings.TRACE);
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -908,6 +912,17 @@ public class CTFTrace implements IDefinitionScope {
             fStreams.put(id, stream);
         }
         stream.addInput(new CTFStreamInput(stream, file));
+    }
+
+    /**
+     * Gets the current trace scope
+     *
+     * @return the current declaration scope
+     *
+     * @since 1.0
+     */
+    public DeclarationScope getScope() {
+        return fScope;
     }
 }
 
