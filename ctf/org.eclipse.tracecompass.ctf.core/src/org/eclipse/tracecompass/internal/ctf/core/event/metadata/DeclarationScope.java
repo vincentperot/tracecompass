@@ -37,7 +37,7 @@ import org.eclipse.tracecompass.internal.ctf.core.event.metadata.exceptions.Pars
  * @author Simon Marchi
  *
  */
-class DeclarationScope {
+public class DeclarationScope {
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -104,14 +104,6 @@ class DeclarationScope {
             fParentScope.fChildren.remove(fName);
             fParentScope.fChildren.put(name, this);
             fName = name;
-        }
-    }
-
-    public void adopt(DeclarationScope newParent) {
-        if (hasParent()) {
-            fParentScope.fChildren.remove(fName);
-            newParent.fChildren.put(fName, this);
-            fParentScope = newParent;
         }
     }
 
@@ -410,8 +402,8 @@ class DeclarationScope {
     }
 
     /**
-     * Lookup query for an identifier through this scope and its ancestors.
-     * An ancestor scope is a scope in which this scope is nested.
+     * Lookup query for an identifier through this scope and its ancestors. An
+     * ancestor scope is a scope in which this scope is nested.
      *
      * @param identifier
      *            the name of the identifier to search for. In the case of int
