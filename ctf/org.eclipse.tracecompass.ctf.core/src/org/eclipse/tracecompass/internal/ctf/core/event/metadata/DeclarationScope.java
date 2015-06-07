@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
@@ -41,13 +42,15 @@ class DeclarationScope {
     // Attributes
     // ------------------------------------------------------------------------
 
-    private DeclarationScope fParentScope = null;
+    private DeclarationScope fParentScope;
+    private @NonNull HashMap<String, DeclarationScope> fChildren = new HashMap<>();
 
     private final Map<String, StructDeclaration> fStructs = new HashMap<>();
     private final Map<String, EnumDeclaration> fEnums = new HashMap<>();
     private final Map<String, VariantDeclaration> fVariants = new HashMap<>();
     private final Map<String, IDeclaration> fTypes = new HashMap<>();
     private final Map<String, IDeclaration> fIdentifiers = new HashMap<>();
+    private String fName;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -64,9 +67,16 @@ class DeclarationScope {
      *
      * @param parentScope
      *            The parent of the newly created scope.
+     * @param name scope name
      */
-    public DeclarationScope(DeclarationScope parentScope) {
+    public DeclarationScope(DeclarationScope parentScope, String name) {
         fParentScope = parentScope;
+        fName = name;
+        parentScope.registerChild(name, this);
+    }
+
+    private void registerChild(String name, DeclarationScope declarationScope) {
+        fChildren.put(name, declarationScope);
     }
 
     // ------------------------------------------------------------------------
@@ -80,6 +90,26 @@ class DeclarationScope {
      */
     public DeclarationScope getParentScope() {
         return fParentScope;
+    }
+
+    /**
+     * Sets the name of the scope
+     * @param name the name
+     */
+    public void setName(String name) {
+        if (hasParent()) {
+            fParentScope.fChildren.remove(fName);
+            fParentScope.fChildren.put(name, this);
+            fName = name;
+        }
+    }
+
+    public void adopt(DeclarationScope newParent) {
+        if (hasParent()) {
+            fParentScope.fChildren.remove(fName);
+            newParent.fChildren.put(fName, this);
+            fParentScope = newParent;
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -231,7 +261,7 @@ class DeclarationScope {
         IDeclaration declaration = lookupType(name);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupTypeRecursive(name);
         } else {
             return null;
@@ -263,7 +293,7 @@ class DeclarationScope {
         StructDeclaration declaration = lookupStruct(name);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupStructRecursive(name);
         } else {
             return null;
@@ -295,7 +325,7 @@ class DeclarationScope {
         EnumDeclaration declaration = lookupEnum(name);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupEnumRecursive(name);
         } else {
             return null;
@@ -327,11 +357,15 @@ class DeclarationScope {
         VariantDeclaration declaration = lookupVariant(name);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupVariantRecursive(name);
         } else {
             return null;
         }
+    }
+
+    private boolean hasParent() {
+        return fParentScope != null;
     }
 
     /**
@@ -359,7 +393,7 @@ class DeclarationScope {
         IDeclaration declaration = lookupIdentifier(identifier);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupIdentifierRecursive(identifier);
         }
         return null;
@@ -394,13 +428,14 @@ class DeclarationScope {
 
     /**
      * Get root declaration scope
+     *
      * @return root
      */
     public static DeclarationScope createRoot() {
         return new DeclarationScope() {
             @Override
             public DeclarationScope getParentScope() {
-                throw new UnsupportedOperationException("Trying to pop root!"); //$NON-NLS-1$
+                return this;
             }
         };
     }
