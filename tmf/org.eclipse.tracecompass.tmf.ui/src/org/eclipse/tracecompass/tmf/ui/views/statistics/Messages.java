@@ -28,6 +28,11 @@ public class Messages extends NLS {
      */
     public static String TmfStatisticsView_GlobalTabName;
 
+     /**
+     * Name given to the update job of the statistics
+     */
+    public static String TmfStatisticsView_TmfStatisticsUpdateName;
+
     static {
         // initialize resource bundle
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
