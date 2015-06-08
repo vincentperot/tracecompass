@@ -27,6 +27,16 @@ public class Messages extends NLS {
      * String for the global tab name
      */
     public static String TmfStatisticsView_GlobalTabName;
+    /**
+     * String for the global tab name
+     * @since 1.0
+     */
+    public static String TmfStatisticsView_TimeRangeSelectionPieChartName;
+    /**
+     * String for the global tab name
+     * @since 1.0
+     */
+    public static String TmfStatisticsView_PieChartOthersSliceName;
 
     static {
         // initialize resource bundle
