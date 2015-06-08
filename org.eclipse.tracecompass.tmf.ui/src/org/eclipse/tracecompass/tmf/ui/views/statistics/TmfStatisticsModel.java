@@ -83,11 +83,10 @@ public class TmfStatisticsModel {
 
     /**
      * Default constructor
-     *
-     * @param view
-     *            the view paired with this model
+     * @param name
+     *            the name of the current model
      */
-    public TmfStatisticsModel(String name, TmfStatisticsView view) {
+    public TmfStatisticsModel(String name) {
         fGlobalModelIsConstructed = new AtomicBoolean(false);
         fPartialModelIsConstructed = new AtomicBoolean(false);
         fName = name;
