@@ -11,21 +11,13 @@
  *   Alexandre Montplaisir - Port to ITmfStatistics provider
  *   Patrick Tasse - Support selection range
  *   Bernd Hufmann - Fix range selection updates
+ *   Alexis Cabana-Loriaux <alex021994@gmail.com> - Extraction of the model to TmfStatisticsModel
  *******************************************************************************/
 
 package org.eclipse.tracecompass.tmf.ui.viewers.statistics;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -34,34 +26,17 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.component.TmfComponent;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
-import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
-import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
-import org.eclipse.tracecompass.tmf.core.signal.TmfTraceRangeUpdatedSignal;
-import org.eclipse.tracecompass.tmf.core.statistics.ITmfStatistics;
-import org.eclipse.tracecompass.tmf.core.statistics.TmfStatisticsEventTypesModule;
-import org.eclipse.tracecompass.tmf.core.statistics.TmfStatisticsModule;
-import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
-import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
-import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceContext;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
-import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
 import org.eclipse.tracecompass.tmf.ui.TmfUiRefreshHandler;
 import org.eclipse.tracecompass.tmf.ui.viewers.TmfViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfBaseColumnData;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfBaseColumnDataProvider;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsFormatter;
-import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsTree;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsTreeManager;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsTreeNode;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfTreeContentProvider;
@@ -69,173 +44,44 @@ import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfTreeContentPr
 /**
  * A basic viewer to display statistics in the statistics view.
  *
- * It is linked to a single ITmfTrace until its disposal.
- *
  * @author Mathieu Denis
  */
 public class TmfStatisticsViewer extends TmfViewer {
 
-    /** Timestamp scale used for all statistics (nanosecond) */
-    private static final byte TIME_SCALE = ITmfTimestamp.NANOSECOND_SCALE;
-
-    /** The delay (in ms) between each update in live-reading mode */
-    private static final long LIVE_UPDATE_DELAY = 1000;
-
-    /** The actual tree viewer to display */
-    private TreeViewer fTreeViewer;
-
-    /** The statistics tree linked to this viewer */
-    private TmfStatisticsTree fStatisticsData;
-
-    /** Update range synchronization object */
-    private final Object fStatisticsRangeUpdateSyncObj = new Object();
-
-    /** The trace that is displayed by this viewer */
-    private ITmfTrace fTrace;
-
-    /** Indicates to process all events */
-    private boolean fProcessAll;
-
-    /** View instance counter (for multiple statistics views) */
-    private static int fCountInstance = 0;
-
-    /** Number of this instance. Used as an instance ID. */
-    private int fInstanceNb;
-
-    /** Object to store the cursor while waiting for the trace to load */
-    private Cursor fWaitCursor = null;
-
     /**
-     * Counts the number of times waitCursor() has been called. It avoids
-     * removing the waiting cursor, since there may be multiple requests running
-     * at the same time.
+     * The actual tree viewer to display
      */
-    private int fWaitCursorCount = 0;
-
-    /** Tells to send a time range request when the trace gets updated. */
-    private boolean fSendRangeRequest = true;
-
-    private final Map<ITmfTrace, Job> fUpdateJobsPartial = new HashMap<>();
-    private final Map<ITmfTrace, Job> fUpdateJobsGlobal = new HashMap<>();
-
-    private TmfTimeRange fTimeRange;
-
-    private TmfTimeRange fTimeRangePartial;
+    private TreeViewer fTreeViewer;
 
     /**
      * Create a basic statistics viewer. To be used in conjunction with
-     * {@link TmfStatisticsViewer#init(Composite, String, ITmfTrace)}
+     * {@link TmfStatisticsViewer#initContent(Composite)}
      *
      * @param parent
      *            The parent composite that will hold the viewer
      * @param viewerName
      *            The name that will be assigned to this viewer
-     * @param trace
-     *            The trace that is displayed by this viewer
      * @see TmfComponent
+     * @since 1.0
      */
-    public TmfStatisticsViewer(Composite parent, String viewerName, ITmfTrace trace) {
-        init(parent, viewerName, trace);
-    }
-
-    /**
-     * Initialize the statistics viewer.
-     *
-     * @param parent
-     *            The parent component of the viewer.
-     * @param viewerName
-     *            The name to give to the viewer.
-     * @param trace
-     *            The trace that will be displayed by the viewer.
-     */
-    public void init(Composite parent, String viewerName, ITmfTrace trace) {
+    public TmfStatisticsViewer(Composite parent, String viewerName) {
         super.init(parent, viewerName);
-        // Increment a counter to make sure the tree ID is unique.
-        fCountInstance++;
-        fInstanceNb = fCountInstance;
-        fTrace = trace;
-
-        // The viewer will process all events if he is assigned to an experiment
-        fProcessAll = (trace instanceof TmfExperiment);
-
         initContent(parent);
-        initInput();
     }
 
     @Override
     public void dispose() {
         super.dispose();
-        if (fWaitCursor != null) {
-            fWaitCursor.dispose();
-        }
-
-        for (Job j : fUpdateJobsGlobal.values()) {
-            j.cancel();
-        }
-
-        for (Job j : fUpdateJobsPartial.values()) {
-            j.cancel();
-        }
-
         // Clean the model for this viewer
-        TmfStatisticsTreeManager.removeStatTreeRoot(getTreeID());
-    }
-
-    // ------------------------------------------------------------------------
-    // Signal handlers
-    // ------------------------------------------------------------------------
-
-    /**
-     * Handles the signal about new trace range.
-     *
-     * @param signal
-     *            The trace range updated signal
-     */
-    @TmfSignalHandler
-    public void traceRangeUpdated(TmfTraceRangeUpdatedSignal signal) {
-        ITmfTrace trace = signal.getTrace();
-        // validate
-        if (!isListeningTo(trace)) {
-            return;
-        }
-
-        synchronized (fStatisticsRangeUpdateSyncObj) {
-            // Sends the time range request only once from this method.
-            if (fSendRangeRequest) {
-                fSendRangeRequest = false;
-
-                TmfTraceContext ctx = TmfTraceManager.getInstance().getCurrentTraceContext();
-                TmfTimeRange timeRange = ctx.getSelectionRange();
-                requestTimeRangeData(trace, timeRange);
-            }
-        }
-        requestData(trace, signal.getRange());
-    }
-
-    /**
-     * Handles the time synch updated signal. It updates the time range
-     * statistics.
-     *
-     * @param signal
-     *            Contains the information about the new selected time range.
-     * @since 1.0
-     */
-    @TmfSignalHandler
-    public void timeSynchUpdated(TmfSelectionRangeUpdatedSignal signal) {
-        if (fTrace == null) {
-            return;
-        }
-        ITmfTimestamp begin = signal.getBeginTime();
-        ITmfTimestamp end = signal.getEndTime();
-        TmfTimeRange timeRange = new TmfTimeRange(begin, end);
-        requestTimeRangeData(fTrace, timeRange);
+        TmfStatisticsTreeManager.removeAll();
+        getTreeViewer().getTree().dispose();
     }
 
     // ------------------------------------------------------------------------
     // Class methods
     // ------------------------------------------------------------------------
 
-    /*
+    /**
      * Returns the primary control associated with this viewer.
      *
      * @return the SWT control which displays this viewer's content
@@ -255,26 +101,13 @@ public class TmfStatisticsViewer extends TmfViewer {
     }
 
     /**
-     * This method can be overridden to implement another way of representing
-     * the statistics data and to retrieve the information for display.
-     *
-     * @return a TmfStatisticsData object.
-     */
-    public TmfStatisticsTree getStatisticData() {
-        if (fStatisticsData == null) {
-            fStatisticsData = new TmfStatisticsTree();
-        }
-        return fStatisticsData;
-    }
-
-    /**
      * Returns a unique ID based on name to be associated with the statistics
      * tree for this viewer. For a same name, it will always return the same ID.
      *
      * @return a unique statistics tree ID.
      */
     public String getTreeID() {
-        return getName() + fInstanceNb;
+        return getName();
     }
 
     @Override
@@ -293,15 +126,6 @@ public class TmfStatisticsViewer extends TmfViewer {
                 }
             }
         });
-    }
-
-    /**
-     * Will force a request on the partial event count if one is needed.
-     */
-    public void sendPartialRequestOnNextUpdate() {
-        synchronized (fStatisticsRangeUpdateSyncObj) {
-            fSendRangeRequest = true;
-        }
     }
 
     /**
@@ -340,6 +164,7 @@ public class TmfStatisticsViewer extends TmfViewer {
      *            The parent of the control to create
      */
     protected void initContent(Composite parent) {
+
         final List<TmfBaseColumnData> columnDataList = getColumnDataProvider().getColumnData();
 
         fTreeViewer = new TreeViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -414,12 +239,14 @@ public class TmfStatisticsViewer extends TmfViewer {
                         return;
                     }
 
-                    // Otherwise, get percentage and draw bar and text if applicable.
+                    // Otherwise, get percentage and draw bar and text if
+                    // applicable.
                     double percentage = columnDataList.get(event.index).getPercentageProvider().getPercentage(node);
 
                     // The item is selected.
                     if ((event.detail & SWT.SELECTED) > 0) {
-                        // Draws our own background to avoid overwriting the bar.
+                        // Draws our own background to avoid overwriting the
+                        // bar.
                         event.gc.fillRectangle(event.x, event.y, event.width, event.height);
                         event.detail &= ~SWT.SELECTED;
                     }
@@ -488,309 +315,20 @@ public class TmfStatisticsViewer extends TmfViewer {
     }
 
     /**
-     * Initializes the input for the tree viewer.
+     * @param input
+     *            The input from which the tree will be populated
+     * @since 1.0
      */
-    protected void initInput() {
-        String treeID = getTreeID();
-        TmfStatisticsTreeNode statisticsTreeNode;
-        if (TmfStatisticsTreeManager.containsTreeRoot(treeID)) {
-            // The statistics root is already present
-            statisticsTreeNode = TmfStatisticsTreeManager.getStatTreeRoot(treeID);
-
-            // Checks if the trace is already in the statistics tree.
-            int numNodeTraces = statisticsTreeNode.getNbChildren();
-
-            Collection<ITmfTrace> traces = TmfTraceManager.getTraceSet(fTrace);
-            int numTraces = traces.size();
-
-            if (numTraces == numNodeTraces) {
-                boolean same = true;
-                /*
-                 * Checks if the experiment contains the same traces as when
-                 * previously selected.
-                 */
-                for (ITmfTrace trace : traces) {
-                    String traceName = trace.getName();
-                    if (!statisticsTreeNode.containsChild(traceName)) {
-                        same = false;
-                        break;
-                    }
-                }
-
-                if (same) {
-                    // No need to reload data, all traces are already loaded
-                    fTreeViewer.setInput(statisticsTreeNode);
-                    return;
-                }
-                // Clears the old content to start over
-                statisticsTreeNode.reset();
-            }
-        } else {
-            // Creates a new tree
-            statisticsTreeNode = TmfStatisticsTreeManager.addStatsTreeRoot(treeID, getStatisticData());
-        }
-
-        // Sets the input to a clean data model
-        fTreeViewer.setInput(statisticsTreeNode);
+    public void setTreeInput(Object input) {
+        this.fTreeViewer.setInput(input);
     }
 
     /**
-     * Tells if the viewer is listening to a trace.
-     *
-     * @param trace
-     *            The trace that the viewer may be listening
-     * @return true if the viewer is listening to the trace, false otherwise
+     * @return the tree viewer
+     * @since 1.0
      */
-    protected boolean isListeningTo(ITmfTrace trace) {
-        if (fProcessAll || trace == fTrace) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Called when an trace request has been completed successfully.
-     *
-     * @param global
-     *            Tells if the request is a global or time range (partial)
-     *            request.
-     */
-    protected void modelComplete(boolean global) {
-        refresh();
-        waitCursor(false);
-    }
-
-    /**
-     * Called when an trace request has failed or has been cancelled.
-     *
-     * @param isGlobalRequest
-     *            Tells if the request is a global or time range (partial)
-     *            request.
-     */
-    protected void modelIncomplete(boolean isGlobalRequest) {
-        if (isGlobalRequest) { // Clean the global statistics
-            /*
-             * No need to reset the global number of events, since the index of
-             * the last requested event is known.
-             */
-        } else { // Clean the partial statistics
-            resetTimeRangeValue();
-        }
-        refresh();
-        waitCursor(false);
-    }
-
-    /**
-     * Sends the request to the trace for the whole trace
-     *
-     * @param trace
-     *            The trace used to send the request
-     * @param timeRange
-     *            The range to request to the trace
-     */
-    protected void requestData(final ITmfTrace trace, final TmfTimeRange timeRange) {
-        buildStatisticsTree(trace, timeRange, true);
-    }
-
-    /**
-     * Sends the time range request from the trace
-     *
-     * @param trace
-     *            The trace used to send the request
-     * @param timeRange
-     *            The range to request to the trace
-     */
-    protected void requestTimeRangeData(final ITmfTrace trace, final TmfTimeRange timeRange) {
-        buildStatisticsTree(trace, timeRange, false);
-    }
-
-    /**
-     * Requests all the data of the trace to the state system which contains
-     * information about the statistics.
-     *
-     * Since the viewer may be listening to multiple traces, it may receive an
-     * experiment rather than a single trace. The filtering is done with the
-     * method {@link #isListeningTo(String trace)}.
-     *
-     * @param trace
-     *            The trace for which a request must be done
-     * @param timeRange
-     *            The time range that will be requested to the state system
-     * @param isGlobal
-     *            Tells if the request is for the global event count or the
-     *            partial one.
-     */
-    private void buildStatisticsTree(final ITmfTrace trace, final TmfTimeRange timeRange, final boolean isGlobal) {
-        final TmfStatisticsTree statsData = TmfStatisticsTreeManager.getStatTree(getTreeID());
-        if (statsData == null) {
-            return;
-        }
-
-        Map<ITmfTrace, Job> updateJobs;
-        if (isGlobal) {
-            updateJobs = fUpdateJobsGlobal;
-            fTimeRange = timeRange;
-        } else {
-            updateJobs = fUpdateJobsPartial;
-            fTimeRangePartial = timeRange;
-        }
-
-        for (ITmfTrace aTrace : TmfTraceManager.getTraceSet(trace)) {
-            aTrace = checkNotNull(aTrace);
-            if (!isListeningTo(aTrace)) {
-                continue;
-            }
-
-            /* Retrieve the statistics object */
-            final TmfStatisticsModule statsMod = TmfTraceUtils.getAnalysisModuleOfClass(aTrace, TmfStatisticsModule.class, TmfStatisticsModule.ID);
-            if (statsMod == null) {
-                /* No statistics module available for this trace */
-                continue;
-            }
-
-            Job job = updateJobs.get(aTrace);
-            if (job == null) {
-                job = new UpdateJob("Statistics update", aTrace, isGlobal, statsMod); //$NON-NLS-1$
-                updateJobs.put(aTrace, job);
-                job.setSystem(true);
-                job.schedule();
-            }
-        }
-    }
-
-    private class UpdateJob extends Job {
-
-        private final ITmfTrace fJobTrace;
-        private final boolean fIsGlobal;
-        private final TmfStatisticsModule fStatsMod;
-
-        private UpdateJob(String name, ITmfTrace trace, boolean isGlobal, TmfStatisticsModule statsMod) {
-            super(name);
-            fJobTrace = trace;
-            fIsGlobal = isGlobal;
-            fStatsMod = statsMod;
-        }
-
-        @Override
-        protected IStatus run(IProgressMonitor monitor) {
-
-            /* Wait until the analysis is ready to be queried */
-            fStatsMod.waitForInitialization();
-            ITmfStatistics stats = fStatsMod.getStatistics();
-            if (stats == null) {
-                /* It should have worked, but didn't */
-                throw new IllegalStateException();
-            }
-
-            /*
-             * TODO Eventually this could be exposed through the
-             * TmfStateSystemAnalysisModule directly.
-             */
-            ITmfStateSystem ss = fStatsMod.getStateSystem(TmfStatisticsEventTypesModule.ID);
-            if (ss == null) {
-                /* It should be instantiated after the
-                 * statsMod.waitForInitialization() above. */
-                throw new IllegalStateException();
-            }
-
-
-            /*
-             * Periodically update the statistics while they are
-             * being built (or, if the back-end is already completely
-             * built, it will skip over the while() immediately.
-             */
-            long start = 0;
-            long end = 0;
-            boolean finished = false;
-            do {
-                if (monitor.isCanceled()) {
-                    return Status.CANCEL_STATUS;
-                }
-                finished = ss.waitUntilBuilt(LIVE_UPDATE_DELAY);
-
-                TmfTimeRange localtimeRange = fIsGlobal ? fTimeRange : fTimeRangePartial;
-                /*
-                 * The generic statistics are stored in nanoseconds, so
-                 * we must make sure the time range is scaled correctly.
-                 */
-                start = localtimeRange.getStartTime().normalize(0, TIME_SCALE).getValue();
-                end = localtimeRange.getEndTime().normalize(0, TIME_SCALE).getValue();
-
-                Map<String, Long> map = stats.getEventTypesInRange(start, end);
-                updateStats(map);
-            } while (!finished);
-
-            /* Query one last time for the final values */
-            Map<String, Long> map = stats.getEventTypesInRange(start, end);
-            updateStats(map);
-
-            /*
-             * Remove job from map so that new range selection updates can
-             * be processed.
-             */
-            Map<ITmfTrace, Job> updateJobs;
-            if (fIsGlobal) {
-                updateJobs = fUpdateJobsGlobal;
-            } else {
-                updateJobs = fUpdateJobsPartial;
-            }
-            updateJobs.remove(fJobTrace);
-            return Status.OK_STATUS;
-        }
-
-        /*
-         * Update statistics for a given trace
-         */
-        private void updateStats(Map<String, Long> eventsPerType) {
-
-            final TmfStatisticsTree statsData = TmfStatisticsTreeManager.getStatTree(getTreeID());
-            if (statsData == null) {
-                /* The stat tree has been disposed, abort mission. */
-                return;
-            }
-
-            Map<String, Long> map = eventsPerType;
-            String name = fJobTrace.getName();
-
-
-            /*
-             * "Global", "partial", "total", etc., it's all very confusing...
-             *
-             * The base view shows the total count for the trace and for
-             * each even types, organized in columns like this:
-             *
-             *                   |  Global  |  Time range |
-             * trace name        |    A     |      B      |
-             *    Event Type     |          |             |
-             *       <event 1>   |    C     |      D      |
-             *       <event 2>   |   ...    |     ...     |
-             *         ...       |          |             |
-             *
-             * Here, we called the cells like this:
-             *  A : GlobalTotal
-             *  B : TimeRangeTotal
-             *  C : GlobalTypeCount(s)
-             *  D : TimeRangeTypeCount(s)
-             */
-
-            /* Fill in an the event counts (either cells C or D) */
-            for (Map.Entry<String, Long> entry : map.entrySet()) {
-                statsData.setTypeCount(name, entry.getKey(), fIsGlobal, entry.getValue());
-            }
-
-            /*
-             * Calculate the totals (cell A or B, depending if isGlobal). We will
-             * use the results of the previous request instead of sending another
-             * one.
-             */
-            long globalTotal = 0;
-            for (long val : map.values()) {
-                globalTotal += val;
-            }
-            statsData.setTotal(name, fIsGlobal, globalTotal);
-
-            modelComplete(fIsGlobal);
-        }
+    public TreeViewer getTreeViewer() {
+        return fTreeViewer;
     }
 
     /**
@@ -800,59 +338,6 @@ public class TmfStatisticsViewer extends TmfViewer {
         TmfStatisticsTreeNode treeModelRoot = TmfStatisticsTreeManager.getStatTreeRoot(getTreeID());
         if (treeModelRoot != null && treeModelRoot.hasChildren()) {
             treeModelRoot.resetTimeRangeValue();
-        }
-    }
-
-    /**
-     * When the trace is loading the cursor will be different so the user knows
-     * that the processing is not finished yet.
-     *
-     * Calls to this method are stacked.
-     *
-     * @param waitRequested
-     *            Indicates if we need to show the waiting cursor, or the
-     *            default one.
-     */
-    protected void waitCursor(final boolean waitRequested) {
-        if ((fTreeViewer == null) || (fTreeViewer.getTree().isDisposed())) {
-            return;
-        }
-
-        boolean needsUpdate = false;
-        Display display = fTreeViewer.getControl().getDisplay();
-        if (waitRequested) {
-            fWaitCursorCount++;
-            if (fWaitCursor == null) { // The cursor hasn't been initialized yet
-                fWaitCursor = new Cursor(display, SWT.CURSOR_WAIT);
-            }
-            if (fWaitCursorCount == 1) { // The cursor is not in waiting mode
-                needsUpdate = true;
-            }
-        } else {
-            if (fWaitCursorCount > 0) { // The cursor is in waiting mode
-                fWaitCursorCount--;
-                if (fWaitCursorCount == 0) { // No more reason to wait
-                    // Put back the default cursor
-                    needsUpdate = true;
-                }
-            }
-        }
-
-        if (needsUpdate) {
-            // Performs the updates on the UI thread
-            display.asyncExec(new Runnable() {
-                @Override
-                public void run() {
-                    if ((fTreeViewer != null)
-                            && (!fTreeViewer.getTree().isDisposed())) {
-                        Cursor cursor = null; // indicates default
-                        if (waitRequested) {
-                            cursor = fWaitCursor;
-                        }
-                        fTreeViewer.getControl().setCursor(cursor);
-                    }
-                }
-            });
         }
     }
 }
