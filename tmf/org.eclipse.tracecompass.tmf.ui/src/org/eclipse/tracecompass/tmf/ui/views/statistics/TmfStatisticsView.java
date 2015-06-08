@@ -52,9 +52,14 @@ import org.eclipse.tracecompass.tmf.ui.widgets.tabsview.TmfViewerFolder;
  * The generic Statistics View displays statistics for any kind of traces.
  *
  * It is implemented according to the MVC pattern. - The model is a
+<<<<<<< Upstream, based on PieChartModelTests
  * TmfStatisticsModel. The view is built with a TreeViewer as well as a
  * PieChartViewer. - The controller that keeps model and view synchronized is an
  * observer of the model.
+=======
+ * TmfStatisticsModel. The view is built with a TreeViewer. - The controller
+ * that keeps model and view synchronized is an observer of the model.
+>>>>>>> 8499139 tmf: merge piecharts and extracted model
  *
  * @author Mathieu Denis
  */
@@ -129,7 +134,7 @@ public class TmfStatisticsView extends TmfView {
          */
         Composite temporaryParent = new Shell();
         fFolderViewer = new TmfViewerFolder(temporaryParent);
-        fModel = new TmfStatisticsModel(Messages.TmfStatisticsView_GlobalTabName, this);
+        fModel = new TmfStatisticsModel(Messages.TmfStatisticsView_GlobalTabName);
         fPieChartViewer = new TmfPieChartViewer(temporaryParent,
                 Messages.TmfStatisticsView_GlobalTabName,
                 Messages.TmfStatisticsView_TimeRangeSelectionPieChartName,
@@ -349,7 +354,6 @@ public class TmfStatisticsView extends TmfView {
 
         // The folder composite that will contain the tabs
         Composite folder = fFolderViewer.getParentFolder();
-
         // Instantiation of the global viewer
         if (fModel.getTrace() != null) {
             // Shows the name of the trace in the global tab
@@ -529,5 +533,4 @@ public class TmfStatisticsView extends TmfView {
             return Status.OK_STATUS;
         }
     }
-
 }
