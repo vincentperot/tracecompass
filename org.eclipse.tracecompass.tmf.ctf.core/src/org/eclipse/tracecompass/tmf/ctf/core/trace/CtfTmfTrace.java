@@ -96,16 +96,15 @@ public class CtfTmfTrace extends TmfTrace
 
     /**
      * Event aspects available for all CTF traces
+     *
      * @since 1.0
      */
-    protected static final @NonNull Collection<ITmfEventAspect> CTF_ASPECTS =
-            checkNotNull(ImmutableList.of(
-                    ITmfEventAspect.BaseAspects.TIMESTAMP,
-                    new CtfChannelAspect(),
-                    new CtfCpuAspect(),
-                    ITmfEventAspect.BaseAspects.EVENT_TYPE,
-                    ITmfEventAspect.BaseAspects.CONTENTS
-                    ));
+    protected static final @NonNull Collection<ITmfEventAspect> CTF_ASPECTS = checkNotNull(ImmutableList.of(
+            ITmfEventAspect.BaseAspects.TIMESTAMP,
+            new CtfChannelAspect(),
+            new CtfCpuAspect(),
+            ITmfEventAspect.BaseAspects.EVENT_TYPE,
+            ITmfEventAspect.BaseAspects.CONTENTS));
 
     /**
      * The Ctf clock unique identifier field
@@ -118,11 +117,9 @@ public class CtfTmfTrace extends TmfTrace
     // Fields
     // -------------------------------------------
 
-    private final Map<String, CtfTmfEventType> fContainedEventTypes =
-            Collections.synchronizedMap(new HashMap<String, CtfTmfEventType>());
+    private final Map<String, CtfTmfEventType> fContainedEventTypes = Collections.synchronizedMap(new HashMap<String, CtfTmfEventType>());
 
-    private final CtfIteratorManager fIteratorManager =
-            new CtfIteratorManager(this);
+    private final CtfIteratorManager fIteratorManager = new CtfIteratorManager(this);
 
     /* Reference to the CTF Trace */
     private CTFTrace fTrace;
@@ -183,8 +180,7 @@ public class CtfTmfTrace extends TmfTrace
                         ITmfEventField contentTree = new TmfEventField(
                                 ITmfEventField.ROOT_FIELD_ID,
                                 null,
-                                content.toArray(new ITmfEventField[content.size()])
-                                );
+                                content.toArray(new ITmfEventField[content.size()]));
 
                         ctfTmfEventType = new CtfTmfEventType(ied.getName(), contentTree);
                         fContainedEventTypes.put(ctfTmfEventType.getName(), ctfTmfEventType);
@@ -223,11 +219,11 @@ public class CtfTmfTrace extends TmfTrace
      * Firstly a weak validation of the metadata is done to determine if the
      * path is actually for a CTF trace. After that a full validation is done.
      *
-     * If the weak and full validation are successful the confidence is set
-     * to 10.
+     * If the weak and full validation are successful the confidence is set to
+     * 10.
      *
-     * If the weak validation was successful, but the full validation fails
-     * a TraceValidationStatus with severity warning and confidence of 1 is
+     * If the weak validation was successful, but the full validation fails a
+     * TraceValidationStatus with severity warning and confidence of 1 is
      * returned.
      *
      * If both weak and full validation fails an error status is returned.
@@ -253,12 +249,13 @@ public class CtfTmfTrace extends TmfTrace
                 }
 
                 // Validate using reader initialization
-                try (CTFTraceReader ctfTraceReader = new CTFTraceReader(trace)) {}
+                try (CTFTraceReader ctfTraceReader = new CTFTraceReader(trace)) {
+                }
 
                 // Trace is validated, return with confidence
                 return new CtfTraceValidationStatus(CONFIDENCE, Activator.PLUGIN_ID, trace.getEnvironment());
 
-            } catch (final CTFException | BufferOverflowException e ) {
+            } catch (final CTFException | BufferOverflowException e) {
                 // return warning since it's a CTF trace but with errors in it
                 return new TraceValidationStatus(MIN_CONFIDENCE, IStatus.WARNING, Activator.PLUGIN_ID, Messages.CtfTmfTrace_ReadingError + ": " + e.toString(), e); //$NON-NLS-1$
             }
@@ -352,26 +349,28 @@ public class CtfTmfTrace extends TmfTrace
      * @see org.eclipse.tracecompass.tmf.core.trace.ITmfTrace#getNext(ITmfContext)
      */
     @Override
-    public synchronized CtfTmfEvent getNext(final ITmfContext context) {
-        if (fTrace == null) {
-            return null;
-        }
-        CtfTmfEvent event = null;
-        if (context instanceof CtfTmfContext) {
-            if (context.getLocation() == null || CtfLocation.INVALID_LOCATION.equals(context.getLocation().getLocationInfo())) {
+    public CtfTmfEvent getNext(final ITmfContext context) {
+        synchronized (context) {
+            if (fTrace == null) {
                 return null;
             }
-            CtfTmfContext ctfContext = (CtfTmfContext) context;
-            event = ctfContext.getCurrentEvent();
+            CtfTmfEvent event = null;
+            if (context instanceof CtfTmfContext) {
+                if (context.getLocation() == null || CtfLocation.INVALID_LOCATION.equals(context.getLocation().getLocationInfo())) {
+                    return null;
+                }
+                CtfTmfContext ctfContext = (CtfTmfContext) context;
+                event = ctfContext.getCurrentEvent();
 
-            if (event != null) {
-                updateAttributes(context, event.getTimestamp());
-                ctfContext.advance();
-                ctfContext.increaseRank();
+                if (event != null) {
+                    updateAttributes(context, event.getTimestamp());
+                    ctfContext.advance();
+                    ctfContext.increaseRank();
+                }
             }
-        }
 
-        return event;
+            return event;
+        }
     }
 
     /**
@@ -396,7 +395,8 @@ public class CtfTmfTrace extends TmfTrace
     /**
      * Get the first callsite that matches the event name
      *
-     * @param eventName The event name to look for
+     * @param eventName
+     *            The event name to look for
      * @return The best callsite candidate
      */
     public @Nullable CtfTmfCallsite getCallsite(String eventName) {
