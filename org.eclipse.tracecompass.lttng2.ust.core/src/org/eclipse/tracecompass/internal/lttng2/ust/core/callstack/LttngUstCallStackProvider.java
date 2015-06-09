@@ -51,6 +51,9 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
     /** Field name for the target function address */
     private static final String FIELD_ADDR = "addr"; //$NON-NLS-1$
 
+    /** name of a thread that has no procname */
+    private static final String UNKNOWN = "unknown procname"; //$NON-NLS-1$
+
     /** Event names indicating function entry */
     private static final Set<String> FUNC_ENTRY_EVENTS = new HashSet<>();
 
@@ -111,15 +114,7 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
      */
     @Override
     protected boolean considerEvent(ITmfEvent event) {
-        if (!(event instanceof CtfTmfEvent)) {
-            return false;
-        }
-        ITmfEventField content = ((CtfTmfEvent) event).getContent();
-        if (content.getField(CONTEXT_VTID) == null ||
-                content.getField(CONTEXT_PROCNAME) == null) {
-            return false;
-        }
-        return true;
+        return (event instanceof CtfTmfEvent);
     }
 
     @Override
@@ -154,8 +149,8 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
     public String getThreadName(ITmfEvent event) {
         /* Class type and content was already checked if we get called here */
         ITmfEventField content = ((CtfTmfEvent) event).getContent();
-        String procName = (String) content.getField(CONTEXT_PROCNAME).getValue();
-        Long vtid = (Long) content.getField(CONTEXT_VTID).getValue();
+        String procName = getProcName(content);
+        Long vtid = getThreadId(event);
 
         if (procName == null || vtid == null) {
             throw new IllegalStateException();
@@ -164,9 +159,15 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
         return new String(procName + '-' + vtid.toString());
     }
 
+    private static String getProcName(ITmfEventField content) {
+        final String value = (String) content.getField(CONTEXT_PROCNAME).getValue();
+        return (value==null)?UNKNOWN:value;
+    }
+
     @Override
     protected Long getThreadId(ITmfEvent event) {
         ITmfEventField content = ((CtfTmfEvent) event).getContent();
-        return (Long) content.getField(CONTEXT_VTID).getValue();
+        final Long value = (Long) content.getField(CONTEXT_VTID).getValue();
+        return (value==null)?Long.valueOf(-1):value;
     }
 }
