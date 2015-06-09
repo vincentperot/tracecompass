@@ -51,6 +51,9 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
     /** Field name for the target function address */
     private static final String FIELD_ADDR = "addr"; //$NON-NLS-1$
 
+    /** name of a thread that has no procname */
+    private static final String UNKNOWN = "unknown procname"; //$NON-NLS-1$
+
     /** Event names indicating function entry */
     private static final Set<String> FUNC_ENTRY_EVENTS = new HashSet<>();
 
@@ -58,7 +61,10 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
     private static final Set<String> FUNC_EXIT_EVENTS = new HashSet<>();
 
     static {
-        /* This seems overkill, but it will be checked every event. Gotta go FAST! */
+        /*
+         * This seems overkill, but it will be checked every event. Gotta go
+         * FAST!
+         */
         FUNC_ENTRY_EVENTS.add("lttng_ust_cyg_profile:func_entry"); //$NON-NLS-1$
         FUNC_ENTRY_EVENTS.add("lttng_ust_cyg_profile_fast:func_entry"); //$NON-NLS-1$
 
@@ -67,8 +73,8 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
     }
 
     /**
-     * Version number of this state provider. Please bump this if you modify
-     * the contents of the generated state history in some way.
+     * Version number of this state provider. Please bump this if you modify the
+     * contents of the generated state history in some way.
      */
     private static final int VERSION = 2;
 
@@ -111,15 +117,7 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
      */
     @Override
     protected boolean considerEvent(ITmfEvent event) {
-        if (!(event instanceof CtfTmfEvent)) {
-            return false;
-        }
-        ITmfEventField content = ((CtfTmfEvent) event).getContent();
-        if (content.getField(CONTEXT_VTID) == null ||
-                content.getField(CONTEXT_PROCNAME) == null) {
-            return false;
-        }
-        return true;
+        return (event instanceof CtfTmfEvent);
     }
 
     @Override
@@ -154,8 +152,8 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
     public String getThreadName(ITmfEvent event) {
         /* Class type and content was already checked if we get called here */
         ITmfEventField content = ((CtfTmfEvent) event).getContent();
-        String procName = (String) content.getField(CONTEXT_PROCNAME).getValue();
-        Long vtid = (Long) content.getField(CONTEXT_VTID).getValue();
+        String procName = getProcName(content);
+        Long vtid = getThreadId(event);
 
         if (procName == null || vtid == null) {
             throw new IllegalStateException();
@@ -164,9 +162,15 @@ public class LttngUstCallStackProvider extends CallStackStateProvider {
         return new String(procName + '-' + vtid.toString());
     }
 
+    private static String getProcName(ITmfEventField content) {
+        final ITmfEventField field = content.getField(CONTEXT_PROCNAME);
+        return (field == null) ? UNKNOWN : (String) field.getValue();
+    }
+
     @Override
     protected Long getThreadId(ITmfEvent event) {
         ITmfEventField content = ((CtfTmfEvent) event).getContent();
-        return (Long) content.getField(CONTEXT_VTID).getValue();
+        final ITmfEventField field = content.getField(CONTEXT_VTID);
+        return (field == null) ? Long.valueOf(-1) : (Long) field.getValue();
     }
 }
