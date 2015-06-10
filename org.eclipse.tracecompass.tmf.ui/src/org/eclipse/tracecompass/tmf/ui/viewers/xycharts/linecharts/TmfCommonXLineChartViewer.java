@@ -327,6 +327,10 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
             @Override
             public void run() {
                 if (!getSwtChart().isDisposed()) {
+                    double[] xValues = fXValues;
+                    if (xValues.length < 1) {
+                        return;
+                    }
                     double maxy = DEFAULT_MAXY;
                     double miny = DEFAULT_MINY;
                     for (Entry<String, double[]> entry : fSeriesValues.entrySet()) {
@@ -334,7 +338,7 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
                         if (series == null) {
                             series = addSeries(entry.getKey());
                         }
-                        series.setXSeries(fXValues);
+                        series.setXSeries(xValues);
                         /* Find the minimal and maximum values in this series */
                         for (double value : entry.getValue()) {
                             maxy = Math.max(maxy, value);
@@ -349,9 +353,9 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
                     IAxisTick xTick = getSwtChart().getAxisSet().getXAxis(0).getTick();
                     xTick.setFormat(tmfChartTimeStampFormat);
 
-                    final double start = fXValues[0];
-                    int lastX = fXValues.length - 1;
-                    double end = (start == fXValues[lastX]) ? start + 1 : fXValues[lastX];
+                    final double start = xValues[0];
+                    int lastX = xValues.length - 1;
+                    double end = (start == xValues[lastX]) ? start + 1 : xValues[lastX];
                     getSwtChart().getAxisSet().getXAxis(0).setRange(new Range(start, end));
                     getSwtChart().getAxisSet().getXAxis(0).adjustRange();
                     if (maxy > miny) {
@@ -360,7 +364,8 @@ public abstract class TmfCommonXLineChartViewer extends TmfXYChartViewer {
                     getSwtChart().redraw();
 
                     if (isSendTimeAlignSignals()) {
-                        // The width of the chart might have changed and its time
+                        // The width of the chart might have changed and its
+                        // time
                         // axis might be misaligned with the other views
                         Point viewPos = TmfCommonXLineChartViewer.this.getParent().getParent().toDisplay(0, 0);
                         int axisPos = getSwtChart().toDisplay(0, 0).x + getPointAreaOffset();
