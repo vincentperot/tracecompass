@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Alexis Cabana-Loriaux - Initial API and implementation
+ *   Alexis Cabana-Loriaux <alex021994@gmail.com> - Initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.tracecompass.lttng2.kernel.core.tests.perf.analysis;
@@ -39,7 +39,7 @@ import org.junit.Test;
 /**
  * This is a test of the time to build a statistics module
  *
- * @author Alexis Cabana-Loriaux
+ * @author Alexis Cabana-Loriaux <alex021994@gmail.com>
  */
 public class StatisticsAnalysisBenchmark {
 
