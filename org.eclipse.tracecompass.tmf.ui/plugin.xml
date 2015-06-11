@@ -1577,10 +1577,6 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.eclipse.tracecompass.internal.tmf.ui.commands.CopyToClipboardCommandHandler"
-            commandId="org.eclipse.tracecompass.tmf.ui.copy_to_clipboard">
-      </handler>
-      <handler
             class="org.eclipse.tracecompass.internal.tmf.ui.commands.ExportToTextCommandHandler"
             commandId="org.eclipse.linuxtools.tmf.ui.exportToText">
       </handler>

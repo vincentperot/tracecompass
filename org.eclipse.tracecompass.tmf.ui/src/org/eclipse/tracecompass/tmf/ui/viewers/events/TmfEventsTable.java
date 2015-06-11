@@ -21,6 +21,7 @@ package org.eclipse.tracecompass.tmf.ui.viewers.events;
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -63,6 +64,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.FontRegistry;
 import org.eclipse.jface.resource.JFaceResources;
@@ -118,7 +120,7 @@ import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.internal.tmf.core.filter.TmfCollapseFilter;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
-import org.eclipse.tracecompass.internal.tmf.ui.commands.CopyToClipboardCommandHandler;
+import org.eclipse.tracecompass.internal.tmf.ui.commands.CopyToClipboardOperation;
 import org.eclipse.tracecompass.internal.tmf.ui.commands.ExportToTextCommandHandler;
 import org.eclipse.tracecompass.internal.tmf.ui.dialogs.MultiLineInputDialog;
 import org.eclipse.tracecompass.tmf.core.component.ITmfEventProvider;
@@ -922,32 +924,28 @@ public class TmfEventsTable extends TmfComponent implements IGotoMarker, IColorS
                 if (fSelectedRank == -1 && fSelectedBeginRank == -1) {
                     return;
                 }
-                IWorkbenchPage activePage = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-                Object handlerServiceObject = activePage.getActiveEditor().getSite().getService(IHandlerService.class);
-                IHandlerService handlerService = (IHandlerService) handlerServiceObject;
-                Object cmdServiceObject = activePage.getActiveEditor().getSite().getService(ICommandService.class);
-                ICommandService cmdService = (ICommandService) cmdServiceObject;
-                try {
-                    HashMap<String, Object> parameters = new HashMap<>();
-                    Command command = cmdService.getCommand(CopyToClipboardCommandHandler.COMMAND_ID);
-                    ParameterizedCommand cmd = ParameterizedCommand.generateCommand(command, parameters);
-
-                    IEvaluationContext context = handlerService.getCurrentState();
-                    List<TmfEventTableColumn> columns = new ArrayList<>();
-                    for (int i : fTable.getColumnOrder()) {
-                        TableColumn column = fTable.getColumns()[i];
-                        // Omit the margin column and hidden columns
-                        if (i >= EVENT_COLUMNS_START_INDEX && (column.getResizable() || column.getWidth() > 0)) {
-                            columns.add(fColumns.get(i));
-                        }
+                List<TmfEventTableColumn> columns = new ArrayList<>();
+                for (int i : fTable.getColumnOrder()) {
+                    TableColumn column = fTable.getColumns()[i];
+                    // Omit the margin column and hidden columns
+                    if (i >= EVENT_COLUMNS_START_INDEX && (column.getResizable() || column.getWidth() > 0)) {
+                        columns.add(fColumns.get(i));
                     }
-                    context.addVariable(CopyToClipboardCommandHandler.COLUMNS_VAR, columns);
-                    context.addVariable(CopyToClipboardCommandHandler.START_VAR, Math.min(fSelectedBeginRank, fSelectedRank));
-                    context.addVariable(CopyToClipboardCommandHandler.END_VAR, Math.max(fSelectedBeginRank, fSelectedRank));
+                }
 
-                    handlerService.executeCommandInContext(cmd, null, context);
-                } catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e) {
-                    displayException(e);
+                long start = Math.min(fSelectedBeginRank, fSelectedRank);
+                long end = Math.max(fSelectedBeginRank, fSelectedRank);
+                ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
+                ITmfFilter filter = TmfTraceManager.getInstance().getCurrentTraceContext().getFilter();
+                if (trace != null) {
+                    IRunnableWithProgress operation = new CopyToClipboardOperation(trace, filter, columns, start, end);
+                    try {
+                        PlatformUI.getWorkbench().getProgressService().busyCursorWhile(operation);
+                    } catch (InvocationTargetException e) {
+                        Activator.getDefault().logError("Invocation target exception copying to clipboard ", e); //$NON-NLS-1$
+                    } catch (InterruptedException e) {
+                        /* ignored */
+                    }
                 }
             }
         };
