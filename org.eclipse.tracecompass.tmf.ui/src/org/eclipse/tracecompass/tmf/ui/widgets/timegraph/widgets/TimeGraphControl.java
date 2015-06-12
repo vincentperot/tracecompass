@@ -120,7 +120,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
     /** Color map for event types */
     private Color[] fEventColorMap = null;
 
-    private ITimeDataProvider fTimeProvider;
+    private ITimeDataProvider2 fTimeProvider;
     private IStatusLineManager fStatusLineManager = null;
     private TimeGraphScale fTimeGraphScale = null;
 
@@ -231,7 +231,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
      *            The time provider
      */
     public void setTimeProvider(ITimeDataProvider timeProvider) {
-        fTimeProvider = timeProvider;
+        fTimeProvider = (ITimeDataProvider2) timeProvider;
         redraw();
     }
 
@@ -799,7 +799,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
     public void selectNextEvent(boolean extend) {
         selectEvent(1, extend);
         // Notify if visible time window has been adjusted
-        fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
+        fTimeProvider.setStartFinishTimeInternal(fTimeProvider.getTime0(), fTimeProvider.getTime1(), true);
     }
 
     /**
@@ -812,7 +812,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
     public void selectPrevEvent(boolean extend) {
         selectEvent(-1, extend);
         // Notify if visible time window has been adjusted
-        fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
+        fTimeProvider.setStartFinishTimeInternal(fTimeProvider.getTime0(), fTimeProvider.getTime1(), true);
     }
 
     /**
@@ -852,7 +852,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
             time1 = Math.min(time1 + increment, timeMax);
             time0 = time1 - range;
         }
-        fTimeProvider.setStartFinishTimeNotify(time0, time1);
+        fTimeProvider.setStartFinishTimeInternal(time0, time1, true);
     }
 
     /**
@@ -881,7 +881,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
         long center = time0 + Math.round(((double) (xPos - nameSpace) / timeSpace * interval));
         long newTime0 = center - Math.round((double) newInterval * (center - time0) / interval);
         long newTime1 = newTime0 + newInterval;
-        fTimeProvider.setStartFinishTimeNotify(newTime0, newTime1);
+        fTimeProvider.setStartFinishTimeInternal(newTime0, newTime1, true);
     }
 
     /**
@@ -905,7 +905,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
         long inaccuracy = (fTimeProvider.getMaxTime() - fTimeProvider.getMinTime()) - (time1 - time0);
 
         if (inaccuracy > 0 && inaccuracy < 100) {
-            fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getMinTime(), fTimeProvider.getMaxTime());
+            fTimeProvider.setStartFinishTimeInternal(fTimeProvider.getMinTime(), fTimeProvider.getMaxTime(), true);
             return;
         }
 
@@ -915,7 +915,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
             time1 = time0 + min;
         }
 
-        fTimeProvider.setStartFinishTimeNotify(time0, time1);
+        fTimeProvider.setStartFinishTimeInternal(time0, time1, true);
     }
 
     /**
@@ -934,11 +934,11 @@ public class TimeGraphControl extends TimeGraphBaseControl
 
         long inaccuracy = (fTimeProvider.getMaxTime() - fTimeProvider.getMinTime()) - (time1 - time0);
         if (inaccuracy > 0 && inaccuracy < 100) {
-            fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getMinTime(), fTimeProvider.getMaxTime());
+            fTimeProvider.setStartFinishTimeInternal(fTimeProvider.getMinTime(), fTimeProvider.getMaxTime(), true);
             return;
         }
 
-        fTimeProvider.setStartFinishTimeNotify(time0, time1);
+        fTimeProvider.setStartFinishTimeInternal(time0, time1, true);
     }
 
     /**
@@ -973,7 +973,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
                         fTimeProvider.setSelectedTimeNotify(link.getTime() + link.getDuration(), true);
                     }
                     // Notify if visible time window has been adjusted
-                    fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
+                    fTimeProvider.setStartFinishTimeInternal(fTimeProvider.getTime0(), fTimeProvider.getTime1(), true);
                 }
                 fireSelectionChanged();
                 updateStatusLine(STATUS_WITHOUT_CURSOR_TIME);
@@ -1006,7 +1006,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
                         fTimeProvider.setSelectedTimeNotify(link.getTime(), true);
                     }
                     // Notify if visible time window has been adjusted
-                    fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
+                    fTimeProvider.setStartFinishTimeInternal(fTimeProvider.getTime0(), fTimeProvider.getTime1(), true);
                 }
                 fireSelectionChanged();
                 updateStatusLine(STATUS_WITHOUT_CURSOR_TIME);
@@ -2060,7 +2060,7 @@ public class TimeGraphControl extends TimeGraphBaseControl
                     time0 = fTimeProvider.getMinTime();
                     time1 = time0 + (fTime1bak - fTime0bak);
                 }
-                fTimeProvider.setStartFinishTime(time0, time1);
+                fTimeProvider.setStartFinishTimeInternal(time0, time1, false);
             }
         } else if (DRAG_SPLIT_LINE == fDragState) {
             fDragX = e.x;
@@ -2252,9 +2252,9 @@ public class TimeGraphControl extends TimeGraphBaseControl
                     long time0 = getTimeAtX(fDragX0);
                     long time1 = getTimeAtX(fDragX);
                     if (time0 < time1) {
-                        fTimeProvider.setStartFinishTimeNotify(time0, time1);
+                        fTimeProvider.setStartFinishTimeInternal(time0, time1, true);
                     } else {
-                        fTimeProvider.setStartFinishTimeNotify(time1, time0);
+                        fTimeProvider.setStartFinishTimeInternal(time1, time0, true);
                     }
                 } else {
                     redraw();

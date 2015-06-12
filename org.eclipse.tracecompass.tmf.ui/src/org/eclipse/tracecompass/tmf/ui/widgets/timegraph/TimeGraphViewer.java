@@ -56,6 +56,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ILinkEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.ITimeDataProvider;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.ITimeDataProvider2;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeDataProviderCyclesConverter;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphColorScheme;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
@@ -69,7 +70,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils.TimeForma
  *
  * @author Patrick Tasse, and others
  */
-public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
+public class TimeGraphViewer implements ITimeDataProvider2, SelectionListener {
 
     /** Constant indicating that all levels of the time graph should be expanded */
     public static final int ALL_LEVELS = AbstractTreeViewer.ALL_LEVELS;
@@ -465,7 +466,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
                 time0 = timeMin + Math.round(delta * ((double) start / H_SCROLLBAR_MAX));
                 time1 = time0 + range;
 
-                setStartFinishTimeNotify(time0, time1);
+                setStartFinishTimeInternal(time0, time1, true);
             }
         });
 
@@ -737,6 +738,17 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
         return fSelectionEnd;
     }
 
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setStartFinishTimeInternal(long time0, long time1, boolean doNotify) {
+        setStartFinishTimeInt(time0, time1);
+        if (doNotify) {
+            notifyRangeListeners();
+        }
+    }
+
     @Override
     public void setStartFinishTimeNotify(long time0, long time1) {
         setStartFinishTime(time0, time1);
@@ -754,6 +766,10 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
         if (fListenerNotifier != null && fListenerNotifier.hasTimeRangeUpdated()) {
             return;
         }
+        setStartFinishTimeInt(time0, time1);
+    }
+
+    private void setStartFinishTimeInt(long time0, long time1) {
         fTime0 = time0;
         if (fTime0 < fTime0Bound) {
             fTime0 = fTime0Bound;
@@ -779,7 +795,7 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
 
     @Override
     public void resetStartFinishTime() {
-        setStartFinishTime(fTime0Bound, fTime1Bound);
+        setStartFinishTimeInternal(fTime0Bound, fTime1Bound, true);
         fTimeRangeFixed = false;
     }
 
@@ -1529,7 +1545,6 @@ public class TimeGraphViewer implements ITimeDataProvider, SelectionListener {
                 @Override
                 public void run() {
                     resetStartFinishTime();
-                    notifyStartFinishTime();
                 }
             };
             fResetScaleAction.setText(Messages.TmfTimeGraphViewer_ResetScaleActionNameText);

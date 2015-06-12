@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Ericsson
+ * Copyright (c) 2014, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -16,7 +16,7 @@ package org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets;
  * Time data provider that converts between time data units used internally and
  * time in display units used by the caller.
  */
-public interface ITimeDataProviderConverter extends ITimeDataProvider {
+public interface ITimeDataProviderConverter extends ITimeDataProvider2 {
 
     /**
      * Convert a time in time data provider units to a time in display units.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Ericsson
+ * Copyright (c) 2014, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -121,6 +121,22 @@ public class TimeDataProviderCyclesConverter implements ITimeDataProviderConvert
     public long getMinTimeInterval() {
         // do not convert: this is in integer units
         return fProvider.getMinTimeInterval();
+    }
+
+    /**
+     * @since 1.0
+     */
+    @Override
+    public void setStartFinishTimeInternal(long time0, long time1, boolean doNotify) {
+        if (fProvider instanceof ITimeDataProvider2) {
+            ((ITimeDataProvider2) fProvider).setStartFinishTimeInternal(toNanos(time0), toNanos(time1), doNotify);
+        } else {
+            if (doNotify) {
+                fProvider.setStartFinishTimeNotify(toNanos(time0), toNanos(time1));
+            } else {
+                fProvider.setStartFinishTime(toNanos(time0), toNanos(time1));
+            }
+        }
     }
 
     @Override

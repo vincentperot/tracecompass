@@ -112,7 +112,7 @@ public class TimeGraphScale extends TimeGraphBaseControl implements
     private static final int NO_BUTTON = 0;
     private static final int LEFT_BUTTON = 1;
 
-    private ITimeDataProvider fTimeProvider;
+    private ITimeDataProvider2 fTimeProvider;
     private int fDragState = NO_BUTTON;
     private int fDragX0 = 0;
     private int fDragX = 0;
@@ -150,7 +150,7 @@ public class TimeGraphScale extends TimeGraphBaseControl implements
      *            The provider to use
      */
     public void setTimeProvider(ITimeDataProvider timeProvider) {
-        fTimeProvider = timeProvider;
+        fTimeProvider = (ITimeDataProvider2) timeProvider;
     }
 
     /**
@@ -550,7 +550,7 @@ public class TimeGraphScale extends TimeGraphBaseControl implements
 
             // Notify time provider to check the need for listener notification
             if (fDragX != fDragX0 && fTimeProvider.getTime0() != fTimeProvider.getTime1()) {
-                fTimeProvider.setStartFinishTimeNotify(fTimeProvider.getTime0(), fTimeProvider.getTime1());
+                fTimeProvider.setStartFinishTimeInternal(fTimeProvider.getTime0(), fTimeProvider.getTime1(), true);
             }
         }
     }
@@ -571,10 +571,10 @@ public class TimeGraphScale extends TimeGraphBaseControl implements
                 }
                 long interval = (long) ((fTime1bak - fTime0bak) * ((double) fDragX0 / fDragX));
                 if (interval == Long.MAX_VALUE) {
-                    fTimeProvider.setStartFinishTime(fTime0bak, Long.MAX_VALUE);
+                    fTimeProvider.setStartFinishTimeInternal(fTime0bak, Long.MAX_VALUE, false);
                 } else {
                     long time1 = fTime0bak + (long) ((fTime1bak - fTime0bak) * ((double) fDragX0 / fDragX));
-                    fTimeProvider.setStartFinishTime(fTime0bak, time1);
+                    fTimeProvider.setStartFinishTimeInternal(fTime0bak, time1, false);
                 }
             }
         }
@@ -584,7 +584,6 @@ public class TimeGraphScale extends TimeGraphBaseControl implements
     public void mouseDoubleClick(MouseEvent e) {
         if (e.button == 1 && null != fTimeProvider && fTimeProvider.getTime0() != fTimeProvider.getTime1() && (e.stateMask & SWT.BUTTON_MASK) == 0) {
             fTimeProvider.resetStartFinishTime();
-            fTimeProvider.notifyStartFinishTime();
             fTime0bak = fTimeProvider.getTime0();
             fTime1bak = fTimeProvider.getTime1();
         }
