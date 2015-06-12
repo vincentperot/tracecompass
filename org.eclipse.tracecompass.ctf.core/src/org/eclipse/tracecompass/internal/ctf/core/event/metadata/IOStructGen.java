@@ -1100,7 +1100,7 @@ public class IOStructGen {
      */
     private IDeclaration parseTypeDeclarator(@Nullable CommonTree typeDeclarator,
             CommonTree typeSpecifierList, StringBuilder identifierSB)
-                    throws ParseException {
+            throws ParseException {
 
         IDeclaration declaration = null;
         List<CommonTree> children = null;
@@ -1172,6 +1172,40 @@ public class IOStructGen {
                     /* Create the sequence declaration. */
                     declaration = new SequenceDeclaration(lengthName,
                             declaration);
+                } else if (isTrace(first)) {
+                    /* Sequence */
+                    String lengthName = parseTraceScope(lengthChildren);
+
+                    /* check that lengthName was declared */
+                    if (isSignedIntegerField(lengthName)) {
+                        throw new ParseException("Sequence declared with length that is not an unsigned integer"); //$NON-NLS-1$
+                    }
+                    /* Create the sequence declaration. */
+                    declaration = new SequenceDeclaration(lengthName,
+                            declaration);
+
+                } else if (isStream(first)) {
+                    /* Sequence */
+                    String lengthName = parseStreamScope(lengthChildren);
+
+                    /* check that lengthName was declared */
+                    if (isSignedIntegerField(lengthName)) {
+                        throw new ParseException("Sequence declared with length that is not an unsigned integer"); //$NON-NLS-1$
+                    }
+                    /* Create the sequence declaration. */
+                    declaration = new SequenceDeclaration(lengthName,
+                            declaration);
+                } else if (isEvent(first)) {
+                    /* Sequence */
+                    String lengthName = parseEventScope(lengthChildren);
+
+                    /* check that lengthName was declared */
+                    if (isSignedIntegerField(lengthName)) {
+                        throw new ParseException("Sequence declared with length that is not an unsigned integer"); //$NON-NLS-1$
+                    }
+                    /* Create the sequence declaration. */
+                    declaration = new SequenceDeclaration(lengthName,
+                            declaration);
                 } else {
                     throw childTypeError(first);
                 }
@@ -1183,6 +1217,71 @@ public class IOStructGen {
         }
 
         return declaration;
+    }
+
+    private static String parseStreamScope(List<CommonTree> lengthChildren) throws ParseException {
+        List<CommonTree> sublist = lengthChildren.subList(1, lengthChildren.size() - 1);
+        CommonTree nextElem = getFirstChild(sublist.get(0));
+        String lengthName = null;
+        if(isUnaryString(nextElem)) {
+            lengthName = parseUnaryString(nextElem);
+        }
+
+        switch (nextElem.getType()) {
+        case CTFParser.IDENTIFIER:
+            lengthName = concatenateUnaryStrings(sublist);
+            break;
+        case CTFParser.EVENT:
+            return parseEventScope(sublist);
+        default:
+            if(lengthName== null)
+             {
+                throw new ParseException("Unsupported scope stream." + nextElem); //$NON-NLS-1$
+            }
+        }
+        return lengthName;
+    }
+
+    private static String parseEventScope(List<CommonTree> lengthChildren) throws ParseException {
+        List<CommonTree> sublist = lengthChildren.subList(1, lengthChildren.size() - 1);
+        CommonTree nextElem = getFirstChild(sublist.get(0));
+        String lengthName;
+        switch (nextElem.getType()) {
+        case CTFParser.IDENTIFIER:
+            lengthName = concatenateUnaryStrings(sublist);
+            break;
+        default:
+            throw new ParseException("Unsupported scope event." + nextElem); //$NON-NLS-1$
+        }
+        return lengthName;
+    }
+
+    private static String parseTraceScope(List<CommonTree> lengthChildren) throws ParseException {
+        List<CommonTree> sublist = lengthChildren.subList(1, lengthChildren.size() - 1);
+        CommonTree nextElem = getFirstChild(sublist.get(0));
+        String lengthName;
+        switch (nextElem.getType()) {
+        case CTFParser.IDENTIFIER:
+            lengthName = concatenateUnaryStrings(sublist);
+            break;
+        case CTFParser.STREAM:
+            return parseStreamScope(sublist);
+        default:
+            throw new ParseException("Unsupported scope trace." + nextElem); //$NON-NLS-1$
+        }
+        return lengthName;
+    }
+
+    private static boolean isEvent(CommonTree first) {
+        return first.getType() == CTFParser.EVENT;
+    }
+
+    private static boolean isStream(CommonTree first) {
+        return first.getType() == CTFParser.STREAM;
+    }
+
+    private static boolean isTrace(CommonTree first) {
+        return first.getType() == CTFParser.TRACE;
     }
 
     private boolean isSignedIntegerField(String lengthName) throws ParseException {
@@ -1546,7 +1645,7 @@ public class IOStructGen {
                 CommonTree structNameIdentifier = getFirstChild(child);
                 structName = structNameIdentifier.getText();
                 DeclarationScope structScope = getCurrentScope().lookupChild(structName);
-                if(structScope!= null){
+                if (structScope != null) {
                     structScope.setName(structName);
                 }
                 break;
@@ -1602,7 +1701,7 @@ public class IOStructGen {
             if (hasName) {
                 getCurrentScope().registerStruct(structName, structDeclaration);
             }
-        } else /* !hasBody */ {
+        } else /* !hasBody */{
             if (structName != null) {
                 /* Name and !body */
 
@@ -1892,7 +1991,7 @@ public class IOStructGen {
      */
     private static long parseEnumEnumerator(CommonTree enumerator,
             EnumDeclaration enumDeclaration, long lastHigh)
-                    throws ParseException {
+            throws ParseException {
 
         List<CommonTree> children = getChildren(enumerator);
 
@@ -2033,7 +2132,7 @@ public class IOStructGen {
                 getCurrentScope().registerVariant(variantName,
                         variantDeclaration);
             }
-        } else /* !hasBody */ {
+        } else /* !hasBody */{
             if (hasName) {
                 /* Name and !body */
 
@@ -2156,7 +2255,7 @@ public class IOStructGen {
      */
     private static String createTypeDeclarationString(
             CommonTree typeSpecifierList, @Nullable List<CommonTree> pointers)
-                    throws ParseException {
+            throws ParseException {
         StringBuilder sb = new StringBuilder();
 
         createTypeSpecifierListString(typeSpecifierList, sb);
@@ -2176,7 +2275,7 @@ public class IOStructGen {
      */
     private static void createTypeSpecifierListString(
             CommonTree typeSpecifierList, StringBuilder sb)
-                    throws ParseException {
+            throws ParseException {
 
         List<CommonTree> children = getChildren(typeSpecifierList);
 
@@ -2763,6 +2862,7 @@ public class IOStructGen {
 
     /**
      * Adds a new declaration scope on the top of the scope stack.
+     *
      * @throws ParseException
      */
     private void pushScope(String name) throws ParseException {
