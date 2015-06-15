@@ -24,19 +24,34 @@ public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.tmf.ui.views.statistics.messages"; //$NON-NLS-1$
 
     /**
-     * String for the global tab name
+     * String for the global tab name and on top of the global selection
+     * piechart
      */
     public static String TmfStatisticsView_GlobalTabName;
     /**
-     * String for the global tab name
+     * String shown on top of the time-range selection piechart
+     *
      * @since 1.0
      */
     public static String TmfStatisticsView_TimeRangeSelectionPieChartName;
     /**
-     * String for the global tab name
+     * String given to the slice in the piechart containing the too little
+     * slices
      * @since 1.0
      */
     public static String TmfStatisticsView_PieChartOthersSliceName;
+
+    /**
+     * Name given to the jobs scheduled to update the view
+     * @since 1.0
+     */
+    public static String TmfStatisticsView_ViewUpdateJobName;
+
+    /**
+     * Name given to the jobs scheduled to update the Statistics model
+     * @since 1.0
+     */
+    public static String TmfStatisticsView_StatisticsUpdateJobName;
 
     static {
         // initialize resource bundle

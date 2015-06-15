@@ -17,6 +17,10 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.statistics;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -38,6 +42,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.ui.TmfUiRefreshHandler;
 import org.eclipse.tracecompass.tmf.ui.viewers.piecharts.TmfPieChartViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.TmfStatisticsViewer;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
@@ -86,7 +91,7 @@ public class TmfStatisticsView extends TmfView {
      *
      * @since 1.0
      */
-    protected final TmfViewerFolder fFolderViewer;
+    private final TmfViewerFolder fFolderViewer;
 
     /**
      * The viewer that contains the tree showing the statistics
@@ -124,7 +129,7 @@ public class TmfStatisticsView extends TmfView {
          */
         Composite temporaryParent = new Shell();
         fFolderViewer = new TmfViewerFolder(temporaryParent);
-        fModel = new TmfStatisticsModel(this);
+        fModel = new TmfStatisticsModel(Messages.TmfStatisticsView_GlobalTabName, this);
         fPieChartViewer = new TmfPieChartViewer(temporaryParent,
                 Messages.TmfStatisticsView_GlobalTabName,
                 Messages.TmfStatisticsView_TimeRangeSelectionPieChartName,
@@ -197,6 +202,8 @@ public class TmfStatisticsView extends TmfView {
         fFolderViewer.clear();
         createStatisticsTreeViewer();
         fModel.requestData(fModel.getTrace().getTimeRange());
+        ViewUpdateJob viewerUpdateJob = new ViewUpdateJob(Messages.TmfStatisticsView_ViewUpdateJobName, true);
+        viewerUpdateJob.schedule();
         fFolderViewer.layout();
         getPieChartViewer().layout();
     }
@@ -222,9 +229,13 @@ public class TmfStatisticsView extends TmfView {
                 TmfTraceContext ctx = TmfTraceManager.getInstance().getCurrentTraceContext();
                 TmfTimeRange timeRange = ctx.getSelectionRange();
                 fModel.requestTimeRangeData(timeRange);
+                ViewUpdateJob job = new ViewUpdateJob("Statistics View update", false); //$NON-NLS-1$
+                job.schedule();
             }
         }
         fModel.requestData(signal.getRange());
+        ViewUpdateJob job = new ViewUpdateJob("Statistics View update", true); //$NON-NLS-1$
+        job.schedule();
     }
 
     /**
@@ -241,6 +252,8 @@ public class TmfStatisticsView extends TmfView {
         ITmfTimestamp end = signal.getEndTime();
         TmfTimeRange timeRange = new TmfTimeRange(begin, end);
         fModel.requestTimeRangeData(timeRange);
+        ViewUpdateJob job = new ViewUpdateJob("Statistics View update", false); //$NON-NLS-1$
+        job.schedule();
     }
 
     /**
@@ -341,10 +354,12 @@ public class TmfStatisticsView extends TmfView {
         if (fModel.getTrace() != null) {
             // Shows the name of the trace in the global tab
             fStatsViewer = new TmfStatisticsViewer(folder, Messages.TmfStatisticsView_GlobalTabName + " - " + fModel.getTrace().getName()); //$NON-NLS-1$
+            fModel.setName(Messages.TmfStatisticsView_GlobalTabName + " - " + fModel.getTrace().getName()); //$NON-NLS-1$
             fFolderViewer.addTab(fStatsViewer, Messages.TmfStatisticsView_GlobalTabName, defaultStyle);
         } else {
             // There is no trace selected. Shows an empty global tab
             fStatsViewer = new TmfStatisticsViewer(folder, Messages.TmfStatisticsView_GlobalTabName);
+            fModel.setName(Messages.TmfStatisticsView_GlobalTabName);
             fFolderViewer.addTab(fStatsViewer, Messages.TmfStatisticsView_GlobalTabName, defaultStyle);
         }
 
@@ -433,15 +448,17 @@ public class TmfStatisticsView extends TmfView {
 
     /**
      * Called when an trace request has been completed successfully.
-     *
-     * @param global
-     *            Tells if the request is a global or time range (partial)
-     *            request.
+     * Used to refresh the tree viewer once the model is finished
      * @since 1.0
      */
-    public void signalTreeModelReady(boolean global) {
-        fStatsViewer.refresh();
-        waitCursor(false);
+    private void signalTreeModelReady() {
+        TmfUiRefreshHandler.getInstance().queueUpdate(this, new Runnable() {
+            @Override
+            public void run() {
+                fStatsViewer.refresh();
+                waitCursor(false);
+            }
+        });
     }
 
     /**
@@ -452,11 +469,11 @@ public class TmfStatisticsView extends TmfView {
      *            request.
      * @since 1.0
      */
-    public void signalPieChartModelReady(boolean global) {
+    private void signalPieChartModelReady(boolean global) {
         if (global) {
             fPieChartViewer.setGlobalPieChartEntries(fModel.getPieChartGlobalModel());
         } else {
-        fPieChartViewer.setTimeRangePieChartEntries(fModel.getPieChartSelectionModel());
+            fPieChartViewer.setTimeRangePieChartEntries(fModel.getPieChartSelectionModel());
         }
     }
 
@@ -466,6 +483,51 @@ public class TmfStatisticsView extends TmfView {
      */
     public TmfStatisticsViewer getStatsViewer() {
         return fStatsViewer;
+    }
+
+    /**
+     * @since 1.0
+     * @return the model represented by this view
+     */
+    public TmfStatisticsModel getModel() {
+        return fModel;
+    }
+
+    private class ViewUpdateJob extends Job {
+        /** The delay (in ms) between each update in live-reading mode */
+        private static final long LIVE_VIEW_UPDATE_DELAY = 500;
+
+        /** A flag indicating if the update is global or time-range only */
+        private final boolean fIsGlobal;
+
+        public ViewUpdateJob(String name, boolean isGlobal) {
+            super(name);
+            fIsGlobal = isGlobal;
+        }
+
+        @Override
+        protected IStatus run(IProgressMonitor monitor) {
+            boolean finished = fIsGlobal ? fModel.isGlobalModelReady() : fModel.isPartialModelReady();
+            do {
+                /* Polling */
+                if (monitor.isCanceled()) {
+                    return Status.CANCEL_STATUS;
+                }
+
+                try {
+                    Thread.sleep(LIVE_VIEW_UPDATE_DELAY);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                signalTreeModelReady();
+                finished = fIsGlobal ? fModel.isGlobalModelReady() : fModel.isPartialModelReady();
+
+            } while (!finished);
+            /* send one last signal to update the tree and the charts*/
+            signalTreeModelReady();
+            signalPieChartModelReady(fIsGlobal);
+            return Status.OK_STATUS;
+        }
     }
 
 }
