@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 Ericsson
+ * Copyright (c) 2013, 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -36,9 +36,7 @@ public class HistogramSelectionStartControl extends HistogramCurrentTimeControl 
         if (fParentView.getLinkState()) {
             fParentView.updateSelectionTime(time, time);
         } else {
-            long begin = Math.min(time, fParentView.getSelectionEnd());
-            long end = Math.max(time, fParentView.getSelectionEnd());
-            fParentView.updateSelectionTime(begin, end);
+            fParentView.updateSelectionTime(time, fParentView.getSelectionEnd());
         }
     }
 

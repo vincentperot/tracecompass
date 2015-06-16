@@ -134,7 +134,7 @@ public class HistogramView extends TmfView implements ITmfTimeAligned {
 
     // Link
     private Label fLinkButton;
-    private boolean fLinkState;
+    private boolean fLinkState = true;
 
     // Histogram/request for the full trace range
     private static FullTraceHistogram fFullTraceHistogram;
@@ -301,6 +301,7 @@ public class HistogramView extends TmfView implements ITmfTimeAligned {
         fSelectionEndControl = new HistogramSelectionEndControl(this, selectionGroup, selectionEndLabel, 0L);
         fSelectionEndControl.setLayoutData(gridData);
         fSelectionEndControl.setValue(Long.MIN_VALUE);
+        fSelectionEndControl.setEnabled(!fLinkState);
 
         // Link button
         gridData = new GridData(GridData.BEGINNING, GridData.CENTER, false, false);
