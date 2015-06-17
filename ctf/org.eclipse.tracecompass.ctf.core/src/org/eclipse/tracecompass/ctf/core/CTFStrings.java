@@ -95,7 +95,7 @@ public interface CTFStrings {
     /**
      * Magic number
      *
-     * @since 1.0
+     * @since 2.0
      */
     String MAGIC = "magic";
 }
