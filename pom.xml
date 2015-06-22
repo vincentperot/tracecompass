@@ -157,7 +157,7 @@
 </profiles>
 
   <modules>
-    <module>doc</module>
+    <!--<module>doc</module>
     <module>org.eclipse.tracecompass.common.core</module>
     <module>org.eclipse.tracecompass.common.core.tests</module>
 
@@ -246,7 +246,9 @@
     <module>org.eclipse.tracecompass.rcp</module>
     <module>org.eclipse.tracecompass.rcp.ui</module>
 
-    <module>org.eclipse.tracecompass.examples</module>
+    <module>org.eclipse.tracecompass.examples</module>-->
+
+    <module>org.eclipse.tracecompass.target</module>
   </modules>
 
     <build>
@@ -256,31 +258,10 @@
                 <artifactId>target-platform-configuration</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
-                    <includePackedArtifacts>true</includePackedArtifacts>
                     <environments>
-                        <environment>
-                            <os>win32</os>
-                            <ws>win32</ws>
-                            <arch>x86</arch>
-                        </environment>
-                        <environment>
-                            <os>win32</os>
-                            <ws>win32</ws>
-                            <arch>x86_64</arch>
-                        </environment>
                         <environment>
                             <os>macosx</os>
                             <ws>cocoa</ws>
-                            <arch>x86_64</arch>
-                        </environment>
-                        <environment>
-                            <os>linux</os>
-                            <ws>gtk</ws>
-                            <arch>x86</arch>
-                        </environment>
-                        <environment>
-                            <os>linux</os>
-                            <ws>gtk</ws>
                             <arch>x86_64</arch>
                         </environment>
                     </environments>
