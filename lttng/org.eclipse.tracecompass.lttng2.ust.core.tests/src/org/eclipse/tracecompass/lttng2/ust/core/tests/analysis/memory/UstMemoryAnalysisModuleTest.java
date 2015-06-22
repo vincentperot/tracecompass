@@ -12,20 +12,15 @@
 
 package org.eclipse.tracecompass.lttng2.ust.core.tests.analysis.memory;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Set;
-
-import org.eclipse.tracecompass.internal.lttng2.ust.core.LttngUstStrings;
-import org.eclipse.tracecompass.lttng2.control.core.session.SessionConfigStrings;
 import org.eclipse.tracecompass.lttng2.ust.core.analysis.memory.UstMemoryAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 
 /**
  * Tests for the {@link UstMemoryAnalysisModule}
@@ -52,50 +47,7 @@ public class UstMemoryAnalysisModuleTest {
     public void testGetAnalysisRequirements() {
         Iterable<TmfAnalysisRequirement> requirements = fUstAnalysisModule.getAnalysisRequirements();
         assertNotNull(requirements);
-        assertTrue(requirements.iterator().hasNext());
-
-        /* There should be the event and domain type */
-        TmfAnalysisRequirement eventReq = null;
-        TmfAnalysisRequirement domainReq = null;
-        int numberOfRequirement = 0;
-        for (TmfAnalysisRequirement requirement : requirements) {
-            ++numberOfRequirement;
-            if (requirement.getType().equals(SessionConfigStrings.CONFIG_ELEMENT_EVENT)) {
-                eventReq = requirement;
-            } else if (requirement.getType().equals(SessionConfigStrings.CONFIG_ELEMENT_DOMAIN)) {
-                domainReq = requirement;
-            }
-        }
-        assertNotNull(eventReq);
-        assertNotNull(domainReq);
-
-        /* There should be two requirements */
-        assertEquals(2, numberOfRequirement);
-
-        /* Verify the content of the requirements themselves */
-        /* Domain should be kernel */
-        assertEquals(1, domainReq.getValues().size());
-        for (String domain : domainReq.getValues()) {
-            assertEquals(SessionConfigStrings.CONFIG_DOMAIN_TYPE_UST, domain);
-        }
-
-        /* Events */
-        Set<String> expectedEvents = ImmutableSet.of(
-                LttngUstStrings.MALLOC,
-                LttngUstStrings.FREE,
-                LttngUstStrings.CALLOC,
-                LttngUstStrings.REALLOC,
-                LttngUstStrings.MEMALIGN,
-                LttngUstStrings.POSIX_MEMALIGN
-                );
-
-        assertEquals(6, eventReq.getValues().size());
-        for (String event : eventReq.getValues()) {
-            assertTrue("Unexpected event " + event, expectedEvents.contains(event));
-        }
-
-        Set<String> infos = eventReq.getInformation();
-        assertEquals(2, infos.size());
+        assertTrue(Iterables.isEmpty(requirements));
     }
 
 }

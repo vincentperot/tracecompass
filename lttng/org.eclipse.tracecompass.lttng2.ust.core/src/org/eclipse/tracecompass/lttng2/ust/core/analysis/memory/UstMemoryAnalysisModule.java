@@ -15,21 +15,16 @@ package org.eclipse.tracecompass.lttng2.ust.core.analysis.memory;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
-import java.util.Set;
+import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.internal.lttng2.ust.core.LttngUstStrings;
 import org.eclipse.tracecompass.internal.lttng2.ust.core.analysis.memory.UstMemoryStateProvider;
-import org.eclipse.tracecompass.lttng2.control.core.session.SessionConfigStrings;
 import org.eclipse.tracecompass.lttng2.ust.core.trace.LttngUstTrace;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement;
-import org.eclipse.tracecompass.tmf.core.analysis.TmfAnalysisRequirement.ValuePriorityLevel;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.statesystem.ITmfStateProvider;
 import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
  * This analysis build a state system from the libc memory instrumentation on a
@@ -43,35 +38,6 @@ public class UstMemoryAnalysisModule extends TmfStateSystemAnalysisModule {
      * Analysis ID, it should match that in the plugin.xml file
      */
     public static final @NonNull String ID = "org.eclipse.linuxtools.lttng2.ust.analysis.memory"; //$NON-NLS-1$
-
-    private static final ImmutableSet<String> REQUIRED_EVENTS = ImmutableSet.of(
-            LttngUstStrings.MALLOC,
-            LttngUstStrings.FREE,
-            LttngUstStrings.CALLOC,
-            LttngUstStrings.REALLOC,
-            LttngUstStrings.MEMALIGN,
-            LttngUstStrings.POSIX_MEMALIGN
-            );
-
-    /** The requirements as an immutable set */
-    private static final @NonNull Set<TmfAnalysisRequirement> REQUIREMENTS;
-
-    static {
-        /* Initialize the requirements for the analysis: domain and events */
-        TmfAnalysisRequirement eventsReq = new TmfAnalysisRequirement(SessionConfigStrings.CONFIG_ELEMENT_EVENT, REQUIRED_EVENTS, ValuePriorityLevel.MANDATORY);
-        /*
-         * In order to have these events, the libc wrapper with probes should be
-         * loaded
-         */
-        eventsReq.addInformation(Messages.UstMemoryAnalysisModule_EventsLoadingInformation);
-        eventsReq.addInformation(Messages.UstMemoryAnalysisModule_EventsLoadingExampleInformation);
-
-        /* The domain type of the analysis */
-        TmfAnalysisRequirement domainReq = new TmfAnalysisRequirement(SessionConfigStrings.CONFIG_ELEMENT_DOMAIN);
-        domainReq.addValue(SessionConfigStrings.CONFIG_DOMAIN_TYPE_UST, ValuePriorityLevel.MANDATORY);
-
-        REQUIREMENTS = checkNotNull(ImmutableSet.of(domainReq, eventsReq));
-    }
 
     @Override
     protected ITmfStateProvider createStateProvider() {
@@ -96,6 +62,48 @@ public class UstMemoryAnalysisModule extends TmfStateSystemAnalysisModule {
 
     @Override
     public Iterable<TmfAnalysisRequirement> getAnalysisRequirements() {
-        return REQUIREMENTS;
+        return checkNotNull(Collections.EMPTY_SET);
+
+        // FIXME Analysis requirements are currently only checked before the
+        // trace is initialized.
+        // Since the check here depends on the tracer version, we cannot know
+        // the event names in advance.
+        // Below is an example implementation of what should be done once the
+        // requirements are checked after initialization.
+
+//        LttngUstTrace trace = this.getTrace();
+//        if (trace == null) {
+//            Activator.getDefault().logError("UST Memory Analysis : Cannot get requirements of uninitialized trace."); //$NON-NLS-1$
+//            return checkNotNull(Collections.EMPTY_SET);
+//        }
+//        ILttngUstEventLayout layout = trace.getEventLayout();
+//        return generateRequirements(layout);
     }
+//
+//    private static @NonNull Set<TmfAnalysisRequirement> generateRequirements(ILttngUstEventLayout layout) {
+//        /* Get the required event names from the layout */
+//        final ImmutableSet<String> requiredEvents = ImmutableSet.of(
+//                layout.eventLibcMalloc(),
+//                layout.eventLibcFree(),
+//                layout.eventLibcCalloc(),
+//                layout.eventLibcRealloc(),
+//                layout.eventLibcMemalign(),
+//                layout.eventLibcPosixMemalign()
+//                );
+//
+//        /* Initialize the requirements for the analysis: domain and events */
+//        TmfAnalysisRequirement eventsReq = new TmfAnalysisRequirement(SessionConfigStrings.CONFIG_ELEMENT_EVENT, requiredEvents, ValuePriorityLevel.MANDATORY);
+//        /*
+//         * In order to have these events, the libc wrapper with probes should be
+//         * loaded
+//         */
+//        eventsReq.addInformation(Messages.UstMemoryAnalysisModule_EventsLoadingInformation);
+//        eventsReq.addInformation(Messages.UstMemoryAnalysisModule_EventsLoadingExampleInformation);
+//
+//        /* The domain type of the analysis */
+//        TmfAnalysisRequirement domainReq = new TmfAnalysisRequirement(SessionConfigStrings.CONFIG_ELEMENT_DOMAIN);
+//        domainReq.addValue(SessionConfigStrings.CONFIG_DOMAIN_TYPE_UST, ValuePriorityLevel.MANDATORY);
+//
+//        return checkNotNull(ImmutableSet.of(domainReq, eventsReq));
+//    }
 }
