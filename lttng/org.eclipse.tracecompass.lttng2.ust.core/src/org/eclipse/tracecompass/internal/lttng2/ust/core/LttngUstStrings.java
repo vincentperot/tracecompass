@@ -19,33 +19,15 @@ package org.eclipse.tracecompass.internal.lttng2.ust.core;
  * @author Geneviève Bastien
  * @noimplement This interface only contains static definitions.
  */
-@SuppressWarnings({ "nls", "javadoc" })
+@SuppressWarnings("nls")
 public interface LttngUstStrings {
 
     /** Memory state system attribute name */
-    String UST_MEMORY_MEMORY_ATTRIBUTE = "Memory"; //$NON-NLS-1$
+    String UST_MEMORY_MEMORY_ATTRIBUTE = "Memory";
+
     /** Procname state system attribute name */
-    String UST_MEMORY_PROCNAME_ATTRIBUTE = "Procname"; //$NON-NLS-1$
+    String UST_MEMORY_PROCNAME_ATTRIBUTE = "Procname";
+
     /** Name of the attribute to store memory usage of events with no context */
     String OTHERS = "Others";
-
-    /* UST_libc event names */
-    String MALLOC = "ust_libc:malloc";
-    String CALLOC = "ust_libc:calloc";
-    String REALLOC = "ust_libc:realloc";
-    String FREE = "ust_libc:free";
-    String MEMALIGN = "ust_libc:memalign";
-    String POSIX_MEMALIGN = "ust_libc:posix_memalign";
-
-    /* Possible contexts */
-    String CONTEXT_VTID = "context._vtid";
-    String CONTEXT_PROCNAME = "context._procname";
-
-    /* Event fields */
-    String FIELD_PTR = "ptr";
-    String FIELD_NMEMB = "nmemb";
-    String FIELD_SIZE = "size";
-    String FIELD_OUTPTR = "out_ptr";
-    String FIELD_INPTR = "in_ptr";
-
 }
