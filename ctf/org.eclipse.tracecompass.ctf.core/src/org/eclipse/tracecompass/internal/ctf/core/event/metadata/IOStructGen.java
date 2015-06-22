@@ -2610,7 +2610,7 @@ public class IOStructGen {
         CommonTree firstChild = (CommonTree) rightNode.getChild(0);
 
         if (isUnaryString(firstChild)) {
-            String strval = concatenateUnaryStrings(rightNode.getChildren());
+            String strval = concatenateUnaryStrings(rightNode.getChildren()).toUpperCase();
 
             if (strval.equals(MetadataStrings.UTF8)) {
                 return Encoding.UTF8;
