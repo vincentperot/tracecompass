@@ -575,6 +575,7 @@ public class HistogramDataModel implements IHistogramDataModel {
 
         // Compact as needed
         if (fullRange) {
+            fEndTime = Math.max(fEndTime, endTime);
             while (endTime >= fTimeLimit) {
                 mergeBuckets();
             }
@@ -582,22 +583,25 @@ public class HistogramDataModel implements IHistogramDataModel {
 
         int indexStart = (int) ((startTime - fFirstBucketTime) / fBucketDuration);
         int indexEnd = (int) ((endTime - fFirstBucketTime) / fBucketDuration);
+        indexEnd = Math.min(indexEnd, fLostEventsBuckets.length - 1);
         int nbBucketRange = (indexEnd - indexStart) + 1;
 
-        int lostEventPerBucket = (int) Math.ceil((double) nbLostEvents / nbBucketRange);
-        long lastLostCol = Math.max(1, nbLostEvents - lostEventPerBucket * (nbBucketRange - 1));
+        double lostEventsPerBucket = (double) nbLostEvents / nbBucketRange;
 
         // Increment the right bucket, bear in mind that ranges make it almost
-        // certain that some lost events are out of range
-        for (int index = indexStart; index <= indexEnd && index < fLostEventsBuckets.length; index++) {
-            if (index == (indexStart + nbBucketRange - 1)) {
-                fLostEventsBuckets[index] += lastLostCol;
-            } else {
-                fLostEventsBuckets[index] += lostEventPerBucket;
-            }
+        // certain that some lost events are out of range when not full range
+        double remainder = 0.0;
+        for (int index = indexStart; index <= indexEnd; index++) {
+            remainder += lostEventsPerBucket;
+            long lostEvents = Math.round(remainder);
+            fLostEventsBuckets[index] += lostEvents;
+            remainder -= lostEvents;
         }
 
         fNbEvents++;
+        if (fullRange) {
+            fLastBucket = Math.max(fLastBucket, indexEnd);
+        }
 
         fireModelUpdateNotification(nbLostEvents);
     }
