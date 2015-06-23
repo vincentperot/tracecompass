@@ -51,8 +51,7 @@ public class TmfEventTest {
     private final String fTypeId = "TestType";
     private final String fLabel1 = "AString";
     private final String fLabel2 = "AnInteger";
-    private final String[] fLabels = new String[] { fLabel1, fLabel2 };
-    private final TmfEventType fType = new TmfEventType(fTypeId, TmfEventField.makeRoot(fLabels));
+    private final TmfEventType fType = new TmfEventType(fTypeId);
     private final String fName = fType.getName();
 
     private final Object fValue1a = "Some string";
@@ -272,8 +271,7 @@ public class TmfEventTest {
         assertTrue("equals", event2.equals(event1));
 
         final String typeId = "OtherTestType";
-        final String[] labels = new String[] { fLabel2, fLabel1 };
-        final TmfEventType newType = new TmfEventType(typeId, TmfEventField.makeRoot(labels));
+        final TmfEventType newType = new TmfEventType(typeId);
 
         event2 = new TmfEvent(null, 0, fTimestamp1, newType, fContent1);
         assertFalse("equals", event1.equals(event2));

@@ -12,8 +12,6 @@
 
 package org.eclipse.tracecompass.tmf.core.parsers.custom;
 
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 
 /**
@@ -30,16 +28,6 @@ public abstract class CustomEventType extends TmfEventType {
      *            Trace definition
      */
     public CustomEventType(CustomTraceDefinition definition) {
-        super(definition.definitionName, getRootField(definition));
+        super(definition.definitionName);
     }
-
-    private static ITmfEventField getRootField(CustomTraceDefinition definition) {
-        ITmfEventField[] fields = new ITmfEventField[definition.outputs.size()];
-        for (int i = 0; i < fields.length; i++) {
-            fields[i] = new TmfEventField(definition.outputs.get(i).name, null, null);
-        }
-        ITmfEventField rootField = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, null, fields);
-        return rootField;
-    }
-
 }

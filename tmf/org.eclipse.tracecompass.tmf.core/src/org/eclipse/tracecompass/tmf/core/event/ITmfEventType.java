@@ -12,8 +12,6 @@
 
 package org.eclipse.tracecompass.tmf.core.event;
 
-import java.util.Collection;
-
 /**
  * The generic event type in TMF. It contains a reference to the full field structure
  * for that event type.
@@ -45,14 +43,4 @@ public interface ITmfEventType {
      * @return the event type ID
      */
     String getName();
-
-    /**
-     * @return the event type root field
-     */
-    ITmfEventField getRootField();
-
-    /**
-     * @return the event field names (labels)
-     */
-    Collection<String> getFieldNames();
 }

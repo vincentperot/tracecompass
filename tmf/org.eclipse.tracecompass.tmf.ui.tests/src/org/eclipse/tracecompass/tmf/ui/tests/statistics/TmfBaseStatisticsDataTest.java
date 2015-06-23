@@ -51,18 +51,13 @@ public class TmfBaseStatisticsDataTest {
     private final String fTypeId1 = "Some type1";
     private final String fTypeId2 = "Some type2";
 
-    private final String   fLabel0 = "label1";
-    private final String   fLabel1 = "label2";
-    private final String   fLabel2 = "label3";
-    private final String[] fLabels = new String[] { fLabel0, fLabel1, fLabel2 };
-
     private final TmfTimestamp fTimestamp1 = new TmfTimestamp(12345, (byte) 2);
     private final TmfTimestamp fTimestamp2 = new TmfTimestamp(12350, (byte) 2);
     private final TmfTimestamp fTimestamp3 = new TmfTimestamp(12355, (byte) 2);
 
-    private final TmfEventType fType1 = new TmfEventType(fTypeId1, TmfEventField.makeRoot(fLabels));
-    private final TmfEventType fType2 = new TmfEventType(fTypeId1, TmfEventField.makeRoot(fLabels));
-    private final TmfEventType fType3 = new TmfEventType(fTypeId2, TmfEventField.makeRoot(fLabels));
+    private final TmfEventType fType1 = new TmfEventType(fTypeId1);
+    private final TmfEventType fType2 = new TmfEventType(fTypeId1);
+    private final TmfEventType fType3 = new TmfEventType(fTypeId2);
 
     private final ITmfEvent fEvent1;
     private final ITmfEvent fEvent2;

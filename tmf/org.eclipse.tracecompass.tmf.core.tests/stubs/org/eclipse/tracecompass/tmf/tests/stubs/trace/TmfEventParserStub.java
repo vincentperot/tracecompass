@@ -55,9 +55,7 @@ public class TmfEventParserStub implements ITmfEventParser {
                 final String field = "Fmt-" + i + "-Fld-" + j;
                 fields.add(field);
             }
-            final String[] fieldArray = new String[i];
-            final ITmfEventField rootField = TmfEventField.makeRoot(fields.toArray(fieldArray));
-            fTypes[i] = new TmfEventType("Type-" + i, rootField);
+            fTypes[i] = new TmfEventType("Type-" + i);
         }
     }
 

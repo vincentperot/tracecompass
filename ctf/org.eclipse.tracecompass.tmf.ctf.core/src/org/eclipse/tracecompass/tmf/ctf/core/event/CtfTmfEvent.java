@@ -178,7 +178,7 @@ public class CtfTmfEvent extends TmfEvent
     @Override
     public ITmfEventType getType() {
         if (fCtfTmfEventType == null) {
-            fCtfTmfEventType = new CtfTmfEventType(fEventName, getContent());
+            fCtfTmfEventType = new CtfTmfEventType(fEventName);
 
             /*
              * Register the event type in the owning trace, but only if there is

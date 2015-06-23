@@ -83,7 +83,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.gdbtrace.core.GdbTraceCorePlugin;
 import org.eclipse.tracecompass.internal.gdbtrace.core.event.GdbTraceEvent;
 import org.eclipse.tracecompass.internal.gdbtrace.core.event.GdbTraceEventContent;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -138,7 +137,7 @@ public class DsfGdbAdaptor {
     // breakpoint (tracepoint is a kind of breakpoint)
     private  Map<Integer, MIBreakpointDMData> fTpInfo = new HashMap<>();
 
-    private TmfEventType tmfEventType = new TmfEventType("GDB Tracepoint", TmfEventField.makeRoot(new String[] { "Content" })); //$NON-NLS-1$ //$NON-NLS-2$
+    private TmfEventType tmfEventType = new TmfEventType("GDB Tracepoint"); //$NON-NLS-1$
 
     {
         new DsfGdbPlatformEventListener();

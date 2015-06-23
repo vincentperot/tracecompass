@@ -83,9 +83,7 @@ public class TmfUml2SDTestTrace implements ITmfEventParser {
             String receiver = stream.readUTF();
             String signal = stream.readUTF();
 
-            String[] labels = {"sender", "receiver", "signal"};
-
-            TmfEventType tmfEventType = new TmfEventType(type, TmfEventField.makeRoot(labels));
+            TmfEventType tmfEventType = new TmfEventType(type);
 
             String content = "[";
             content += sender;
