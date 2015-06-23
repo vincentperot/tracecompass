@@ -584,17 +584,16 @@ public class HistogramDataModel implements IHistogramDataModel {
         int indexEnd = (int) ((endTime - fFirstBucketTime) / fBucketDuration);
         int nbBucketRange = (indexEnd - indexStart) + 1;
 
-        int lostEventPerBucket = (int) Math.ceil((double) nbLostEvents / nbBucketRange);
-        long lastLostCol = Math.max(1, nbLostEvents - lostEventPerBucket * (nbBucketRange - 1));
+        double lostEventsPerBucket = (double) nbLostEvents / nbBucketRange;
 
         // Increment the right bucket, bear in mind that ranges make it almost
-        // certain that some lost events are out of range
+        // certain that some lost events are out of range when not full range
+        double remainder = 0.0;
         for (int index = indexStart; index <= indexEnd && index < fLostEventsBuckets.length; index++) {
-            if (index == (indexStart + nbBucketRange - 1)) {
-                fLostEventsBuckets[index] += lastLostCol;
-            } else {
-                fLostEventsBuckets[index] += lostEventPerBucket;
-            }
+            remainder += lostEventsPerBucket;
+            long lostEvents = Math.round(remainder);
+            fLostEventsBuckets[index] += lostEvents;
+            remainder -= lostEvents;
         }
 
         fNbEvents++;
