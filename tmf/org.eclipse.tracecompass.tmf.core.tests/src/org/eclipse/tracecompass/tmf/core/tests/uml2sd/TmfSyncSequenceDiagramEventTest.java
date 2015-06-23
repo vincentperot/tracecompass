@@ -33,12 +33,9 @@ import org.junit.Test;
 public class TmfSyncSequenceDiagramEventTest {
 
     private final String fTypeId  = "Some type";
-    private final String fLabel0  = "label1";
-    private final String fLabel1  = "label2";
-    private final String[] fLabels  = new String[] { fLabel0, fLabel1 };
 
     private final TmfTimestamp fTimestamp1 = new TmfTimestamp(12345, (byte) 2);
-    private final TmfEventType fType       = new TmfEventType(fTypeId, TmfEventField.makeRoot(fLabels));
+    private final TmfEventType fType       = new TmfEventType(fTypeId);
 
     private final ITmfEvent fEvent1;
     private final TmfEventField fContent1;

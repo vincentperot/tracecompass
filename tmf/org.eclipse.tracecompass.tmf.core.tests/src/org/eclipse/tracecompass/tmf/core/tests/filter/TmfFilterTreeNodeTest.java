@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNull;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.filter.model.ITmfFilterTreeNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterNode;
@@ -54,7 +53,7 @@ public class TmfFilterTreeNodeTest {
             return false;
         }
     };
-    protected static final ITmfEventType EVENT_TYPE = new TmfEventType("Type", TmfEventField.makeRoot(new String[] { FIELD }));
+    protected static final ITmfEventType EVENT_TYPE = new TmfEventType("Type");
     protected ITmfFilterTreeNode fFilterNode;
 
     @AfterClass

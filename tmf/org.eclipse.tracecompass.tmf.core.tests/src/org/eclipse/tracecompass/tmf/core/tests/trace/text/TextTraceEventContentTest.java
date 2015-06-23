@@ -106,7 +106,6 @@ public class TextTraceEventContentTest {
         SyslogEventType eventType = SyslogEventType.INSTANCE;
         assertEquals("getTypeId", "Syslog", eventType.getName());
         assertNotNull ("instance", eventType);
-        assertEquals ("getFieldNames", 0, eventType.getFieldNames().size());
     }
 
     // ------------------------------------------------------------------------

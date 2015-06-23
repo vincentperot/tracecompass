@@ -14,7 +14,6 @@ package org.eclipse.tracecompass.internal.tmf.pcap.core.event;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 
 /**
@@ -33,7 +32,7 @@ public class PcapEventType extends TmfEventType {
      * Default constructor
      */
     public PcapEventType() {
-        this(DEFAULT_PCAP_TYPE_ID, null);
+        this(DEFAULT_PCAP_TYPE_ID);
     }
 
     /**
@@ -41,11 +40,9 @@ public class PcapEventType extends TmfEventType {
      *
      * @param typeId
      *            the type name
-     * @param root
-     *            the root field
      */
-    public PcapEventType(final String typeId, final @Nullable ITmfEventField root) {
-        super(typeId, root);
+    public PcapEventType(final String typeId) {
+        super(typeId);
     }
 
     /**

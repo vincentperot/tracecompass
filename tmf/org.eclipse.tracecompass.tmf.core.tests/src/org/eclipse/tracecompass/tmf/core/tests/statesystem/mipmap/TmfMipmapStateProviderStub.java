@@ -114,7 +114,7 @@ class TmfMipmapStateProviderStub extends AbstractTmfMipmapStateProvider {
             value = TmfStateValue.nullValue();
         }
         ITmfTimestamp timestamp = new TmfNanoTimestamp(time);
-        ITmfEventType eventType = new TmfEventType(MIPMAP_ID, null);
+        ITmfEventType eventType = new TmfEventType(MIPMAP_ID);
         ITmfEventField content = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, value, null);
         ITmfEvent event = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, timestamp, eventType, content);
         return event;

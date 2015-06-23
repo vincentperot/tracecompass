@@ -93,7 +93,7 @@ public class PcapEventFactory {
         Packet packet = pcapPacket.getMostEcapsulatedPacket();
         if (!fEventTypes.containsKey(packet.getProtocol())) {
             String typeIdString = PcapEventType.DEFAULT_PCAP_TYPE_ID + ':' + packet.getProtocol().getShortName();
-            fEventTypes.put(packet.getProtocol(), new PcapEventType(typeIdString, null));
+            fEventTypes.put(packet.getProtocol(), new PcapEventType(typeIdString));
         }
         TmfEventType eventType = fEventTypes.get(packet.getProtocol());
         if (eventType == null) {

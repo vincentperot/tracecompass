@@ -30,7 +30,7 @@ public class SyslogEventType extends TmfEventType {
      * Default Constructor
      */
     public SyslogEventType() {
-        super(TYPE_ID, null);
+        super(TYPE_ID);
     }
 
 }

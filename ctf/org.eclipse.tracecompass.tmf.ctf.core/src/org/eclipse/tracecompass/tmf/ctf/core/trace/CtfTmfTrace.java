@@ -181,13 +181,8 @@ public class CtfTmfTrace extends TmfTrace
                         for (String fieldName : ied.getFields().getFieldsList()) {
                             content.add(new TmfEventField(nullToEmptyString(fieldName), null, null));
                         }
-                        ITmfEventField contentTree = new TmfEventField(
-                                ITmfEventField.ROOT_FIELD_ID,
-                                null,
-                                content.toArray(new ITmfEventField[content.size()])
-                                );
 
-                        ctfTmfEventType = new CtfTmfEventType(ied.getName(), contentTree);
+                        ctfTmfEventType = new CtfTmfEventType(ied.getName());
                         fContainedEventTypes.put(ctfTmfEventType.getName(), ctfTmfEventType);
                     }
                 }

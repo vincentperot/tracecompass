@@ -13,9 +13,6 @@
 
 package org.eclipse.tracecompass.tmf.core.event;
 
-import java.util.Collection;
-import java.util.Collections;
-
 /**
  * A basic implementation of ITmfEventType.
  *
@@ -32,7 +29,6 @@ public class TmfEventType implements ITmfEventType {
     // ------------------------------------------------------------------------
 
     private final String fTypeId;
-    private final ITmfEventField fRootField;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -42,21 +38,20 @@ public class TmfEventType implements ITmfEventType {
      * Default constructor
      */
     public TmfEventType() {
-        this(DEFAULT_TYPE_ID, null);
+        this(DEFAULT_TYPE_ID);
     }
 
     /**
      * Full constructor
      *
      * @param typeId the type name
-     * @param root the root field
+     * @since 2.0
      */
-    public TmfEventType(final String typeId, final ITmfEventField root) {
+    public TmfEventType(final String typeId) {
         if (typeId == null) {
             throw new IllegalArgumentException();
         }
         fTypeId = typeId;
-        fRootField = root;
     }
 
     /**
@@ -69,7 +64,6 @@ public class TmfEventType implements ITmfEventType {
             throw new IllegalArgumentException();
         }
         fTypeId  = type.getName();
-        fRootField = type.getRootField();
     }
 
     // ------------------------------------------------------------------------
@@ -79,16 +73,6 @@ public class TmfEventType implements ITmfEventType {
     @Override
     public String getName() {
         return fTypeId;
-    }
-
-    @Override
-    public ITmfEventField getRootField() {
-        return fRootField;
-    }
-
-    @Override
-    public Collection<String> getFieldNames() {
-        return (fRootField != null) ? fRootField.getFieldNames() : Collections.EMPTY_SET;
     }
 
     // ------------------------------------------------------------------------

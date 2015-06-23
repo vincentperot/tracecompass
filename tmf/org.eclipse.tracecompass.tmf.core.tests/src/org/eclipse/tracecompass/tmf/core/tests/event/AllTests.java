@@ -25,7 +25,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
     TmfEventFieldTest.class,
     TmfEventTest.class,
-    TmfEventTypeTest.class,
     TmfNanoTimestampTest.class,
     TmfSimpleTimestampTest.class,
     TmfTimePreferencesTest.class,

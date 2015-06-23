@@ -38,7 +38,6 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.tracecompass.internal.tmf.core.Activator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
@@ -285,8 +284,7 @@ public class TmfXmlTraceStub extends TmfTrace {
         }
 
         /* Create a new event with new fields and name */
-        ITmfEventType customEventType = event.getType();
-        TmfEventType eventType = new TmfEventType(eventName, customEventType.getRootField());
+        TmfEventType eventType = new TmfEventType(eventName);
         ITmfEventField eventFields = new CustomEventContent(content.getName(), content.getValue(), fieldsArray);
         /*
          * TODO: Timestamps for these traces are in nanos, but since the

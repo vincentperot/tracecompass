@@ -16,8 +16,6 @@ package org.eclipse.tracecompass.tmf.ctf.core.tests.event;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEventType;
 import org.junit.Test;
 
@@ -36,8 +34,7 @@ public class CtfTmfEventTypeTest {
     @Test
     public void testCtfTmfEventType() {
         String eventName = "";
-        ITmfEventField content = new TmfEventField("", null, new ITmfEventField[] {});
-        CtfTmfEventType result = new CtfTmfEventType(eventName, content);
+        CtfTmfEventType result = new CtfTmfEventType(eventName);
 
         assertNotNull(result);
         assertEquals("", result.toString());
@@ -49,8 +46,7 @@ public class CtfTmfEventTypeTest {
      */
     @Test
     public void testToString() {
-        ITmfEventField emptyField = new TmfEventField("", null, new ITmfEventField[] {});
-        CtfTmfEventType fixture = new CtfTmfEventType("" , emptyField);
+        CtfTmfEventType fixture = new CtfTmfEventType("" );
 
         String result = fixture.toString();
 

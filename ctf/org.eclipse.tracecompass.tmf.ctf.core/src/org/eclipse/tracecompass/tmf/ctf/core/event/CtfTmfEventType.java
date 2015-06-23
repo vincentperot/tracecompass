@@ -11,7 +11,6 @@
 
 package org.eclipse.tracecompass.tmf.ctf.core.event;
 
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 
 /**
@@ -26,11 +25,10 @@ public class CtfTmfEventType extends TmfEventType {
      *
      * @param eventName
      *            The event name
-     * @param content
-     *            The event field
+     * @since 2.0
      */
-    public CtfTmfEventType(String eventName, ITmfEventField content) {
-        super(eventName, content);
+    public CtfTmfEventType(String eventName) {
+        super(eventName);
     }
 
     /**
