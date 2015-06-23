@@ -15,15 +15,13 @@
 package org.eclipse.tracecompass.tmf.ctf.core.trace;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
-import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,8 +43,6 @@ import org.eclipse.tracecompass.internal.tmf.ctf.core.Activator;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.trace.iterator.CtfIterator;
 import org.eclipse.tracecompass.internal.tmf.ctf.core.trace.iterator.CtfIteratorManager;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -68,7 +64,6 @@ import org.eclipse.tracecompass.tmf.ctf.core.context.CtfLocation;
 import org.eclipse.tracecompass.tmf.ctf.core.context.CtfLocationInfo;
 import org.eclipse.tracecompass.tmf.ctf.core.context.CtfTmfContext;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
-import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEventType;
 import org.eclipse.tracecompass.tmf.ctf.core.event.aspect.CtfChannelAspect;
 import org.eclipse.tracecompass.tmf.ctf.core.event.aspect.CtfCpuAspect;
 import org.eclipse.tracecompass.tmf.ctf.core.event.lookup.CtfTmfCallsite;
@@ -119,8 +114,8 @@ public class CtfTmfTrace extends TmfTrace
     // Fields
     // -------------------------------------------
 
-    private final Map<String, CtfTmfEventType> fContainedEventTypes =
-            Collections.synchronizedMap(new HashMap<String, CtfTmfEventType>());
+    private final Set<String> fContainedEventTypes =
+            Collections.synchronizedSet(new HashSet<String>());
 
     private final CtfIteratorManager fIteratorManager =
             new CtfIteratorManager(this);
@@ -174,17 +169,8 @@ public class CtfTmfTrace extends TmfTrace
              */
             try (CtfIterator iter = fIteratorManager.getIterator(ctx)) {
                 for (IEventDeclaration ied : iter.getEventDeclarations()) {
-                    CtfTmfEventType ctfTmfEventType = fContainedEventTypes.get(ied.getName());
-                    if (ctfTmfEventType == null) {
-                        List<ITmfEventField> content = new ArrayList<>();
-                        /* Should only return null the first time */
-                        for (String fieldName : ied.getFields().getFieldsList()) {
-                            content.add(new TmfEventField(nullToEmptyString(fieldName), null, null));
-                        }
-
-                        ctfTmfEventType = new CtfTmfEventType(ied.getName());
-                        fContainedEventTypes.put(ctfTmfEventType.getName(), ctfTmfEventType);
-                    }
+                    /* Set will only keep one instance of each event name */
+                    fContainedEventTypes.add(ied.getName());
                 }
             }
         } catch (final CTFException e) {
@@ -487,8 +473,8 @@ public class CtfTmfTrace extends TmfTrace
      * Gets the list of declared events
      */
     @Override
-    public Set<CtfTmfEventType> getContainedEventTypes() {
-        return ImmutableSet.copyOf(fContainedEventTypes.values());
+    public Set<String> getContainedEventTypes() {
+        return ImmutableSet.copyOf(fContainedEventTypes);
     }
 
     /**
@@ -500,9 +486,10 @@ public class CtfTmfTrace extends TmfTrace
      *
      * @param eventType
      *            The event type to register
+     * @since 2.0
      */
-    public void registerEventType(CtfTmfEventType eventType) {
-        fContainedEventTypes.put(eventType.getName(), eventType);
+    public void registerEventType(String eventType) {
+        fContainedEventTypes.add(eventType);
     }
 
     // -------------------------------------------

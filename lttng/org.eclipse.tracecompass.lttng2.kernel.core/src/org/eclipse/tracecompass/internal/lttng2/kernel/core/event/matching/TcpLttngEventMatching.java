@@ -26,7 +26,6 @@ import org.eclipse.tracecompass.tmf.core.event.matching.TcpEventKey;
 import org.eclipse.tracecompass.tmf.core.event.matching.TmfEventMatching.Direction;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceWithPreDefinedEvents;
-import org.eclipse.tracecompass.tmf.core.trace.TmfEventTypeCollectionHelper;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -68,7 +67,7 @@ public class TcpLttngEventMatching implements ITmfMatchEventDefinition {
         }
         ITmfTraceWithPreDefinedEvents ktrace = (ITmfTraceWithPreDefinedEvents) trace;
 
-        Set<String> traceEvents = TmfEventTypeCollectionHelper.getEventNames(ktrace.getContainedEventTypes());
+        Set<String> traceEvents = ktrace.getContainedEventTypes();
         traceEvents.retainAll(REQUIRED_EVENTS);
         return !traceEvents.isEmpty();
     }

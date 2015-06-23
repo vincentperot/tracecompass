@@ -15,8 +15,6 @@ package org.eclipse.tracecompass.tmf.core.trace;
 
 import java.util.Set;
 
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
-
 /**
  * This interface should be implemented by all trace classes who have a way to
  * know in advance what events it may contain. It allows analyses and other
@@ -47,12 +45,10 @@ public interface ITmfTraceWithPreDefinedEvents {
      * that it can be there.
      *
      * The set should be immutable. Destructive set operations should be
-     * performed on a copy of this set.A helper class
-     * {@link TmfEventTypeCollectionHelper} will provide ways of working with
-     * this data structure.
+     * performed on a copy of this set.
      *
      * @return The set of events that might be present in the trace
      */
-    Set<? extends ITmfEventType> getContainedEventTypes();
+    Set<String> getContainedEventTypes();
 
 }
