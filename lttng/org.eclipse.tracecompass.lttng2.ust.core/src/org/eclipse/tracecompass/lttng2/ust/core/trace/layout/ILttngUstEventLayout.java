@@ -34,6 +34,15 @@ public interface ILttngUstEventLayout {
     String eventLibcPosixMemalign();
 
     // ------------------------------------------------------------------------
+    // Event names used in liblttng-ust-cyg-profile(-fast)
+    // ------------------------------------------------------------------------
+
+    String eventCygProfileFuncEntry();
+    String eventCygProfileFastFuncEntry();
+    String eventCygProfileFuncExit();
+    String eventCygProfileFastFuncExit();
+
+    // ------------------------------------------------------------------------
     // Field names
     // ------------------------------------------------------------------------
 
@@ -42,6 +51,8 @@ public interface ILttngUstEventLayout {
     String fieldSize();
     String fieldOutPtr();
     String fieldInPtr();
+
+    String fieldAddr();
 
     // ------------------------------------------------------------------------
     // Context field names
