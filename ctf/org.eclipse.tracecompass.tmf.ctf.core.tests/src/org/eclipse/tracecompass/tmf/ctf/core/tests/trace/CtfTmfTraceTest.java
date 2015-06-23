@@ -28,7 +28,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.signal.TmfEndSynchSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignal;
@@ -37,7 +36,6 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfNanoTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
-import org.eclipse.tracecompass.tmf.core.trace.TmfEventTypeCollectionHelper;
 import org.eclipse.tracecompass.tmf.ctf.core.context.CtfLocation;
 import org.eclipse.tracecompass.tmf.ctf.core.context.CtfLocationInfo;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
@@ -202,7 +200,7 @@ public class CtfTmfTraceTest {
      */
     @Test
     public void testGetContainedEventTypes() {
-        Set<? extends ITmfEventType> result = fixture.getContainedEventTypes();
+        Set<String> result = fixture.getContainedEventTypes();
         assertNotNull(result);
         assertFalse(result.isEmpty());
     }
@@ -395,8 +393,7 @@ public class CtfTmfTraceTest {
      */
     @Test
     public void testEventLookup() {
-        Set<? extends ITmfEventType> eventTypes = fixture.getContainedEventTypes();
-        Set<String> eventNames = TmfEventTypeCollectionHelper.getEventNames(eventTypes);
+        Set<String> eventNames = fixture.getContainedEventTypes();
         assertTrue(eventNames.contains("sched_switch"));
         assertFalse(eventNames.contains("Sched_switch"));
         String[] events = { "sched_switch", "sched_wakeup", "timer_init" };

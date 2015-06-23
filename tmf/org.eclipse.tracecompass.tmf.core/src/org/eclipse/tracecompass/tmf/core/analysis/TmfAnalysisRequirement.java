@@ -22,7 +22,6 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTraceWithPreDefinedEvents;
-import org.eclipse.tracecompass.tmf.core.trace.TmfEventTypeCollectionHelper;
 
 /**
  * Class that contains all the values associated with a type needed by an
@@ -272,7 +271,7 @@ public class TmfAnalysisRequirement {
         switch (fType) {
         case TYPE_EVENT:
             if (trace instanceof ITmfTraceWithPreDefinedEvents) {
-                Set<String> traceEvents = TmfEventTypeCollectionHelper.getEventNames(((ITmfTraceWithPreDefinedEvents) trace).getContainedEventTypes());
+                Set<String> traceEvents = ((ITmfTraceWithPreDefinedEvents) trace).getContainedEventTypes();
                 Set<String> mandatoryValues = getValues(ValuePriorityLevel.MANDATORY);
                 return traceEvents.containsAll(mandatoryValues);
             }

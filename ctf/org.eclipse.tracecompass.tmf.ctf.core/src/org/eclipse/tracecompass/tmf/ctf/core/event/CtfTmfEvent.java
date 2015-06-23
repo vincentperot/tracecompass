@@ -184,7 +184,7 @@ public class CtfTmfEvent extends TmfEvent
              * Register the event type in the owning trace, but only if there is
              * one
              */
-            getTrace().registerEventType(fCtfTmfEventType);
+            getTrace().registerEventType(fEventName);
         }
         return fCtfTmfEventType;
     }
