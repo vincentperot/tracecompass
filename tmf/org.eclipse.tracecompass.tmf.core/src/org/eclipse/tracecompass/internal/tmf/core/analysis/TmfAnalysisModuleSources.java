@@ -59,9 +59,9 @@ public final class TmfAnalysisModuleSources {
                 try {
                     IAnalysisModuleSource source = (IAnalysisModuleSource) ce.createExecutableExtension(CLASS_ATTR);
                     sources.add(source);
-                } catch (InvalidRegistryObjectException e) {
-                    Activator.logError("Error creating module source", e); //$NON-NLS-1$
-                } catch (CoreException e) {
+                } catch (ClassCastException e) {
+                    Activator.logError("Attempting to load incompatible module source", e); //$NON-NLS-1$
+                } catch (InvalidRegistryObjectException | CoreException e) {
                     Activator.logError("Error creating module source", e); //$NON-NLS-1$
                 }
 
