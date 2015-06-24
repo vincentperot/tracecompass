@@ -36,7 +36,6 @@ import org.eclipse.tracecompass.internal.tmf.pcap.core.event.PcapRootEventField;
 import org.eclipse.tracecompass.internal.tmf.pcap.core.trace.PcapTrace;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 
@@ -50,7 +49,7 @@ public class PcapEventFactory {
     private static final ITmfEventField[] EMPTY_FIELD_ARRAY = new ITmfEventField[0];
     private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
-    private static final Map<PcapProtocol, TmfEventType> fEventTypes = new HashMap<>();
+    private static final Map<PcapProtocol, PcapEventType> fEventTypes = new HashMap<>();
 
     private PcapEventFactory() {
     }
@@ -95,9 +94,9 @@ public class PcapEventFactory {
             String typeIdString = PcapEventType.DEFAULT_PCAP_TYPE_ID + ':' + packet.getProtocol().getShortName();
             fEventTypes.put(packet.getProtocol(), new PcapEventType(typeIdString));
         }
-        TmfEventType eventType = fEventTypes.get(packet.getProtocol());
+        PcapEventType eventType = fEventTypes.get(packet.getProtocol());
         if (eventType == null) {
-            eventType = new TmfEventType();
+            eventType = new PcapEventType();
         }
         return new PcapEvent(trace, rank, tmfTimestamp, dataLink, nullToEmptyString(eventType.getName()), field, fileName, packet);
 

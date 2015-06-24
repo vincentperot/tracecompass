@@ -27,7 +27,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
  * @author Francois Chouinard
  *
  * @see ITmfTimestamp
- * @see ITmfEventType
  * @see ITmfEventField
  * @see ITmfTrace
  */

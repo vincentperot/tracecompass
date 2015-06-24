@@ -22,7 +22,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         CtfTmfEventFieldTest.class,
         CtfTmfEventTest.class,
-        CtfTmfEventTypeTest.class,
         CtfTmfLostEventStatisticsTest.class,
         CtfTmfLostEventsTest.class,
         EventContextTest.class

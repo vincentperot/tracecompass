@@ -39,7 +39,6 @@ import com.google.common.collect.ImmutableMap;
  * @author Francois Chouinard
  *
  * @see ITmfEvent
- * @see ITmfEventType
  */
 public class TmfEventField implements ITmfEventField {
 

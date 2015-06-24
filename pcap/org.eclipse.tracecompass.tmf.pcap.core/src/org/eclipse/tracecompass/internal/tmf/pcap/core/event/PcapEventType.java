@@ -14,25 +14,26 @@ package org.eclipse.tracecompass.internal.tmf.pcap.core.event;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 
 /**
  * Class that represents the type of a PcapEvent.
  *
  * @author Vincent Perot
  */
-public class PcapEventType extends TmfEventType {
+public class PcapEventType {
 
     /**
      * The default Pcap Type ID for a PcapEvent
      */
     public static final String DEFAULT_PCAP_TYPE_ID = NonNullUtils.nullToEmptyString(Messages.PcapEventType_DefaultTypeID);
 
+    private final String fName;
+
     /**
      * Default constructor
      */
     public PcapEventType() {
-        this(DEFAULT_PCAP_TYPE_ID);
+        fName = DEFAULT_PCAP_TYPE_ID;
     }
 
     /**
@@ -42,7 +43,7 @@ public class PcapEventType extends TmfEventType {
      *            the type name
      */
     public PcapEventType(final String typeId) {
-        super(typeId);
+        fName = typeId;
     }
 
     /**
@@ -52,12 +53,19 @@ public class PcapEventType extends TmfEventType {
      *            the other type
      */
     public PcapEventType(final PcapEventType type) {
-        super(type);
+        fName = type.fName;
+    }
+
+    /**
+     * @return the type name
+     */
+    public String getName() {
+        return fName;
     }
 
     @Override
     public @Nullable String toString() {
-        return getName();
+        return fName;
     }
 
 }

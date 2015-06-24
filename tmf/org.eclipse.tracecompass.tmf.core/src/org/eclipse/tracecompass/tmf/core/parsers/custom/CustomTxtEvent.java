@@ -16,7 +16,6 @@ import java.util.regex.Matcher;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputData;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTraceDefinition.InputLine;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -64,9 +63,10 @@ public class CustomTxtEvent extends CustomEvent {
      *            Timestamp of this event
      * @param type
      *            Event type
+     * @since 2.0
      */
     public CustomTxtEvent(CustomTxtTraceDefinition definition,
-            ITmfTrace parentTrace, ITmfTimestamp timestamp, TmfEventType type) {
+            ITmfTrace parentTrace, ITmfTimestamp timestamp, CustomEventType type) {
         super(definition, parentTrace, timestamp, type);
     }
 
