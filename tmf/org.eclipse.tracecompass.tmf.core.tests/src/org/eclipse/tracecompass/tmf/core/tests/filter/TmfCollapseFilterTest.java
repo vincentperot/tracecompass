@@ -133,7 +133,7 @@ public class TmfCollapseFilterTest {
         private final boolean fIsCollapsible;
 
         CollapsibleEvent(boolean isCollapsible) {
-            super(fTrace, ITmfContext.UNKNOWN_RANK, null, null, null);
+            super(fTrace, ITmfContext.UNKNOWN_RANK, null, "", null);
             fIsCollapsible = isCollapsible;
         }
 

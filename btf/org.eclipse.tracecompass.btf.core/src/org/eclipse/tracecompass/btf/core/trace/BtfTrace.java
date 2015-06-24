@@ -13,6 +13,8 @@
 
 package org.eclipse.tracecompass.btf.core.trace;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -408,7 +410,7 @@ public class BtfTrace extends TmfTrace implements ITmfPersistentlyIndexable, ITm
         return new BtfEvent(this, rank,
                 getTimestampTransform().transform(fTsFormat.createTimestamp(timestamp + fTsOffset)),
                 source,
-                type,
+                nullToEmptyString(type.getName()),
                 type.getDescription(),
                 content,
                 target);

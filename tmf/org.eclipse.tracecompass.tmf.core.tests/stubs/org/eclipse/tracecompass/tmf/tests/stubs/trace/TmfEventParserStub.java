@@ -12,6 +12,8 @@
 
 package org.eclipse.tracecompass.tmf.tests.stubs.trace;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -21,7 +23,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfEventParser;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -39,7 +40,7 @@ public class TmfEventParserStub implements ITmfEventParser {
     // ------------------------------------------------------------------------
 
     private static final int NB_TYPES = 10;
-    private final TmfEventType[] fTypes;
+    private final String[] fTypes;
     private final ITmfTrace fEventStream;
 
     // ------------------------------------------------------------------------
@@ -48,14 +49,14 @@ public class TmfEventParserStub implements ITmfEventParser {
 
     public TmfEventParserStub(final ITmfTrace eventStream) {
         fEventStream = eventStream;
-        fTypes = new TmfEventType[NB_TYPES];
+        fTypes = new String[NB_TYPES];
         for (int i = 0; i < NB_TYPES; i++) {
             final Vector<String> fields = new Vector<>();
             for (int j = 1; j <= i; j++) {
                 final String field = "Fmt-" + i + "-Fld-" + j;
                 fields.add(field);
             }
-            fTypes[i] = new TmfEventType("Type-" + i);
+            fTypes[i] = new String("Type-" + i);
         }
     }
 
@@ -111,7 +112,7 @@ public class TmfEventParserStub implements ITmfEventParser {
                 final ITmfEvent event = new TmfEvent(fEventStream,
                         ITmfContext.UNKNOWN_RANK,
                         fEventStream.createTimestamp(ts * 1000000L),
-                        fTypes[typeIndex], root);
+                        checkNotNull(fTypes[typeIndex]), root);
                 return event;
             } catch (final EOFException e) {
             } catch (final IOException e) {

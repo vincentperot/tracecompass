@@ -25,11 +25,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.Messages;
@@ -48,16 +48,12 @@ public class TmfBaseStatisticsDataTest {
 
     private static final String fTestName = "StatisticsDataTest";
 
-    private final String fTypeId1 = "Some type1";
-    private final String fTypeId2 = "Some type2";
+    private final @NonNull String fTypeId1 = "Some type1";
+    private final @NonNull String fTypeId2 = "Some type2";
 
     private final TmfTimestamp fTimestamp1 = new TmfTimestamp(12345, (byte) 2);
     private final TmfTimestamp fTimestamp2 = new TmfTimestamp(12350, (byte) 2);
     private final TmfTimestamp fTimestamp3 = new TmfTimestamp(12355, (byte) 2);
-
-    private final TmfEventType fType1 = new TmfEventType(fTypeId1);
-    private final TmfEventType fType2 = new TmfEventType(fTypeId1);
-    private final TmfEventType fType3 = new TmfEventType(fTypeId2);
 
     private final ITmfEvent fEvent1;
     private final ITmfEvent fEvent2;
@@ -78,13 +74,13 @@ public class TmfBaseStatisticsDataTest {
      */
     public TmfBaseStatisticsDataTest() {
         fContent1 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some content", null);
-        fEvent1 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp1, fType1, fContent1);
+        fEvent1 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp1, fTypeId1, fContent1);
 
         fContent2 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some other content", null);
-        fEvent2 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp2, fType2, fContent2);
+        fEvent2 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp2, fTypeId1, fContent2);
 
         fContent3 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some other different content", null);
-        fEvent3 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp3, fType3, fContent3);
+        fEvent3 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp3, fTypeId2, fContent3);
 
         fStatsTree = new TmfStatisticsTree();
 
@@ -220,8 +216,8 @@ public class TmfBaseStatisticsDataTest {
         fStatsTree.getNode(fTestName, Messages.TmfStatisticsData_EventTypes).reset();
 
         assertEquals(0, fStatsTree.getNode(fTestName, Messages.TmfStatisticsData_EventTypes).getChildren().size());
-        assertNull(fStatsTree.getNode(fTestName, Messages.TmfStatisticsData_EventTypes, fType1.getName()));
-        assertNull(fStatsTree.getNode(fTestName, Messages.TmfStatisticsData_EventTypes, fType3.getName()));
+        assertNull(fStatsTree.getNode(fTestName, Messages.TmfStatisticsData_EventTypes, fTypeId1));
+        assertNull(fStatsTree.getNode(fTestName, Messages.TmfStatisticsData_EventTypes, fTypeId2));
 
         fStatsTree.getNode(fTestName).reset();
         assertEquals(0, fStatsTree.getNode(fTestName).getChildren().size());

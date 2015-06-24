@@ -75,6 +75,7 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.debug.ui.contexts.DebugContextEvent;
 import org.eclipse.debug.ui.contexts.IDebugContextListener;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -83,7 +84,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.gdbtrace.core.GdbTraceCorePlugin;
 import org.eclipse.tracecompass.internal.gdbtrace.core.event.GdbTraceEvent;
 import org.eclipse.tracecompass.internal.gdbtrace.core.event.GdbTraceEventContent;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.experiment.TmfExperiment;
@@ -137,7 +137,7 @@ public class DsfGdbAdaptor {
     // breakpoint (tracepoint is a kind of breakpoint)
     private  Map<Integer, MIBreakpointDMData> fTpInfo = new HashMap<>();
 
-    private TmfEventType tmfEventType = new TmfEventType("GDB Tracepoint"); //$NON-NLS-1$
+    private static final @NonNull String EVENT_NAME = "GDB Tracepoint"; //$NON-NLS-1$
 
     {
         new DsfGdbPlatformEventListener();
@@ -715,7 +715,7 @@ public class DsfGdbAdaptor {
             GdbTraceEvent ev = new GdbTraceEvent(fGdbTrace,
                     new TmfTimestamp(Integer.parseInt(data.getRecordId())),
                     "Tracepoint: " + data.getTracepointNumber() + ", Frame: " + data.getRecordId(),  //$NON-NLS-1$ //$NON-NLS-2$
-                    tmfEventType,
+                    EVENT_NAME,
                     evContent,
                     tmfEventRef);
 
@@ -763,7 +763,7 @@ public class DsfGdbAdaptor {
         GdbTraceEvent ev = new GdbTraceEvent(fGdbTrace,
                 new TmfTimestamp(rank),
                 tmfEventSrc,
-                tmfEventType,
+                EVENT_NAME,
                 evContent,
                 tmfEventRef);
 

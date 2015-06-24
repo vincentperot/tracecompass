@@ -17,7 +17,6 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.collapse.ITmfCollapsibleEvent;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfCallsite;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfSourceLookup;
@@ -36,7 +35,7 @@ public class SyslogEvent extends TextTraceEvent implements ITmfCollapsibleEvent,
      * Default constructor
      */
     public SyslogEvent() {
-        super(null, null, new SyslogEventType(), null);
+        super(null, null, "Syslog", null);
     }
 
     /**
@@ -63,7 +62,7 @@ public class SyslogEvent extends TextTraceEvent implements ITmfCollapsibleEvent,
      *            the event content (payload)
      */
     public SyslogEvent(SyslogTrace parentTrace, final ITmfTimestamp timestamp,
-            final ITmfEventType type, final TextTraceEventContent content) {
+            final @NonNull String type, final TextTraceEventContent content) {
         super(parentTrace, timestamp, type, content);
     }
 
@@ -80,14 +79,6 @@ public class SyslogEvent extends TextTraceEvent implements ITmfCollapsibleEvent,
         final SyslogEvent other = (SyslogEvent) otherEvent;
 
         if (!getTrace().equals(other.getTrace())) {
-            return false;
-        }
-
-        if (getType() == null) {
-            if (other.getType() != null) {
-                return false;
-            }
-        } else if (!getType().equals(other.getType())) {
             return false;
         }
 

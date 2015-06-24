@@ -22,11 +22,11 @@ import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.Messages;
@@ -46,14 +46,11 @@ public class TmfTreeContentProviderTest {
 
     private static final String fTestName = "TreeContentProviderTest";
 
-    private final String fTypeId1 = "Some type1";
-    private final String fTypeId2 = "Some type2";
+    private final @NonNull String fTypeId1 = "Some type1";
+    private final @NonNull String fTypeId2 = "Some type2";
 
     private final TmfTimestamp fTimestamp1 = new TmfTimestamp(12345, (byte) 2);
     private final TmfTimestamp fTimestamp2 = new TmfTimestamp(12350, (byte) 2);
-
-    private final TmfEventType fType1 = new TmfEventType(fTypeId1);
-    private final TmfEventType fType2 = new TmfEventType(fTypeId2);
 
     private final ITmfEvent fEvent1;
     private final ITmfEvent fEvent2;
@@ -74,10 +71,10 @@ public class TmfTreeContentProviderTest {
      */
     public TmfTreeContentProviderTest() {
         fContent1 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some content", null);
-        fEvent1 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp1, fType1, fContent1);
+        fEvent1 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp1, fTypeId1, fContent1);
 
         fContent2 = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, "Some other content", null);
-        fEvent2 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp2, fType2, fContent2);
+        fEvent2 = new TmfEvent(null, ITmfContext.UNKNOWN_RANK, fTimestamp2, fTypeId2, fContent2);
 
         fStatsData = new TmfStatisticsTree();
 

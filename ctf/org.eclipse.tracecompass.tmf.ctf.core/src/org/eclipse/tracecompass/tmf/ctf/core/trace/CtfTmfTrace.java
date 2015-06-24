@@ -480,8 +480,6 @@ public class CtfTmfTrace extends TmfTrace
     /**
      * Register an event type to this trace.
      *
-     * Public visibility so that {@link CtfTmfEvent#getType} can call it.
-     *
      * FIXME This could probably be made cleaner?
      *
      * @param eventType

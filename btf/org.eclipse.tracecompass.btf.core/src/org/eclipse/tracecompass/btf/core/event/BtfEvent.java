@@ -14,8 +14,8 @@
 package org.eclipse.tracecompass.btf.core.event;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -51,12 +51,13 @@ public class BtfEvent extends TmfEvent {
      *            the event content (payload)
      * @param target
      *            the event reference
+     * @since 2.0
      */
     public BtfEvent(final ITmfTrace trace,
             final long rank,
             final ITmfTimestamp timestamp,
             final String source,
-            final ITmfEventType type,
+            final @NonNull String type,
             final String description,
             final ITmfEventField content,
             final String target) {

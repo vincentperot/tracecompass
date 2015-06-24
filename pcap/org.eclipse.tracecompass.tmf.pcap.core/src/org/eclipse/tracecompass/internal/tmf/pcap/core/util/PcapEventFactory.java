@@ -13,6 +13,7 @@
 package org.eclipse.tracecompass.internal.tmf.pcap.core.util;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class PcapEventFactory {
         if (eventType == null) {
             eventType = new TmfEventType();
         }
-        return new PcapEvent(trace, rank, tmfTimestamp, dataLink, eventType, field, fileName, packet);
+        return new PcapEvent(trace, rank, tmfTimestamp, dataLink, nullToEmptyString(eventType.getName()), field, fileName, packet);
 
     }
 
