@@ -15,7 +15,6 @@ package org.eclipse.tracecompass.tmf.core.tests.trace.text;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -23,7 +22,6 @@ import java.util.List;
 
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.trace.text.TextTraceEventContent;
-import org.eclipse.tracecompass.tmf.tests.stubs.trace.text.SyslogEventType;
 import org.eclipse.tracecompass.tmf.tests.stubs.trace.text.SyslogTrace.Field;
 import org.junit.Test;
 
@@ -95,17 +93,6 @@ public class TextTraceEventContentTest {
         assertEquals("getField:FILE", "SourceFileA", fEventContent1.getFieldValue(Index.FILE));
         assertEquals("getField:LINE", "0", fEventContent1.getFieldValue(Index.LINE));
         assertEquals("getField:MESSAGE", "MessageA", fEventContent1.getFieldValue(Index.MESSAGE).toString());
-    }
-
-    // ------------------------------------------------------------------------
-    // Event Type
-    // ------------------------------------------------------------------------
-
-    @Test
-    public void testEventTypeInstance() {
-        SyslogEventType eventType = SyslogEventType.INSTANCE;
-        assertEquals("getTypeId", "Syslog", eventType.getName());
-        assertNotNull ("instance", eventType);
     }
 
     // ------------------------------------------------------------------------

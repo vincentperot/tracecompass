@@ -23,7 +23,6 @@ import java.util.Set;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterAndNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterCompareNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterContainsNode;
@@ -31,6 +30,7 @@ import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterEqualsNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterMatchesNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterOrNode;
 import org.eclipse.tracecompass.tmf.core.filter.model.TmfFilterTraceTypeNode;
+import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomEventType;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtEvent;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtEventType;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTxtTrace;
@@ -76,8 +76,8 @@ public class TmfFilterTraceTypeNodeTest extends TmfFilterTreeNodeTest {
     }
     private static CustomTxtTrace fCustomTxtTrace = new CustomTxtTrace(fCustomTxtDefinition);
     private static CustomXmlTrace fCustomXmlTrace = new CustomXmlTrace(fCustomXmlDefinition);
-    private static TmfEventType fCustomTxtEventType = new CustomTxtEventType(fCustomTxtDefinition);
-    private static TmfEventType fCustomXmlEventType = new CustomXmlEventType(fCustomXmlDefinition);
+    private static CustomEventType fCustomTxtEventType = new CustomTxtEventType(fCustomTxtDefinition);
+    private static CustomEventType fCustomXmlEventType = new CustomXmlEventType(fCustomXmlDefinition);
     private ITmfEventField fContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, null, null);
     private TmfEvent fEvent1 = new TmfEvent(TRACE, 0, new TmfNanoTimestamp(1), EVENT_TYPE, fContent);
     private TmfEvent fEvent2 = new CustomTxtEvent(fCustomTxtDefinition, fCustomTxtTrace, new TmfNanoTimestamp(2), fCustomTxtEventType);

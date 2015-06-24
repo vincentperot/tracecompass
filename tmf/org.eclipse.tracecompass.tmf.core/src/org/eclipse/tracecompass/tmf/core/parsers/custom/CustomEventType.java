@@ -12,14 +12,12 @@
 
 package org.eclipse.tracecompass.tmf.core.parsers.custom;
 
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
-
 /**
  * Event type for custom text parsers.
  *
  * @author Patrick Tassé
  */
-public abstract class CustomEventType extends TmfEventType {
+public abstract class CustomEventType {
 
     /**
      * Constructor
@@ -28,6 +26,5 @@ public abstract class CustomEventType extends TmfEventType {
      *            Trace definition
      */
     public CustomEventType(CustomTraceDefinition definition) {
-        super(definition.definitionName);
     }
 }

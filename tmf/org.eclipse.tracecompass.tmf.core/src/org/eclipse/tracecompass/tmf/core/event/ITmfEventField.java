@@ -26,7 +26,6 @@ import org.eclipse.jdt.annotation.NonNull;
  * @author Francois Chouinard
  *
  * @see ITmfEvent
- * @see ITmfEventType
  */
 public interface ITmfEventField {
 

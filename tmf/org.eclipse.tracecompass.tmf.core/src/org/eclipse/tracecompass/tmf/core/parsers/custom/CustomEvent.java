@@ -20,10 +20,8 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.parsers.custom.CustomTraceDefinition.OutputColumn;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfNanoTimestamp;
@@ -52,7 +50,7 @@ public class CustomEvent extends TmfEvent {
     private ITmfEventField customEventContent;
 
     /** Replacement for the super-class' type field */
-    private ITmfEventType customEventType;
+    private CustomEventType customEventType;
 
     /** The trace to which this event belongs */
     protected CustomTraceDefinition fDefinition;
@@ -106,9 +104,10 @@ public class CustomEvent extends TmfEvent {
      *            Timestamp of this event
      * @param type
      *            Event type
+     * @since 2.0
      */
     public CustomEvent(CustomTraceDefinition definition, ITmfTrace parentTrace,
-            ITmfTimestamp timestamp, TmfEventType type) {
+            ITmfTimestamp timestamp, CustomEventType type) {
         /* Do not use upstream's fields for stuff we override */
         super(parentTrace, ITmfContext.UNKNOWN_RANK, null, "", null); //$NON-NLS-1$
         fDefinition = definition;
@@ -170,15 +169,17 @@ public class CustomEvent extends TmfEvent {
      *
      * @param type
      *            The new type
+     * @since 2.0
      */
-    protected void setType(ITmfEventType type) {
+    protected void setType(CustomEventType type) {
         customEventType = type;
     }
 
     /**
      * @return The event type
+     * @since 2.0
      */
-    protected ITmfEventType getType() {
+    protected CustomEventType getType() {
         return customEventType;
     }
 

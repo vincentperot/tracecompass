@@ -17,14 +17,13 @@ import org.eclipse.tracecompass.btf.core.Messages;
 import org.eclipse.tracecompass.btf.core.trace.BtfColumnNames;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 
 /**
  * Btf event type, can get a description from the spec
  *
  * @author Matthew Khouzam
  */
-public class BtfEventType extends TmfEventType {
+public class BtfEventType {
 
     private final String fName;
     private final String fDescription;
@@ -54,7 +53,6 @@ public class BtfEventType extends TmfEventType {
     /**
      * @return the name
      */
-    @Override
     public String getName() {
         return fName;
     }
