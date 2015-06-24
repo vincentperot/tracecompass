@@ -40,7 +40,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     private final ITmfTrace fTrace;
     private final long fRank;
     private final @NonNull ITmfTimestamp fTimestamp;
-    private final ITmfEventType fType;
+    private final @NonNull String fName;
     private final ITmfEventField fContent;
 
     // ------------------------------------------------------------------------
@@ -52,12 +52,12 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
      * used normally.
      *
      * @deprecated Do not use, extension-point use only. Use
-     *             {@link #TmfEvent(ITmfTrace, long, ITmfTimestamp, ITmfEventType, ITmfEventField)}
+     *             {@link #TmfEvent(ITmfTrace, long, ITmfTimestamp, String, ITmfEventField)}
      *             instead.
      */
     @Deprecated
     public TmfEvent() {
-        this(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+        this(null, ITmfContext.UNKNOWN_RANK, null, "", null); //$NON-NLS-1$
     }
 
     /**
@@ -70,15 +70,16 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
      *            {@link ITmfContext#UNKNOWN_RANK} as default value
      * @param timestamp
      *            the event timestamp
-     * @param type
-     *            the event type
+     * @param name
+     *            the event name
      * @param content
      *            the event content (payload)
+     * @since 2.0
      */
     public TmfEvent(final ITmfTrace trace,
             final long rank,
             final ITmfTimestamp timestamp,
-            final ITmfEventType type,
+            final @NonNull String name,
             final ITmfEventField content) {
         fTrace = trace;
         fRank = rank;
@@ -87,7 +88,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
         } else {
             fTimestamp = TmfTimestamp.ZERO;
         }
-        fType = type;
+        fName = name;
         fContent = content;
     }
 
@@ -101,7 +102,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
         fTrace = event.getTrace();
         fRank = event.getRank();
         fTimestamp = event.getTimestamp();
-        fType = event.getType();
+        fName = event.getName();
         fContent = event.getContent();
     }
 
@@ -138,21 +139,8 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
      * @since 1.0
      */
     @Override
-    public String getName() {
-        ITmfEventType type = getType();
-        if (type != null) {
-            return type.getName();
-        }
-        return ""; //$NON-NLS-1$
-    }
-
-    /**
-     * Return the event type
-     *
-     * @return The event type
-     */
-    protected ITmfEventType getType() {
-        return fType;
+    public @NonNull String getName() {
+        return fName;
     }
 
     // ------------------------------------------------------------------------
@@ -166,7 +154,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
         result = prime * result + ((fTrace == null) ? 0 : getTrace().hashCode());
         result = prime * result + (int) (getRank() ^ (getRank() >>> 32));
         result = prime * result + getTimestamp().hashCode();
-        result = prime * result + ((getType() == null) ? 0 : getType().hashCode());
+        result = prime * result + getName().hashCode();
         result = prime * result + ((getContent() == null) ? 0 : getContent().hashCode());
         return result;
     }
@@ -200,7 +188,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
         if (!getTimestamp().equals(other.getTimestamp())) {
             return false;
         }
-        if (!NonNullUtils.equalsNullable(getType(), other.getType())) {
+        if (!NonNullUtils.equalsNullable(getName(), other.getName())) {
             return false;
         }
         if (!NonNullUtils.equalsNullable(getContent(), other.getContent())) {
@@ -214,7 +202,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     public String toString() {
         return getClass().getSimpleName() + " [fTimestamp=" + getTimestamp()
                 + ", fTrace=" + getTrace() + ", fRank=" + getRank()
-                +  ", fType=" + getType() + ", fContent=" + getContent()
+                +  ", fName=" + getName() + ", fContent=" + getContent()
                 + "]";
     }
 

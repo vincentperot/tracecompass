@@ -40,7 +40,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.aspect.ITmfEventAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfContentFieldAspect;
 import org.eclipse.tracecompass.tmf.core.event.aspect.TmfCpuAspect;
@@ -284,7 +283,6 @@ public class TmfXmlTraceStub extends TmfTrace {
         }
 
         /* Create a new event with new fields and name */
-        TmfEventType eventType = new TmfEventType(eventName);
         ITmfEventField eventFields = new CustomEventContent(content.getName(), content.getValue(), fieldsArray);
         /*
          * TODO: Timestamps for these traces are in nanos, but since the
@@ -293,7 +291,7 @@ public class TmfXmlTraceStub extends TmfTrace {
          * the source when it is supported
          */
         ITmfTimestamp timestamp = new TmfNanoTimestamp(event.getTimestamp().getValue() / SECONDS_TO_NS);
-        TmfEvent newEvent = new TmfEvent(this, ITmfContext.UNKNOWN_RANK, timestamp, eventType, eventFields);
+        TmfEvent newEvent = new TmfEvent(this, ITmfContext.UNKNOWN_RANK, timestamp, eventName, eventFields);
         updateAttributes(savedContext, event.getTimestamp());
         context.increaseRank();
 

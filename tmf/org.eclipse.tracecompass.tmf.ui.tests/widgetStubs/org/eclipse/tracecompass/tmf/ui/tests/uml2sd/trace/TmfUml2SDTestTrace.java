@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.tmf.ui.tests.uml2sd.trace;
 
+import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -19,7 +21,6 @@ import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfEventParser;
@@ -77,13 +78,11 @@ public class TmfUml2SDTestTrace implements ITmfEventParser {
 
             long ts        = stream.readLong();
             stream.readUTF(); /* Previously source, now unused */
-            String type    = stream.readUTF();
+            String type    = checkNotNull(stream.readUTF());
             stream.readUTF(); /* Previously reference, now unused */
             String sender = stream.readUTF();
             String receiver = stream.readUTF();
             String signal = stream.readUTF();
-
-            TmfEventType tmfEventType = new TmfEventType(type);
 
             String content = "[";
             content += sender;
@@ -98,7 +97,7 @@ public class TmfUml2SDTestTrace implements ITmfEventParser {
             fields[2] = new TmfEventField("signal", signal, null);
 
             ITmfEventField tmfContent = new TmfEventField(ITmfEventField.ROOT_FIELD_ID, content, fields);
-            ITmfEvent tmfEvent = new TmfEvent(fEventStream, ITmfContext.UNKNOWN_RANK, new TmfTimestamp(ts, -9), tmfEventType, tmfContent);
+            ITmfEvent tmfEvent = new TmfEvent(fEventStream, ITmfContext.UNKNOWN_RANK, new TmfTimestamp(ts, -9), type, tmfContent);
 
             return tmfEvent;
         } catch (final EOFException e) {

@@ -40,7 +40,7 @@ public class TmfSyncEventStub extends TmfEvent {
         super(trace,
                 ITmfContext.UNKNOWN_RANK,
                 timestamp,
-                new TmfEventTypeStub(),
+                "TmfEventTypeStub",
                 new TmfEventField(stub, stub, null));
     }
 }

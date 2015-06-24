@@ -25,7 +25,6 @@ import java.util.Set;
 
 import org.eclipse.tracecompass.internal.tmf.ctf.core.trace.iterator.CtfIterator;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEvent;
 import org.eclipse.tracecompass.tmf.ctf.core.event.CtfTmfEventFactory;
@@ -77,15 +76,6 @@ public class CtfTmfEventTest {
     public void testGetCPU() {
         int result = nullEvent.getCPU();
         assertEquals(-1, result);
-    }
-
-    /**
-     * Run the String getEventName() method test.
-     */
-    @Test
-    public void testGetEventName() {
-        String result = nullEvent.getType().getName();
-        assertEquals("Empty CTF event", result);
     }
 
     /**
@@ -167,12 +157,12 @@ public class CtfTmfEventTest {
         }
         String reference = fixture.getReference();
         int cpu = fixture.getCPU();
-        ITmfEventType type = fixture.getType();
+        String name = fixture.getName();
         assertEquals(ITmfContext.UNKNOWN_RANK, rank);
 
         assertEquals("channel0_1", reference);
         assertEquals(1, cpu);
-        assertEquals("lttng_statedump_vm_map", type.toString());
+        assertEquals("lttng_statedump_vm_map", name);
     }
 
     /**
@@ -207,7 +197,7 @@ public class CtfTmfEventTest {
         assertSame(nullEvent2, nullEvent);
         assertNotNull(nullEvent);
         assertEquals(-1, nullEvent.getCPU());
-        assertEquals("Empty CTF event", nullEvent.getType().getName());
+        assertEquals("Empty CTF event", nullEvent.getName());
         assertNull(nullEvent.getReference());
         assertEquals(0, nullEvent.getContent().getFields().size());
         assertEquals(-1L, nullEvent.getID());

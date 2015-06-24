@@ -26,7 +26,6 @@ import org.eclipse.tracecompass.internal.tmf.pcap.core.protocol.TmfPcapProtocol;
 import org.eclipse.tracecompass.internal.tmf.pcap.core.util.ProtocolConversion;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
-import org.eclipse.tracecompass.tmf.core.event.TmfEventType;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 
@@ -82,7 +81,7 @@ public class PcapEvent extends TmfEvent {
             long rank,
             ITmfTimestamp timestamp,
             String source,
-            TmfEventType type,
+            String type,
             ITmfEventField content,
             String reference,
             Packet packet) {

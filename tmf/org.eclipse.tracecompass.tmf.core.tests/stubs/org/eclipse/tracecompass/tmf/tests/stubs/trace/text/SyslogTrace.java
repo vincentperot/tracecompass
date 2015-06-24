@@ -121,7 +121,7 @@ public class SyslogTrace extends TextTrace<SyslogEvent> {
         SyslogEvent event = new SyslogEvent(
                 this,
                 timestamp,
-                SyslogEventType.INSTANCE,
+                "Syslog",
                 content); //$NON-NLS-1$
 
         return event;

@@ -70,7 +70,7 @@ public class CustomEvent extends TmfEvent {
      *            The trace definition to which this event belongs
      */
     public CustomEvent(CustomTraceDefinition definition) {
-        super(null, ITmfContext.UNKNOWN_RANK, null, null, null);
+        super(null, ITmfContext.UNKNOWN_RANK, null, "", null); //$NON-NLS-1$
         fDefinition = definition;
         fData = new HashMap<>();
         customEventTimestamp = TmfTimestamp.ZERO;
@@ -111,7 +111,7 @@ public class CustomEvent extends TmfEvent {
     public CustomEvent(CustomTraceDefinition definition, ITmfTrace parentTrace,
             ITmfTimestamp timestamp, TmfEventType type) {
         /* Do not use upstream's fields for stuff we override */
-        super(parentTrace, ITmfContext.UNKNOWN_RANK, null, null, null);
+        super(parentTrace, ITmfContext.UNKNOWN_RANK, null, "", null); //$NON-NLS-1$
         fDefinition = definition;
         fData = new HashMap<>();
 
@@ -140,11 +140,6 @@ public class CustomEvent extends TmfEvent {
     @Override
     public ITmfEventField getContent() {
         return customEventContent;
-    }
-
-    @Override
-    public ITmfEventType getType() {
-        return customEventType;
     }
 
     // ------------------------------------------------------------------------
@@ -179,6 +174,13 @@ public class CustomEvent extends TmfEvent {
      */
     protected void setType(ITmfEventType type) {
         customEventType = type;
+    }
+
+    /**
+     * @return The event type
+     */
+    protected ITmfEventType getType() {
+        return customEventType;
     }
 
     // ------------------------------------------------------------------------

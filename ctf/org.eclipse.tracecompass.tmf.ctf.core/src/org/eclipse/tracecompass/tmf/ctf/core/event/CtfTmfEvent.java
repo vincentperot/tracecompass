@@ -27,7 +27,6 @@ import org.eclipse.tracecompass.ctf.core.event.types.ICompositeDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.tmf.core.event.ITmfCustomAttributes;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.lookup.ITmfModelLookup;
@@ -51,7 +50,7 @@ public class CtfTmfEvent extends TmfEvent
     // Constants
     // ------------------------------------------------------------------------
 
-    private static final String EMPTY_CTF_EVENT_NAME = "Empty CTF event"; //$NON-NLS-1$
+    private static final @NonNull String EMPTY_CTF_EVENT_NAME = "Empty CTF event"; //$NON-NLS-1$
 
     // ------------------------------------------------------------------------
     // Attributes
@@ -59,15 +58,12 @@ public class CtfTmfEvent extends TmfEvent
 
     private final int fSourceCPU;
     private final long fTypeId;
-    private final String fEventName;
     private final IEventDeclaration fEventDeclaration;
     private final @NonNull EventDefinition fEvent;
     private final String fReference;
 
     /** Lazy-loaded field containing the event's payload */
     private ITmfEventField fContent;
-
-    private CtfTmfEventType fCtfTmfEventType;
 
     // ------------------------------------------------------------------------
     // Constructors
@@ -85,7 +81,7 @@ public class CtfTmfEvent extends TmfEvent
                  * Event type. We don't use TmfEvent's field here, we
                  * re-implement getType().
                  */
-                null,
+                nullToEmptyString(declaration.getName()),
                 /*
                  * Content handled with a lazy-loaded field re-implemented in
                  * getContent().
@@ -95,7 +91,6 @@ public class CtfTmfEvent extends TmfEvent
         fEventDeclaration = declaration;
         fSourceCPU = cpu;
         fTypeId = declaration.getId().longValue();
-        fEventName = declaration.getName();
         fEvent = eventDefinition;
         fReference = fileName;
     }
@@ -115,11 +110,10 @@ public class CtfTmfEvent extends TmfEvent
         super(trace,
                 ITmfContext.UNKNOWN_RANK,
                 new TmfNanoTimestamp(-1),
-                null,
+                EMPTY_CTF_EVENT_NAME,
                 new TmfEventField("", null, new CtfTmfEventField[0])); //$NON-NLS-1$
         fSourceCPU = -1;
         fTypeId = -1;
-        fEventName = EMPTY_CTF_EVENT_NAME;
         fEventDeclaration = null;
         fEvent = EventDefinition.NULL_EVENT;
         fReference = null;
@@ -178,25 +172,6 @@ public class CtfTmfEvent extends TmfEvent
     }
 
     @Override
-    public ITmfEventType getType() {
-        if (fCtfTmfEventType == null) {
-            fCtfTmfEventType = new CtfTmfEventType(fEventName);
-
-            /*
-             * Register the event type in the owning trace, but only if there is
-             * one
-             */
-            getTrace().registerEventType(fEventName);
-        }
-        return fCtfTmfEventType;
-    }
-
-    @Override
-    public String getName() {
-        return fEventName;
-    }
-
-    @Override
     public Set<String> listCustomAttributes() {
         if (fEventDeclaration == null) {
             return new HashSet<>();
@@ -226,11 +201,11 @@ public class CtfTmfEvent extends TmfEvent
             ITmfEventField ipField = getContent().getField(CtfConstants.CONTEXT_FIELD_PREFIX + CtfConstants.IP_KEY);
             if (ipField != null && ipField.getValue() instanceof Long) {
                 long ip = (Long) ipField.getValue();
-                callsite = trace.getCallsite(fEventName, ip);
+                callsite = trace.getCallsite(getName(), ip);
             }
         }
         if (callsite == null) {
-            callsite = trace.getCallsite(fEventName);
+            callsite = trace.getCallsite(getName());
         }
         return callsite;
     }

@@ -99,7 +99,7 @@ public class PcapEventFactory {
         if (eventType == null) {
             eventType = new TmfEventType();
         }
-        return new PcapEvent(trace, rank, tmfTimestamp, dataLink, eventType, field, fileName, packet);
+        return new PcapEvent(trace, rank, tmfTimestamp, dataLink, nullToEmptyString(eventType.getName()), field, fileName, packet);
 
     }
 

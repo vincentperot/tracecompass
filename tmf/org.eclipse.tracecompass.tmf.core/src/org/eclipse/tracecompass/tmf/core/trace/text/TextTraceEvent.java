@@ -13,7 +13,6 @@
 package org.eclipse.tracecompass.tmf.core.trace.text;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.tmf.core.event.ITmfEventType;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
@@ -39,10 +38,11 @@ public abstract class TextTraceEvent extends TmfEvent {
      *            The event type
      * @param content
      *            The event content (payload)
+     * @since 2.0
      */
     public TextTraceEvent(TextTrace<? extends TextTraceEvent> parentTrace,
             final ITmfTimestamp timestamp,
-            final ITmfEventType type,
+            final @NonNull String type,
             final TextTraceEventContent content) {
         super(parentTrace, ITmfContext.UNKNOWN_RANK, timestamp, type, content);
     }

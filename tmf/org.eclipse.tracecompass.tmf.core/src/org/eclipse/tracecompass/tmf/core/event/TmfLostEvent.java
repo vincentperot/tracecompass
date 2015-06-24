@@ -15,6 +15,7 @@ package org.eclipse.tracecompass.tmf.core.event;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.equalsNullable;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -52,11 +53,12 @@ public class TmfLostEvent extends TmfEvent implements ITmfLostEvent {
      *            the 'problematic' time range
      * @param nbLostEvents
      *            the number of lost events in the time range
+     * @since 2.0
      */
     public TmfLostEvent(final ITmfTrace trace,
             final long rank,
             final ITmfTimestamp timestamp,
-            final ITmfEventType type,
+            final @NonNull String type,
             final TmfTimeRange timeRange,
             final long nbLostEvents) {
         super(trace, rank, timestamp, type, null);
