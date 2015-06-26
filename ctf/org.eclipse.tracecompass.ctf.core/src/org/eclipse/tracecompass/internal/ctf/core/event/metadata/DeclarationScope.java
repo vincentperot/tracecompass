@@ -275,7 +275,7 @@ class DeclarationScope {
         IDeclaration declaration = lookupType(name);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupTypeRecursive(name);
         } else {
             return null;
@@ -307,7 +307,7 @@ class DeclarationScope {
         StructDeclaration declaration = lookupStruct(name);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupStructRecursive(name);
         } else {
             return null;
@@ -339,7 +339,7 @@ class DeclarationScope {
         EnumDeclaration declaration = lookupEnum(name);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupEnumRecursive(name);
         } else {
             return null;
@@ -371,7 +371,7 @@ class DeclarationScope {
         VariantDeclaration declaration = lookupVariant(name);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupVariantRecursive(name);
         } else {
             return null;
@@ -407,7 +407,7 @@ class DeclarationScope {
         IDeclaration declaration = lookupIdentifier(identifier);
         if (declaration != null) {
             return declaration;
-        } else if (fParentScope != null) {
+        } else if (hasParent()) {
             return fParentScope.lookupIdentifierRecursive(identifier);
         }
         return null;
