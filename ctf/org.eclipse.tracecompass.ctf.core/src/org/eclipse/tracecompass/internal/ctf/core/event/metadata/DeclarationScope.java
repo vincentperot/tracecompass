@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
@@ -239,6 +240,15 @@ class DeclarationScope {
     // ------------------------------------------------------------------------
     // Lookup operations
     // ------------------------------------------------------------------------
+
+    /**
+     * Lookup the children scopes of this scope
+     * @param name the child to lookup
+     * @return the scope or null
+     */
+    public @Nullable DeclarationScope lookupChild(String name) {
+        return fChildren.get(name);
+    }
 
     /**
      * Looks up a type declaration in the current scope.
