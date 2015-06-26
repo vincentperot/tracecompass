@@ -243,7 +243,9 @@ class DeclarationScope {
 
     /**
      * Lookup the children scopes of this scope
-     * @param name the child to lookup
+     *
+     * @param name
+     *            the child to lookup
      * @return the scope or null
      */
     public @Nullable DeclarationScope lookupChild(String name) {
