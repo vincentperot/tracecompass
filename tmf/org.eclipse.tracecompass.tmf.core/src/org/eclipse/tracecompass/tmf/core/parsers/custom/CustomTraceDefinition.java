@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
@@ -66,7 +67,7 @@ public abstract class CustomTraceDefinition {
     public static class OutputColumn {
 
         /** Name of this column */
-        public String name;
+        public @Nullable String name;
 
         /**
          * Default constructor (empty)
