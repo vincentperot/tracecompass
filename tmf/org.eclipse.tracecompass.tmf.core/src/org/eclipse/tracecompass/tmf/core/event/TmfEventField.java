@@ -18,11 +18,13 @@ package org.eclipse.tracecompass.tmf.core.event;
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -111,12 +113,12 @@ public class TmfEventField implements ITmfEventField {
     }
 
     @Override
-    public Collection<String> getFieldNames() {
+    public final Collection<String> getFieldNames() {
         return checkNotNull(fFields.keySet());
     }
 
     @Override
-    public Collection<ITmfEventField> getFields() {
+    public final Collection<ITmfEventField> getFields() {
         return checkNotNull(fFields.values());
     }
 
@@ -161,10 +163,11 @@ public class TmfEventField implements ITmfEventField {
 
     @Override
     public int hashCode() {
-        Object value = fValue;
+        Object value = getValue();
+
         final int prime = 31;
         int result = 1;
-        result = prime * result + fName.hashCode();
+        result = prime * result + getName().hashCode();
         result = prime * result + ((value == null) ? 0 : value.hashCode());
         result = prime * result + fFields.hashCode();
         return result;
@@ -178,33 +181,76 @@ public class TmfEventField implements ITmfEventField {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof TmfEventField)) {
+
+        /* We only consider equals fields of the exact same class */
+        if (!(this.getClass().equals(obj.getClass()))) {
             return false;
         }
 
         final TmfEventField other = (TmfEventField) obj;
 
-        /* Check that 'fName' is the same */
-        if (!fName.equals(other.fName)) {
+        /* Check that the field names are the same */
+        if (!NonNullUtils.equalsNullable(getName(), other.getName())) {
             return false;
         }
 
-        /* Check that 'fValue' is the same */
-        Object value = this.fValue;
-        if (value == null) {
-            if (other.fValue != null) {
-                return false;
-            }
-        } else if (!value.equals(other.fValue)) {
+        /* Check that the field values are the same */
+        if (!valueEquals(this.getValue(), other.getValue())) {
             return false;
         }
 
-        /* Check that 'fFields' are the same */
+        /* Check that sub-fields are the same */
         if (!fFields.equals(other.fFields)) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Check if two Object values are equal. We have to handle the special cases
+     * where values can be null, or [] arrays.
+     */
+    private static boolean valueEquals(@Nullable Object value1, @Nullable Object value2) {
+        if ((value1 == null) && (value2 == null)) {
+            return true;
+        }
+        if ((value1 == null) || (value2 == null)) {
+            return false;
+        }
+        /* From here on we are sure both values are not null */
+
+        /*
+         * First we need to check if the field type is an [] array, in which
+         * case equals() won't match them.
+         */
+        Class<?> class1 = value1.getClass();
+        Class<?> class2 = value2.getClass();
+        if (class1.isArray() && class2.isArray()) {
+            if (class1.equals(int[].class) && class2.equals(int[].class)) {
+                return Arrays.equals((int[]) value1, (int[]) value2);
+            } else if (class1.equals(float[].class) && class2.equals(float[].class)) {
+                return Arrays.equals((float[]) value1, (float[]) value2);
+            } else if (class1.equals(double[].class) && class2.equals(double[].class)) {
+                return Arrays.equals((double[]) value1, (double[]) value2);
+            } else if (class1.equals(boolean[].class) && class2.equals(boolean[].class)) {
+                return Arrays.equals((boolean[]) value1, (boolean[]) value2);
+            } else if (class1.equals(byte[].class) && class2.equals(byte[].class)) {
+                return Arrays.equals((byte[]) value1, (byte[]) value2);
+            } else if (class1.equals(short[].class) && class2.equals(short[].class)) {
+                return Arrays.equals((short[]) value1, (short[]) value2);
+            } else if (class1.equals(long[].class) && class2.equals(long[].class)) {
+                return Arrays.equals((long[]) value1, (long[]) value2);
+            } else if (class1.equals(char[].class) && class2.equals(char[].class)) {
+                return Arrays.equals((char[]) value1, (char[]) value2);
+            } else if (class1.equals(Object[].class) && class2.equals(Object[].class)) {
+                return Arrays.equals((Object[]) value1, (Object[]) value2);
+            }
+            /* If the two are arrays of different types, they are not equal. */
+            return false;
+        }
+
+        return (value1.equals(value2));
     }
 
     @Override
