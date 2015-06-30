@@ -156,11 +156,11 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((fTrace == null) ? 0 : fTrace.hashCode());
-        result = prime * result + (int) (fRank ^ (fRank >>> 32));
-        result = prime * result + fTimestamp.hashCode();
-        result = prime * result + ((fType == null) ? 0 : fType.hashCode());
-        result = prime * result + ((fContent == null) ? 0 : fContent.hashCode());
+        result = prime * result + ((fTrace == null) ? 0 : getTrace().hashCode());
+        result = prime * result + (int) (getRank() ^ (getRank() >>> 32));
+        result = prime * result + getTimestamp().hashCode();
+        result = prime * result + ((getType() == null) ? 0 : getType().hashCode());
+        result = prime * result + ((getContent() == null) ? 0 : getContent().hashCode());
         return result;
     }
 
@@ -176,31 +176,33 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
             return false;
         }
         final TmfEvent other = (TmfEvent) obj;
+
         if (fTrace == null) {
             if (other.fTrace != null) {
                 return false;
             }
-        } else if (!fTrace.equals(other.fTrace)) {
+        } else if (!getTrace().equals(other.getTrace())) {
             return false;
         }
-        if (fRank != other.fRank) {
+
+        if (getRank() != other.getRank()) {
             return false;
         }
-        if (!fTimestamp.equals(other.fTimestamp)) {
+        if (!getTimestamp().equals(other.getTimestamp())) {
             return false;
         }
-        if (fType == null) {
-            if (other.fType != null) {
+        if (getType() == null) {
+            if (other.getType() != null) {
                 return false;
             }
-        } else if (!fType.equals(other.fType)) {
+        } else if (!getType().equals(other.getType())) {
             return false;
         }
-        if (fContent == null) {
-            if (other.fContent != null) {
+        if (getContent() == null) {
+            if (other.getContent() != null) {
                 return false;
             }
-        } else if (!fContent.equals(other.fContent)) {
+        } else if (!getContent().equals(other.getContent())) {
             return false;
         }
         return true;
