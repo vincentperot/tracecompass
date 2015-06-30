@@ -13,6 +13,7 @@
 package org.eclipse.tracecompass.tmf.core.parsers.custom;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.equalsNullable;
+import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
 import java.text.ParseException;
 import java.util.HashMap;
@@ -223,11 +224,12 @@ public class CustomEvent extends TmfEvent {
         fColumnData = new TmfEventField[fDefinition.outputs.size()];
         for (OutputColumn outputColumn : fDefinition.outputs) {
             String value = fData.get(outputColumn.name);
-            if (outputColumn.name.equals(CustomTraceDefinition.TAG_TIMESTAMP) && timestamp != null) {
+            String columnName = nullToEmptyString(outputColumn.name);
+            if (columnName.equals(CustomTraceDefinition.TAG_TIMESTAMP) && timestamp != null) {
                 TmfTimestampFormat timestampFormat = new TmfTimestampFormat(fDefinition.timeStampOutputFormat);
-                fColumnData[i++] = new TmfEventField(outputColumn.name, timestampFormat.format(timestamp.getValue()), null);
+                fColumnData[i++] = new TmfEventField(columnName, timestampFormat.format(timestamp.getValue()), null);
             } else {
-                fColumnData[i++] = new TmfEventField(outputColumn.name, (value != null ? value : ""), null); //$NON-NLS-1$
+                fColumnData[i++] = new TmfEventField(columnName, (value != null ? value : ""), null); //$NON-NLS-1$
             }
         }
         CustomEventContent curContent = (CustomEventContent) getContent();

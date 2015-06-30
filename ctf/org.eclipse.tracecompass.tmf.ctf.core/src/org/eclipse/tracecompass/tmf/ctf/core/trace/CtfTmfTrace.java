@@ -15,6 +15,7 @@
 package org.eclipse.tracecompass.tmf.ctf.core.trace;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -178,7 +179,7 @@ public class CtfTmfTrace extends TmfTrace
                         List<ITmfEventField> content = new ArrayList<>();
                         /* Should only return null the first time */
                         for (String fieldName : ied.getFields().getFieldsList()) {
-                            content.add(new TmfEventField(fieldName, null, null));
+                            content.add(new TmfEventField(nullToEmptyString(fieldName), null, null));
                         }
                         ITmfEventField contentTree = new TmfEventField(
                                 ITmfEventField.ROOT_FIELD_ID,
