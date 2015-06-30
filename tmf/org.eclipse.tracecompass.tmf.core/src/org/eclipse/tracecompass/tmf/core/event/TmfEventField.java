@@ -18,11 +18,14 @@ package org.eclipse.tracecompass.tmf.core.event;
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -111,12 +114,12 @@ public class TmfEventField implements ITmfEventField {
     }
 
     @Override
-    public Collection<String> getFieldNames() {
+    public final Collection<String> getFieldNames() {
         return checkNotNull(fFields.keySet());
     }
 
     @Override
-    public Collection<ITmfEventField> getFields() {
+    public final Collection<ITmfEventField> getFields() {
         return checkNotNull(fFields.values());
     }
 
@@ -161,10 +164,11 @@ public class TmfEventField implements ITmfEventField {
 
     @Override
     public int hashCode() {
-        Object value = fValue;
+        Object value = getValue();
+
         final int prime = 31;
         int result = 1;
-        result = prime * result + fName.hashCode();
+        result = prime * result + getName().hashCode();
         result = prime * result + ((value == null) ? 0 : value.hashCode());
         result = prime * result + fFields.hashCode();
         return result;
@@ -184,27 +188,77 @@ public class TmfEventField implements ITmfEventField {
 
         final TmfEventField other = (TmfEventField) obj;
 
-        /* Check that 'fName' is the same */
-        if (!fName.equals(other.fName)) {
+        /* Check that the field names are the same */
+        if (!NonNullUtils.equalsNullable(getName(), other.getName())) {
             return false;
         }
 
-        /* Check that 'fValue' is the same */
-        Object value = this.fValue;
-        if (value == null) {
-            if (other.fValue != null) {
-                return false;
-            }
-        } else if (!value.equals(other.fValue)) {
+        /* Check that the field values are the same */
+        if (!valueEquals(this.getValue(), other.getValue())) {
             return false;
         }
 
-        /* Check that 'fFields' are the same */
+        /* Check that sub-fields are the same */
         if (!fFields.equals(other.fFields)) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Check if two Object values are equal. We have to handle the special cases
+     * where values can be null, or [] arrays.
+     */
+    private static boolean valueEquals(@Nullable Object value1, @Nullable Object value2) {
+        if ((value1 == null) && (value2 == null)) {
+            return true;
+        }
+        if ((value1 == null) || (value2 == null)) {
+            return false;
+        }
+        /* From here on we are sure both values are not null */
+
+        /*
+         * First we need to check if the field type is an [] array, in which
+         * case equals() won't match them.
+         */
+        if (value1.getClass().isArray() && value2.getClass().isArray()) {
+            return Arrays.equals(getArray(value1), getArray(value2));
+        }
+        return (value1.equals(value2));
+    }
+
+    /*
+     * Construct a Object[] from any unknown-typed array.
+     * Java 9 (or 10?) will save us from this mess.
+     *
+     * From http://stackoverflow.com/a/25309047/4227853 .
+     */
+    private static final Class<?>[] ARRAY_PRIMITIVE_TYPES = {
+            int[].class, float[].class, double[].class, boolean[].class,
+            byte[].class, short[].class, long[].class, char[].class };
+
+    private static Object[] getArray(Object val) {
+        Class<?> valKlass = val.getClass();
+        Object[] outputArray = null;
+
+        for (Class<?> arrKlass : ARRAY_PRIMITIVE_TYPES) {
+            if (valKlass.isAssignableFrom(arrKlass)) {
+                int arrlength = Array.getLength(val);
+                outputArray = new Object[arrlength];
+                for (int i = 0; i < arrlength; ++i) {
+                    outputArray[i] = Array.get(val, i);
+                }
+                break;
+            }
+        }
+        if (outputArray == null) {
+            /* Not a primitive type array */
+            outputArray = (Object[]) val;
+        }
+
+        return outputArray;
     }
 
     @Override
