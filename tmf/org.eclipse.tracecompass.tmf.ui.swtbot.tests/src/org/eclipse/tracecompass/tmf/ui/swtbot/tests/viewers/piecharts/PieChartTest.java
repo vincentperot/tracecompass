@@ -14,16 +14,17 @@ package org.eclipse.tracecompass.tmf.ui.swtbot.tests.viewers.piecharts;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.log4j.ConsoleAppender;
+import java.io.File;
+
 import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.varia.NullAppender;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.utils.SWTBotPreferences;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotTreeItem;
 import org.eclipse.tracecompass.tmf.ctf.core.tests.shared.CtfTmfTestTrace;
 import org.eclipse.tracecompass.tmf.ui.swtbot.tests.shared.SWTBotUtils;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -77,7 +78,7 @@ public class PieChartTest {
         /* set up for swtbot */
         SWTBotPreferences.TIMEOUT = 20000; /* 20 second timeout */
         fLogger.removeAllAppenders();
-        fLogger.addAppender(new ConsoleAppender(new SimpleLayout()));
+        fLogger.addAppender(new NullAppender());
         fBot = new SWTWorkbenchBot();
 
         SWTBotUtils.closeView("welcome", fBot);
@@ -90,16 +91,15 @@ public class PieChartTest {
         SWTBotTreeItem treeItem = SWTBotUtils.selectTracesFolder(fBot, PROJECT_NAME);
         assertNotNull(treeItem);
         String path = CtfTmfTestTrace.DJANGO_CLIENT.getPath();
-        SWTBotUtils.openTrace(PROJECT_NAME, path, TRACE_TYPE);
+        File f = new File(path);
+        SWTBotUtils.openTrace(PROJECT_NAME, f.getAbsolutePath(), TRACE_TYPE);
         SWTBotUtils.openView(STATVIEW_ID);
     }
 
-    /**
-     * Tear down the tests
-     */
-    @AfterClass
-    public static void tearDown() {
-
+    @SuppressWarnings("javadoc")
+    @After
+    public void removeMe(){
+        System.out.println("----------=============== PASS ===============----------");
     }
 
     // ------------------------------------------------------------------

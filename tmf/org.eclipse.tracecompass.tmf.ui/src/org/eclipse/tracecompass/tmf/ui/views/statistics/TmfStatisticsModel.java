@@ -44,9 +44,10 @@ public class TmfStatisticsModel {
     /**
      * The ID corresponds to the package in which this class is embedded.
      */
-    public static final @NonNull String ID = "org.eclipse.linuxtools.tmf.ui.views.statistics"; //$NON-NLS-1$
+    public static final @NonNull String ID = "org.eclipse.linuxtools.tmf.ui.views.statistics.model"; //$NON-NLS-1$
 
     private String fName;
+
     /**
      * The update jobs containers
      */
@@ -76,6 +77,11 @@ public class TmfStatisticsModel {
     private TmfStatisticsTree fStatisticsData;
 
     /**
+     * The number of this instance to guarantee the uniqueness of the tree ID
+     */
+    private static int fInstanceNb = 0;
+
+    /**
      * Thread-safe flag storing the current state of the model
      */
     private AtomicBoolean fGlobalModelIsConstructed;
@@ -90,6 +96,7 @@ public class TmfStatisticsModel {
         fGlobalModelIsConstructed = new AtomicBoolean(false);
         fPartialModelIsConstructed = new AtomicBoolean(false);
         fName = name;
+        fInstanceNb++;
     }
 
     // ------------------------------------------------------------------------
@@ -232,7 +239,7 @@ public class TmfStatisticsModel {
      * @since 1.0
      */
     public String getTreeID() {
-        return getName();
+        return getName() + fInstanceNb;
     }
 
     /**

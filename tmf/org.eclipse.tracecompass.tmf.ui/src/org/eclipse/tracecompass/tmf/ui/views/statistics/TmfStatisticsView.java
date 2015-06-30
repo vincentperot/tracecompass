@@ -17,6 +17,11 @@
 
 package org.eclipse.tracecompass.tmf.ui.views.statistics;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -24,9 +29,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -43,7 +46,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceContext;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.ui.TmfUiRefreshHandler;
-import org.eclipse.tracecompass.tmf.ui.viewers.piecharts.TmfPieChartViewer;
 import org.eclipse.tracecompass.tmf.ui.viewers.statistics.TmfStatisticsViewer;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.tabsview.TmfViewerFolder;
@@ -52,14 +54,9 @@ import org.eclipse.tracecompass.tmf.ui.widgets.tabsview.TmfViewerFolder;
  * The generic Statistics View displays statistics for any kind of traces.
  *
  * It is implemented according to the MVC pattern. - The model is a
-<<<<<<< Upstream, based on PieChartModelTests
  * TmfStatisticsModel. The view is built with a TreeViewer as well as a
  * PieChartViewer. - The controller that keeps model and view synchronized is an
  * observer of the model.
-=======
- * TmfStatisticsModel. The view is built with a TreeViewer. - The controller
- * that keeps model and view synchronized is an observer of the model.
->>>>>>> 8499139 tmf: merge piecharts and extracted model
  *
  * @author Mathieu Denis
  */
@@ -80,13 +77,6 @@ public class TmfStatisticsView extends TmfView {
     private final Object fStatisticsRangeUpdateSyncObj = new Object();
 
     /**
-     * The viewer that builds the piecharts to show statistics
-     *
-     * @since 1.0
-     */
-    private final TmfPieChartViewer fPieChartViewer;
-
-    /**
      * Tells to send a time range request when the trace gets updated.
      */
     private boolean fSendRangeRequest = true;
@@ -99,9 +89,10 @@ public class TmfStatisticsView extends TmfView {
     private final TmfViewerFolder fFolderViewer;
 
     /**
-     * The viewer that contains the tree showing the statistics
+     * The viewer concretely shown in the Folder viewer
+     *
      */
-    private TmfStatisticsViewer fStatsViewer;
+    private TmfStatisticsViewer fCurrentStatsViewer;
 
     /**
      * Object to store the cursor while waiting for the trace to load
@@ -109,9 +100,9 @@ public class TmfStatisticsView extends TmfView {
     private Cursor fWaitCursor = null;
 
     /**
-     * The model holding the data for this view
+     * The current model of the viewer shown
      */
-    private TmfStatisticsModel fModel;
+    private TmfStatisticsModel fCurrentModel;
 
     /**
      * Counts the number of times waitCursor() has been called. It avoids
@@ -119,6 +110,12 @@ public class TmfStatisticsView extends TmfView {
      * at the same time.
      */
     private int fWaitCursorCount = 0;
+
+    /**
+     * Container for each StatisticsViewer and their associated Model, to add
+     * support for multiple tabs
+     */
+    private Map<TmfStatisticsViewer, TmfStatisticsModel> fTabsContent = new HashMap<>();
 
     /**
      * Constructor of a statistics view.
@@ -134,11 +131,7 @@ public class TmfStatisticsView extends TmfView {
          */
         Composite temporaryParent = new Shell();
         fFolderViewer = new TmfViewerFolder(temporaryParent);
-        fModel = new TmfStatisticsModel(Messages.TmfStatisticsView_GlobalTabName);
-        fPieChartViewer = new TmfPieChartViewer(temporaryParent,
-                Messages.TmfStatisticsView_GlobalTabName,
-                Messages.TmfStatisticsView_TimeRangeSelectionPieChartName,
-                Messages.TmfStatisticsView_PieChartOthersSliceName);
+        fCurrentModel = new TmfStatisticsModel(Messages.TmfStatisticsView_GlobalTabName);
         TmfSignalManager.register(this);
     }
 
@@ -151,22 +144,12 @@ public class TmfStatisticsView extends TmfView {
 
     @Override
     public void createPartControl(Composite parent) {
-        SashForm sash = new SashForm(parent, SWT.NONE);
-        sash.setLayout(new FillLayout());
+        fFolderViewer.setParent(parent);
         /*
-         * The Tree Viewer
-         */
-        fFolderViewer.setParent(sash);
-        /*
-         * Create the Statistics Tree viewer that will included in the folder
+         * Create the Statistics Tree viewer included in the folder
          * viewer
          */
-        createStatisticsTreeViewer();
-
-        /*
-         * The Piechart Viewer
-         */
-        getPieChartViewer().setParent(sash);
+        createStatisticsViewer();
 
         ITmfTrace trace = TmfTraceManager.getInstance().getActiveTrace();
         if (trace != null) {
@@ -181,7 +164,6 @@ public class TmfStatisticsView extends TmfView {
             fWaitCursor.dispose();
         }
         fFolderViewer.dispose();
-        getPieChartViewer().dispose();
     }
 
     // ------------------------------------------------------------------------
@@ -196,21 +178,27 @@ public class TmfStatisticsView extends TmfView {
      */
     @TmfSignalHandler
     public void traceOpened(final TmfTraceOpenedSignal signal) {
-        if (signal.getTrace() == fModel.getTrace()) {
-            // no need to reopen the same trace.
-            return;
+        for (Entry<TmfStatisticsViewer, TmfStatisticsModel> entry : fTabsContent.entrySet()) {
+            if (entry.getValue().getTrace().equals(signal.getTrace())) {
+                // no need to reopen the same trace.
+                return;
+            }
         }
-        // Update the current trace
-        fModel.clear();
-        fModel.setTrace(signal.getTrace());
+
+        // Create a model for the newly opened trace
+        fCurrentModel = new TmfStatisticsModel(signal.getTrace().getName());
+        fCurrentModel.setTrace(signal.getTrace());
 
         fFolderViewer.clear();
-        createStatisticsTreeViewer();
-        fModel.requestData(fModel.getTrace().getTimeRange());
-        ViewUpdateJob viewerUpdateJob = new ViewUpdateJob(Messages.TmfStatisticsView_ViewUpdateJobName, true);
+        /* creates the viewer associated with the model */
+        createStatisticsViewer();
+        fCurrentModel.requestData(fCurrentModel.getTrace().getTimeRange());
+        ViewUpdateJob viewerUpdateJob = new ViewUpdateJob(Messages.TmfStatisticsView_ViewUpdateJobName, fCurrentStatsViewer, true);
         viewerUpdateJob.schedule();
         fFolderViewer.layout();
-        getPieChartViewer().layout();
+
+        /* Keep track of the viewers opened */
+        fTabsContent.put(fCurrentStatsViewer, fCurrentModel);
     }
 
     /**
@@ -222,24 +210,24 @@ public class TmfStatisticsView extends TmfView {
      */
     @TmfSignalHandler
     public void traceRangeUpdated(final TmfTraceRangeUpdatedSignal signal) {
-        final ITmfTrace trace = signal.getTrace();
         // validate
-        if (!fModel.isListeningTo(trace)) {
+        if (!fCurrentModel.getTrace().equals(signal.getTrace())) {
             return;
         }
+
         synchronized (fStatisticsRangeUpdateSyncObj) {
             if (fSendRangeRequest) {
                 fSendRangeRequest = false;
 
                 TmfTraceContext ctx = TmfTraceManager.getInstance().getCurrentTraceContext();
                 TmfTimeRange timeRange = ctx.getSelectionRange();
-                fModel.requestTimeRangeData(timeRange);
-                ViewUpdateJob job = new ViewUpdateJob("Statistics View update", false); //$NON-NLS-1$
+                fCurrentModel.requestTimeRangeData(timeRange);
+                ViewUpdateJob job = new ViewUpdateJob(Messages.TmfStatisticsView_ViewUpdateJobName, fCurrentStatsViewer, false);
                 job.schedule();
             }
         }
-        fModel.requestData(signal.getRange());
-        ViewUpdateJob job = new ViewUpdateJob("Statistics View update", true); //$NON-NLS-1$
+        fCurrentModel.requestData(signal.getRange());
+        ViewUpdateJob job = new ViewUpdateJob(Messages.TmfStatisticsView_ViewUpdateJobName, fCurrentStatsViewer, true);
         job.schedule();
     }
 
@@ -250,14 +238,16 @@ public class TmfStatisticsView extends TmfView {
      */
     @TmfSignalHandler
     public void traceSelectionRangeUpdated(final TmfSelectionRangeUpdatedSignal signal) {
-        if (fModel.getTrace() == null) {
+        /* If the model shown is empty, no selection has to be updated */
+        if (fCurrentModel.getTrace() == null) {
             return;
         }
+
         ITmfTimestamp begin = signal.getBeginTime();
         ITmfTimestamp end = signal.getEndTime();
         TmfTimeRange timeRange = new TmfTimeRange(begin, end);
-        fModel.requestTimeRangeData(timeRange);
-        ViewUpdateJob job = new ViewUpdateJob("Statistics View update", false); //$NON-NLS-1$
+        fCurrentModel.requestTimeRangeData(timeRange);
+        ViewUpdateJob job = new ViewUpdateJob(Messages.TmfStatisticsView_ViewUpdateJobName, fCurrentStatsViewer, false);
         job.schedule();
     }
 
@@ -270,28 +260,38 @@ public class TmfStatisticsView extends TmfView {
      */
     @TmfSignalHandler
     public void traceSelected(TmfTraceSelectedSignal signal) {
-        // Does not reload the same trace if already opened
-        if (signal.getTrace() != fModel.getTrace()) {
-            /*
-             * Dispose the current viewer and adapt the new one to the trace
-             * type of the trace selected
-             */
-            fFolderViewer.clear();
-            // Update the current trace
-            fModel.clear();
-            fModel.setTrace(signal.getTrace());
-            createStatisticsTreeViewer();
-            fFolderViewer.layout();
-            sendPartialRequestOnNextUpdate();
-            traceRangeUpdated(new TmfTraceRangeUpdatedSignal(this, fModel.getTrace(), fModel.getTrace().getTimeRange()));
-        } else {
-            /*
-             * If the same trace is reselected, sends a notification to the
-             * viewers to make sure they reload correctly their partial event
-             * count.
-             */
-            sendPartialRequestOnNextUpdate();
+        boolean traceFound = false;
+        for (Entry<TmfStatisticsViewer, TmfStatisticsModel> entry : fTabsContent.entrySet()) {
+            if (entry.getValue().getTrace().equals(signal.getTrace())) {
+                fCurrentModel = entry.getValue();
+                fCurrentStatsViewer = entry.getKey();
+
+                /*
+                 * If the same trace is reselected, sends a notification to the
+                 * viewers to make sure they reload correctly their partial
+                 * event count.
+                 */
+                sendPartialRequestOnNextUpdate();
+                traceFound = true;
+            }
         }
+
+        if (traceFound) {
+            return;
+        }
+
+        /*
+         * Dispose the current viewer and adapt the new one to the trace type of
+         * the trace selected
+         */
+        fFolderViewer.clear();
+        // Update the current trace
+        fCurrentModel = new TmfStatisticsModel(signal.getTrace().getName());
+        fCurrentModel.setTrace(signal.getTrace());
+        createStatisticsViewer();
+        fFolderViewer.layout();
+        sendPartialRequestOnNextUpdate();
+        traceRangeUpdated(new TmfTraceRangeUpdatedSignal(this, fCurrentModel.getTrace(), fCurrentModel.getTrace().getTimeRange()));
     }
 
     /**
@@ -300,18 +300,26 @@ public class TmfStatisticsView extends TmfView {
      */
     @TmfSignalHandler
     public void traceClosed(TmfTraceClosedSignal signal) {
-        if (signal.getTrace() != fModel.getTrace()) {
-            return;
+
+        Iterator<Map.Entry<TmfStatisticsViewer, TmfStatisticsModel>> iterator = fTabsContent.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Entry<TmfStatisticsViewer, TmfStatisticsModel> entry = iterator.next();
+            if (entry.getValue().getTrace().equals(signal.getTrace())) {
+                /*
+                 * Clear the internal data
+                 */
+                entry.getKey().dispose();
+                entry.getValue().clear();
+                entry.getValue().setTrace(null);
+                iterator.remove();
+            }
         }
 
-        // Clear the internal data
-        fModel.clear();
-        fModel.setTrace(null);
-
         // Clear the UI widgets
-        fFolderViewer.clear(); // Also cancels ongoing requests
-        createStatisticsTreeViewer();
-        getPieChartViewer().reinitializeCharts();
+        /* This should be ignored if we want to have multiple tabs opened */
+        fFolderViewer.clear();
+        createStatisticsViewer();
+        fCurrentStatsViewer.getPieChartViewer().reinitializeCharts();
         fFolderViewer.layout();
     }
 
@@ -348,27 +356,27 @@ public class TmfStatisticsView extends TmfView {
      *
      * @since 1.0
      */
-    private void createStatisticsTreeViewer() {
+    private void createStatisticsViewer() {
         // Default style for the tabs that will be created
         int defaultStyle = SWT.NONE;
 
         // The folder composite that will contain the tabs
         Composite folder = fFolderViewer.getParentFolder();
         // Instantiation of the global viewer
-        if (fModel.getTrace() != null) {
+        if (fCurrentModel.getTrace() != null) {
             // Shows the name of the trace in the global tab
-            fStatsViewer = new TmfStatisticsViewer(folder, Messages.TmfStatisticsView_GlobalTabName + " - " + fModel.getTrace().getName()); //$NON-NLS-1$
-            fModel.setName(Messages.TmfStatisticsView_GlobalTabName + " - " + fModel.getTrace().getName()); //$NON-NLS-1$
-            fFolderViewer.addTab(fStatsViewer, Messages.TmfStatisticsView_GlobalTabName, defaultStyle);
+            fCurrentStatsViewer = new TmfStatisticsViewer(folder, Messages.TmfStatisticsView_GlobalTabName + " - " + fCurrentModel.getTrace().getName()); //$NON-NLS-1$
+            fCurrentModel.setName(Messages.TmfStatisticsView_GlobalTabName + " - " + fCurrentModel.getTrace().getName()); //$NON-NLS-1$
+            fFolderViewer.addTab(fCurrentStatsViewer, Messages.TmfStatisticsView_GlobalTabName, defaultStyle);
         } else {
             // There is no trace selected. Shows an empty global tab
-            fStatsViewer = new TmfStatisticsViewer(folder, Messages.TmfStatisticsView_GlobalTabName);
-            fModel.setName(Messages.TmfStatisticsView_GlobalTabName);
-            fFolderViewer.addTab(fStatsViewer, Messages.TmfStatisticsView_GlobalTabName, defaultStyle);
+            fCurrentStatsViewer = new TmfStatisticsViewer(folder, Messages.TmfStatisticsView_GlobalTabName);
+            fCurrentModel.setName(Messages.TmfStatisticsView_GlobalTabName);
+            fFolderViewer.addTab(fCurrentStatsViewer, Messages.TmfStatisticsView_GlobalTabName, defaultStyle);
         }
 
-        fModel.initTreeInput();
-        fStatsViewer.getTreeViewer().setInput(fModel.getStatisticData().getRootNode());
+        fCurrentModel.initTreeInput();
+        fCurrentStatsViewer.getTreeViewer().setInput(fCurrentModel.getStatisticData().getRootNode());
         // Makes the global viewer visible
         fFolderViewer.setSelection(0);
     }
@@ -382,7 +390,7 @@ public class TmfStatisticsView extends TmfView {
      * @since 1.0
      */
     public void modelComplete(boolean global) {
-        fStatsViewer.refresh();
+        fCurrentStatsViewer.refresh();
         // waitCursor(false);
     }
 
@@ -398,7 +406,7 @@ public class TmfStatisticsView extends TmfView {
      * @since 1.0
      */
     private void waitCursor(final boolean waitRequested) {
-        TreeViewer fTreeViewer = fStatsViewer.getTreeViewer();
+        TreeViewer fTreeViewer = fCurrentStatsViewer.getTreeViewer();
         if ((fTreeViewer == null) || (fTreeViewer.getTree().isDisposed())) {
             return;
         }
@@ -428,7 +436,7 @@ public class TmfStatisticsView extends TmfView {
             display.asyncExec(new Runnable() {
                 @Override
                 public void run() {
-                    TreeViewer tv = fStatsViewer.getTreeViewer();
+                    TreeViewer tv = fCurrentStatsViewer.getTreeViewer();
                     if ((tv != null)
                             && (!tv.getTree().isDisposed())) {
                         Cursor cursor = null; // indicates default
@@ -443,42 +451,20 @@ public class TmfStatisticsView extends TmfView {
     }
 
     /**
-     * @return The viewer representing the piechart.
+     * Called when an trace request has been completed successfully. Used to
+     * refresh the tree viewer once the model is finished. Normally only called
+     * by ViewUpdateJob
+     *
      * @since 1.0
      */
-    private TmfPieChartViewer getPieChartViewer() {
-        return fPieChartViewer;
-    }
-
-    /**
-     * Called when an trace request has been completed successfully.
-     * Used to refresh the tree viewer once the model is finished
-     * @since 1.0
-     */
-    private void signalTreeModelReady() {
+    private void refreshStatViewer(final TmfStatisticsViewer viewer) {
         TmfUiRefreshHandler.getInstance().queueUpdate(this, new Runnable() {
             @Override
             public void run() {
-                fStatsViewer.refresh();
+                viewer.refresh();
                 waitCursor(false);
             }
         });
-    }
-
-    /**
-     * Called when an trace request has been completed successfully.
-     *
-     * @param global
-     *            Tells if the request is a global or time range (partial)
-     *            request.
-     * @since 1.0
-     */
-    private void signalPieChartModelReady(boolean global) {
-        if (global) {
-            fPieChartViewer.setGlobalPieChartEntries(fModel.getPieChartGlobalModel());
-        } else {
-            fPieChartViewer.setTimeRangePieChartEntries(fModel.getPieChartSelectionModel());
-        }
     }
 
     /**
@@ -486,7 +472,7 @@ public class TmfStatisticsView extends TmfView {
      * @since 1.0
      */
     public TmfStatisticsViewer getStatsViewer() {
-        return fStatsViewer;
+        return fCurrentStatsViewer;
     }
 
     /**
@@ -494,7 +480,7 @@ public class TmfStatisticsView extends TmfView {
      * @return the model represented by this view
      */
     public TmfStatisticsModel getModel() {
-        return fModel;
+        return fCurrentModel;
     }
 
     private class ViewUpdateJob extends Job {
@@ -504,14 +490,27 @@ public class TmfStatisticsView extends TmfView {
         /** A flag indicating if the update is global or time-range only */
         private final boolean fIsGlobal;
 
-        public ViewUpdateJob(String name, boolean isGlobal) {
+        /** The viewer to be updated */
+        private final TmfStatisticsViewer fViewerToUpdate;
+
+        /**
+         * @param name
+         *            The name of the job
+         * @param currentStatsViewer
+         *            The viewer to live-update
+         * @param isGlobal
+         *            If the update has to be made globally or for the
+         *            time-range selection
+         */
+        public ViewUpdateJob(String name, TmfStatisticsViewer currentStatsViewer, boolean isGlobal) {
             super(name);
             fIsGlobal = isGlobal;
+            fViewerToUpdate = currentStatsViewer;
         }
 
         @Override
         protected IStatus run(IProgressMonitor monitor) {
-            boolean finished = fIsGlobal ? fModel.isGlobalModelReady() : fModel.isPartialModelReady();
+            boolean finished = fIsGlobal ? fCurrentModel.isGlobalModelReady() : fCurrentModel.isPartialModelReady();
             do {
                 /* Polling */
                 if (monitor.isCanceled()) {
@@ -523,13 +522,16 @@ public class TmfStatisticsView extends TmfView {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                signalTreeModelReady();
-                finished = fIsGlobal ? fModel.isGlobalModelReady() : fModel.isPartialModelReady();
+                refreshStatViewer(fViewerToUpdate); /*
+                                                     * only refresh the Tree
+                                                     * Viewer
+                                                     */
+                finished = fIsGlobal ? fCurrentModel.isGlobalModelReady() : fCurrentModel.isPartialModelReady();
 
             } while (!finished);
-            /* send one last signal to update the tree and the charts*/
-            signalTreeModelReady();
-            signalPieChartModelReady(fIsGlobal);
+
+            /* Refresh both models and redraw the viewers */
+            fViewerToUpdate.setInput(fCurrentModel);
             return Status.OK_STATUS;
         }
     }
