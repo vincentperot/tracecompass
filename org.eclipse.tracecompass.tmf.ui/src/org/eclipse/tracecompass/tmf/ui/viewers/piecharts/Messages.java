@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 Ericsson
+ * Copyright (c) 2015 Ericsson
  *
  * All rights reserved. This program and the accompanying materials are
  * made available under the terms of the Eclipse Public License v1.0 which
@@ -7,26 +7,21 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *   Mathieu Denis <mathieu.denis@polymtl.ca> - Initial API and Implementation
+ *   Alexis Cabana-Loriaux <alex021994@gmail.com> - Initial API and Implementation
  *******************************************************************************/
 
-package org.eclipse.tracecompass.tmf.ui.viewers.statistics;
+package org.eclipse.tracecompass.tmf.ui.viewers.piecharts;
 
 import org.eclipse.osgi.util.NLS;
 
 /**
  * Messages file for statistics view strings.
  *
- * @author Mathieu Denis
+ * @author Alexis Cabana-Loriaux <alex021994@gmail.com>
  */
 public class Messages extends NLS {
 
-    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.tmf.ui.viewers.statistics.messages"; //$NON-NLS-1$
-
-    /**
-     * String for unknown trace name.
-     */
-    public static String TmfStatisticsView_UnknownTraceName;
+    private static final String BUNDLE_NAME = "org.eclipse.tracecompass.tmf.ui.viewers.piecharts.messages"; //$NON-NLS-1$
 
     /**
      * String shown on top of the time-range selection piechart

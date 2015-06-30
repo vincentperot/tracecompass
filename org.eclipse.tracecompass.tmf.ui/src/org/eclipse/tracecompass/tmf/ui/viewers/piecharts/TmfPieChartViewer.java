@@ -98,18 +98,12 @@ public class TmfPieChartViewer extends Composite {
     /**
      * @param parent
      *            The parent composite that will hold the viewer
-     * @param nameOfGLobal
-     *            The name to be shown over the Global PieChart
-     * @param nameOfSelection
-     *            The name to be shown over the Time-range selection PieChart
-     * @param nameOfOthers
-     *            The name given to the slices piecharts
      */
-    public TmfPieChartViewer(Composite parent, String nameOfGLobal, String nameOfSelection, String nameOfOthers) {
+    public TmfPieChartViewer(Composite parent) {
         super(parent, SWT.NONE);
-        fGlobalPCname = nameOfGLobal;
-        fTimeRangePCname = nameOfSelection;
-        fOthersSliceName = nameOfOthers;
+        fGlobalPCname = Messages.TmfStatisticsView_GlobalSelectionPieChartName;
+        fTimeRangePCname = Messages.TmfStatisticsView_TimeRangeSelectionPieChartName;
+        fOthersSliceName = Messages.TmfStatisticsView_PieChartOthersSliceName;
         initContent();
     }
 

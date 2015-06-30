@@ -28,18 +28,6 @@ public class Messages extends NLS {
      * piechart
      */
     public static String TmfStatisticsView_GlobalTabName;
-    /**
-     * String shown on top of the time-range selection piechart
-     *
-     * @since 1.0
-     */
-    public static String TmfStatisticsView_TimeRangeSelectionPieChartName;
-    /**
-     * String given to the slice in the piechart containing the too little
-     * slices
-     * @since 1.0
-     */
-    public static String TmfStatisticsView_PieChartOthersSliceName;
 
     /**
      * Name given to the jobs scheduled to update the view

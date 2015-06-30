@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.tracecompass.tmf.ui" version="2">
+    <resource path="src/org/eclipse/tracecompass/tmf/ui/viewers/statistics/TmfStatisticsViewer.java" type="org.eclipse.tracecompass.tmf.ui.viewers.statistics.TmfStatisticsViewer">
+        <filter id="643842064">
+            <message_arguments>
+                <message_argument value="TmfPieChartViewer"/>
+                <message_argument value="TmfStatisticsViewer"/>
+                <message_argument value="getPieChartViewer()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
