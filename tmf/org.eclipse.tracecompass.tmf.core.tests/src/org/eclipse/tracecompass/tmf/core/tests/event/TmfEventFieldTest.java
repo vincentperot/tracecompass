@@ -23,6 +23,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -322,6 +323,79 @@ public class TmfEventFieldTest {
 
         assertEquals(field1, field2);
         assertEquals(field2, field1);
+    }
+
+    /**
+     * Test with values being Object[] arrays.
+     */
+    @Test
+    public void testValueArrayObject() {
+        Object object1 = new Object();
+        Object object2 = new Object();
+        assertNotEquals(object1, object2);
+
+        Object[] value1 = new Object[] { object1, object2 };
+        Object[] value2 = new Object[] { object1, object2 };
+        assertNotEquals(value1, value2);
+        assertTrue(Arrays.equals(value1, value2));
+
+        TmfEventField field1 = new TmfEventField(fFieldName1, value1, null);
+        TmfEventField field2 = new TmfEventField(fFieldName1, value2, null);
+        assertEquals(field1, field2);
+    }
+
+    /**
+     * Test with values being primitive arrays.
+     */
+    @Test
+    public void testValueArrayPrimitive() {
+        long[] value1 = new long[] { 10, 20 };
+        long[] value2 = new long[] { 10, 20 };
+        assertNotEquals(value1, value2);
+        assertTrue(Arrays.equals(value1, value2));
+
+        TmfEventField field1 = new TmfEventField(fFieldName1, value1, null);
+        TmfEventField field2 = new TmfEventField(fFieldName1, value2, null);
+        assertEquals(field1, field2);
+    }
+
+    /**
+     * Test with values being both primitive arrays, but different ones.
+     */
+    @Test
+    public void testValueArrayPrimitiveNotEquals() {
+        long[] value1 = new long[] { 10, 20 };
+        long[] value2 = new long[] { 10, 30 };
+
+        TmfEventField field1 = new TmfEventField(fFieldName1, value1, null);
+        TmfEventField field2 = new TmfEventField(fFieldName1, value2, null);
+        assertNotEquals(field1, field2);
+    }
+
+    /**
+     * Test with values being arrays, but of different element types.
+     */
+    @Test
+    public void testValueArrayMismatchedTypes() {
+        Object[] value1 = new Object[] { new Object(), new Object() };
+        long[] value2 = new long[] { 10, 20 };
+
+        TmfEventField field1 = new TmfEventField(fFieldName1, value1, null);
+        TmfEventField field2 = new TmfEventField(fFieldName1, value2, null);
+        assertNotEquals(field1, field2);
+    }
+
+    /**
+     * Test with values being one array, and one other standard type.
+     */
+    @Test
+    public void testValueArrayAndOther() {
+        long[] value1 = new long[] { 10, 20 };
+        Integer value2 = Integer.valueOf(10);
+
+        TmfEventField field1 = new TmfEventField(fFieldName1, value1, null);
+        TmfEventField field2 = new TmfEventField(fFieldName1, value2, null);
+        assertNotEquals(field1, field2);
     }
 
     // ------------------------------------------------------------------------
