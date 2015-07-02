@@ -12,7 +12,6 @@
 
 package org.eclipse.tracecompass.tmf.core.parsers.custom;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.equalsNullable;
 import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
 import java.text.ParseException;
@@ -236,46 +235,4 @@ public class CustomEvent extends TmfEvent {
         setContent(new CustomEventContent(curContent.getName(), curContent.getValue(), fColumnData));
         fData = null;
     }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((fDefinition == null) ? 0 : fDefinition.hashCode());
-        result = prime * result + customEventTimestamp.hashCode();
-        result = prime * result + ((customEventContent == null) ? 0 : customEventContent.hashCode());
-        result = prime * result + ((customEventType == null) ? 0 : customEventType.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof CustomEvent)) {
-            return false;
-        }
-        CustomEvent other = (CustomEvent) obj;
-        if (!equalsNullable(fDefinition, other.fDefinition)) {
-            return false;
-        }
-
-        if (!customEventTimestamp.equals(other.customEventTimestamp)) {
-            return false;
-        }
-
-        if (!equalsNullable(customEventContent, other.customEventContent)) {
-            return false;
-        }
-
-        if (!equalsNullable(customEventType, other.customEventType)) {
-            return false;
-        }
-        return true;
-    }
-
 }

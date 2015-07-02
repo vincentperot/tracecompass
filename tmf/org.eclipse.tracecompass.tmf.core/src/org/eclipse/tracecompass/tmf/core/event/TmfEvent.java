@@ -15,7 +15,6 @@ package org.eclipse.tracecompass.tmf.core.event;
 
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfContext;
@@ -138,7 +137,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     }
 
     /**
-     * @since 1.0
+     * @since 2.0
      */
     @Override
     public String getName() {
@@ -152,56 +151,6 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     // ------------------------------------------------------------------------
     // Object
     // ------------------------------------------------------------------------
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fTrace == null) ? 0 : getTrace().hashCode());
-        result = prime * result + (int) (getRank() ^ (getRank() >>> 32));
-        result = prime * result + getTimestamp().hashCode();
-        result = prime * result + ((getType() == null) ? 0 : getType().hashCode());
-        result = prime * result + ((getContent() == null) ? 0 : getContent().hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-
-        /* Two events must be of the exact same class to be equal */
-        if (!(this.getClass().equals(obj.getClass()))) {
-            return false;
-        }
-        final TmfEvent other = (TmfEvent) obj;
-
-        if (fTrace == null) {
-            if (other.fTrace != null) {
-                return false;
-            }
-        } else if (!getTrace().equals(other.getTrace())) {
-            return false;
-        }
-
-        if (getRank() != other.getRank()) {
-            return false;
-        }
-        if (!getTimestamp().equals(other.getTimestamp())) {
-            return false;
-        }
-        if (!NonNullUtils.equalsNullable(getType(), other.getType())) {
-            return false;
-        }
-        if (!NonNullUtils.equalsNullable(getContent(), other.getContent())) {
-            return false;
-        }
-        return true;
-    }
 
     @Override
     @SuppressWarnings("nls")
