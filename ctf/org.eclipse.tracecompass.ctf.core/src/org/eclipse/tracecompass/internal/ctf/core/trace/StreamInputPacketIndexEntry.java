@@ -20,6 +20,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.FloatDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
+import org.eclipse.tracecompass.ctf.core.event.types.SimpleDatatypeDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketDescriptor;
@@ -138,7 +139,7 @@ public class StreamInputPacketIndexEntry implements ICTFPacketDescriptor {
         Long packetSize = (Long) fAttributes.get(CTFStrings.PACKET_SIZE);
         Long tsBegin = (Long) fAttributes.get(CTFStrings.TIMESTAMP_BEGIN);
         Long tsEnd = (Long) fAttributes.get(CTFStrings.TIMESTAMP_END);
-        String device = (String) fAttributes.get(CTFStrings.DEVICE);
+        boolean hasDevice = fAttributes.containsKey(CTFStrings.DEVICE);
         // LTTng Specific
         Long cpuId = (Long) fAttributes.get(CTFStrings.CPU_ID);
         Long lostEvents = (Long) fAttributes.get(CTFStrings.EVENTS_DISCARDED);
@@ -179,16 +180,9 @@ public class StreamInputPacketIndexEntry implements ICTFPacketDescriptor {
             fTimestampEnd = Long.MAX_VALUE;
         }
 
-        if (device != null) {
-            fTarget = device;
-            fTargetID = Integer.parseInt(device.replaceAll("[\\D]", "")); //$NON-NLS-1$ //$NON-NLS-2$ // slow
-        } else if (cpuId != null) {
-            fTarget = ("CPU" + cpuId.toString()); //$NON-NLS-1$
-            fTargetID = cpuId;
-        } else {
-            fTarget = null;
-            fTargetID = UNKNOWN;
-        }
+        Target target = lookupTarget(streamPacketContextDef, hasDevice, cpuId);
+        fTarget = target.string;
+        fTargetID = target.number;
 
         if (lostEvents != null) {
             fLostEvents = (lostEvents - lostSoFar);
@@ -198,6 +192,36 @@ public class StreamInputPacketIndexEntry implements ICTFPacketDescriptor {
 
         fOffsetBits = dataOffsetBits;
         fOffsetBytes = dataOffsetBits / Byte.SIZE;
+    }
+
+    private static class Target {
+        public String string;
+        public long number;
+
+        public Target() {
+            string = null;
+            number = UNKNOWN;
+        }
+    }
+
+    private static Target lookupTarget(StructDefinition streamPacketContextDef, boolean hasDevice, Long cpuId) {
+        Target ret = new Target();
+        if (hasDevice) {
+            IDefinition def = streamPacketContextDef.lookupDefinition(CTFStrings.DEVICE);
+            if (def instanceof SimpleDatatypeDefinition) {
+                SimpleDatatypeDefinition simpleDefinition = (SimpleDatatypeDefinition) def;
+                ret.string = simpleDefinition.getStringValue();
+                ret.number = simpleDefinition.getIntegerValue();
+            } else if (def instanceof StringDefinition) {
+                StringDefinition stringDefinition = (StringDefinition) def;
+                ret.string = stringDefinition.getValue();
+                ret.number = Integer.parseInt(ret.string.replaceAll("[\\D]", "")); //$NON-NLS-1$ //$NON-NLS-2$
+            }
+        } else if (cpuId != null) {
+            ret.string = ("CPU" + cpuId.toString()); //$NON-NLS-1$
+            ret.number = cpuId;
+        }
+        return ret;
     }
 
     // ------------------------------------------------------------------------
