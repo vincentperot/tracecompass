@@ -93,6 +93,11 @@ public class TreeMapStore<T extends ISegment> implements ISegmentStore<T> {
 
     @Override
     public Iterable<T> getIntersectingElements(long start, long end) {
+        /*
+         * The intervals intersecting are those whose 1) start time is *higher*
+         * or *equal* to the start parameter AND 2) start time is *lower* or
+         * *equal* to the end parameter.
+         */
         Iterable<T> matchStarts = Iterables.concat(fStartTimesIndex.asMap().headMap(end, true).values());
         Iterable<T> matchEnds = Iterables.concat(fEndTimesIndex.asMap().tailMap(start, true).values());
 
