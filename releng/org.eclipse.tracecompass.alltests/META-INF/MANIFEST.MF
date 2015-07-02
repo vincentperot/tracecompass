@@ -22,6 +22,8 @@ Require-Bundle: org.junit;bundle-version="4.0.0",
  org.eclipse.tracecompass.lttng2.ust.core.tests,
  org.eclipse.tracecompass.lttng2.ust.ui.tests,
  org.eclipse.tracecompass.statesystem.core.tests,
+ org.eclipse.tracecompass.segmentstore.core.tests,
+ org.eclipse.tracecompass.tmf.remote.ui.swtbot.tests,
  org.eclipse.tracecompass.tmf.core.tests,
  org.eclipse.tracecompass.tmf.ctf.core.tests,
  org.eclipse.tracecompass.tmf.ctf.ui.swtbot.tests,
@@ -35,8 +37,7 @@ Require-Bundle: org.junit;bundle-version="4.0.0",
  org.eclipse.tracecompass.tmf.pcap.core.tests,
  org.eclipse.tracecompass.tmf.pcap.ui.swtbot.tests,
  org.eclipse.tracecompass.tmf.remote.core.tests,
- org.eclipse.tracecompass.tmf.remote.ui.tests,
- org.eclipse.tracecompass.tmf.remote.ui.swtbot.tests
+ org.eclipse.tracecompass.tmf.remote.ui.tests
 Export-Package: org.eclipse.tracecompass.alltests;x-internal:=true,
  org.eclipse.tracecompass.alltests.perf;x-internal:=true,
  org.eclipse.tracecompass.alltests.swtbot;x-internal:=true
