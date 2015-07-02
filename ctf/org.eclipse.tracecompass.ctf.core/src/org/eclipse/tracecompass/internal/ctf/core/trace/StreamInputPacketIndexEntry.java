@@ -20,6 +20,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.EnumDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.FloatDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.IntegerDefinition;
+import org.eclipse.tracecompass.ctf.core.event.types.SimpleDatatypeDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StringDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.trace.ICTFPacketDescriptor;
@@ -180,8 +181,16 @@ public class StreamInputPacketIndexEntry implements ICTFPacketDescriptor {
         }
 
         if (device != null) {
-            fTarget = device;
-            fTargetID = Integer.parseInt(device.replaceAll("[\\D]", "")); //$NON-NLS-1$ //$NON-NLS-2$ // slow
+            IDefinition def = streamPacketContextDef.lookupDefinition(CTFStrings.DEVICE);
+            if (def instanceof SimpleDatatypeDefinition) {
+                SimpleDatatypeDefinition enumDefinition = (SimpleDatatypeDefinition) def;
+                fTarget = enumDefinition.getStringValue();
+                fTargetID = enumDefinition.getIntegerValue();
+            } else {
+                fTarget = null;
+                fTargetID = UNKNOWN;
+            }
+
         } else if (cpuId != null) {
             fTarget = ("CPU" + cpuId.toString()); //$NON-NLS-1$
             fTargetID = cpuId;
