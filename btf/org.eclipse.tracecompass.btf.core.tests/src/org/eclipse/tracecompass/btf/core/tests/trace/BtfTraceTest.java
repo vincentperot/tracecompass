@@ -139,6 +139,11 @@ public class BtfTraceTest {
         ITmfEvent event1 = fixture.getNext(ctx1);
         assertNotNull(event);
         assertNotNull(event1);
-        assertEquals(event, event1);
+        assertEquals(event.getTrace(), event1.getTrace());
+        assertEquals(event.getName(), event1.getName());
+        assertEquals(event.getType(), event1.getType());
+        assertEquals(event.getTimestamp(), event1.getTimestamp());
+        assertEquals(event.getRank(), event1.getRank());
+        assertEquals(event.getContent(), event1.getContent());
     }
 }
