@@ -15,10 +15,8 @@
 package org.eclipse.tracecompass.tmf.core.tests.event;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -145,168 +143,13 @@ public class TmfEventTest {
     }
 
     // ------------------------------------------------------------------------
-    // hashCode
-    // ------------------------------------------------------------------------
-
-    @Test
-    public void testHashCode() {
-        ITmfEvent event1 = new TmfEvent(fTrace, ITmfContext.UNKNOWN_RANK, null, null, null);
-        ITmfEvent event2 = new TmfEvent(fTrace, ITmfContext.UNKNOWN_RANK, null, null, null);
-
-        assertTrue("hashCode", event1.hashCode() == event2.hashCode());
-
-        final ITmfTrace trace = fTrace;
-        event1 = new TmfEvent(trace, 0, fTimestamp1, fType, fContent1);
-        event2 = new TmfEvent(trace, 1, fTimestamp2, fType, fContent2);
-        final ITmfEvent event1b = new TmfEvent(event1);
-        final ITmfEvent event2b = new TmfEvent(event2);
-
-        assertTrue("hashCode", event1.hashCode() == event1b.hashCode());
-        assertTrue("hashCode", event2.hashCode() == event2b.hashCode());
-
-        assertTrue("hashCode", event1.hashCode() != event2.hashCode());
-        assertTrue("hashCode", event2.hashCode() != event1.hashCode());
-
-        trace.dispose();
-    }
-
-    // ------------------------------------------------------------------------
-    // equals
-    // ------------------------------------------------------------------------
-
-    @Test
-    public void testEqualsReflexivity() {
-        assertTrue("equals", fEvent1.equals(fEvent1));
-        assertTrue("equals", fEvent2.equals(fEvent2));
-
-        assertFalse("equals", fEvent1.equals(fEvent2));
-        assertFalse("equals", fEvent2.equals(fEvent1));
-    }
-
-    @Test
-    public void testEqualsSymmetry() {
-        final ITmfEvent event1 = new TmfEvent(fEvent1);
-        final ITmfEvent event2 = new TmfEvent(fEvent2);
-
-        assertTrue("equals", event1.equals(fEvent1));
-        assertTrue("equals", fEvent1.equals(event1));
-
-        assertTrue("equals", event2.equals(fEvent2));
-        assertTrue("equals", fEvent2.equals(event2));
-    }
-
-    @Test
-    public void testEqualsTransivity() {
-        final ITmfEvent event1 = new TmfEvent(fEvent1);
-        final ITmfEvent event2 = new TmfEvent(fEvent1);
-        final ITmfEvent event3 = new TmfEvent(fEvent1);
-
-        assertTrue("equals", event1.equals(event2));
-        assertTrue("equals", event2.equals(event3));
-        assertTrue("equals", event1.equals(event3));
-    }
-
-    @Test
-    public void testEqualsNull() {
-        assertFalse("equals", fEvent1.equals(null));
-        assertFalse("equals", fEvent2.equals(null));
-    }
-
-    @Test
-    public void testNonEqualClasses() {
-        assertFalse("equals", fEvent1.equals(fEvent1.getType()));
-        assertFalse("equals", fEvent1.equals(null));
-    }
-
-    @Test
-    public void testNonEqualTraces() {
-        final ITmfTrace trace1 = fTrace;
-        final ITmfTrace trace2 = STUB_TRACE.getTrace();
-
-        final ITmfEvent event1 = new TmfEvent(trace1, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(trace1,  0, fTimestamp1, fType, fContent1);
-        assertTrue("equals", event1.equals(event2));
-        assertTrue("equals", event2.equals(event1));
-
-        event2 = new TmfEvent(trace2,  0, fTimestamp1, fType, fContent1);
-        assertFalse("equals", event1.equals(event2));
-        assertFalse("equals", event2.equals(event1));
-
-        trace2.dispose();
-    }
-
-    @Test
-    public void testNonEqualRanks() {
-        final ITmfEvent event1 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        assertTrue("equals", event1.equals(event2));
-        assertTrue("equals", event2.equals(event1));
-
-        event2 = new TmfEvent(null, 1, fTimestamp1, fType, fContent1);
-        assertFalse("equals", event1.equals(event2));
-        assertFalse("equals", event2.equals(event1));
-    }
-
-    @Test
-    public void testNonEqualTimestamps() {
-        final ITmfEvent event1 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        assertTrue("equals", event1.equals(event2));
-        assertTrue("equals", event2.equals(event1));
-
-        event2 = new TmfEvent(null, 0, fTimestamp2, fType, fContent1);
-        assertFalse("equals", event1.equals(event2));
-        assertFalse("equals", event2.equals(event1));
-
-        event2 = new TmfEvent(null, 0, null, fType, fContent1);
-        assertFalse("equals", event1.equals(event2));
-        assertFalse("equals", event2.equals(event1));
-    }
-
-    @Test
-    public void testNonEqualTypes() {
-        final ITmfEvent event1 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(null, 0, fTimestamp1, fType,  fContent1);
-        assertTrue("equals", event1.equals(event2));
-        assertTrue("equals", event2.equals(event1));
-
-        final String typeId = "OtherTestType";
-        final String[] labels = new String[] { fLabel2, fLabel1 };
-        final TmfEventType newType = new TmfEventType(typeId, TmfEventField.makeRoot(labels));
-
-        event2 = new TmfEvent(null, 0, fTimestamp1, newType, fContent1);
-        assertFalse("equals", event1.equals(event2));
-        assertFalse("equals", event2.equals(event1));
-
-        event2 = new TmfEvent(null, 0, fTimestamp1, null, fContent1);
-        assertFalse("equals", event1.equals(event2));
-        assertFalse("equals", event2.equals(event1));
-    }
-
-    @Test
-    public void testNonEqualContents() {
-        final ITmfEvent event1 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        ITmfEvent event2 = new TmfEvent(null, 0, fTimestamp1, fType, fContent1);
-        assertTrue("equals", event1.equals(event2));
-        assertTrue("equals", event2.equals(event1));
-
-        event2 = new TmfEvent(null, 0, fTimestamp1, fType, fContent2);
-        assertFalse("equals", event1.equals(event2));
-        assertFalse("equals", event2.equals(event1));
-
-        event2 = new TmfEvent(null, 0, fTimestamp1, fType, null);
-        assertFalse("equals", event1.equals(event2));
-        assertFalse("equals", event2.equals(event1));
-    }
-
-    // ------------------------------------------------------------------------
     // toString
     // ------------------------------------------------------------------------
 
     @Test
     public void testToString() {
         final String expected1 = "TmfEvent [fTimestamp=" + fTimestamp1 + ", fTrace=" + fTrace +
-                ", fRank=0, fType=" + fType + ", fContent=" + fContent1 +  "]";
+                ", fRank=0, fType=" + fType + ", fContent=" + fContent1 + "]";
         assertEquals("toString", expected1, fEvent1.toString());
 
         final String expected2 = "TmfEvent [fTimestamp=" + fTimestamp2 + ", fTrace=" + fTrace +
@@ -315,8 +158,8 @@ public class TmfEventTest {
     }
 
     /**
-     * Test the .toString() with extended classes.
-     * It should print the correct class name.
+     * Test the .toString() with extended classes. It should print the correct
+     * class name.
      */
     @Test
     public void testToStringExtended() {
