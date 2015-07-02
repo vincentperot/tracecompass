@@ -20,7 +20,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        // No tests at the moment!
+        TestIntersectingElements.class
 })
 public class AllTests {
 
