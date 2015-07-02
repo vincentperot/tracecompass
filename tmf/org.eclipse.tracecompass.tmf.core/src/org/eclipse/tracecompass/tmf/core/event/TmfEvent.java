@@ -137,7 +137,7 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     }
 
     /**
-     * @since 1.0
+     * @since 1.1
      */
     @Override
     public String getName() {
@@ -151,60 +151,6 @@ public class TmfEvent extends PlatformObject implements ITmfEvent {
     // ------------------------------------------------------------------------
     // Object
     // ------------------------------------------------------------------------
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fTrace == null) ? 0 : fTrace.hashCode());
-        result = prime * result + (int) (fRank ^ (fRank >>> 32));
-        result = prime * result + fTimestamp.hashCode();
-        result = prime * result + ((fType == null) ? 0 : fType.hashCode());
-        result = prime * result + ((fContent == null) ? 0 : fContent.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof TmfEvent)) {
-            return false;
-        }
-        final TmfEvent other = (TmfEvent) obj;
-        if (fTrace == null) {
-            if (other.fTrace != null) {
-                return false;
-            }
-        } else if (!fTrace.equals(other.fTrace)) {
-            return false;
-        }
-        if (fRank != other.fRank) {
-            return false;
-        }
-        if (!fTimestamp.equals(other.fTimestamp)) {
-            return false;
-        }
-        if (fType == null) {
-            if (other.fType != null) {
-                return false;
-            }
-        } else if (!fType.equals(other.fType)) {
-            return false;
-        }
-        if (fContent == null) {
-            if (other.fContent != null) {
-                return false;
-            }
-        } else if (!fContent.equals(other.fContent)) {
-            return false;
-        }
-        return true;
-    }
 
     @Override
     @SuppressWarnings("nls")
