@@ -12,13 +12,16 @@
 
 package org.eclipse.tracecompass.tmf.ctf.core.tests.event;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.event.ITmfLostEvent;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
@@ -102,21 +105,23 @@ public class CtfTmfLostEventsTest {
     public void testFirstLostEvent() {
         final long rank = 190;
         final ITmfTimestamp start = new TmfNanoTimestamp(1376592664828900165L);
-        final ITmfTimestamp end   = new TmfNanoTimestamp(1376592664829403076L);
+        final ITmfTimestamp end = new TmfNanoTimestamp(1376592664829403076L);
         final long nbLost = 859;
 
-        final CtfTmfEvent ev = getOneEventTime(start);
+        final CtfTmfEvent event = getOneEventTime(start);
         /* Make sure seeking by rank yields the same event */
-        final CtfTmfEvent ev2 = getOneEventRank(rank);
-        assertEquals(ev, ev2);
+        final CtfTmfEvent event2 = getOneEventRank(rank);
+        assertEquals(event.getTimestamp(), event2.getTimestamp());
+        assertEquals(event.getRank(), event2.getRank());
+        assertEquals(event.getContent(), event2.getContent());
 
-        assertTrue(ev instanceof ITmfLostEvent);
-        ITmfLostEvent event = (ITmfLostEvent) ev;
+        assertTrue(event instanceof ITmfLostEvent);
+        ITmfLostEvent lostEvent = (ITmfLostEvent) event;
 
-        assertEquals(start, event.getTimestamp());
-        assertEquals(start, event.getTimeRange().getStartTime());
-        assertEquals(end, event.getTimeRange().getEndTime());
-        assertEquals(nbLost, event.getNbLostEvents());
+        assertEquals(start, lostEvent.getTimestamp());
+        assertEquals(start, lostEvent.getTimeRange().getStartTime());
+        assertEquals(end, lostEvent.getTimeRange().getEndTime());
+        assertEquals(nbLost, lostEvent.getNbLostEvents());
     }
 
     /**
@@ -126,21 +131,23 @@ public class CtfTmfLostEventsTest {
     public void testSecondLostEvent() {
         final long rank = 229;
         final ITmfTimestamp start = new TmfNanoTimestamp(1376592664829477058L);
-        final ITmfTimestamp end   = new TmfNanoTimestamp(1376592664829824514L);
+        final ITmfTimestamp end = new TmfNanoTimestamp(1376592664829824514L);
         final long nbLost = 488;
 
-        final CtfTmfEvent ev = getOneEventTime(start);
+        final CtfTmfEvent event = getOneEventTime(start);
         /* Make sure seeking by rank yields the same event */
-        final CtfTmfEvent ev2 = getOneEventRank(rank);
-        assertEquals(ev, ev2);
+        final CtfTmfEvent event2 = getOneEventRank(rank);
+        assertEquals(event.getTimestamp(), event2.getTimestamp());
+        assertEquals(event.getRank(), event2.getRank());
+        assertEquals(event.getContent(), event2.getContent());
 
-        assertTrue(ev instanceof ITmfLostEvent);
-        ITmfLostEvent event = (ITmfLostEvent) ev;
+        assertTrue(event instanceof ITmfLostEvent);
+        ITmfLostEvent lostEvent = (ITmfLostEvent) event;
 
-        assertEquals(start, event.getTimestamp());
-        assertEquals(start, event.getTimeRange().getStartTime());
-        assertEquals(end, event.getTimeRange().getEndTime());
-        assertEquals(nbLost, event.getNbLostEvents());
+        assertEquals(start, lostEvent.getTimestamp());
+        assertEquals(start, lostEvent.getTimeRange().getStartTime());
+        assertEquals(end, lostEvent.getTimeRange().getEndTime());
+        assertEquals(nbLost, lostEvent.getNbLostEvents());
     }
 
     /**
@@ -155,7 +162,14 @@ public class CtfTmfLostEventsTest {
         final CtfTmfEvent event = getOneEventTime(ts);
         /* Make sure seeking by rank yields the same event */
         final CtfTmfEvent event2 = getOneEventRank(rank);
-        assertEquals(event, event2);
+        assertEquals(event.getTimestamp(), event2.getTimestamp());
+        assertEquals(event.getRank(), event2.getRank());
+        final ITmfEventField content = event.getContent();
+        final ITmfEventField content2 = event2.getContent();
+        assertNotNull(content);
+        assertNotNull(content2);
+        // TODO: fix bug and replace with assertEquals(content, content2)
+        assertArrayEquals((ITmfEventField[]) content.getValue(), (ITmfEventField[]) content2.getValue());
 
         assertFalse(event instanceof ITmfLostEvent);
         assertEquals(ts, event.getTimestamp());
