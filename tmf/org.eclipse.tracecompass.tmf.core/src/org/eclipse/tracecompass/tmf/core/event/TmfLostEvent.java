@@ -13,8 +13,6 @@
 
 package org.eclipse.tracecompass.tmf.core.event;
 
-import static org.eclipse.tracecompass.common.core.NonNullUtils.equalsNullable;
-
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -81,36 +79,6 @@ public class TmfLostEvent extends TmfEvent implements ITmfLostEvent {
     // ------------------------------------------------------------------------
     // Object
     // ------------------------------------------------------------------------
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + (int) (fNbLostEvents ^ (fNbLostEvents >>> 32));
-        result = prime * result + ((fTimeRange == null) ? 0 : fTimeRange.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (!(obj instanceof TmfLostEvent)) {
-            return false;
-        }
-        TmfLostEvent other = (TmfLostEvent) obj;
-        if (fNbLostEvents != other.fNbLostEvents) {
-            return false;
-        }
-        if (!equalsNullable(fTimeRange, other.fTimeRange)) {
-            return false;
-        }
-        return true;
-    }
 
     @Override
     @SuppressWarnings("nls")
