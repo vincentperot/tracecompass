@@ -34,7 +34,7 @@ import org.eclipse.tracecompass.tmf.ui.viewers.statistics.model.TmfStatisticsTre
  * Class used to update the Statistics view's model. Normally, it should only be
  * used by this class
  *
- * @since 1.0
+ * @since 2.0
  * @author Mathieu Denis
  */
 public class StatisticsUpdateJob extends Job {

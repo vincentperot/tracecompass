@@ -162,7 +162,7 @@ public class TmfStatisticsViewer extends TmfViewer {
      * @param viewerName
      *            The name that will be assigned to this viewer
      * @see TmfComponent
-     * @since 1.0
+     * @since 2.0
      */
     public TmfStatisticsViewer(
             Composite parent,
@@ -358,7 +358,7 @@ public class TmfStatisticsViewer extends TmfViewer {
      *
      * @param model
      *            The input from which the tree will be populated
-     * @since 1.0
+     * @since 2.0
      */
     public void setInput(final TmfStatisticsModel model) {
 
@@ -377,7 +377,7 @@ public class TmfStatisticsViewer extends TmfViewer {
 
     /**
      * @return The viewer representing the piechart.
-     * @since 1.0
+     * @since 2.0
      */
     public TmfPieChartViewer getPieChartViewer() {
         return fPieChartViewer;
@@ -395,7 +395,7 @@ public class TmfStatisticsViewer extends TmfViewer {
 
     /**
      * @return The Tree viewer represented in this viewer
-     * @since 1.0
+     * @since 2.0
      */
     public TreeViewer getTreeViewer() {
         return fTreeViewer;

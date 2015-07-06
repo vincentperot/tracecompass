@@ -18,6 +18,7 @@ package org.eclipse.tracecompass.tmf.ui.viewers.piecharts;
  * State design pattern. Thus it is closely related with the TmfPieChartViewer
  *
  * @author Alexis Cabana-Loriaux <alex021994@gmail.com>
+ * @since 2.0
  *
  */
 public interface IPieChartViewerState {

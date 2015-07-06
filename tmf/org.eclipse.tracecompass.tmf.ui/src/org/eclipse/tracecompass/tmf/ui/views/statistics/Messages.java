@@ -31,13 +31,13 @@ public class Messages extends NLS {
 
     /**
      * Name given to the jobs scheduled to update the view
-     * @since 1.0
+     * @since 2.0
      */
     public static String TmfStatisticsView_ViewUpdateJobName;
 
     /**
      * Name given to the jobs scheduled to update the Statistics model
-     * @since 1.0
+     * @since 2.0
      */
     public static String TmfStatisticsView_StatisticsUpdateJobName;
 

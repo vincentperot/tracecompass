@@ -476,7 +476,7 @@ public class TmfStatisticsView extends TmfView {
     }
 
     /**
-     * @since 1.0
+     * @since 2.0
      * @return the model represented by this view
      */
     public TmfStatisticsModel getModel() {
