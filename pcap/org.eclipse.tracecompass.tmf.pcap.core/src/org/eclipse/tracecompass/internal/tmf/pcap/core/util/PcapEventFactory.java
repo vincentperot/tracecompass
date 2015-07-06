@@ -13,6 +13,7 @@
 package org.eclipse.tracecompass.internal.tmf.pcap.core.util;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
+import static org.eclipse.tracecompass.common.core.NonNullUtils.nullToEmptyString;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -114,7 +115,7 @@ public class PcapEventFactory {
             for (Map.Entry<String, String> entry : localPacket.getFields().entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
-                subfieldList.add(new TmfEventField(key, value, null));
+                subfieldList.add(new TmfEventField(nullToEmptyString(key), value, null));
             }
             ITmfEventField[] subfieldArray = subfieldList.toArray(new ITmfEventField[subfieldList.size()]);
             fieldList.add(new PcapEventField(localPacket.getProtocol().getName(), EMPTY_STRING, subfieldArray, localPacket));
