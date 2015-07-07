@@ -313,8 +313,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
             StructDeclaration lostFields = lostEventDeclaration.getFields();
             // this is a hard coded map, we know it's not null
             IntegerDeclaration lostFieldsDecl = (IntegerDeclaration) lostFields.getField(CTFStrings.LOST_EVENTS_FIELD);
-            if (lostFieldsDecl == null)
-            {
+            if (lostFieldsDecl == null) {
                 throw new IllegalStateException("Lost events count not declared!"); //$NON-NLS-1$
             }
             IntegerDeclaration lostEventsDurationDecl = (IntegerDeclaration) lostFields.getField(CTFStrings.LOST_EVENTS_DURATION);
@@ -333,11 +332,11 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
                     null,
                     null,
                     null,
+                    null,
                     new StructDefinition(
                             lostFields,
                             this, "fields", //$NON-NLS-1$
-                            fields
-                    ));
+                            fields));
 
         }
 
@@ -402,7 +401,7 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         if (eventDeclaration == null) {
             throw new CTFIOException("Incorrect event id : " + eventID); //$NON-NLS-1$
         }
-        EventDefinition eventDef = eventDeclaration.createDefinition(fStreamInputReader, currentBitBuffer, timestamp);
+        EventDefinition eventDef = eventDeclaration.createDefinition(fStreamInputReader, fCurrentStreamEventHeaderDef, currentBitBuffer, timestamp);
 
         /*
          * Set the event timestamp using the timestamp calculated by
@@ -475,7 +474,6 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
         }
         return null;
     }
-
 
     /**
      * Get stream event header

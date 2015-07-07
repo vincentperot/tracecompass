@@ -40,7 +40,7 @@ public final class EventDefinition implements IDefinitionScope {
      * A null event, can be used for testing or poison pilling
      */
     @NonNull
-    public static final EventDefinition NULL_EVENT = new EventDefinition(new EventDeclaration(), null, -1L, null, null, null, null);
+    public static final EventDefinition NULL_EVENT = new EventDefinition(new EventDeclaration(), null, -1L, null, null, null, null, null);
 
     /**
      * The corresponding event declaration.
@@ -71,6 +71,8 @@ public final class EventDefinition implements IDefinitionScope {
      */
     private final CTFStreamInputReader fStreamInputReader;
 
+    private StructDefinition fEventHeader;
+
     // ------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------
@@ -84,6 +86,8 @@ public final class EventDefinition implements IDefinitionScope {
      *            The SIR from where this EventDef was read
      * @param timestamp
      *            event timestamp
+     * @param eventHeader
+     *            The event header
      * @param eventContext
      *            The event context
      * @param packetContext
@@ -92,11 +96,11 @@ public final class EventDefinition implements IDefinitionScope {
      *            the stream context
      * @param fields
      *            The event fields
-     * @since 1.0
+     * @since 1.1
      */
     public EventDefinition(IEventDeclaration declaration,
             CTFStreamInputReader streamInputReader,
-            long timestamp,
+            long timestamp, StructDefinition eventHeader,
             ICompositeDefinition streamContext,
             ICompositeDefinition eventContext,
             ICompositeDefinition packetContext,
@@ -104,6 +108,7 @@ public final class EventDefinition implements IDefinitionScope {
         fDeclaration = declaration;
         fStreamInputReader = streamInputReader;
         fTimestamp = timestamp;
+        fEventHeader = eventHeader;
         fFields = fields;
         fEventContext = eventContext;
         fPacketContext = packetContext;
@@ -235,6 +240,16 @@ public final class EventDefinition implements IDefinitionScope {
      */
     public int getCPU() {
         return fStreamInputReader.getCPU();
+    }
+
+    /**
+     * Get the event header
+     *
+     * @return the event header
+     * @since 1.1
+     */
+    public ICompositeDefinition getEventHeader() {
+        return fEventHeader;
     }
 
     /**
