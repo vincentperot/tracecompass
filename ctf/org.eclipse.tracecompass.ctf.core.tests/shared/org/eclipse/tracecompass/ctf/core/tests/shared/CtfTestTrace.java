@@ -213,6 +213,18 @@ public enum CtfTestTrace {
      */
     FLIPPING_ENDIANNESS("../../ctf/org.eclipse.tracecompass.ctf.core.tests/traces/flipping-endianness", 14310, 41),
 
+    /**
+     * UST Trace with Debug Info information
+     *
+     * <pre>
+     * Trace Size: 72 KB (including index/)
+     * Tracer: lttng-ust 2.7
+     * Event count: 22
+     * Trace length: 1 s
+     * </pre>
+     */
+    DEBUG_INFO("../../ctf/org.eclipse.tracecompass.ctf.core.tests/traces/debuginfo-test-app", 22, 1),
+
     /** Set of many traces, do not call getTrace */
     TRACE_EXPERIMENT("../../ctf/org.eclipse.tracecompass.ctf.core.tests/traces/exp", -1, -1);
 
