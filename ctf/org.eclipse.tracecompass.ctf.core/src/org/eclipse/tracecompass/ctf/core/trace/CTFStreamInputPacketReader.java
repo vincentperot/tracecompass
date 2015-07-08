@@ -40,6 +40,7 @@ import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDefinition;
 import org.eclipse.tracecompass.ctf.core.event.types.VariantDefinition;
 import org.eclipse.tracecompass.internal.ctf.core.SafeMappedByteBuffer;
+import org.eclipse.tracecompass.internal.ctf.core.event.EventDeclaration;
 import org.eclipse.tracecompass.internal.ctf.core.event.types.composite.EventHeaderDefinition;
 
 /**
@@ -398,11 +399,11 @@ public class CTFStreamInputPacketReader implements IDefinitionScope, AutoCloseab
             }
         }
         /* Get the right event definition using the event id. */
-        IEventDeclaration eventDeclaration = fStreamInputReader.getStreamInput().getStream().getEventDeclaration(eventID);
+        EventDeclaration eventDeclaration = (EventDeclaration) fStreamInputReader.getStreamInput().getStream().getEventDeclaration(eventID);
         if (eventDeclaration == null) {
             throw new CTFIOException("Incorrect event id : " + eventID); //$NON-NLS-1$
         }
-        EventDefinition eventDef = eventDeclaration.createDefinition(fStreamInputReader, currentBitBuffer, timestamp);
+        EventDefinition eventDef = eventDeclaration.createDefinition(fStreamInputReader, fCurrentStreamEventHeaderDef, currentBitBuffer, timestamp);
 
         /*
          * Set the event timestamp using the timestamp calculated by
