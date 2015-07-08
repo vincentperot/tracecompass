@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.antlr.runtime.tree.CommonTree;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.event.CTFClock;
 import org.eclipse.tracecompass.ctf.core.event.types.Encoding;
 import org.eclipse.tracecompass.ctf.core.event.types.EnumDeclaration;
@@ -1680,9 +1681,9 @@ public class IOStructGen {
 
             StringBuilder identifierSB = new StringBuilder();
 
-            IDeclaration decl = parseTypeDeclarator(typeDeclaratorNode,
-                    typeSpecifierListNode, identifierSB);
-            String fieldName = identifierSB.toString();
+            IDeclaration decl = NonNullUtils.checkNotNull(parseTypeDeclarator(typeDeclaratorNode,
+                    typeSpecifierListNode, identifierSB));
+            String fieldName = NonNullUtils.checkNotNull(identifierSB.toString());
             getCurrentScope().registerIdentifier(fieldName, decl);
 
             if (struct.hasField(fieldName)) {

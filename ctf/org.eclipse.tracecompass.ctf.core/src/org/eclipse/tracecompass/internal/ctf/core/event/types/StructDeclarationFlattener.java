@@ -13,6 +13,7 @@
 package org.eclipse.tracecompass.internal.ctf.core.event.types;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.tracecompass.common.core.NonNullUtils;
 import org.eclipse.tracecompass.ctf.core.event.types.IDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.ISimpleDatatypeDeclaration;
 import org.eclipse.tracecompass.ctf.core.event.types.StructDeclaration;
@@ -80,12 +81,12 @@ public final class StructDeclarationFlattener {
     private static @NonNull StructDeclaration newFlattenedStruct(@NonNull StructDeclaration sd) {
         StructDeclaration flatStruct = new StructDeclaration(sd.getAlignment());
         for (String name : sd.getFieldsList()) {
-            depthFirstAdd(name, flatStruct, sd.getField(name));
+            depthFirstAdd(NonNullUtils.checkNotNull(name), flatStruct, sd.getField(name));
         }
         return flatStruct;
     }
 
-    private static void depthFirstAdd(String path, StructDeclaration flatStruct, IDeclaration dec) {
+    private static void depthFirstAdd(@NonNull String path, StructDeclaration flatStruct, IDeclaration dec) {
         if (dec instanceof ISimpleDatatypeDeclaration) {
             flatStruct.addField(path, dec);
         } else if (dec instanceof ArrayDeclaration) {
