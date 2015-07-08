@@ -187,6 +187,9 @@ public final class EventDefinition implements IDefinitionScope {
         /* Add fields from the stream */
         List<String> fieldNames = fStreamContext.getFieldNames();
         for (String fieldName : fieldNames) {
+            if (fieldName == null) {
+                continue;
+            }
             Definition definition = fStreamContext.getDefinition(fieldName);
             mergedDeclaration.addField(fieldName, definition.getDeclaration());
             fieldValues.add(definition);
@@ -197,6 +200,9 @@ public final class EventDefinition implements IDefinitionScope {
          * needed.
          */
         for (String fieldName : fEventContext.getFieldNames()) {
+            if (fieldName == null) {
+                continue;
+            }
             Definition definition = fEventContext.getDefinition(fieldName);
             mergedDeclaration.addField(fieldName, definition.getDeclaration());
             if (fieldNames.contains(fieldName)) {
