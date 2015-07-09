@@ -18,6 +18,7 @@ Require-Bundle: org.eclipse.core.expressions,
  org.eclipse.ui.ide,
  org.eclipse.ui.navigator,
  org.eclipse.ui.navigator.resources,
+ org.eclipse.ui.workbench,
  org.swtchart,
  com.ibm.icu
 Export-Package: org.eclipse.tracecompass.internal.tmf.ui;x-friends:="org.eclipse.tracecompass.tmf.ui.tests,org.eclipse.tracecompass.tmf.ctf.ui.tests",

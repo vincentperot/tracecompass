@@ -45,6 +45,8 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfSignalManager;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -301,8 +303,9 @@ public abstract class TmfCommonProjectElement extends TmfProjectModelElement {
             for (IWorkbenchPage wbPage : wbWindow.getPages()) {
                 for (IEditorReference editorReference : wbPage.getEditorReferences()) {
                     try {
-                        if (editorReference.getEditorInput().equals(input)) {
-                            wbPage.closeEditor(editorReference.getEditor(false), false);
+                        IEditorPart editor = editorReference.getEditor(false);
+                        if (editor instanceof ITmfTraceEditor && editorReference.getEditorInput().equals(input)) {
+                            wbPage.closeEditor(editor, false);
                         }
                     } catch (PartInitException e) {
                         Activator.getDefault().logError(NLS.bind(Messages.TmfCommonProjectElement_ErrorClosingEditor, getName()), e);
