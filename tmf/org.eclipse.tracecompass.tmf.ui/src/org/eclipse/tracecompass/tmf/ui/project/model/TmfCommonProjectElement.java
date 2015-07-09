@@ -301,7 +301,8 @@ public abstract class TmfCommonProjectElement extends TmfProjectModelElement {
             for (IWorkbenchPage wbPage : wbWindow.getPages()) {
                 for (IEditorReference editorReference : wbPage.getEditorReferences()) {
                     try {
-                        if (editorReference.getEditorInput().equals(input)) {
+                        IEditorPart editor = editorReference.getEditor(false);
+                        if (editor instanceof TmfEditor && editorReference.getEditorInput().equals(input)) {
                             wbPage.closeEditor(editorReference.getEditor(false), false);
                         }
                     } catch (PartInitException e) {
