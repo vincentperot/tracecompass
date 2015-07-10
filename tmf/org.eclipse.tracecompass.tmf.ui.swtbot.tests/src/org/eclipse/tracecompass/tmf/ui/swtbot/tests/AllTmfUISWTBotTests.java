@@ -22,9 +22,6 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        org.eclipse.tracecompass.tmf.ui.swtbot.tests.parsers.custom.AllTests.class,
-        org.eclipse.tracecompass.tmf.ui.swtbot.tests.perspectives.TracingPerspectiveChecker.class,
-        org.eclipse.tracecompass.tmf.ui.swtbot.tests.viewers.events.AllTests.class,
         org.eclipse.tracecompass.tmf.ui.swtbot.tests.wizards.AllTests.class
 })
 public class AllTmfUISWTBotTests {

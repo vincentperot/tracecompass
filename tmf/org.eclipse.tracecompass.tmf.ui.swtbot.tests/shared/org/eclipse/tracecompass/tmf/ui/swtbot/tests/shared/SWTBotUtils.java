@@ -150,7 +150,9 @@ public final class SWTBotUtils {
         contextMenu.click();
 
         if (deleteResources) {
-            bot.shell("Delete Resources").setFocus();
+            SWTBotShell shell = bot.shell("Delete Resources");
+            assertTrue(shell.isEnabled());
+            shell.setFocus();
             final SWTBotCheckBox checkBox = bot.checkBox();
             bot.waitUntil(Conditions.widgetIsEnabled(checkBox));
             checkBox.click();
