@@ -12,15 +12,19 @@
 
 package org.eclipse.tracecompass.tmf.ui.swtbot.tests.wizards;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.TestSuite;
 
 /**
  * SWTBot test suite for testing of the TMF events table.
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    StandardImportGzipTraceTest.class
-})
-public class AllTests {
+public class AllTests extends TestSuite {
+   public static TestSuite suite() {
+       TestSuite s = new TestSuite("Test suite");
+       for (int i = 0; i < 100; i++) {
+           s.addTest(new JUnit4TestAdapter(TestDeleteDialog.class));
+       }
+
+       return s;
+   }
 }
